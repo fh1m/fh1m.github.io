@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUV Control & Perception System Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0a1f3d 0%, #1e3c72 50%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .download-section {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.4);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 2em;
+            color: #0a1f3d;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #1e3c72;
+        }
+
+        .subsection-title {
+            font-size: 1.5em;
+            color: #2a5298;
+            margin: 25px 0 15px 0;
+        }
+
+        .hardware-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .spec-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .spec-card h3 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .spec-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .spec-card li {
+            padding: 5px 0;
+            color: #555;
+        }
+
+        .spec-card li:before {
+            content: "▸ ";
+            color: #1e3c72;
+            font-weight: bold;
+        }
+
+        .full-system-diagram {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e3f2fd 100%);
+            border: 3px solid #1e3c72;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(30, 60, 114, 0.2);
+        }
+
+        .diagram-title {
+            text-align: center;
+            font-size: 2em;
+            color: #0a1f3d;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .flow-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .flow-block {
+            background: white;
+            border: 3px solid #1e3c72;
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 200px;
+            box-shadow: 0 4px 10px rgba(30, 60, 114, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .flow-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(30, 60, 114, 0.3);
+            border-color: #2a5298;
+        }
+
+        .flow-block-title {
+            font-weight: bold;
+            color: #0a1f3d;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .flow-block-content {
+            font-size: 0.85em;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .flow-block-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0;
+        }
+
+        .flow-block-content li {
+            padding: 3px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .flow-block-content li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+
+        .flow-arrow-down {
+            text-align: center;
+            font-size: 3em;
+            color: #1e3c72;
+            line-height: 0.5;
+        }
+
+        .flow-arrow-right {
+            font-size: 2em;
+            color: #1e3c72;
+        }
+
+        .layer-badge {
+            position: absolute;
+            top: -12px;
+            right: 10px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .hardware-layer { border-color: #c62828; background: linear-gradient(135deg, #fff 0%, #ffebee 100%); }
+        .vision-layer { border-color: #f57c00; background: linear-gradient(135deg, #fff 0%, #fff3e0 100%); }
+        .dl-layer { border-color: #00796b; background: linear-gradient(135deg, #fff 0%, #e0f2f1 100%); }
+        .planning-layer { border-color: #5e35b1; background: linear-gradient(135deg, #fff 0%, #ede7f6 100%); }
+        .fusion-layer { 
+            border-color: #1565c0; 
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-width: 4px;
+        }
+        .output-layer { 
+            border-color: #2e7d32; 
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-width: 4px;
+        }
+
+        .realtime-badge {
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin: 10px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .data-rate {
+            font-size: 0.75em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .subsystem-group {
+            border: 2px dashed #90caf9;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+
+        .subsystem-label {
+            background: #1e3c72;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .quick-flowchart {
+            background: linear-gradient(135deg, #0a1f3d 0%, #1e3c72 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 15px 40px rgba(10, 31, 61, 0.4);
+        }
+
+        .flowchart-title {
+            text-align: center;
+            font-size: 2.5em;
+            color: white;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .flowchart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .flowchart-box {
+            background: white;
+            border: 4px solid #90caf9;
+            border-radius: 15px;
+            padding: 20px 40px;
+            min-width: 300px;
+            text-align: center;
+            box-shadow: 0 6px 15px rgba(144, 202, 249, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .flowchart-box:hover {
+            transform: scale(1.05);
+            border-color: #42a5f5;
+            box-shadow: 0 10px 25px rgba(66, 165, 245, 0.5);
+        }
+
+        .flowchart-box-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #0a1f3d;
+            margin-bottom: 8px;
+        }
+
+        .flowchart-box-subtitle {
+            font-size: 0.9em;
+            color: #555;
+            font-style: italic;
+        }
+
+        .flowchart-arrow {
+            font-size: 2.5em;
+            color: #90caf9;
+            text-shadow: 0 0 10px rgba(144, 202, 249, 0.5);
+        }
+
+        .flowchart-split {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .flowchart-box-small {
+            background: white;
+            border: 3px solid #64b5f6;
+            border-radius: 12px;
+            padding: 15px 25px;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(100, 181, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .flowchart-box-small:hover {
+            transform: translateY(-5px);
+            border-color: #2196F3;
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .flowchart-merge-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 15px 0;
+        }
+
+        .flowchart-merge-line {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, transparent, #90caf9);
+        }
+
+        .flowchart-badge {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(245, 124, 0, 0.4);
+        }
+
+        .flowchart-hz {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .architecture-diagram {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .layer {
+            background: #f8f9fa;
+            border: 2px solid #1e3c72;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .layer-title {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .layer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .component {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .component:hover {
+            border-color: #1e3c72;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 60, 114, 0.2);
+        }
+
+        .component-title {
+            color: #1e3c72;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .component-detail {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: #1e3c72;
+            font-size: 2em;
+            margin: 10px 0;
+        }
+
+        .fusion-core {
+            background: linear-gradient(135deg, #1565c0 0%, #1976d2 50%, #2196F3 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 30px 0;
+            box-shadow: 0 8px 16px rgba(21, 101, 192, 0.3);
+        }
+
+        .questions-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .questions-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .questions-box ol {
+            color: #856404;
+            padding-left: 25px;
+        }
+
+        .questions-box li {
+            margin: 8px 0;
+        }
+
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .pipeline-step {
+            background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            font-weight: bold;
+            color: #0a1f3d;
+            box-shadow: 0 2px 4px rgba(30, 60, 114, 0.2);
+        }
+
+        .pipeline-arrow {
+            font-size: 1.5em;
+            color: #1e3c72;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .info-box h4 {
+            color: #1565C0;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .task-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ff8a65;
+        }
+
+        .task-card h4 {
+            color: #bf360c;
+            margin-bottom: 8px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .download-section {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+
+        .sensor-fusion-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .sensor-fusion-table th {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .sensor-fusion-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sensor-fusion-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .priority-high {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .priority-medium {
+            color: #f57c00;
+            font-weight: bold;
+        }
+
+        .priority-low {
+            color: #388e3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="content">
+        <div class="header">
+            <h1>🤖 AUV Control & Perception System</h1>
+            <p>Multi-Layered Sensor Fusion Architecture for RoboSub Competition</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">BracU Duburi - Autonomous Underwater Vehicle</p>
+        </div>
+
+        <div class="download-section">
+            <button class="download-btn" onclick="downloadPage()">📥 Download System Architecture</button>
+            <p style="margin-top: 15px; color: #666;">Complete system design with all layers, sub-systems, and fusion flows</p>
+        </div>
+
+        <!-- QUICK PREVIEW FLOWCHART -->
+        <div class="quick-flowchart">
+            <div class="flowchart-title">⚡ System Flowchart - Quick Preview ⚡</div>
+            <p style="text-align: center; color: #90caf9; font-size: 1.1em; margin-bottom: 30px;">Real-Time Execution Pipeline (100Hz Loop)</p>
+            
+            <div class="flowchart-container">
+                
+                <!-- SENSORS INPUT -->
+                <div class="flowchart-box">
+                    <span class="flowchart-badge">LAYER 1</span>
+                    <span class="flowchart-hz">50-100Hz</span>
+                    <div class="flowchart-box-title">🔬 HARDWARE SENSORS</div>
+                    <div class="flowchart-box-subtitle">Pixhawk · BAR30 · DVL · VectorNav/WitMotion</div>
+                </div>
+
+                <div class="flowchart-arrow">⬇</div>
+
+                <!-- PARALLEL PROCESSING -->
+                <div class="flowchart-split">
+                    <div class="flowchart-box-small">
+                        <span class="flowchart-badge">LAYER 2</span>
+                        <div class="flowchart-box-title">📷 VISION</div>
+                        <div class="flowchart-box-subtitle">Classical CV<br>30Hz</div>
+                    </div>
+
+                    <div class="flowchart-box-small">
+                        <span class="flowchart-badge">LAYER 3</span>
+                        <div class="flowchart-box-title">🧠 DEEP LEARNING</div>
+                        <div class="flowchart-box-subtitle">YOLO · Depth · DINO<br>30Hz</div>
+                    </div>
+
+                    <div class="flowchart-box-small">
+                        <span class="flowchart-badge">LAYER 4</span>
+                        <div class="flowchart-box-title">🗺️ NAVIGATION</div>
+                        <div class="flowchart-box-subtitle">Maps · Planning<br>1-10Hz</div>
+                    </div>
+                </div>
+
+                <div class="flowchart-merge-arrow">
+                    <div class="flowchart-merge-line"></div>
+                    <div class="flowchart-arrow">⬇</div>
+                    <div class="flowchart-merge-line"></div>
+                </div>
+
+                <!-- FUSION ENGINE -->
+                <div class="flowchart-box" style="border-color: #42a5f5; border-width: 5px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                    <span class="flowchart-badge" style="background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);">CORE</span>
+                    <span class="flowchart-hz">100Hz</span>
+                    <div class="flowchart-box-title" style="color: #0d47a1;">⚡ CENTRAL FUSION ENGINE ⚡</div>
+                    <div class="flowchart-box-subtitle" style="color: #1565c0; font-weight: bold;">
+                        Multi-Sensor Fusion · Kalman Filter · Adaptive Weighting
+                    </div>
+                </div>
+
+                <div class="flowchart-arrow">⬇</div>
+
+                <!-- FUSION OUTPUT -->
+                <div class="flowchart-box" style="border-color: #29b6f6;">
+                    <div class="flowchart-box-title">🎯 FUSED STATE ESTIMATE</div>
+                    <div class="flowchart-box-subtitle">Position (X,Y,Z) · Attitude (P,Y,R) · Velocity · Target Info</div>
+                </div>
+
+                <div class="flowchart-arrow">⬇</div>
+
+                <!-- CONTROLLERS -->
+                <div class="flowchart-split">
+                    <div class="flowchart-box-small" style="border-color: #66bb6a;">
+                        <div class="flowchart-box-title">🎮 Depth PID</div>
+                        <div class="flowchart-box-subtitle">100Hz</div>
+                    </div>
+
+                    <div class="flowchart-box-small" style="border-color: #66bb6a;">
+                        <div class="flowchart-box-title">🎮 Attitude PID</div>
+                        <div class="flowchart-box-subtitle">100Hz</div>
+                    </div>
+
+                    <div class="flowchart-box-small" style="border-color: #66bb6a;">
+                        <div class="flowchart-box-title">🎮 Position PID</div>
+                        <div class="flowchart-box-subtitle">100Hz</div>
+                    </div>
+
+                    <div class="flowchart-box-small" style="border-color: #66bb6a;">
+                        <div class="flowchart-box-title">🎮 Velocity PID</div>
+                        <div class="flowchart-box-subtitle">100Hz</div>
+                    </div>
+                </div>
+
+                <div class="flowchart-merge-arrow">
+                    <div class="flowchart-merge-line"></div>
+                    <div class="flowchart-arrow">⬇</div>
+                    <div class="flowchart-merge-line"></div>
+                </div>
+
+                <!-- THRUSTER OUTPUT -->
+                <div class="flowchart-box" style="border-color: #66bb6a; border-width: 5px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+                    <span class="flowchart-badge" style="background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);">OUTPUT</span>
+                    <span class="flowchart-hz">400Hz</span>
+                    <div class="flowchart-box-title" style="color: #1b5e20;">🚀 THRUSTER PWM SIGNALS 🚀</div>
+                    <div class="flowchart-box-subtitle" style="color: #2e7d32; font-weight: bold;">
+                        8 Thrusters (Forward · Vertical · Lateral) + Task Actuators
+                    </div>
+                </div>
+
+                <div class="flowchart-arrow">⬇</div>
+
+                <!-- PHYSICAL MOTION -->
+                <div class="flowchart-box" style="border-color: #ffa726; border-width: 4px;">
+                    <div class="flowchart-box-title" style="color: #e65100;">🌊 AUV PHYSICAL MOTION 🌊</div>
+                    <div class="flowchart-box-subtitle">Underwater movement in 6DOF</div>
+                </div>
+
+                <!-- FEEDBACK LOOP -->
+                <div style="margin-top: 30px; text-align: center;">
+                    <div style="display: inline-block; background: linear-gradient(135deg, #ff6f00 0%, #ff9800 100%); color: white; padding: 15px 40px; border-radius: 50px; font-size: 1.2em; font-weight: bold; box-shadow: 0 5px 20px rgba(255, 111, 0, 0.4);">
+                        🔄 CONTINUOUS FEEDBACK LOOP → Back to Sensors
+                    </div>
+                    <p style="color: #90caf9; margin-top: 15px; font-size: 1.1em;">⚡ 100Hz Update Rate (10ms cycle time) ⚡</p>
+                </div>
+
+            </div>
+
+            <!-- Quick Stats -->
+            <div style="display: flex; justify-content: space-around; margin-top: 40px; flex-wrap: wrap; gap: 20px;">
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center; min-width: 200px;">
+                    <div style="font-size: 2em; color: #90caf9; font-weight: bold;">4</div>
+                    <div style="color: white; margin-top: 5px;">Processing Layers</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center; min-width: 200px;">
+                    <div style="font-size: 2em; color: #90caf9; font-weight: bold;">8+</div>
+                    <div style="color: white; margin-top: 5px;">Hardware Sensors</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center; min-width: 200px;">
+                    <div style="font-size: 2em; color: #90caf9; font-weight: bold;">10+</div>
+                    <div style="color: white; margin-top: 5px;">AI Algorithms</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center; min-width: 200px;">
+                    <div style="font-size: 2em; color: #90caf9; font-weight: bold;">100Hz</div>
+                    <div style="color: white; margin-top: 5px;">Control Loop Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Hardware Overview -->
+            <div class="section">
+                <h2 class="section-title">⚙️ Hardware Configuration</h2>
+                
+                <div class="hardware-specs">
+                    <div class="spec-card">
+                        <h3>🎮 Control Board</h3>
+                        <ul>
+                            <li>Pixhawk 2.4.8 (Main Flight Controller)</li>
+                            <li>Provides: Pitch, Yaw, Roll</li>
+                            <li>MEMS-based IMU</li>
+                            <li>Primary navigation grounding</li>
+                        </ul>
+                    </div>
+
+                    <div class="spec-card">
+                        <h3>💻 Computing Units</h3>
+                        <ul>
+                            <li>NVIDIA Orin Nano Dev Kit (Main SBC)</li>
+                            <li>Raspberry Pi (Companion Computer)</li>
+                            <li>Deep Learning & CV Processing</li>
+                        </ul>
+                    </div>
+
+                    <div class="spec-card">
+                        <h3>📷 Vision System</h3>
+                        <ul>
+                            <li>2× Blue Robotics Low Light Cameras</li>
+                            <li>Front-facing camera</li>
+                            <li>Down-facing camera</li>
+                            <li>Dual-camera CV pipeline</li>
+                        </ul>
+                    </div>
+
+                    <div class="spec-card">
+                        <h3>🔬 Sensor Suite</h3>
+                        <ul>
+                            <li>BAR30 (Barometer - Z-axis)</li>
+                            <li>DVL Nucleus1000 (Doppler Velocity Log)</li>
+                            <li>VectorNav/WitMotion (Secondary IMU)</li>
+                            <li>Metric-level sensor grounding</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4>🎯 Competition Context</h4>
+                    <p><strong>Competition:</strong> RoboSub (RoboNation)</p>
+                    <p><strong>Reference:</strong> <a href="https://bracuduburi.com/auv/4.2" target="_blank">BracU Duburi AUV System</a> | <a href="https://robonation.gitbook.io/robosub-resources/section-3-autonomy-challenge/3.2-task-descriptions" target="_blank">Task Descriptions</a></p>
+                    <p><strong>Pre-competition Testing:</strong> 2 days in competition pool for sensor calibration, feature mapping, and system validation</p>
+                </div>
+            </div>
+
+            <!-- COMPLETE SYSTEM FLOW DIAGRAM -->
+            <div class="section">
+                <h2 class="section-title">🔄 Complete Real-Time System Dataflow</h2>
+                
+                <div class="full-system-diagram">
+                    <div class="diagram-title">AUV Real-Time Pipeline: Sensors → Perception → Fusion → Control → Thrusters</div>
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <span class="realtime-badge">⚡ REAL-TIME EXECUTION FLOW ⚡</span>
+                    </div>
+
+                    <div class="flow-container">
+                        
+                        <!-- LAYER 1: HARDWARE SENSORS -->
+                        <div class="subsystem-group">
+                            <div class="subsystem-label">LAYER 1: HARDWARE SENSOR GROUNDING</div>
+                            <div class="flow-row">
+                                <div class="flow-block hardware-layer">
+                                    <div class="layer-badge">ATTITUDE</div>
+                                    <div class="flow-block-title">Pixhawk 2.4.8</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Pitch angle</li>
+                                            <li>Yaw angle</li>
+                                            <li>Roll angle</li>
+                                            <li>Magnetometer</li>
+                                            <li>MEMS IMU</li>
+                                        </ul>
+                                        <div class="data-rate">100 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block hardware-layer">
+                                    <div class="layer-badge">DEPTH</div>
+                                    <div class="flow-block-title">BAR30 Barometer</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Pressure measurement</li>
+                                            <li>Z-axis (depth)</li>
+                                            <li>1m calibration ref</li>
+                                            <li>Altitude</li>
+                                        </ul>
+                                        <div class="data-rate">50 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block hardware-layer">
+                                    <div class="layer-badge">VELOCITY</div>
+                                    <div class="flow-block-title">DVL Nucleus1000</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>X velocity</li>
+                                            <li>Y velocity</li>
+                                            <li>Z velocity</li>
+                                            <li>Distance traveled</li>
+                                            <li>1m calibration ref</li>
+                                        </ul>
+                                        <div class="data-rate">10 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block hardware-layer">
+                                    <div class="layer-badge">REDUNDANT</div>
+                                    <div class="flow-block-title">VectorNav/WitMotion</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Secondary IMU</li>
+                                            <li>Cross-validation</li>
+                                            <li>Heading backup</li>
+                                            <li>Reliability check</li>
+                                        </ul>
+                                        <div class="data-rate">100 Hz</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-arrow-down">⬇️</div>
+
+                        <!-- LAYER 2: VISION SYSTEM -->
+                        <div class="subsystem-group">
+                            <div class="subsystem-label">LAYER 2: DUAL-CAMERA VISION CORRECTION STACK</div>
+                            
+                            <div class="flow-row">
+                                <div class="flow-block vision-layer">
+                                    <div class="layer-badge">INPUT</div>
+                                    <div class="flow-block-title">Blue Robotics Cameras</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Front camera feed</li>
+                                            <li>Down camera feed</li>
+                                            <li>Low-light optimized</li>
+                                            <li>Synchronized capture</li>
+                                        </ul>
+                                        <div class="data-rate">30 FPS</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-arrow-right">→</div>
+
+                                <div class="flow-block vision-layer">
+                                    <div class="layer-badge">CV STACK</div>
+                                    <div class="flow-block-title">Classical CV Pipeline</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Hough Lines (edges)</li>
+                                            <li>Optical Flow (motion)</li>
+                                            <li>Vanishing Point (pitch)</li>
+                                            <li>Contours (roll)</li>
+                                            <li>Essential Matrix (pose)</li>
+                                            <li>SIFT (features)</li>
+                                            <li>PnP (3D pose)</li>
+                                        </ul>
+                                        <div class="data-rate">30 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-arrow-right">→</div>
+
+                                <div class="flow-block vision-layer">
+                                    <div class="layer-badge">OUTPUT</div>
+                                    <div class="flow-block-title">CV Attitude Estimates</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Estimated Pitch</li>
+                                            <li>Estimated Yaw</li>
+                                            <li>Estimated Roll</li>
+                                            <li>Velocity validation</li>
+                                            <li>Confidence scores</li>
+                                        </ul>
+                                        <div class="data-rate">30 Hz</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 15px; padding: 15px; background: #fff9e6; border-radius: 10px; border: 2px solid #ffa000;">
+                                <strong>🔄 Vision-Hardware Fusion:</strong> Compare CV estimates with Pixhawk → Detect sensor drift/interference → Adjust fusion weights dynamically
+                            </div>
+                        </div>
+
+                        <div class="flow-arrow-down">⬇️</div>
+
+                        <!-- LAYER 3: DEEP LEARNING PERCEPTION -->
+                        <div class="subsystem-group">
+                            <div class="subsystem-label">LAYER 3: DEEP LEARNING PERCEPTION STACK</div>
+                            
+                            <div class="flow-row">
+                                <div class="flow-block dl-layer">
+                                    <div class="layer-badge">DETECT</div>
+                                    <div class="flow-block-title">YOLOv12</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Object detection</li>
+                                            <li>Instance segmentation</li>
+                                            <li>Gate detection</li>
+                                            <li>Buoy detection</li>
+                                            <li>Bin detection</li>
+                                            <li>Bounding boxes</li>
+                                        </ul>
+                                        <div class="data-rate">30 Hz (GPU)</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block dl-layer">
+                                    <div class="layer-badge">DEPTH</div>
+                                    <div class="flow-block-title">Depth Anything V3</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Monocular depth map</li>
+                                            <li>Distance estimation</li>
+                                            <li>DVL calibrated (1m)</li>
+                                            <li>Obstacle distance</li>
+                                            <li>Collision avoidance</li>
+                                        </ul>
+                                        <div class="data-rate">30 Hz (GPU)</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block dl-layer">
+                                    <div class="layer-badge">TRACK</div>
+                                    <div class="flow-block-title">DINOv2</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Feature extraction</li>
+                                            <li>Object tracking</li>
+                                            <li>Scene understanding</li>
+                                            <li>Feature map matching</li>
+                                            <li>Pre-built pool map</li>
+                                        </ul>
+                                        <div class="data-rate">30 Hz (GPU)</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block dl-layer">
+                                    <div class="layer-badge">MATCH</div>
+                                    <div class="flow-block-title">XFeat/SuperGlue</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Feature matching</li>
+                                            <li>Place recognition</li>
+                                            <li>Loop closure</li>
+                                            <li>"Seen before?" check</li>
+                                        </ul>
+                                        <div class="data-rate">10 Hz (GPU)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 15px; padding: 15px; background: #e0f2f1; border-radius: 10px; border: 2px solid #00796b;">
+                                <strong>📏 Metric Grounding:</strong> DVL (X-Y 1m) + Barometer (Z 1m) calibration → Metric-accurate perception
+                            </div>
+                        </div>
+
+                        <div class="flow-arrow-down">⬇️</div>
+
+                        <!-- LAYER 4: PLANNING & NAVIGATION -->
+                        <div class="subsystem-group">
+                            <div class="subsystem-label">LAYER 4: NAVIGATION & PLANNING</div>
+                            
+                            <div class="flow-row">
+                                <div class="flow-block planning-layer">
+                                    <div class="layer-badge">MAP</div>
+                                    <div class="flow-block-title">High-Level 2D Map</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Graph-based waypoints</li>
+                                            <li>Task sequence</li>
+                                            <li>Mission plan</li>
+                                            <li>Strategic navigation</li>
+                                        </ul>
+                                        <div class="data-rate">1 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block planning-layer">
+                                    <div class="layer-badge">3D MAP</div>
+                                    <div class="flow-block-title">Task-Specific 3D Maps</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Gaussian Splatting</li>
+                                            <li>Dense maps</li>
+                                            <li>Octagon precision</li>
+                                            <li>Slalom navigation</li>
+                                        </ul>
+                                        <div class="data-rate">On-demand</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block planning-layer">
+                                    <div class="layer-badge">PATH</div>
+                                    <div class="flow-block-title">Path Planner</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Trajectory generation</li>
+                                            <li>Collision avoidance</li>
+                                            <li>Energy optimization</li>
+                                            <li>Dynamic replanning</li>
+                                        </ul>
+                                        <div class="data-rate">10 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block planning-layer">
+                                    <div class="layer-badge">FUTURE</div>
+                                    <div class="flow-block-title">SLAM/VSLAM/VIO</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Real-time mapping</li>
+                                            <li>Visual-inertial fusion</li>
+                                            <li>Loop closure</li>
+                                            <li>Drift correction</li>
+                                        </ul>
+                                        <div class="data-rate">Future</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-arrow-down">⬇️</div>
+
+                        <!-- CENTRAL FUSION ENGINE -->
+                        <div style="border: 5px solid #1565c0; border-radius: 20px; padding: 30px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%); box-shadow: 0 10px 30px rgba(21, 101, 192, 0.4);">
+                            <div style="text-align: center; font-size: 2em; font-weight: bold; color: #0a1f3d; margin-bottom: 20px;">
+                                ⚡ CENTRAL FUSION ENGINE ⚡
+                            </div>
+                            
+                            <div class="flow-row">
+                                <div class="flow-block fusion-layer">
+                                    <div class="layer-badge">FUSION</div>
+                                    <div class="flow-block-title">Multi-Sensor Fusion</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Weighted sensor fusion</li>
+                                            <li>Kalman filtering</li>
+                                            <li>Complementary filtering</li>
+                                            <li>Adaptive weighting</li>
+                                            <li>Outlier rejection</li>
+                                        </ul>
+                                        <div class="data-rate">100 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block fusion-layer">
+                                    <div class="layer-badge">FUSION</div>
+                                    <div class="flow-block-title">Vision-Hardware Fusion</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>CV vs Hardware compare</li>
+                                            <li>Mismatch detection</li>
+                                            <li>Magnetic interference flag</li>
+                                            <li>Dynamic weight adjust</li>
+                                        </ul>
+                                        <div class="data-rate">30 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block fusion-layer">
+                                    <div class="layer-badge">FUSION</div>
+                                    <div class="flow-block-title">Perception Integration</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>DL perception merge</li>
+                                            <li>Object distance</li>
+                                            <li>Task awareness</li>
+                                            <li>Spatial understanding</li>
+                                        </ul>
+                                        <div class="data-rate">30 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block fusion-layer">
+                                    <div class="layer-badge">FUSION</div>
+                                    <div class="flow-block-title">Navigation Fusion</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Map-based localization</li>
+                                            <li>Path following</li>
+                                            <li>Waypoint tracking</li>
+                                            <li>Task execution state</li>
+                                        </ul>
+                                        <div class="data-rate">10 Hz</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 20px; padding: 20px; background: white; border-radius: 15px; border: 3px solid #1565c0;">
+                                <div style="font-size: 1.2em; font-weight: bold; color: #0a1f3d; margin-bottom: 10px;">🎯 FUSION OUTPUT</div>
+                                <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px;">
+                                    <div><strong>Position:</strong> X, Y, Z (m)</div>
+                                    <div><strong>Attitude:</strong> Pitch, Yaw, Roll (°)</div>
+                                    <div><strong>Velocity:</strong> Vx, Vy, Vz (m/s)</div>
+                                    <div><strong>Target:</strong> Object, Distance, Bearing</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-arrow-down">⬇️</div>
+
+                        <!-- CONTROL LAYER -->
+                        <div class="subsystem-group">
+                            <div class="subsystem-label">CONTROL LAYER: PID CONTROLLERS</div>
+                            
+                            <div class="flow-row">
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">PID</div>
+                                    <div class="flow-block-title">Depth Controller</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Z position control</li>
+                                            <li>Depth hold</li>
+                                            <li>Vertical thrusters</li>
+                                        </ul>
+                                        <div class="data-rate">100 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">PID</div>
+                                    <div class="flow-block-title">Attitude Controller</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Pitch stabilization</li>
+                                            <li>Yaw control</li>
+                                            <li>Roll stabilization</li>
+                                        </ul>
+                                        <div class="data-rate">100 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">PID</div>
+                                    <div class="flow-block-title">Position Controller</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>X-Y position control</li>
+                                            <li>Waypoint navigation</li>
+                                            <li>Station keeping</li>
+                                        </ul>
+                                        <div class="data-rate">100 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">PID</div>
+                                    <div class="flow-block-title">Velocity Controller</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Speed control</li>
+                                            <li>Acceleration limits</li>
+                                            <li>Smooth trajectories</li>
+                                        </ul>
+                                        <div class="data-rate">100 Hz</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flow-arrow-down">⬇️</div>
+
+                        <!-- THRUSTER OUTPUT -->
+                        <div style="border: 5px solid #2e7d32; border-radius: 20px; padding: 30px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%); box-shadow: 0 10px 30px rgba(46, 125, 50, 0.4);">
+                            <div style="text-align: center; font-size: 2em; font-weight: bold; color: #1b5e20; margin-bottom: 20px;">
+                                🚀 THRUSTER OUTPUTS 🚀
+                            </div>
+                            
+                            <div class="flow-row">
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">PWM</div>
+                                    <div class="flow-block-title">Forward Thrusters</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Left forward</li>
+                                            <li>Right forward</li>
+                                            <li>PWM signals</li>
+                                        </ul>
+                                        <div class="data-rate">400 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">PWM</div>
+                                    <div class="flow-block-title">Vertical Thrusters</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Front vertical</li>
+                                            <li>Rear vertical</li>
+                                            <li>Depth control</li>
+                                        </ul>
+                                        <div class="data-rate">400 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">PWM</div>
+                                    <div class="flow-block-title">Lateral Thrusters</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Left lateral</li>
+                                            <li>Right lateral</li>
+                                            <li>Strafe control</li>
+                                        </ul>
+                                        <div class="data-rate">400 Hz</div>
+                                    </div>
+                                </div>
+
+                                <div class="flow-block output-layer">
+                                    <div class="layer-badge">ACTION</div>
+                                    <div class="flow-block-title">Task Actuators</div>
+                                    <div class="flow-block-content">
+                                        <ul>
+                                            <li>Marker dropper</li>
+                                            <li>Torpedo launcher</li>
+                                            <li>Manipulator</li>
+                                        </ul>
+                                        <div class="data-rate">On-demand</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 20px; padding: 15px; background: white; border-radius: 10px; border: 3px solid #2e7d32;">
+                                <strong>✅ FINAL OUTPUT:</strong> 8 thruster PWM signals (1100-1900μs) + Task actuator triggers → Physical AUV motion
+                            </div>
+                        </div>
+
+                        <!-- FEEDBACK LOOP -->
+                        <div style="text-align: center; margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #fff9e6 0%, #ffe0b2 100%); border-radius: 15px; border: 3px dashed #ff6f00;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #e65100; margin-bottom: 10px;">
+                                🔄 CONTINUOUS FEEDBACK LOOP
+                            </div>
+                            <div style="font-size: 1.1em; color: #bf360c;">
+                                AUV moves → Sensors measure new state → Vision observes changes → Perception updates → Fusion recalculates → Control adjusts → Thrusters respond → REPEAT
+                            </div>
+                            <div style="margin-top: 10px; font-weight: bold; color: #e65100;">
+                                ⚡ Loop Rate: 100 Hz (10ms cycle time) ⚡
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Architecture Overview -->
+            <div class="section">
+                <h2 class="section-title">🏗️ Multi-Layered Fusion Architecture</h2>
+                
+                <div class="fusion-core">
+                    🎯 CENTRAL FUSION LOOP
+                    <div style="font-size: 0.7em; margin-top: 10px; opacity: 0.9;">
+                        Hardware Sensors (Trusted Ground Truth) ⇄ Vision Systems (Real-time Correction) ⇄ Deep Learning (Perception & Planning)
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4>Fusion Philosophy</h4>
+                    <p><strong>Hardware-based layers:</strong> Trusted grounding layers providing real metric values (higher trust weight)</p>
+                    <p><strong>Perception layers:</strong> Real-time correction and validation to detect sensor misbehavior and maintain system stability</p>
+                    <p><strong>Adaptive Fusion:</strong> Configurable fusion order and weights based on operational needs and sensor reliability</p>
+                </div>
+            </div>
+
+            <!-- Layer 1: Hardware Grounding Layer -->
+            <div class="section">
+                <div class="architecture-diagram">
+                    <div class="layer">
+                        <div class="layer-title">LAYER 1: Hardware Grounding Layer (Highest Trust)</div>
+                        <div class="layer-content">
+                            <div class="component">
+                                <div class="component-title">Pixhawk 2.4.8</div>
+                                <div class="component-detail">
+                                    • Primary attitude reference<br>
+                                    • Pitch, Yaw, Roll<br>
+                                    • Initial navigation ground truth<br>
+                                    • MEMS IMU baseline
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">BAR30 Barometer</div>
+                                <div class="component-detail">
+                                    • Z-axis (depth) measurement<br>
+                                    • 1m calibration reference<br>
+                                    • Pressure-based altitude<br>
+                                    • Vertical navigation ground
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">DVL Nucleus1000</div>
+                                <div class="component-detail">
+                                    • X-Y plane calibration (1m reference)<br>
+                                    • Point-to-point distance<br>
+                                    • Velocity measurement<br>
+                                    • Dead reckoning support
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">VectorNav/WitMotion IMU</div>
+                                <div class="component-detail">
+                                    • Secondary IMU for redundancy<br>
+                                    • Cross-validation with Pixhawk<br>
+                                    • Robust heading (fused with DVL)<br>
+                                    • Reliability fallback
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow">⬇️ GROUNDS TO</div>
+
+                    <!-- Layer 2: Vision Correction Layer -->
+                    <div class="layer">
+                        <div class="layer-title">LAYER 2: Vision Correction Layer (Real-time Validation)</div>
+                        
+                        <h3 class="subsection-title">Classical Computer Vision Pipeline</h3>
+                        <div class="info-box">
+                            <h4>Pure CV Stack - Dual Camera Fusion (Front + Downward)</h4>
+                            <p><strong>Purpose:</strong> Real-time attitude estimation and sensor validation without training dependency</p>
+                            <p><strong>Role:</strong> Act as continuous sanity check against hardware sensor drift/interference</p>
+                        </div>
+
+                        <div class="layer-content">
+                            <div class="component">
+                                <div class="component-title">Hough Lines</div>
+                                <div class="component-detail">
+                                    • Detect pool edges & lanes<br>
+                                    • Horizon line detection<br>
+                                    • Orientation reference
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Optical Flow</div>
+                                <div class="component-detail">
+                                    • Motion estimation<br>
+                                    • Velocity validation<br>
+                                    • Ego-motion tracking
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Vanishing Point</div>
+                                <div class="component-detail">
+                                    • Pitch angle estimation<br>
+                                    • Forward direction<br>
+                                    • 3D orientation cues
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Contour Analysis</div>
+                                <div class="component-detail">
+                                    • Object boundaries<br>
+                                    • Roll estimation<br>
+                                    • Shape-based navigation
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Essential Matrix</div>
+                                <div class="component-detail">
+                                    • Relative pose estimation<br>
+                                    • Camera motion recovery<br>
+                                    • Epipolar geometry
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">SIFT Features</div>
+                                <div class="component-detail">
+                                    • Feature detection<br>
+                                    • Scale-invariant matching<br>
+                                    • Stable landmarks
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">PnP (Perspective-n-Point)</div>
+                                <div class="component-detail">
+                                    • 3D pose from 2D-3D correspondences<br>
+                                    • Absolute positioning<br>
+                                    • Camera pose refinement
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-box" style="margin-top: 20px; background: #fff9e6; border-color: #ffa000;">
+                            <h4>🔄 Fusion Strategy: Vision ↔ Hardware</h4>
+                            <p><strong>Base:</strong> Start with Pixhawk sensor ground values (Pitch, Yaw, Roll)</p>
+                            <p><strong>Correction:</strong> CV pipeline continuously estimates attitude from visual cues</p>
+                            <p><strong>Mismatch Detection:</strong> Compare CV estimates with hardware readings</p>
+                            <p><strong>Adaptive Weighting:</strong> If mismatch exceeds threshold → increase vision weight, flag potential sensor interference (magnetic, vibration)</p>
+                            <p><strong>Stability:</strong> Vision acts as auxiliary controller-free correction layer maintaining stability during sensor anomalies</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow">⬇️ INFORMS</div>
+
+                    <!-- Layer 3: Deep Learning Perception Layer -->
+                    <div class="layer">
+                        <div class="layer-title">LAYER 3: Deep Learning Perception Stack</div>
+                        
+                        <div class="questions-box">
+                            <h4>🤔 Three Critical Questions for Task Execution</h4>
+                            <ol>
+                                <li><strong>What can it see?</strong> → Object Detection & Segmentation (YOLOv12)</li>
+                                <li><strong>How far can it see?</strong> → Monocular Depth Estimation (Depth Anything V3)</li>
+                                <li><strong>Has it seen it before?</strong> → Feature Matching (XFeat/SuperGlue)</li>
+                                <li><strong>Track what it has seen</strong> → Visual Tracking (DINOv2)</li>
+                            </ol>
+                        </div>
+
+                        <div class="layer-content">
+                            <div class="component">
+                                <div class="component-title">YOLOv12</div>
+                                <div class="component-detail">
+                                    • Real-time object detection<br>
+                                    • Instance segmentation<br>
+                                    • Task object identification<br>
+                                    • Gate, buoy, bin detection
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Depth Anything V3</div>
+                                <div class="component-detail">
+                                    • Monocular depth estimation<br>
+                                    • Metric calibration via DVL (1m)<br>
+                                    • Distance to objects<br>
+                                    • Collision avoidance
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">DINOv2</div>
+                                <div class="component-detail">
+                                    • Visual feature extraction<br>
+                                    • Object tracking across frames<br>
+                                    • Pre-competition feature mapping<br>
+                                    • Scene understanding
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">XFeat / SuperGlue</div>
+                                <div class="component-detail">
+                                    • Feature matching<br>
+                                    • Place recognition<br>
+                                    • Loop closure detection<br>
+                                    • Revisit confirmation
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-box" style="margin-top: 20px;">
+                            <h4>📏 Metric Grounding Strategy</h4>
+                            <p><strong>DVL Calibration (X-Y):</strong> Move exactly 1m using DVL feedback → calibrate perception system's horizontal distance estimates</p>
+                            <p><strong>Barometer Calibration (Z):</strong> Move exactly 1m depth using BAR30 → calibrate vertical distance estimates</p>
+                            <p><strong>Pre-competition Feature Maps:</strong> Use 2-day testing period to build DINOv2 feature database of competition pool environment</p>
+                            <p><strong>Result:</strong> Metric-accurate perception aligned with physical sensor measurements</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow">⬇️ FEEDS INTO</div>
+
+                    <!-- Layer 4: Navigation & Planning Layer -->
+                    <div class="layer">
+                        <div class="layer-title">LAYER 4: Navigation & Planning Layer</div>
+                        
+                        <div class="layer-content">
+                            <div class="component">
+                                <div class="component-title">High-Level 2D Map</div>
+                                <div class="component-detail">
+                                    • Graph-based run sequence<br>
+                                    • Task waypoints<br>
+                                    • Strategic navigation<br>
+                                    • Mission planning
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Task-Specific 3D Maps</div>
+                                <div class="component-detail">
+                                    • Dense/Gaussian Splatting<br>
+                                    • Octagon, Slalom precision<br>
+                                    • Tight maneuvering<br>
+                                    • Sub-cm accuracy
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Hybrid SLAM/VSLAM/VIO</div>
+                                <div class="component-detail">
+                                    • Future development path<br>
+                                    • Real-time mapping<br>
+                                    • Visual-inertial odometry<br>
+                                    • Adaptive approach
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Path Planning</div>
+                                <div class="component-detail">
+                                    • Task sequence optimization<br>
+                                    • Collision-free trajectories<br>
+                                    • Energy-efficient paths<br>
+                                    • Dynamic replanning
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow">⬇️ ALL CONVERGE TO</div>
+
+                    <!-- Central Fusion Core -->
+                    <div class="fusion-core" style="padding: 40px;">
+                        <div style="font-size: 1.5em; margin-bottom: 15px;">⚡ CENTRAL FUSION ENGINE ⚡</div>
+                        <div style="font-size: 0.8em; line-height: 1.6;">
+                            <strong>Inputs:</strong> Hardware Sensors + CV Pipeline + DL Perception + Navigation Plans<br>
+                            <strong>Fusion Rules:</strong><br>
+                            • Hardware layers = Highest base trust (ground truth)<br>
+                            • Vision layers = Real-time correction & anomaly detection<br>
+                            • DL layers = Task-specific perception & spatial awareness<br>
+                            • Adaptive weighting based on sensor reliability metrics<br>
+                            • Configurable fusion hierarchy for mission-specific tuning<br>
+                            <strong>Output:</strong> Robust, metric-accurate navigation commands<br>
+                            <strong>Robustness:</strong> System remains stable even if individual subsystems misbehave
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow">⬇️ OUTPUTS TO</div>
+
+                    <!-- Control Output -->
+                    <div class="layer">
+                        <div class="layer-title">OUTPUT: Control Commands to AUV</div>
+                        <div class="layer-content">
+                            <div class="component">
+                                <div class="component-title">Attitude Control</div>
+                                <div class="component-detail">
+                                    • Fused Pitch, Yaw, Roll<br>
+                                    • Stabilization commands<br>
+                                    • Orientation correction
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Position Control</div>
+                                <div class="component-detail">
+                                    • X, Y, Z coordinates<br>
+                                    • Waypoint navigation<br>
+                                    • Depth holding
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Velocity Control</div>
+                                <div class="component-detail">
+                                    • Forward/backward speed<br>
+                                    • Lateral movement<br>
+                                    • Vertical velocity
+                                </div>
+                            </div>
+
+                            <div class="component">
+                                <div class="component-title">Task-Specific Actions</div>
+                                <div class="component-detail">
+                                    • Marker dropping<br>
+                                    • Torpedo firing<br>
+                                    • Manipulator control
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sensor Fusion Priority Table -->
+            <div class="section">
+                <h2 class="section-title">⚖️ Sensor Fusion Priority & Weighting</h2>
+                
+                <table class="sensor-fusion-table">
+                    <thead>
+                        <tr>
+                            <th>Measurement</th>
+                            <th>Primary Source</th>
+                            <th>Secondary Source</th>
+                            <th>Validation/Correction</th>
+                            <th>Trust Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Pitch</strong></td>
+                            <td>Pixhawk IMU</td>
+                            <td>VectorNav/WitMotion</td>
+                            <td>CV: Vanishing Point, Hough Lines</td>
+                            <td><span class="priority-high">High → Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Yaw</strong></td>
+                            <td>Pixhawk IMU</td>
+                            <td>VectorNav/WitMotion</td>
+                            <td>CV: Optical Flow, Feature Matching</td>
+                            <td><span class="priority-high">High → Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Roll</strong></td>
+                            <td>Pixhawk IMU</td>
+                            <td>VectorNav/WitMotion</td>
+                            <td>CV: Contour Analysis, Horizon</td>
+                            <td><span class="priority-high">High → Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Depth (Z)</strong></td>
+                            <td>BAR30 Barometer</td>
+                            <td>Depth Anything V3 (calibrated)</td>
+                            <td>DVL altitude, CV: Size estimation</td>
+                            <td><span class="priority-high">High → Low</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Heading</strong></td>
+                            <td>WitMotion/VectorNav + DVL Fusion</td>
+                            <td>Pixhawk Magnetometer</td>
+                            <td>CV: Directional features</td>
+                            <td><span class="priority-high">High → Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Velocity (X-Y)</strong></td>
+                            <td>DVL Nucleus1000</td>
+                            <td>Optical Flow</td>
+                            <td>Feature tracking displacement</td>
+                            <td><span class="priority-high">High → Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Distance Traveled</strong></td>
+                            <td>DVL Dead Reckoning</td>
+                            <td>Visual Odometry (SIFT/XFeat)</td>
+                            <td>Feature map matching</td>
+                            <td><span class="priority-high">High → Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Object Distance</strong></td>
+                            <td>Depth Anything V3 (DVL-calibrated)</td>
+                            <td>Stereo estimation (if dual-cam)</td>
+                            <td>Known object size, PnP</td>
+                            <td><span class="priority-medium">Medium → Low</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Position (Absolute)</strong></td>
+                            <td>Dead Reckoning (DVL + IMU)</td>
+                            <td>Feature Map Localization (DINO)</td>
+                            <td>Visual landmarks, loop closure</td>
+                            <td><span class="priority-medium">Medium → Medium</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <h4>🔧 Adaptive Fusion Rules</h4>
+                    <p><strong>Normal Operation:</strong> Hardware sensors weighted highest, vision provides continuous validation</p>
+                    <p><strong>Magnetic Interference Detected:</strong> Reduce Pixhawk magnetometer weight, increase WitMotion + DVL heading fusion</p>
+                    <p><strong>Vibration/Turbulence:</strong> Increase optical flow weight for velocity estimation</p>
+                    <p><strong>Low Visibility:</strong> Increase reliance on DVL and barometer, reduce vision weighting</p>
+                    <p><strong>Tight Maneuvering:</strong> Shift to 3D task maps and vision-based fine control</p>
+                </div>
+            </div>
+
+            <!-- Competition Tasks -->
+            <div class="section">
+                <h2 class="section-title">🎯 RoboSub Competition Tasks</h2>
+                
+                <div class="tasks-grid">
+                    <div class="task-card">
+                        <h4>Gate Navigation</h4>
+                        <p>Pass through underwater gate using vision detection and precise depth control</p>
+                    </div>
+                    <div class="task-card">
+                        <h4>Path Following</h4>
+                        <p>Follow marked path on pool floor using downward camera and CV pipeline</p>
+                    </div>
+                    <div class="task-card">
+                        <h4>Buoy Contact</h4>
+                        <p>Identify and contact colored buoys using object detection and distance estimation</p>
+                    </div>
+                    <div class="task-card">
+                        <h4>Octagon Navigation</h4>
+                        <p>Navigate through octagonal path requiring tight maneuvering and 3D mapping</p>
+                    </div>
+                    <div class="task-card">
+                        <h4>Slalom</h4>
+                        <p>Weave through obstacles using precise perception and control fusion</p>
+                    </div>
+                    <div class="task-card">
+                        <h4>Marker Drop</h4>
+                        <p>Drop markers in target bins using combined depth estimation and position control</p>
+                    </div>
+                    <div class="task-card">
+                        <h4>Torpedo</h4>
+                        <p>Fire torpedoes at target using visual targeting and distance calculation</p>
+                    </div>
+                    <div class="task-card">
+                        <h4>Autonomous Challenges</h4>
+                        <p>Various autonomy tasks testing full integration of perception and control systems</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Flow Diagram -->
+            <div class="section">
+                <h2 class="section-title">📊 Mission Execution Flow</h2>
+                
+                <div class="architecture-diagram">
+                    <div class="pipeline-flow">
+                        <div class="pipeline-step">🚀 Mission Start<br><small>Load Maps</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">📍 Initialize<br><small>Ground Sensors</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">🗺️ Navigate<br><small>Follow Plan</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">👁️ Perceive<br><small>DL Stack Active</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">🎯 Task Detect<br><small>What/How Far/Seen?</small></div>
+                    </div>
+                    
+                    <div class="flow-arrow">⬇️</div>
+                    
+                    <div class="pipeline-flow">
+                        <div class="pipeline-step">⚡ Fusion<br><small>Central Loop</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">🎮 Control<br><small>Execute Moves</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">✓ Validate<br><small>CV Check</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">🔄 Adapt<br><small>Adjust Fusion</small></div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-step">✅ Task Complete<br><small>Next Waypoint</small></div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 20px; color: #1e3c72; font-weight: bold;">
+                        🔁 Loop until mission complete or safety abort
+                    </div>
+                </div>
+            </div>
+
+            <!-- Future Development -->
+            <div class="section">
+                <h2 class="section-title">🚀 Future Development Paths</h2>
+                
+                <div class="info-box">
+                    <h4>Evolution Strategy</h4>
+                    <p><strong>Phase 1 (Current):</strong> Establish robust multi-layer fusion with hardware grounding + CV correction + DL perception</p>
+                    <p><strong>Phase 2:</strong> Integrate lightweight VSLAM for real-time mapping and drift correction</p>
+                    <p><strong>Phase 3:</strong> Add VIO (Visual-Inertial Odometry) for tighter sensor-vision coupling</p>
+                    <p><strong>Phase 4:</strong> Hybrid SLAM with loop closure using DINOv2 features</p>
+                    <p><strong>Core Principle:</strong> All future systems feed into central fusion loop - maintain modularity and configurability</p>
+                </div>
+            </div>
+
+            <!-- Key Advantages -->
+            <div class="section">
+                <h2 class="section-title">⭐ System Advantages</h2>
+                
+                <div class="hardware-specs">
+                    <div class="spec-card">
+                        <h3>🛡️ Robustness</h3>
+                        <ul>
+                            <li>Multiple redundant measurements</li>
+                            <li>Graceful degradation on sensor failure</li>
+                            <li>Continuous cross-validation</li>
+                            <li>Anomaly detection & compensation</li>
+                        </ul>
+                    </div>
+
+                    <div class="spec-card">
+                        <h3>📏 Metric Accuracy</h3>
+                        <ul>
+                            <li>Hardware sensor grounding (1m calibration)</li>
+                            <li>DVL for precise distance</li>
+                            <li>Barometer for accurate depth</li>
+                            <li>Real-world metric alignment</li>
+                        </ul>
+                    </div>
+
+                    <div class="spec-card">
+                        <h3>🔄 Adaptability</h3>
+                        <ul>
+                            <li>Configurable fusion weights</li>
+                            <li>Mission-specific tuning</li>
+                            <li>Dynamic re-weighting</li>
+                            <li>Modular architecture</li>
+                        </ul>
+                    </div>
+
+                    <div class="spec-card">
+                        <h3>🧠 Intelligence</h3>
+                        <ul>
+                            <li>State-of-art DL models</li>
+                            <li>Pre-trained feature maps</li>
+                            <li>Classical CV validation</li>
+                            <li>No single point of failure</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 40px; background: #f8f9fa; border-top: 2px solid #e0e0e0;">
+                <h3 style="color: #1e3c72; margin-bottom: 10px;">BracU Duburi AUV Team</h3>
+                <p style="color: #666;">Multi-Layered Sensor Fusion Architecture for Autonomous Underwater Navigation</p>
+                <p style="color: #999; margin-top: 10px; font-size: 0.9em;">RoboSub Competition | Version 1.0 | 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function downloadPage() {
+            // Create a clean copy of the page
+            const content = document.getElementById('content').cloneNode(true);
+            
+            // Remove the download button section
+            const downloadSection = content.querySelector('.download-section');
+            if (downloadSection) {
+                downloadSection.remove();
+            }
+
+            // Create HTML structure
+            const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUV Control & Perception System Architecture - BracU Duburi</title>
+    <style>
+        ${document.querySelector('style').innerHTML}
+        body { background: white; padding: 20px; }
+        .container { box-shadow: none; }
+        @media print {
+            body { margin: 0; padding: 10px; }
+            .section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    ${content.outerHTML}
+</body>
+</html>`;
+
+            // Create blob and download
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'AUV_System_Architecture_BracU_Duburi.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Show success message
+            const btn = document.querySelector('.download-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Downloaded Successfully!';
+            btn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+            }, 2000);
+        }
+
+        // Print functionality
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+    </script>
+</body>
+</html>
