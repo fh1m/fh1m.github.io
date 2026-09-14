@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# astro
+.astro/
+
+# vercel
+.vercel/
+
+# user data + orchestrator state (never tracked, modified, or committed)
+.remember/
+.omo/
