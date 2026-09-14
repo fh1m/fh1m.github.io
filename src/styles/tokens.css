@@ -1,0 +1,63 @@
+/* ============================================================
+   Design Tokens — fahim-personal-site
+   Single source of truth: palette, type scale, spacing,
+   z-index, durations. No rounded corners. No pure black.
+   ============================================================ */
+
+:root {
+  /* ---- Palette ---- */
+  --bg: #0A0B0C;        /* near-black canvas */
+  --bg-raise: #121316;  /* raised surface */
+  --paper: #E8E6E1;     /* warm paper text */
+  --gray: #9A9B99;      /* body gray / secondary text */
+  --border: #26282B;    /* hairline borders */
+  --accent: #FFB000;    /* instrument amber — max 3 uses per viewport */
+  --ok: #3FB950;        /* terminal green — status dot only */
+  --fail: #E5484D;      /* failure red — FAIL states only */
+
+  /* ---- Type scale ---- */
+  --text-display: clamp(2.5rem, 8vw, 9rem);
+  --text-h1: clamp(2rem, 5vw, 3.5rem);
+  --text-h2: clamp(1.5rem, 3.5vw, 2.5rem);
+  --text-h3: clamp(1.25rem, 2.5vw, 1.75rem);
+  --text-body: clamp(1rem, 1.1vw, 1.1875rem); /* 16–19px */
+  --text-mono: clamp(0.625rem, 0.8vw, 0.875rem); /* 10–14px */
+  --text-label: 0.6875rem; /* 11px */
+
+  --leading-display: 0.92;
+  --leading-body: 1.6;
+  --tracking-display: -0.03em;
+  --tracking-label: 0.08em;
+  --max-width-editorial: 68ch;
+
+  /* ---- Spacing ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* ---- Layout ---- */
+  --grid-columns: 12;
+  --grid-gap: 1rem;
+  --container-max: 1440px;
+
+  /* ---- Z-index ---- */
+  --z-grain: 9999;
+  --z-header: 100;
+  --z-overlay: 50;
+  --z-base: 1;
+
+  /* ---- Durations ---- */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 350ms;
+  --dur-page: 350ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
