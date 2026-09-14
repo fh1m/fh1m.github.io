@@ -1,0 +1,24 @@
+/* Self-hosted typography layer.
+   All fonts are served locally — zero external font CDN requests.
+   Every generated @font-face ships `font-display: swap` by default. */
+
+/* Display + body-bold: Archivo Variable */
+@import '@fontsource-variable/archivo';
+
+/* Mono: JetBrains Mono Variable */
+@import '@fontsource-variable/jetbrains-mono';
+
+/* Body: IBM Plex Sans (regular + medium) */
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+
+/* Serif accent: Instrument Serif (regular + italic) */
+@import '@fontsource/instrument-serif/400.css';
+@import '@fontsource/instrument-serif/400-italic.css';
+
+:root {
+  --font-display: 'Archivo Variable';
+  --font-mono: 'JetBrains Mono Variable';
+  --font-body: 'IBM Plex Sans';
+  --font-serif: 'Instrument Serif';
+}
