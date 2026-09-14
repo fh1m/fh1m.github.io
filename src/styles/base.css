@@ -146,3 +146,52 @@ h6 {
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-display);
 }
+
+/* ---- Registration-mark corner crosshairs (all four corners) ----
+   Fixed overlays on body pseudo-elements: 1px crosshair lines at each
+   viewport corner + mono [0,0] coordinate labels. Pointer-events none. */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-header) + 1);
+  pointer-events: none;
+}
+
+/* 1px crosshair lines — two per corner (horizontal + vertical) */
+body::before {
+  background-image:
+    linear-gradient(var(--border), var(--border)),
+    linear-gradient(var(--border), var(--border)),
+    linear-gradient(var(--border), var(--border)),
+    linear-gradient(var(--border), var(--border)),
+    linear-gradient(var(--border), var(--border)),
+    linear-gradient(var(--border), var(--border)),
+    linear-gradient(var(--border), var(--border)),
+    linear-gradient(var(--border), var(--border));
+  background-size:
+    28px 1px, 1px 28px,
+    28px 1px, 1px 28px,
+    28px 1px, 1px 28px,
+    28px 1px, 1px 28px;
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    100% 100%, 100% 100%,
+    0 100%, 0 100%;
+  background-repeat: no-repeat;
+}
+
+/* mono [0,0] labels — one per corner */
+body::after {
+  --corner-label: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='44'%20height='14'%3E%3Ctext%20x='0'%20y='11'%20font-family='ui-monospace,monospace'%20font-size='10'%20fill='%239A9B99'%3E%5B0,0%5D%3C/text%3E%3C/svg%3E");
+  background-image: var(--corner-label), var(--corner-label), var(--corner-label), var(--corner-label);
+  background-size: 44px 14px;
+  background-repeat: no-repeat;
+  background-position:
+    8px 8px,
+    calc(100% - 52px) 8px,
+    calc(100% - 52px) calc(100% - 22px),
+    8px calc(100% - 22px);
+}

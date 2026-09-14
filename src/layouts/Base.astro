@@ -1,0 +1,293 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import { PROFILE } from '../data/profile';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/fonts.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = 'FAHIM FAISAL', description = PROFILE.roleLine } = Astro.props;
+
+const NAV = [
+  { num: '01', label: 'HOME', href: '/' },
+  { num: '02', label: 'ABOUT', href: '/about' },
+  { num: '03', label: 'MACHINES', href: '/machines' },
+  { num: '04', label: 'NOTEBOOK', href: '/notebook' },
+  { num: '05', label: 'LOG', href: '/log' },
+  { num: '06', label: 'NOW', href: '/now' },
+] as const;
+
+const pathname = Astro.url.pathname;
+const activeHref = NAV.find((item) => {
+  if (item.href === '/') return pathname === '/';
+  return pathname.startsWith(item.href);
+})?.href;
+
+const pad = (n: number) => String(n).padStart(2, '0');
+const buildTime = new Date();
+const initialTime = `${pad(buildTime.getHours())}:${pad(buildTime.getMinutes())}:${pad(buildTime.getSeconds())}`;
+const buildYear = buildTime.getFullYear();
+const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <slot name="head" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ViewTransitions />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">SKIP TO CONTENT</a>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="header-top">
+          <a class="wordmark" href="/">FAHIM FAISAL</a>
+          <div class="header-telemetry">
+            <span class="clock mono-label" id="site-clock">{initialTime}</span>
+            <span class="status-dot" role="img" aria-label="Machine status: running" title={PROFILE.statusLine}></span>
+          </div>
+        </div>
+        <div class="header-bottom">
+          <span class="mono-label sub-label">AUTONOMOUS SYSTEMS // {PROFILE.handle}</span>
+          <nav class="site-nav" aria-label="Primary">
+            {NAV.map((item) => (
+              <a
+                href={item.href}
+                class:list={['nav-link', { 'is-active': item.href === activeHref }]}
+                aria-current={item.href === activeHref ? 'page' : undefined}
+              >
+                [{item.num}] {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href={PROFILE.links.github} target="_blank" rel="noopener noreferrer">GITHUB</a>
+          <a href={PROFILE.links.duburi} target="_blank" rel="noopener noreferrer">BRACU DUBURI</a>
+          <a href={PROFILE.links.email}>{emailLabel} <span class="verify-flag">[VERIFY]</span></a>
+        </div>
+        <div class="footer-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>{PROFILE.statusLine}</span>
+        </div>
+        <div class="footer-meta">
+          <span>BUILT: {buildYear}</span>
+          <span class="colophon">{PROFILE.name} — {PROFILE.location} — ALL SYSTEMS NOMINAL</span>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      (function () {
+        var el = document.getElementById('site-clock');
+        if (!el || el.dataset.clockBound) return;
+        el.dataset.clockBound = '1';
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function tick() {
+          var d = new Date();
+          el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+        }
+        tick();
+        setInterval(tick, 1000);
+      })();
+    </script>
+
+    <style>
+      .skip-link {
+        position: fixed;
+        top: var(--space-2);
+        left: var(--space-2);
+        z-index: calc(var(--z-header) + 2);
+        background: var(--bg-raise);
+        color: var(--paper);
+        border: 1px solid var(--border);
+        padding: var(--space-2) var(--space-3);
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: var(--text-label);
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-label);
+        transform: translateY(-200%);
+        transition: transform var(--dur-fast) var(--ease-out);
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: var(--z-header);
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .header-inner {
+        max-width: var(--container-max);
+        margin: 0 auto;
+        padding: var(--space-4) var(--space-6);
+      }
+
+      .header-top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-4);
+      }
+
+      .wordmark {
+        font-family: var(--font-display), sans-serif;
+        font-weight: 900;
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-display);
+        line-height: 1;
+      }
+
+      .wordmark:hover {
+        color: var(--accent);
+      }
+
+      .header-telemetry {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .clock {
+        font-variant-numeric: tabular-nums;
+        color: var(--paper);
+      }
+
+      .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: var(--ok);
+        flex: none;
+      }
+
+      .header-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-top: var(--space-3);
+        flex-wrap: wrap;
+      }
+
+      .site-nav {
+        display: flex;
+        gap: var(--space-4);
+        flex-wrap: wrap;
+      }
+
+      .nav-link {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: var(--text-label);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-label);
+        color: var(--gray);
+        padding: var(--space-1) 0;
+        white-space: nowrap;
+      }
+
+      .nav-link:hover {
+        color: var(--paper);
+      }
+
+      .nav-link.is-active {
+        color: var(--accent);
+      }
+
+      main {
+        width: 100%;
+      }
+
+      .site-footer {
+        border-top: 1px solid var(--border);
+        margin-top: var(--space-24);
+      }
+
+      .footer-inner {
+        max-width: var(--container-max);
+        margin: 0 auto;
+        padding: var(--space-8) var(--space-6) var(--space-12);
+        display: grid;
+        gap: var(--space-6);
+      }
+
+      .footer-links {
+        display: flex;
+        gap: var(--space-6);
+        flex-wrap: wrap;
+      }
+
+      .footer-links a {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: var(--text-label);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-label);
+        color: var(--gray);
+      }
+
+      .footer-links a:hover {
+        color: var(--paper);
+      }
+
+      .verify-flag {
+        color: var(--accent);
+      }
+
+      .footer-status {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: var(--text-label);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-label);
+        color: var(--paper);
+      }
+
+      .footer-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        flex-wrap: wrap;
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: var(--text-label);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-label);
+        color: var(--gray);
+      }
+    </style>
+  </body>
+</html>
