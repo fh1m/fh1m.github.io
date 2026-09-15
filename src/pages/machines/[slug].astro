@@ -1,0 +1,309 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+const CATEGORY_ORDER = ['underwater', 'air', 'perception', 'compute', 'systems'] as const;
+const CATEGORY_LABELS: Record<string, string> = {
+  underwater: 'UNDERWATER',
+  air: 'AIR',
+  perception: 'PERCEPTION',
+  compute: 'COMPUTE',
+  systems: 'SYSTEMS',
+};
+
+const STATUS_TONE: Record<string, string> = {
+  running: 'accent',
+  ongoing: 'accent',
+  prototype: 'gray',
+  closed: 'gray',
+  retired: 'gray',
+  failed: 'fail',
+};
+
+const machines = await getCollection('machines');
+
+export async function getStaticPaths() {
+  return machines.map((machine) => ({
+    params: { slug: machine.id },
+    props: { machine },
+  }));
+}
+
+const { machine } = Astro.props;
+const { Content } = await render(machine);
+
+// Same ordering as the index: fixed category order, then dateStart ascending,
+// then id for a stable tiebreak. Prev/next walk this list.
+const ordered = [...machines].sort((a, b) => {
+  const ca = CATEGORY_ORDER.indexOf(a.data.category);
+  const cb = CATEGORY_ORDER.indexOf(b.data.category);
+  if (ca !== cb) return ca - cb;
+  if (a.data.dateStart !== b.data.dateStart) return a.data.dateStart.localeCompare(b.data.dateStart);
+  return a.id.localeCompare(b.id);
+});
+
+const idx = ordered.findIndex((m) => m.id === machine.id);
+const prev = idx > 0 ? ordered[idx - 1] : undefined;
+const next = idx >= 0 && idx < ordered.length - 1 ? ordered[idx + 1] : undefined;
+
+const { name, category, status, yearLabel, summary, repoLink, metrics } = machine.data;
+const categoryLabel = CATEGORY_LABELS[category] ?? category.toUpperCase();
+const tone = STATUS_TONE[status] ?? 'gray';
+const hasRepo = repoLink !== undefined && repoLink.trim() !== '';
+const hasMetrics = metrics !== undefined && metrics.length > 0;
+---
+
+<Base title={`${name} — MACHINES — FAHIM FAISAL`} description={summary}>
+  <article class="machine-detail">
+    <header class="detail-header">
+      <a class="back-link mono-label" href="/machines">← MACHINES</a>
+      <div class="meta-strip">
+        <span class="mono-label">[{categoryLabel}]</span>
+        <span class:list={['chip', `chip-${tone}`]}>{status}</span>
+        <span class="mono-label">{yearLabel}</span>
+      </div>
+      <h1 class="display detail-name">{name}</h1>
+      {hasRepo && (
+        <a class="source-button" href={repoLink} target="_blank" rel="noopener noreferrer">
+          SOURCE →
+        </a>
+      )}
+    </header>
+
+    {hasMetrics && (
+      <div class="metrics-strip">
+        {metrics.map((metric) => (
+          <div class="metric-row">
+            <span class="metric-label mono-label">{metric.label}</span>
+            <span class="metric-value">{metric.value}</span>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <figure class="media-pending">
+      <div class="media-frame">
+        <span class="mono-label">[MEDIA: PENDING]</span>
+      </div>
+      <figcaption class="media-caption mono-label">{summary}</figcaption>
+    </figure>
+
+    <div class="journal-body">
+      <Content />
+    </div>
+
+    <nav class="machine-nav" aria-label="Machine navigation">
+      {prev && (
+        <a class="nav-prev" href={`/machines/${prev.id}`}>
+          <span class="mono-label">← PREV</span>
+          <span class="nav-name">{prev.data.name}</span>
+        </a>
+      )}
+      {next && (
+        <a class="nav-next" href={`/machines/${next.id}`}>
+          <span class="mono-label">NEXT →</span>
+          <span class="nav-name">{next.data.name}</span>
+        </a>
+      )}
+    </nav>
+  </article>
+
+  <style>
+    .machine-detail {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6) var(--space-24);
+    }
+
+    .detail-header {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .back-link {
+      color: var(--gray);
+      width: fit-content;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    .meta-strip {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      margin-top: var(--space-4);
+    }
+
+    .chip {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      border: 1px solid currentColor;
+      padding: var(--space-1) var(--space-2);
+      width: fit-content;
+      line-height: 1;
+    }
+
+    .chip-accent {
+      color: var(--accent);
+    }
+
+    .chip-gray {
+      color: var(--gray);
+    }
+
+    .chip-fail {
+      color: var(--fail);
+    }
+
+    .detail-name {
+      font-weight: 900;
+      margin-top: var(--space-4);
+    }
+
+    .source-button {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: var(--space-2) var(--space-3);
+      width: fit-content;
+    }
+
+    .source-button:hover {
+      color: var(--bg);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .metrics-strip {
+      margin-top: var(--space-12);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: var(--space-4);
+      padding: var(--space-3) 0;
+    }
+
+    .metric-row + .metric-row {
+      border-top: 1px solid var(--border);
+    }
+
+    .metric-label {
+      color: var(--gray);
+    }
+
+    .metric-value {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--paper);
+      text-align: right;
+    }
+
+    .media-pending {
+      margin-top: var(--space-12);
+    }
+
+    .media-frame {
+      border: 1px solid var(--border);
+      padding: var(--space-16) var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .media-frame .mono-label {
+      color: var(--gray);
+    }
+
+    .media-caption {
+      color: var(--gray);
+      padding-top: var(--space-3);
+    }
+
+    .journal-body {
+      max-width: var(--max-width-editorial);
+      margin-top: var(--space-16);
+    }
+
+    .journal-body h2 {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      font-size: var(--text-h3);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      line-height: 1.1;
+      margin-top: var(--space-12);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border);
+    }
+
+    .journal-body h2:first-of-type {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .journal-body p {
+      margin-top: var(--space-4);
+      line-height: var(--leading-body);
+    }
+
+    .journal-body h2:first-of-type + p {
+      font-size: var(--text-h3);
+      line-height: 1.45;
+      font-weight: 500;
+    }
+
+    .machine-nav {
+      margin-top: var(--space-16);
+      border-top: 1px solid var(--border);
+      padding-top: var(--space-6);
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .nav-prev,
+    .nav-next {
+      display: grid;
+      gap: var(--space-1);
+    }
+
+    .nav-next {
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .nav-name {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      font-size: var(--text-h3);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      line-height: 1.1;
+    }
+
+    .nav-prev:hover .nav-name,
+    .nav-next:hover .nav-name {
+      color: var(--accent);
+    }
+  </style>
+</Base>
