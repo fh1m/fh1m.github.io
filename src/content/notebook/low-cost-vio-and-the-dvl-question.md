@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "02"
 title: Low-cost VIO and the DVL question — can autonomy stop being expensive
 date: 2026-02
 tags: [vio, dvl, dead-reckoning, cost]

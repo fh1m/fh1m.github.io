@@ -1,4 +1,6 @@
 ---
+act: decide
+chapterKey: "05"
 name: duburi-sim_ws
 category: systems
 status: running
@@ -27,6 +29,8 @@ Simulation is where reality is approximated before it isn't. The difficulty is k
 ## Built
 
 duburi-sim_ws — a Gazebo Harmonic + ArduSub SITL simulator and operator lab for the Mongla AUV stack. The environment where the vehicle's software runs against a simulated world before it runs against the real one.
+
+<!-- [VERIFY]: "Mongla AUV stack" refers to the Mongol Tori project — confirm the project name and details from the v2 brief. -->
 
 ## Owned
 

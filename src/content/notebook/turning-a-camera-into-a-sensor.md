@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "03"
 title: Turning a camera into a sensor — hardware triggering, V4L2, buffer latency
 date: 2025-08
 tags: [v4l2, cameras, timing, embedded]

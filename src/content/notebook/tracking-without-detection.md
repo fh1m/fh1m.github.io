@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "03"
 title: Tracking without detection — correspondences, optical flow
 date: 2025-11
 tags: [optical-flow, tracking, computer-vision]

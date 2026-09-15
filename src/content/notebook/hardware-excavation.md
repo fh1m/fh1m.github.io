@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "02"
 title: Hardware excavation — boards nobody in the western forums talks about
 date: 2026-06
 tags: [hardware, embedded, sourcing]

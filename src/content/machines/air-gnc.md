@@ -1,4 +1,6 @@
 ---
+act: decide
+chapterKey: "08"
 name: Air / drones & GPS-denied navigation
 category: air
 status: ongoing
@@ -27,6 +29,8 @@ Without GPS, the vehicle has to estimate its own state from its own sensors — 
 
 <!-- [VERIFY]: no public repo exists for this work — drafted from the brief narrative (drones, avionics, GNC, GPS-denied navigation). Confirm scope, hardware, and dates before publishing. -->
 This entry is not yet public — in progress. The work covers drones, avionics, guidance/navigation/control (GNC), and GPS-denied navigation. There is no public repository yet, so the honest description is: a machine being built, not yet shown.
+
+<!-- [VERIFY]: AERD rockets program — name, dates, and scoping are from the v2 brief; confirm the program name and what it actually covers before publishing. -->
 
 ## Owned
 

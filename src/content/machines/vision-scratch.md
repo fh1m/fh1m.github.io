@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "03"
 name: Vision scratch experiments
 category: perception
 status: retired

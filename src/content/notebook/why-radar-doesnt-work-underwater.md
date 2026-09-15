@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "02"
 title: Why radar doesn't work underwater — and what does instead
 date: 2024-03
 tags: [sonar, radar, acoustics, auv]

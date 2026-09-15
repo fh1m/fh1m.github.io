@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "05"
 title: Opening the box — what is actually on the Jetson
 date: 2026-04
 tags: [jetson, soc, embedded, real-time]

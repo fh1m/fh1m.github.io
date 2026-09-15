@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "03"
 name: comma.ai calibration challenge
 category: perception
 status: closed

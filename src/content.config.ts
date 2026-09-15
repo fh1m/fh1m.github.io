@@ -2,9 +2,12 @@
  * Astro 5 content collections — `src/content.config.ts` (project root).
  *
  * Three collections, all loaded with the Astro 5 `glob` loader:
- *   - `machines`  → src/content/machines/*.md   (10 entries, todo 6)
- *   - `notebook`  → src/content/notebook/*.md   (8 entries, todo 7)
- *   - `log`       → src/content/log/*.md        (6 entries, todo 7)
+ *   - `machines`  → src/content/machines/*.md   (10 entries)
+ *   - `notebook`  → src/content/notebook/*.md   (8 entries)
+ *   - `log`       → src/content/log/*.md        (6 entries)
+ *
+ * v2 additions: optional `act` (move|understand|decide|next) and
+ * `chapterKey` fields on all three collections for story binding.
  *
  * Date formats are load-bearing for sorting (plan todo 5):
  *   dateStart / dateEnd / notebook.date = ISO `YYYY-MM`
@@ -19,6 +22,14 @@ import { glob } from 'astro/loaders';
 const machines = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/machines' }),
   schema: z.object({
+    act: z
+      .enum(['move', 'understand', 'decide', 'next'])
+      .optional()
+      .describe('Narrative act binding (v2 four-act structure)'),
+    chapterKey: z
+      .string()
+      .optional()
+      .describe('Story chapter association key, e.g. "02" through "08"'),
     name: z.string().describe('Display name of the machine / project'),
     category: z
       .enum(['underwater', 'air', 'perception', 'compute', 'systems'])
@@ -55,6 +66,14 @@ const machines = defineCollection({
 const notebook = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/notebook' }),
   schema: z.object({
+    act: z
+      .enum(['move', 'understand', 'decide', 'next'])
+      .optional()
+      .describe('Narrative act binding (v2 four-act structure)'),
+    chapterKey: z
+      .string()
+      .optional()
+      .describe('Story chapter association key, e.g. "02" through "08"'),
     title: z.string().describe('Essay title'),
     date: z
       .string()
@@ -70,6 +89,14 @@ const notebook = defineCollection({
 const log = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/log' }),
   schema: z.object({
+    act: z
+      .enum(['move', 'understand', 'decide', 'next'])
+      .optional()
+      .describe('Narrative act binding (v2 four-act structure)'),
+    chapterKey: z
+      .string()
+      .optional()
+      .describe('Story chapter association key, e.g. "02" through "08"'),
     title: z.string().describe('Phase title'),
     phaseLabel: z.string().describe('Short mono label for the phase, e.g. "PHASE 01"'),
     year: z

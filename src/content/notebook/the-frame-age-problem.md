@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "03"
 title: The frame-age problem — queues vs latest-frame buffers
 date: 2025-06
 tags: [perception, control, latency, buffers]

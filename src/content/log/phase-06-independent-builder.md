@@ -1,4 +1,5 @@
 ---
+act: next
 title: Building without a brief
 phaseLabel: PHASE 06
 year: "2026"
@@ -6,7 +7,7 @@ dateLabel: "2026"
 phase: Independent Builder
 ---
 
-The current phase has no org chart. The Unauthorized Engineering collective is a group of young engineers building unreasonable things — irreverent, open, practical. Whatever we built is better than it was before, far better.
+The current phase has no org chart. The Unauthorized Engineering collective is a group of young engineers building unreasonable things — irreverent, open, practical. The work is better for the iteration, and the iteration continues.
 
 The work now is the work I chose: low-cost autonomous systems, visual navigation without expensive sensing, integrated vision-and-control boards, and the same mission every time on Duburi. The questions are the ones that have always been underneath — what is actually happening, and can I rebuild it from first principles.
 

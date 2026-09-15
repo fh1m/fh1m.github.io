@@ -1,4 +1,6 @@
 ---
+act: next
+chapterKey: "08"
 name: secure-terminal-p2p-chat
 category: compute
 status: prototype

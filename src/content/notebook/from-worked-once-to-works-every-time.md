@@ -1,4 +1,6 @@
 ---
+act: decide
+chapterKey: "06"
 title: From "it worked once" to "it works every time" — robustness
 date: 2026-08
 tags: [robustness, testing, reliability]

@@ -1,4 +1,5 @@
 ---
+act: understand
 name: Toolchain archaeology
 category: compute
 status: running
@@ -38,7 +39,7 @@ The failures are the ones every toolchain has: the script that broke the system,
 
 ## Changed
 
-The toolchain changed how I work — the environment became something I maintain deliberately instead of something I tolerate. The first machine got the engineering it deserved.
+The toolchain changed how I work — the environment became something I maintain deliberately instead of something I tolerate. The question shifted from "what is the toolchain" to "what does the toolchain need to be."
 
 ## Machine-now
 

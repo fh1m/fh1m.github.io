@@ -1,4 +1,5 @@
 ---
+act: understand
 title: Learning the machine from inside
 phaseLabel: PHASE 03
 year: "2024"

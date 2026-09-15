@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "03"
 name: Arduino-Vision
 category: compute
 status: prototype

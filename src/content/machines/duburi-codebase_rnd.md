@@ -1,4 +1,6 @@
 ---
+act: understand
+chapterKey: "02"
 name: duburi-codebase_RND
 category: perception
 status: ongoing
