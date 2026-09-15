@@ -23,6 +23,7 @@ const STATUS_TONE: Record<string, string> = {
 const machines = await getCollection('machines');
 
 export async function getStaticPaths() {
+  const machines = await getCollection('machines');
   return machines.map((machine) => ({
     params: { slug: machine.id },
     props: { machine },
