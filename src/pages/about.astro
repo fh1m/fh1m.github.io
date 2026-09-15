@@ -1,0 +1,447 @@
+---
+import Base from '../layouts/Base.astro';
+import StackDescent from '../components/StackDescent.astro';
+
+// Verbatim manifesto block, brief #46 (plan line 63). Kept literal in this
+// page so the source is grep-assertable; identical to PROFILE.manifestoLines.
+const MANIFESTO = [
+  'I like machines that have to deal with reality.',
+  'I like understanding what sits beneath the abstraction.',
+  'I like taking expensive or opaque systems apart conceptually and rebuilding them from first principles.',
+  'I like robotics because there is nowhere to hide: eventually the machine has to move.',
+  'I like software because it lets an idea become behavior.',
+  'I like hardware because physics gets the final vote.',
+  'I like open source because knowledge should compound.',
+  'I like difficult problems because they expose what I don\u2019t understand.',
+  'And I am still building.',
+];
+
+// brief #45 — the loop, in order.
+const LOOP = [
+  { label: 'CURIOSITY', note: 'a question about what is underneath' },
+  { label: 'DECONSTRUCTION', note: 'taking the system apart conceptually' },
+  { label: 'EXPERIMENT', note: 'the smallest thing that tests the idea' },
+  { label: 'INTEGRATION', note: 'putting it back together, differently' },
+  { label: 'REALITY', note: 'the machine meets the world' },
+  { label: 'OPTIMIZATION', note: 'fast enough, small enough, cheap enough' },
+  { label: 'ROBUSTNESS', note: 'from it worked once to it works every time' },
+  { label: 'SHARING', note: 'open source, because knowledge should compound' },
+];
+
+// brief #64 — six contradictions (plan line 67).
+const CONTRADICTIONS = [
+  {
+    left: 'AMBITIOUS',
+    leftNote: 'the machine should do more than it was asked',
+    right: 'INSECURE',
+    rightNote: 'the fear that it is not enough',
+  },
+  {
+    left: 'SOPHISTICATED SYSTEMS',
+    leftNote: 'estimation, control, perception working together',
+    right: 'HATES UNNECESSARY COMPLEXITY',
+    rightNote: 'the simplest thing that survives contact with reality',
+  },
+  {
+    left: 'HARDWARE-LEVEL',
+    leftNote: 'registers, interrupts, the physical layer',
+    right: 'HIGH-LEVEL',
+    rightNote: 'behavior, intent, the whole system',
+  },
+  {
+    left: 'OPEN SOURCE',
+    leftNote: 'knowledge should compound',
+    right: 'PROPRIETARY-GRADE SERIOUSNESS',
+    rightNote: 'the work is held to a production standard',
+  },
+  {
+    left: 'TECHNICALLY SERIOUS',
+    leftNote: 'the engineering is not a joke',
+    right: 'ABSURD HUMOR',
+    rightNote: 'the jokes are',
+  },
+  {
+    left: 'FAILURE',
+    leftNote: 'the detector worked, the vehicle didn\u2019t',
+    right: 'GROWING AMBITION',
+    rightNote: 'each failure raised the ceiling',
+  },
+];
+
+// brief #20 — influences, restrained. What he borrows, not hero-worship.
+const INFLUENCES = [
+  {
+    name: 'GEORGE HOTZ',
+    borrow: 'the willingness to open the box and rebuild it — first principles over received wisdom',
+  },
+  {
+    name: 'ANDREJ KARPATHY',
+    borrow: 'the discipline of teaching from the bottom up — mechanisms, not magic',
+  },
+  {
+    name: 'COMMA.AI',
+    borrow: 'the calibration mindset — there is no magic, just long calibration',
+  },
+  {
+    name: 'THE OPEN-SOURCE COMMUNITY',
+    borrow: 'the habit of publishing the work so knowledge compounds',
+  },
+];
+---
+
+<Base
+  title="FAHIM FAISAL — ABOUT"
+  description="The machine and the person behind it — the descent, the loop, the contradictions, the manifesto."
+>
+  <!-- [VERIFY]: brief #65 deep-characterization drafted from the approved signature lines (plan line 62); confirm wording before publishing. -->
+  <section class="about-hero">
+    <p class="mono-label">[02] ABOUT</p>
+    <h1 class="display about-h1">
+      MOST OF MY WORK STARTS WITH A QUESTION ABOUT WHAT IS HAPPENING UNDERNEATH THE ABSTRACTION.
+    </h1>
+    <p class="hero-sub">The path was non-linear. The engineering became increasingly serious.</p>
+    <p class="hero-body">
+      Fahim Faisal builds machines that perceive the world and act inside it. He works across robotics,
+      computer vision, embedded systems, control, and AI — usually starting from a simple question: what
+      is actually happening underneath the abstraction?
+    </p>
+  </section>
+
+  <!-- [VERIFY]: descent item lists drafted from brief #3 layer titles and site themes; confirm items. -->
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[02.1]</span>
+      <h2>THE DESCENT</h2>
+    </header>
+    <p class="section-intro">Five layers, from intent down to the world. The descent is the default mode.</p>
+    <StackDescent />
+  </section>
+
+  <!-- [VERIFY]: loop node notes drafted from brief #45 sequence; confirm wording. -->
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[02.2]</span>
+      <h2>THE LOOP</h2>
+    </header>
+    <p class="section-intro">The cycle the work actually runs on.</p>
+    <ol class="loop">
+      {LOOP.map((node, i) => (
+        <li class="loop-node" data-reveal>
+          <span class="loop-index mono-label">[{String(i + 1).padStart(2, '0')}]</span>
+          <div class="loop-body">
+            <span class="loop-label">{node.label}</span>
+            <span class="loop-note">{node.note}</span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- [VERIFY]: contradiction descriptors drafted from brief #64 pairs (plan line 67); confirm wording. -->
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[02.3]</span>
+      <h2>CONTRADICTIONS</h2>
+    </header>
+    <p class="section-intro">Six pairs that are all true at once.</p>
+    <div class="contradictions">
+      {CONTRADICTIONS.map((pair) => (
+        <div class="contradiction-row">
+          <div class="pole">
+            <span class="pole-label">{pair.left}</span>
+            <span class="pole-note">{pair.leftNote}</span>
+          </div>
+          <div class="pole">
+            <span class="pole-label">{pair.right}</span>
+            <span class="pole-note">{pair.rightNote}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[02.4]</span>
+      <h2>MANIFESTO</h2>
+    </header>
+    <div class="manifesto">
+      {MANIFESTO.map((line, i) => (
+        <p class="manifesto-line" data-reveal>
+          <span class="manifesto-prefix mono-label">[M]</span>
+          <span class:list={['manifesto-text', { 'manifesto-final': i === MANIFESTO.length - 1 }]}>
+            {line}
+          </span>
+        </p>
+      ))}
+    </div>
+  </section>
+
+  <!-- [VERIFY]: university story drafted from brief #61 framing (plan line 66); confirm details. -->
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[02.5]</span>
+      <h2>THE UNIVERSITY STORY</h2>
+    </header>
+    <p class="editorial">
+      The path was not a straight line. There was a university detour, and with it the feeling of running
+      late — the sense that the machine was being built elsewhere, faster. What changed was not the
+      destination but the pace: the engineering became increasingly serious. The detour did not stop the
+      work; it changed what the work was. When the machine came back online, it came back with more of the
+      stack understood.
+    </p>
+  </section>
+
+  <!-- [VERIFY]: Bangladesh passage drafted from brief #62 (plan line 69); confirm wording. -->
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[02.6]</span>
+      <h2>BANGLADESH</h2>
+    </header>
+    <p class="editorial">
+      Dhaka, Bangladesh. This is where the machine is being built. The tools are the same; the constraints
+      are different. The work does not wait for a different address.
+    </p>
+  </section>
+
+  <!-- [VERIFY]: influence borrow-lines drafted from brief #20 (plan todo 9); confirm wording. -->
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[02.7]</span>
+      <h2>INFLUENCES</h2>
+    </header>
+    <p class="section-intro">Not idols — sources. What I borrow is the approach: idea, implementation, working system.</p>
+    <div class="influences">
+      {INFLUENCES.map((influence) => (
+        <div class="influence-row">
+          <span class="influence-name">{influence.name}</span>
+          <span class="influence-borrow">{influence.borrow}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <footer class="about-close" data-reveal>
+    <p class="status-line">[STATUS: STILL BUILDING]</p>
+  </footer>
+
+  <style>
+    .about-hero {
+      display: grid;
+      gap: var(--space-6);
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6) 0;
+    }
+
+    .about-h1 {
+      font-size: var(--text-h1);
+      font-weight: 800;
+      max-width: 24ch;
+    }
+
+    .hero-sub {
+      font-family: var(--font-serif), serif;
+      font-style: italic;
+      font-size: var(--text-h3);
+      color: var(--paper);
+    }
+
+    .hero-body {
+      color: var(--gray);
+      max-width: var(--max-width-editorial);
+    }
+
+    .about-section {
+      display: grid;
+      gap: var(--space-8);
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-24) var(--space-6) 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-4);
+      border-top: 1px solid var(--border);
+      padding-top: var(--space-6);
+    }
+
+    .section-head h2 {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      font-size: var(--text-h2);
+    }
+
+    .section-intro {
+      color: var(--gray);
+      max-width: var(--max-width-editorial);
+    }
+
+    .editorial {
+      color: var(--paper);
+      max-width: var(--max-width-editorial);
+    }
+
+    /* ---- THE LOOP ---- */
+    .loop {
+      display: grid;
+    }
+
+    .loop-node {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-6);
+      padding: var(--space-6) 0;
+      border-top: 1px solid var(--border);
+      align-items: baseline;
+    }
+
+    .loop-index {
+      color: var(--gray);
+    }
+
+    .loop-body {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: var(--space-2) var(--space-4);
+    }
+
+    .loop-label {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      font-size: var(--text-h3);
+    }
+
+    .loop-note {
+      color: var(--gray);
+    }
+
+    /* ---- CONTRADICTIONS ---- */
+    .contradictions {
+      display: grid;
+    }
+
+    .contradiction-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--border);
+    }
+
+    .pole {
+      display: grid;
+      gap: var(--space-2);
+      padding: var(--space-6);
+    }
+
+    .pole + .pole {
+      border-left: 1px solid var(--border);
+    }
+
+    .pole-label {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      font-size: var(--text-h3);
+    }
+
+    .pole-note {
+      color: var(--gray);
+    }
+
+    /* ---- MANIFESTO ---- */
+    .manifesto {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .manifesto-line {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-4);
+      align-items: baseline;
+    }
+
+    .manifesto-prefix {
+      color: var(--gray);
+    }
+
+    .manifesto-text {
+      font-size: var(--text-h3);
+      line-height: 1.4;
+    }
+
+    .manifesto-final {
+      font-family: var(--font-serif), serif;
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    /* ---- INFLUENCES ---- */
+    .influences {
+      display: grid;
+    }
+
+    .influence-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: var(--space-6);
+      padding: var(--space-6) 0;
+      border-top: 1px solid var(--border);
+      align-items: baseline;
+    }
+
+    .influence-name {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--paper);
+    }
+
+    .influence-borrow {
+      color: var(--gray);
+    }
+
+    /* ---- CLOSE ---- */
+    .about-close {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-24) var(--space-6) 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .status-line {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--accent);
+    }
+
+    @media (max-width: 640px) {
+      .contradiction-row {
+        grid-template-columns: 1fr;
+      }
+
+      .pole + .pole {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .influence-row {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+      }
+    }
+  </style>
+</Base>

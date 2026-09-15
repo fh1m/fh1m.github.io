@@ -1,0 +1,173 @@
+---
+/**
+ * StackDescent — the abstraction-stack descent (brief #3).
+ *
+ * Five stacked layers, HIGH-LEVEL → PHYSICAL, each a collapsible mono-labeled
+ * row that expands its item list. Built on native <details>/<summary>:
+ * expand/collapse works with JavaScript disabled. The `name` attribute groups
+ * the layers into an exclusive accordion where supported (progressive
+ * enhancement only — unsupported browsers fall back to independent rows).
+ *
+ * Layer titles are sourced from brief #3 (plan todo 9). Item lists are drafted
+ * from the site's themes; wording is covered by the README content-review
+ * checklist.
+ */
+
+interface Layer {
+  index: string;
+  title: string;
+  descriptor: string;
+  items: string[];
+}
+
+const LAYERS: Layer[] = [
+  {
+    index: '01',
+    title: 'HIGH-LEVEL',
+    descriptor: 'what the machine is trying to do',
+    items: [
+      'mission intent — the goal the machine is given',
+      'behavior selection — which mode applies right now',
+      'planning — a route through the world, or through the problem',
+      'perception goals — what the machine needs to see in order to act',
+    ],
+  },
+  {
+    index: '02',
+    title: 'MID-LEVEL',
+    descriptor: 'the logic that decides, in real time',
+    items: [
+      'control loops — the feedback that keeps the machine honest',
+      'state estimation — where the machine thinks it is',
+      'sensor fusion — several imperfect senses, one usable picture',
+      'decision logic — what to do with the picture',
+    ],
+  },
+  {
+    index: '03',
+    title: 'LOW-LEVEL',
+    descriptor: 'the code that talks to the metal',
+    items: [
+      'drivers — the first translation layer',
+      'interrupts — the hardware asking for attention',
+      'real-time scheduling — the promise that the loop runs on time',
+      'register-level code — where the abstraction ends',
+    ],
+  },
+  {
+    index: '04',
+    title: 'HARDWARE',
+    descriptor: 'the parts that carry the current',
+    items: [
+      'boards — the silicon and the traces between it',
+      'sensors — the machine\u2019s senses',
+      'actuators — the machine\u2019s muscles',
+      'power — everything downstream of the battery',
+    ],
+  },
+  {
+    index: '05',
+    title: 'PHYSICAL',
+    descriptor: 'the world that does not negotiate',
+    items: [
+      'water — denser, darker, no GPS',
+      'air — the medium the machine has to move through',
+      'friction — the world pushing back',
+      'latency — the time between sensing and acting',
+    ],
+  },
+];
+---
+
+<div class="stack-descent">
+  {LAYERS.map((layer) => (
+    <details class="layer" name="stack-descent">
+      <summary>
+        <span class="layer-index">[LAYER {layer.index}]</span>
+        <span class="layer-title">{layer.title}</span>
+        <span class="layer-descriptor">{layer.descriptor}</span>
+      </summary>
+      <ul class="layer-items">
+        {layer.items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </details>
+  ))}
+</div>
+
+<style>
+  .stack-descent {
+    display: grid;
+    border-top: 1px solid var(--border);
+  }
+
+  .layer {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .layer summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-6) 0;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .layer summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .layer summary::after {
+    content: '+';
+    margin-left: auto;
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: var(--text-label);
+    color: var(--gray);
+  }
+
+  .layer[open] summary::after {
+    content: '\2212';
+  }
+
+  .layer-index {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: var(--text-label);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--gray);
+  }
+
+  .layer-title {
+    font-family: var(--font-display), sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-display);
+    font-size: var(--text-h3);
+  }
+
+  .layer-descriptor {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: var(--text-label);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--gray);
+  }
+
+  .layer-items {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0 0 var(--space-6);
+  }
+
+  .layer-items li {
+    color: var(--gray);
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--border);
+    margin-left: var(--space-1);
+  }
+</style>
