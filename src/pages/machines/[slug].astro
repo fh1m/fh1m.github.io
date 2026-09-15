@@ -51,11 +51,12 @@ const idx = ordered.findIndex((m) => m.id === machine.id);
 const prev = idx > 0 ? ordered[idx - 1] : undefined;
 const next = idx >= 0 && idx < ordered.length - 1 ? ordered[idx + 1] : undefined;
 
-const { name, category, status, yearLabel, summary, repoLink, metrics, chapterKey } = machine.data;
+const { name, category, status, yearLabel, summary, repoLink, metrics, chapterKey, sources } = machine.data;
 const categoryLabel = CATEGORY_LABELS[category] ?? category.toUpperCase();
 const tone = STATUS_TONE[status] ?? 'gray';
 const hasRepo = repoLink !== undefined && repoLink.trim() !== '';
 const hasMetrics = metrics !== undefined && metrics.length > 0;
+const hasSources = sources !== undefined && sources.length > 0;
 
 const CHAPTER_QUESTIONS: Record<string, string> = {
   '01': 'How do machines move?',
@@ -99,6 +100,19 @@ const chapterQuestion = chapterKey ? CHAPTER_QUESTIONS[chapterKey] : undefined;
             <span class="metric-value">{metric.value}</span>
           </div>
         ))}
+      </div>
+    )}
+
+    {hasSources && (
+      <div class="sources-strip" data-reveal>
+        <span class="sources-label mono-label">SOURCES</span>
+        <div class="sources-links">
+          {sources.map((source) => (
+            <a class="source-link mono-label" href={source.url} target="_blank" rel="noopener noreferrer">
+              {source.label} ↗
+            </a>
+          ))}
+        </div>
       </div>
     )}
 
@@ -269,6 +283,37 @@ const chapterQuestion = chapterKey ? CHAPTER_QUESTIONS[chapterKey] : undefined;
       letter-spacing: var(--tracking-label);
       color: var(--ink);
       text-align: right;
+    }
+
+    .sources-strip {
+      margin-top: var(--space-6);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: var(--space-4);
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .sources-label {
+      color: var(--ink-muted);
+    }
+
+    .sources-links {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .source-link {
+      color: var(--ink-muted);
+      border: 1px solid var(--line);
+      padding: var(--space-1) var(--space-2);
+      line-height: 1;
+      width: fit-content;
+    }
+
+    .source-link:hover {
+      color: var(--ink);
+      border-color: var(--ink-muted);
     }
 
     .media-pending {

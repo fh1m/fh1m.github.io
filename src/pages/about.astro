@@ -8,8 +8,30 @@ import Trajectories from '../components/Trajectories.astro';
 // Evidence: AERD (real-world-aerd.md), Duburi (real-world-duburi.md),
 // persona arc (real-world-persona.md). [VERIFY] markers only on new v2 claims.
 const CHAPTERS = [
-  { id: '01', built: 'AERD / ROCKETS', question: 'How do machines move?', verify: '[VERIFY]' },
-  { id: '02', built: 'DUBURI / ROBOSUB 2024', question: 'How does a machine see?' },
+  {
+    id: '01',
+    built: 'AERD / ROCKETS',
+    question: 'How do machines move?',
+    verify: '[VERIFY]',
+    sources: [
+      {
+        label: 'THE DAILY STAR',
+        url: 'https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016',
+      },
+    ],
+  },
+  {
+    id: '02',
+    built: 'DUBURI / ROBOSUB 2024',
+    question: 'How does a machine see?',
+    sources: [
+      { label: 'BRACU DUBURI', url: 'https://bracuduburi.com/' },
+      {
+        label: 'ROBOSUB 2026',
+        url: 'https://robosub.org/2026/07/17/robosub-2026-final-standings/',
+      },
+    ],
+  },
   { id: '03', built: 'MACHINE VISION', question: 'How do you know the map is true?' },
   { id: '04', built: '2025 SUBTEAM LEAD', question: 'How do subsystems agree?' },
   { id: '05', built: 'ARCHITECTURE', question: 'Where should intelligence live?' },
@@ -152,6 +174,15 @@ const INFLUENCES = [
                   <p class="chapter-id mono-label">[{ch.id}]</p>
                   <h3 class="chapter-heading">{ch.built}</h3>
                   {ch.verify && <span class="verify-tag mono-label">{ch.verify}</span>}
+                  {ch.sources && (
+                    <div class="chapter-sources">
+                      {ch.sources.map((s) => (
+                        <a class="chapter-source mono-label" href={s.url} target="_blank" rel="noopener noreferrer">
+                          {s.label} ↗
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div class="chapter-thread">
                   <span class="thread-label mono-label">LEARNING: {THREADS[i]}</span>
@@ -487,6 +518,26 @@ const INFLUENCES = [
       color: var(--signal-amber);
       margin-top: var(--space-2);
       display: block;
+    }
+
+    .chapter-sources {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      margin-top: var(--space-3);
+    }
+
+    .chapter-source {
+      color: var(--ink-muted);
+      border: 1px solid var(--line);
+      padding: var(--space-1) var(--space-2);
+      line-height: 1;
+      width: fit-content;
+    }
+
+    .chapter-source:hover {
+      color: var(--ink);
+      border-color: var(--ink-muted);
     }
 
     /* Thread label — horizontal axis (mono, muted, not signal) */

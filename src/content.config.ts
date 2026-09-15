@@ -26,6 +26,15 @@ import { glob } from 'astro/loaders';
 const machines = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/machines' }),
   schema: z.object({
+    sources: z
+      .array(
+        z.object({
+          label: z.string().describe('Source label, e.g. "The Daily Star"'),
+          url: z.string().describe('Source URL'),
+        }),
+      )
+      .optional()
+      .describe('Optional real-world source citations for the machine'),
     stack: z
       .array(
         z.object({

@@ -15,6 +15,13 @@ tags:
   - robotics
   - computer-vision
 repoLink: https://github.com/fh1m/Duburi
+sources:
+  - label: ROBOSUB 2026
+    url: https://robosub.org/2026/07/17/robosub-2026-final-standings/
+  - label: THE BUSINESS STANDARD
+    url: https://www.tbsnews.net/economy/corporates/bracu-duburi-finishes-eighth-robosub-2026-1496691
+  - label: BRACU DUBURI
+    url: https://bracuduburi.com/
 metrics:
   - label: ROBOSUB 2023
     value: 2ND

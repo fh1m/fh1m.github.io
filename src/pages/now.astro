@@ -59,6 +59,28 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       </div>
     </section>
 
+    <section class="links" aria-labelledby="links-label" data-reveal>
+      <p class="mono-label section-label" id="links-label">[LIVE PROJECTS]</p>
+      <div class="link-rows">
+        <a class="link-row" href="https://bracuduburi.com/" target="_blank" rel="noopener noreferrer">
+          <span class="link-stamp mono-label">[01]</span>
+          <div class="link-body">
+            <h2 class="link-title">BRACU DUBURI</h2>
+            <p class="link-note">The AUV team — the machine that keeps being rebuilt to perform better next time.</p>
+          </div>
+          <span class="link-arrow mono-label" aria-hidden="true">↗</span>
+        </a>
+        <a class="link-row" href="https://robosub.org/2026/07/17/robosub-2026-final-standings/" target="_blank" rel="noopener noreferrer">
+          <span class="link-stamp mono-label">[02]</span>
+          <div class="link-body">
+            <h2 class="link-title">ROBOSUB 2026</h2>
+            <p class="link-note">Final standings — 8th, 6230 points.</p>
+          </div>
+          <span class="link-arrow mono-label" aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+
     <section class="next" aria-labelledby="next-label" data-reveal>
       <p class="mono-label section-label" id="next-label">[ACT IV: NEXT]</p>
       <div class="next-rows">
@@ -181,6 +203,58 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
     .next-note {
       color: var(--ink-muted);
       max-width: 60ch;
+    }
+
+    .links {
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .link-rows {
+      border-top: 1px solid var(--line);
+    }
+
+    .link-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: baseline;
+      gap: var(--space-6);
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .link-stamp {
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .link-body {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .link-title {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-weight: 600;
+      font-size: var(--text-h3);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      line-height: var(--leading-h3);
+    }
+
+    .link-note {
+      color: var(--ink-muted);
+      max-width: 60ch;
+    }
+
+    .link-arrow {
+      color: var(--ink-muted);
+      transition: transform var(--dur-fast) var(--ease-out);
+    }
+
+    .link-row:hover .link-arrow {
+      color: var(--signal);
+      transform: translate(2px, -2px);
     }
 
     .now-close {

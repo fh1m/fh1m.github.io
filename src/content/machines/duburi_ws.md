@@ -15,6 +15,11 @@ tags:
   - robosub
   - robotics
 repoLink: https://github.com/fh1m/duburi_ws
+sources:
+  - label: GITHUB
+    url: https://github.com/fh1m/duburi_ws
+  - label: ROBOSUB 2026
+    url: https://robosub.org/2026/07/17/robosub-2026-final-standings/
 stack:
   - name: Python
     weight: 97

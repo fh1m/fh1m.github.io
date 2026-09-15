@@ -122,6 +122,15 @@ const featured = FEATURED_SLUGS.map((slug) =>
     </div>
   </section>
 
+  <section class="press-strip" data-reveal>
+    <p class="mono-label section-label">[AS COVERED BY]</p>
+    <div class="press-links">
+      <a class="press-link mono-label" href="https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016" target="_blank" rel="noopener noreferrer">THE DAILY STAR</a>
+      <a class="press-link mono-label" href="https://robonation.org" target="_blank" rel="noopener noreferrer">ROBONATION</a>
+      <a class="press-link mono-label" href="https://bracuduburi.com/" target="_blank" rel="noopener noreferrer">BRACU DUBURI</a>
+    </div>
+  </section>
+
   <section class="now-teaser" data-reveal>
     <p class="mono-label section-label">[ACT IV: NEXT]</p>
     <p class="now-line">The next act is open — the machine is still being built.</p>
@@ -352,6 +361,35 @@ const featured = FEATURED_SLUGS.map((slug) =>
 
     .machine-row:hover .machine-arrow {
       color: var(--signal);
+    }
+
+    /* ── Press strip ─────────────────────────────── */
+    .press-strip {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6);
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .press-links {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+      padding-top: var(--space-4);
+    }
+
+    .press-link {
+      color: var(--ink-muted);
+      border: 1px solid var(--line);
+      padding: var(--space-1) var(--space-2);
+      line-height: 1;
+    }
+
+    .press-link:hover {
+      color: var(--ink);
+      border-color: var(--ink-muted);
     }
 
     /* ── NOW / Act IV teaser ─────────────────────── */
