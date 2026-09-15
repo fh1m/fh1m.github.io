@@ -1,7 +1,229 @@
 ---
 import Base from '../layouts/Base.astro';
+import Pipeline from '../components/Pipeline.astro';
+import { PROFILE } from '../data/profile';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+const now = new Date();
+const initialTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+const buildYear = now.getFullYear();
+
+// LOC derives from PROFILE.location ("Dhaka, Bangladesh" → "DHAKA BD").
+const locParts = PROFILE.location.split(',').map((s) => s.trim().toUpperCase());
+const locCity = locParts[0] ?? 'DHAKA';
+const locCountry = locParts[1]?.startsWith('BANGLADESH') ? 'BD' : (locParts[1] ?? 'BD');
+
+// Featured machines band — pinned slugs, order preserved.
+const FEATURED_SLUGS = ['duburi', 'duburi_ws', 'duburi-codebase_rnd'] as const;
+const allMachines = await getCollection('machines');
+const featured = FEATURED_SLUGS.map((slug) =>
+  allMachines.find((m) => m.id === slug && !m.data.draft),
+).filter((m): m is CollectionEntry<'machines'> => Boolean(m));
 ---
 
-<Base title="FAHIM FAISAL — AUTONOMOUS SYSTEMS">
-  <!-- Home page content lands in todo 8. -->
+<Base title="FAHIM FAISAL — AUTONOMOUS SYSTEMS" description={PROFILE.roleLine}>
+  <!-- [VERIFY]: LOC derives from PROFILE.location ("Dhaka, Bangladesh" → "DHAKA BD"); confirm the abbreviation mapping before publishing. -->
+  <section class="hero">
+    <p class="mono-label">
+      [SYS: ONLINE] [LOC: {locCity} {locCountry}] [BLDG: {buildYear}]
+    </p>
+    <h1 class="display hero-title">
+      MACHINES THAT HAVE TO WORK WHEN NOBODY IS WATCHING.
+    </h1>
+    <p class="hero-sub">
+      I build machines that perceive the world and act inside it. Most of my work
+      starts with a question about what is happening underneath the abstraction.
+    </p>
+    <div class="hero-ctas">
+      <a class="cta" href="/machines">[03] MACHINES →</a>
+      <a class="cta" href="/about">[01] ABOUT →</a>
+    </div>
+  </section>
+
+  <section class="status-strip" aria-label="System telemetry">
+    <span class="mono-label">[SYS:ONLINE]</span>
+    <span class="mono-label">[SCROLL:00%]</span>
+    <span class="mono-label">[T: <span id="home-clock">{initialTime}</span>]</span>
+    <span class="mono-label">[FRAMES:—]</span>
+  </section>
+
+  <section class="pipeline-section">
+    <p class="mono-label section-label">[PIPELINE]</p>
+    <Pipeline />
+  </section>
+
+  <section class="featured">
+    <p class="mono-label section-label">[FEATURED MACHINES]</p>
+    <div class="machine-rows">
+      {featured.map((m) => (
+        <a class="machine-row" href={`/machines/${m.id}`}>
+          <span class="machine-chip mono-label">{m.data.status}</span>
+          <span class="machine-name">{m.data.name}</span>
+          <span class="machine-summary">{m.data.summary}</span>
+          <span class="machine-arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="now-teaser">
+    <p class="mono-label section-label">[NOW]</p>
+    <p class="now-line">The current build list — what is running, what is next.</p>
+    <p class="now-line">Obsessions, experiments, and the next targets, in one place.</p>
+    <a class="cta" href="/now">[06] NOW →</a>
+  </section>
+
+  <script is:inline>
+    (function () {
+      var el = document.getElementById('home-clock');
+      if (!el || el.dataset.clockBound) return;
+      el.dataset.clockBound = '1';
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function tick() {
+        var d = new Date();
+        el.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
+
+  <style>
+    .hero {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-24) var(--space-6) var(--space-16);
+      display: grid;
+      gap: var(--space-8);
+    }
+
+    .hero-title {
+      font-weight: 900;
+    }
+
+    .hero-sub {
+      color: var(--gray);
+      max-width: 52ch;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .cta {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: var(--space-2) var(--space-3);
+      width: fit-content;
+    }
+
+    .cta:hover {
+      color: var(--bg);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .status-strip {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-3) var(--space-6);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .pipeline-section {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6);
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .section-label {
+      color: var(--gray);
+    }
+
+    .featured {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6);
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .machine-rows {
+      border-top: 1px solid var(--border);
+    }
+
+    .machine-row {
+      display: grid;
+      grid-template-columns: auto 1fr 2fr auto;
+      align-items: baseline;
+      gap: var(--space-6);
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .machine-chip {
+      border: 1px solid var(--border);
+      padding: var(--space-1) var(--space-2);
+      color: var(--gray);
+      white-space: nowrap;
+    }
+
+    .machine-name {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      font-size: var(--text-h3);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+    }
+
+    .machine-summary {
+      color: var(--gray);
+    }
+
+    .machine-arrow {
+      color: var(--gray);
+    }
+
+    .machine-row:hover .machine-arrow {
+      color: var(--accent);
+    }
+
+    .now-teaser {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6) var(--space-24);
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .now-line {
+      color: var(--gray);
+      max-width: 40ch;
+    }
+
+    @media (max-width: 720px) {
+      .machine-row {
+        grid-template-columns: auto 1fr auto;
+      }
+
+      .machine-summary {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
 </Base>
