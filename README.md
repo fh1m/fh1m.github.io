@@ -6,9 +6,13 @@ A static personal site for Fahim Faisal — machines that perceive, reason, and 
 
 - Astro 5 (static output)
 - TypeScript
-- Self-hosted fonts (Archivo, JetBrains Mono, IBM Plex Sans, Instrument Serif via @fontsource)
+- Self-hosted fonts (Iosevka, Roboto Mono Variable, IBM Plex Sans, Instrument Serif via @fontsource)
 - GSAP + Lenis for motion, gated behind `prefers-reduced-motion`
 - No frontend frameworks, no CSS frameworks
+
+### Typography sizing note
+
+Iosevka is narrow (~0.5em advance) — display text fits roughly half the width of a typical grotesque at the same size. The display scale caps at 4.5rem (72px) and the mono floor is 12px (`--text-mono`); the old 9rem Archivo overflow fix (scoped 404 clamp) is no longer needed. All 800/900 display weights are normalized to 700 — only latin-400 + latin-700 are imported.
 
 ## Local run
 
@@ -52,7 +56,7 @@ Import the repo in Vercel — zero-config static deploy. No `vercel.json` needed
 
 Run before shipping. All copy is drafted — replace or correct anything that does not match reality.
 
-- [ ] `grep -r 'VERIFY' dist` returns 0 hits (currently 44 markers in built HTML — each one is a fact to confirm)
+- [ ] `grep -r 'VERIFY' dist` returns 0 hits (currently 52 markers in built HTML — each one is a fact to confirm)
 - [ ] `grep -riE 'passionate|innovative|cutting-edge|synergy|leveraging' dist` returns 0 hits (expect zero)
 - [ ] `grep -r '∞' dist` returns 0 hits
 - [ ] `grep -r '#000' dist` returns 0 hits
@@ -62,8 +66,12 @@ Run before shipping. All copy is drafted — replace or correct anything that do
 - [ ] RoboSub results are correct: 2023 runners-up (2nd), 2025 9th, 2026 8th (6230 pts)
 - [ ] Machine repo links and dates match GitHub (Duburi, duburi_ws, duburi-sim_ws, duburi-codebase_RND, calib_challenge_fh1m, Arduino-Vision, vision-scratch repos, secure-terminal-p2p-chat, toolchain repos)
 - [ ] Air / drones & GPS-denied navigation entry is confirmed (no public repo — drafted from the brief narrative)
+- [ ] AERD name and scope are confirmed (air-gnc entry + about chapter 01 "AERD / ROCKETS" — program name, dates, and what it actually covers)
+- [ ] Mongol Tori spelling is confirmed (duburi-sim_ws + about chapter 02 "MONGOL TORI" — repo README says "Mongla", v2 plan says "Mongol Tori")
+- [ ] Unauthorized Engineering collective name and framing confirmed (log phase-06 + now page + about chapter 08 "INDEPENDENT SYSTEMS / UE" — name, framing, motto-spirit line)
+- [ ] Subteam-lead role start date is confirmed (2025 — log phase-04/05)
+- [ ] Engineering-lead transition date is confirmed (2026 — log phase-05)
 - [ ] Notebook publish dates are confirmed (all are draft placeholders)
 - [ ] Log phase dates and role titles are confirmed (2022 start year, subteam-lead to engineering-lead arc)
 - [ ] Email link is real (currently `hello@fahimfaisal.dev` placeholder)
-- [ ] Unauthorized Engineering collective name and framing confirmed
 - [ ] Media: all machine pages show `[MEDIA: PENDING]` placeholders — no images or video are shipped yet
