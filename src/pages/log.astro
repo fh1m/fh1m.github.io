@@ -37,8 +37,14 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
     </header>
 
     <ol class="timeline">
-      {nodes.map(({ entry, Content }, i) => (
-        <li class="phase-node" style={`--i: ${i}`}>
+      {/* ── ACT I — MOVE ──────────────────────────────── */}
+      <li class="timeline-item act-header" style="--i: 0">
+        <span class="act-label mono-label">ACT I — MOVE</span>
+        <span class="act-arc">Student → Builder</span>
+      </li>
+
+      {nodes.filter(n => n.entry.data.act === 'move').map(({ entry, Content }, i) => (
+        <li class="timeline-item phase-node" style={`--i: ${i + 1}`}>
           <div class="phase-body">
             <div class="phase-meta">
               <span class="phase-stamp mono-label">[t+{entry.data.year}]</span>
@@ -49,14 +55,83 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
           </div>
         </li>
       ))}
-      <li class="phase-node continues">
+
+      {/* ── Interstitial ──────────────────────────────── */}
+      <li class="timeline-item act-question" style="--i: 3">
+        How does a machine see?
+      </li>
+
+      {/* ── ACT II — UNDERSTAND ───────────────────────── */}
+      <li class="timeline-item act-header" style="--i: 4">
+        <span class="act-label mono-label">ACT II — UNDERSTAND</span>
+        <span class="act-arc">Vision Engineer → Technical Lead</span>
+      </li>
+
+      {nodes.filter(n => n.entry.data.act === 'understand').map(({ entry, Content }, i) => (
+        <li class="timeline-item phase-node" style={`--i: ${i + 5}`}>
+          <div class="phase-body">
+            <div class="phase-meta">
+              <span class="phase-stamp mono-label">[t+{entry.data.year}]</span>
+              <span class="phase-badge">{entry.data.phaseLabel}</span>
+            </div>
+            <h2 class="phase-title">{entry.data.title}</h2>
+            <div class="phase-narrative"><Content /></div>
+          </div>
+        </li>
+      ))}
+
+      {/* ── Interstitial ──────────────────────────────── */}
+      <li class="timeline-item act-question" style="--i: 7">
+        How do I make the whole machine reliable?
+      </li>
+
+      {/* ── ACT III — DECIDE ──────────────────────────── */}
+      <li class="timeline-item act-header" style="--i: 8">
+        <span class="act-label mono-label">ACT III — DECIDE</span>
+        <span class="act-arc">Systems Engineer → Independent Builder</span>
+      </li>
+
+      {nodes.filter(n => n.entry.data.act === 'decide').map(({ entry, Content }, i) => (
+        <li class="timeline-item phase-node" style={`--i: ${i + 9}`}>
+          <div class="phase-body">
+            <div class="phase-meta">
+              <span class="phase-stamp mono-label">[t+{entry.data.year}]</span>
+              <span class="phase-badge">{entry.data.phaseLabel}</span>
+            </div>
+            <h2 class="phase-title">{entry.data.title}</h2>
+            <div class="phase-narrative"><Content /></div>
+          </div>
+        </li>
+      ))}
+
+      {/* ── Interstitial (before open Act IV) ─────────── */}
+      <li class="timeline-item act-question" style="--i: 10">
+        What happens when nobody is watching?
+      </li>
+
+      {/* ── Phase 06 — Open Act IV ────────────────────── */}
+      {nodes.filter(n => n.entry.data.act === 'next').map(({ entry, Content }) => (
+        <li class="timeline-item phase-node phase-open" style="--i: 11">
+          <div class="phase-body">
+            <div class="phase-meta">
+              <span class="phase-stamp mono-label">[t+{entry.data.year}]</span>
+              <span class="phase-badge">{entry.data.phaseLabel}</span>
+            </div>
+            <h2 class="phase-title">{entry.data.title}</h2>
+            <div class="phase-narrative"><Content /></div>
+          </div>
+        </li>
+      ))}
+
+      {/* ── Terminal [CONTINUES] node ──────────────────── */}
+      <li class="timeline-item phase-node continues" style="--i: 12">
         <div class="phase-body">
           <div class="phase-meta">
             <span class="phase-stamp mono-label">[t+now]</span>
             <span class="phase-badge">OPEN</span>
           </div>
           <h2 class="phase-title"><a href="/now">Continues</a></h2>
-          <p class="phase-narrative">The phase is open — the machine is still being built.</p>
+          <p class="phase-narrative">The next act is open — the machine is still being built.</p>
           <a class="continues-link" href="/now">[CONTINUES] → /now</a>
         </div>
       </li>
@@ -126,7 +201,7 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
         animation: timeline-fill calc(var(--dur-slow) * 3) var(--ease-out) forwards;
       }
 
-      .phase-node {
+      .timeline-item {
         animation: node-rise var(--dur-slow) var(--ease-out) both;
         animation-delay: calc(var(--dur-slow) * 3 + var(--i, 0) * 90ms);
       }
@@ -149,8 +224,45 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       }
     }
 
-    .phase-node {
+    /* ── Act headers ──────────────────────────────── */
+    .act-header {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-3);
+      padding-left: var(--space-8);
+      flex-wrap: wrap;
+    }
+
+    .act-label {
+      color: var(--ink);
+      font-size: var(--text-label);
+    }
+
+    .act-arc {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--ink-muted);
+    }
+
+    /* ── Question interstitials ───────────────────── */
+    .act-question {
+      font-family: var(--font-serif), serif;
+      font-style: italic;
+      font-size: var(--text-h3);
+      color: var(--ink-muted);
+      padding-left: var(--space-8);
+      max-width: 48ch;
+    }
+
+    /* ── Phase nodes (shared) ─────────────────────── */
+    .timeline-item {
       position: relative;
+    }
+
+    .phase-node {
       padding-left: var(--space-8);
     }
 
