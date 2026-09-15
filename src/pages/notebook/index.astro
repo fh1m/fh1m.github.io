@@ -1,0 +1,158 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+// Field log — newest first. ISO YYYY-MM dates compare correctly as strings,
+// so localeCompare on the raw date field is a valid descending sort.
+const entries = (await getCollection('notebook')).sort((a, b) =>
+  b.data.date.localeCompare(a.data.date),
+);
+
+const STATUS_LABEL = { open: 'OPEN', ongoing: 'ONGOING', closed: 'CLOSED' } as const;
+const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip-closed' } as const;
+---
+
+<Base
+  title="NOTEBOOK — FIELD LOG"
+  description="Field log — notes from the Duburi build."
+>
+  <section class="notebook-index">
+    <div class="index-inner">
+      <header class="index-head">
+        <p class="mono-label">[04] NOTEBOOK // FIELD LOG</p>
+        <h1 class="index-title">FIELD LOG</h1>
+        <p class="log-line">
+          [t+0:00] log entry loaded — from "it worked once" to "it works every time" below
+        </p>
+        <p class="mono-label index-count">
+          [{entries.length} ENTRIES // {entries[entries.length - 1].data.date} → {entries[0].data.date}]
+        </p>
+      </header>
+
+      <ul class="entry-list">
+        {entries.map((entry) => (
+          <li>
+            <a class="entry-row" href={`/notebook/${entry.id}`}>
+              <span class="entry-date mono-label">[{entry.data.date}]</span>
+              <span class="entry-title">{entry.data.title}</span>
+              <span class:list={['status-chip', STATUS_CLASS[entry.data.status]]}>
+                {STATUS_LABEL[entry.data.status]}
+              </span>
+              <span class="entry-tags mono-label">{entry.data.tags.join(' / ')}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <style>
+    .index-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    .index-head {
+      display: grid;
+      gap: var(--space-4);
+      padding: var(--space-16) 0 var(--space-8);
+    }
+
+    .index-title {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 900;
+      font-size: var(--text-h1);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      line-height: var(--leading-display);
+    }
+
+    .log-line {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-mono);
+      color: var(--gray);
+      border-left: 1px solid var(--border);
+      padding-left: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    .index-count {
+      color: var(--gray);
+    }
+
+    .entry-list {
+      border-top: 1px solid var(--border);
+    }
+
+    .entry-row {
+      display: grid;
+      grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+      grid-template-areas:
+        'date title chip'
+        'date tags tags';
+      column-gap: var(--space-4);
+      row-gap: var(--space-2);
+      align-items: baseline;
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .entry-date {
+      grid-area: date;
+      color: var(--gray);
+    }
+
+    .entry-title {
+      grid-area: title;
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      font-size: var(--text-h3);
+      line-height: 1.2;
+      transition: color var(--dur-fast) var(--ease-out);
+    }
+
+    .entry-row:hover .entry-title {
+      color: var(--accent);
+    }
+
+    .status-chip {
+      grid-area: chip;
+      justify-self: end;
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      padding: var(--space-1) var(--space-2);
+      border: 1px solid currentColor;
+    }
+
+    .chip-open {
+      color: var(--accent);
+    }
+
+    .chip-ongoing {
+      color: var(--ok);
+    }
+
+    .chip-closed {
+      color: var(--gray);
+    }
+
+    .entry-tags {
+      grid-area: tags;
+      color: var(--gray);
+    }
+
+    @media (max-width: 640px) {
+      .entry-row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          'date chip'
+          'title title'
+          'tags tags';
+      }
+    }
+  </style>
+</Base>
