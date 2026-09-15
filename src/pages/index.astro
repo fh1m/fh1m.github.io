@@ -15,6 +15,32 @@ const locParts = PROFILE.location.split(',').map((s) => s.trim().toUpperCase());
 const locCity = locParts[0] ?? 'DHAKA';
 const locCountry = locParts[1]?.startsWith('BANGLADESH') ? 'BD' : (locParts[1] ?? 'BD');
 
+// Story axes — act labels, roman numerals, and per-machine thread hints.
+const ACT_LABEL: Record<string, string> = {
+  move: 'MOVE',
+  understand: 'UNDERSTAND',
+  decide: 'DECIDE',
+  next: 'NEXT',
+};
+const ACT_ROMAN: Record<string, string> = {
+  move: 'I',
+  understand: 'II',
+  decide: 'III',
+  next: 'IV',
+};
+const THREAD_MAP: Record<string, string> = {
+  duburi: 'motion → perception',
+  duburi_ws: 'intelligence → deployment',
+  'duburi-codebase_rnd': 'perception → research',
+};
+
+// ACT teaser rows — one per act, links into /about (the story).
+const ACTS = [
+  { roman: 'I', label: 'MOVE', line: 'Machines that move through water and air.' },
+  { roman: 'II', label: 'UNDERSTAND', line: 'Machines that see, estimate, and map.' },
+  { roman: 'III', label: 'DECIDE', line: 'Machines that decide where intelligence lives.' },
+];
+
 // Featured machines band — pinned slugs, order preserved.
 const FEATURED_SLUGS = ['duburi', 'duburi_ws', 'duburi-codebase_rnd'] as const;
 const allMachines = await getCollection('machines');
@@ -30,7 +56,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
       [SYS: ONLINE] [LOC: {locCity} {locCountry}] [BLDG: {buildYear}]
     </p>
     <h1 class="display hero-title">
-      MACHINES THAT HAVE TO WORK WHEN NOBODY IS WATCHING.
+      Machines that have to work when nobody is watching.
     </h1>
     <p class="hero-sub">
       I build machines that perceive the world and act inside it. Most of my work
@@ -40,6 +66,13 @@ const featured = FEATURED_SLUGS.map((slug) =>
       <a class="cta" href="/machines">[03] MACHINES →</a>
       <a class="cta" href="/about">[01] ABOUT →</a>
     </div>
+  </section>
+
+  <section class="question-node" data-reveal>
+    <a class="question-link" href="/about">
+      <span class="question-text">How do machines move?</span>
+      <span class="question-arrow" aria-hidden="true">→</span>
+    </a>
   </section>
 
   <section class="status-strip" aria-label="System telemetry">
@@ -54,25 +87,45 @@ const featured = FEATURED_SLUGS.map((slug) =>
     <Pipeline />
   </section>
 
-  <section class="featured" data-reveal>
-    <p class="mono-label section-label">[FEATURED MACHINES]</p>
-    <div class="machine-rows">
-      {featured.map((m) => (
-        <a class="machine-row" href={`/machines/${m.id}`}>
-          <span class="machine-chip mono-label">{m.data.status}</span>
-          <span class="machine-name">{m.data.name}</span>
-          <span class="machine-summary">{m.data.summary}</span>
-          <span class="machine-arrow" aria-hidden="true">→</span>
+  <section class="act-teaser" data-reveal>
+    <p class="mono-label section-label">[THE STORY]</p>
+    <div class="act-rows">
+      {ACTS.map((a) => (
+        <a class="act-row" href="/about">
+          <span class="act-row-label mono-label">ACT {a.roman} — {a.label}</span>
+          <span class="act-row-line">{a.line}</span>
+          <span class="act-row-arrow" aria-hidden="true">→</span>
         </a>
       ))}
     </div>
   </section>
 
+  <section class="featured" data-reveal>
+    <p class="mono-label section-label">[FEATURED MACHINES]</p>
+    <div class="machine-rows">
+      {featured.map((m) => {
+        const act = m.data.act ?? 'next';
+        const thread = THREAD_MAP[m.id];
+        return (
+          <a class="machine-row" href={`/machines/${m.id}`}>
+            <span class="act-chip mono-label">ACT {ACT_ROMAN[act]} {ACT_LABEL[act]}</span>
+            <span class="machine-chip mono-label">{m.data.status}</span>
+            <span class="machine-name">{m.data.name}</span>
+            <span class="machine-summary">{m.data.summary}</span>
+            <span class="machine-arrow" aria-hidden="true">→</span>
+            {thread && (
+              <span class="machine-thread mono-label">{thread}</span>
+            )}
+          </a>
+        );
+      })}
+    </div>
+  </section>
+
   <section class="now-teaser" data-reveal>
-    <p class="mono-label section-label">[NOW]</p>
-    <p class="now-line">The current build list — what is running, what is next.</p>
-    <p class="now-line">Obsessions, experiments, and the next targets, in one place.</p>
-    <a class="cta" href="/now">[06] NOW →</a>
+    <p class="mono-label section-label">[ACT IV: NEXT]</p>
+    <p class="now-line">The next act is open — the machine is still being built.</p>
+    <a class="cta" href="/now">[NEXT:] the next act is open →</a>
   </section>
 
   <script is:inline>
@@ -91,8 +144,9 @@ const featured = FEATURED_SLUGS.map((slug) =>
   </script>
 
   <style>
-    /* F3 FLAG: 4 raw var(--signal) refs (hero CTA base+hover = 1 pattern,
-       machine-arrow hover = 1) — verify <=3 visible applications per viewport. */
+    /* F3 FLAG: 7 raw var(--signal) refs (hero CTA base+hover = 1 pattern,
+       act chips = 1 pattern, machine-arrow hover = 1 pattern,
+       question hover = 1 conditional pattern) — ≤3 simultaneous per viewport. */
     .hero {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -134,6 +188,46 @@ const featured = FEATURED_SLUGS.map((slug) =>
       border-color: var(--signal);
     }
 
+    /* ── Question node — story entry pull line ───── */
+    .question-node {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-6);
+      border-top: 1px solid var(--line);
+    }
+
+    .question-link {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-4);
+      max-width: var(--max-width-editorial);
+    }
+
+    .question-text {
+      font-family: var(--font-serif), serif;
+      font-style: italic;
+      font-size: var(--text-h2);
+      color: var(--ink);
+      max-width: 48ch;
+    }
+
+    .question-arrow {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      color: var(--ink-muted);
+      transition:
+        color var(--dur-fast) var(--ease-out),
+        transform var(--dur-fast) var(--ease-out);
+    }
+
+    .question-link:hover .question-text {
+      color: var(--signal);
+    }
+
+    .question-link:hover .question-arrow {
+      color: var(--signal);
+      transform: translateX(2px);
+    }
+
     .status-strip {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -157,6 +251,47 @@ const featured = FEATURED_SLUGS.map((slug) =>
       color: var(--ink-muted);
     }
 
+    /* ── Act teaser strip ────────────────────────── */
+    .act-teaser {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6);
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .act-rows {
+      border-top: 1px solid var(--line);
+    }
+
+    .act-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: baseline;
+      gap: var(--space-6);
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .act-row-label {
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .act-row-line {
+      color: var(--ink-muted);
+    }
+
+    .act-row-arrow {
+      color: var(--ink-muted);
+      transition: transform var(--dur-fast) var(--ease-out);
+    }
+
+    .act-row:hover .act-row-arrow {
+      transform: translateX(2px);
+    }
+
+    /* ── Featured machines ───────────────────────── */
     .featured {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -171,11 +306,16 @@ const featured = FEATURED_SLUGS.map((slug) =>
 
     .machine-row {
       display: grid;
-      grid-template-columns: auto 1fr 2fr auto;
+      grid-template-columns: auto auto 1fr 2fr auto;
       align-items: baseline;
-      gap: var(--space-6);
+      gap: var(--space-4);
       padding: var(--space-4) 0;
       border-bottom: 1px solid var(--line);
+    }
+
+    .act-chip {
+      color: var(--signal);
+      white-space: nowrap;
     }
 
     .machine-chip {
@@ -201,10 +341,20 @@ const featured = FEATURED_SLUGS.map((slug) =>
       color: var(--ink-muted);
     }
 
+    .machine-thread {
+      grid-column: 3 / -1;
+      color: var(--ink-muted);
+      border: 1px solid var(--line);
+      padding: var(--space-1) var(--space-2);
+      width: fit-content;
+      line-height: 1;
+    }
+
     .machine-row:hover .machine-arrow {
       color: var(--signal);
     }
 
+    /* ── NOW / Act IV teaser ─────────────────────── */
     .now-teaser {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -220,11 +370,16 @@ const featured = FEATURED_SLUGS.map((slug) =>
 
     @media (max-width: 720px) {
       .machine-row {
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: auto auto 1fr auto;
       }
 
-      .machine-summary {
+      .machine-summary,
+      .machine-thread {
         grid-column: 1 / -1;
+      }
+
+      .act-row {
+        grid-template-columns: auto 1fr auto;
       }
     }
   </style>
