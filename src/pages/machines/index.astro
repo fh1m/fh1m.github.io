@@ -20,6 +20,27 @@ const STATUS_TONE: Record<string, string> = {
   failed: 'fail',
 };
 
+const ACT_LABEL: Record<string, string> = {
+  move: 'MOVE',
+  understand: 'UNDERSTAND',
+  decide: 'DECIDE',
+  next: 'NEXT',
+};
+
+/* One-line learning thread per entry — compact story axis hint. */
+const THREAD_MAP: Record<string, string> = {
+  duburi: 'motion → perception',
+  duburi_ws: 'intelligence → deployment',
+  'duburi-sim_ws': 'simulation → reality',
+  'duburi-codebase_rnd': 'perception → research',
+  'air-gnc': 'navigation → autonomy',
+  'arduino-vision': 'embedded → vision',
+  'vision-scratch': 'experiment → foundation',
+  calib_challenge: 'calibration → trust',
+  'secure-terminal-p2p-chat': 'crypto → independence',
+  toolchain: 'environment → capability',
+};
+
 const machines = await getCollection('machines');
 
 // Fixed category order, then dateStart ascending, then id for a stable tiebreak.
@@ -63,18 +84,26 @@ const newest = ordered
           {group.entries.map((entry) => {
             const tone = STATUS_TONE[entry.data.status] ?? 'gray';
             const isNewest = entry.id === newest.id;
+            const actLabel = entry.data.act ? ACT_LABEL[entry.data.act] : undefined;
+            const thread = THREAD_MAP[entry.id];
             return (
               <a class="machine-row" href={`/machines/${entry.id}`}>
+                {actLabel && (
+                  <span class="act-chip mono-label">{actLabel}</span>
+                )}
                 <span class:list={['chip', `chip-${tone}`]}>{entry.data.status}</span>
                 <span class="machine-name">{entry.data.name}</span>
                 <span class="machine-year">{entry.data.yearLabel}</span>
                 <span class="machine-summary">{entry.data.summary}</span>
+                <span class="machine-arrow" aria-hidden="true">→</span>
+                {thread && (
+                  <span class="machine-thread mono-label">{thread}</span>
+                )}
                 {isNewest && (
                   <span class="machine-tags mono-label">
                     {entry.data.tags.map((tag) => `[${tag}]`).join(' ')}
                   </span>
                 )}
-                <span class="machine-arrow" aria-hidden="true">→</span>
               </a>
             );
           })}
@@ -116,12 +145,17 @@ const newest = ordered
 
     .machine-row {
       display: grid;
-      grid-template-columns: 8rem minmax(0, 1fr) auto minmax(0, 1.4fr) auto;
+      grid-template-columns: auto 8rem minmax(0, 1fr) auto minmax(0, 1.4fr) auto;
       column-gap: var(--space-4);
       row-gap: var(--space-2);
       align-items: baseline;
       padding: var(--space-4) 0;
       border-top: 1px solid var(--line);
+    }
+
+    .act-chip {
+      color: var(--signal);
+      white-space: nowrap;
     }
 
     .chip {
@@ -173,8 +207,13 @@ const newest = ordered
       line-height: var(--leading-body);
     }
 
+    .machine-thread {
+      grid-column: 3 / -1;
+      color: var(--ink-muted);
+    }
+
     .machine-tags {
-      grid-column: 2 / -1;
+      grid-column: 3 / -1;
       color: var(--ink-muted);
     }
 
@@ -201,6 +240,7 @@ const newest = ordered
         row-gap: var(--space-1);
       }
 
+      .machine-thread,
       .machine-tags {
         grid-column: 1 / -1;
       }

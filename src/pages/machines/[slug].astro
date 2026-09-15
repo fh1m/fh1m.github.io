@@ -47,11 +47,24 @@ const idx = ordered.findIndex((m) => m.id === machine.id);
 const prev = idx > 0 ? ordered[idx - 1] : undefined;
 const next = idx >= 0 && idx < ordered.length - 1 ? ordered[idx + 1] : undefined;
 
-const { name, category, status, yearLabel, summary, repoLink, metrics } = machine.data;
+const { name, category, status, yearLabel, summary, repoLink, metrics, chapterKey } = machine.data;
 const categoryLabel = CATEGORY_LABELS[category] ?? category.toUpperCase();
 const tone = STATUS_TONE[status] ?? 'gray';
 const hasRepo = repoLink !== undefined && repoLink.trim() !== '';
 const hasMetrics = metrics !== undefined && metrics.length > 0;
+
+const CHAPTER_QUESTIONS: Record<string, string> = {
+  '01': 'How do machines move?',
+  '02': 'How does a machine see?',
+  '03': 'How do you know the map is true?',
+  '04': 'How do subsystems agree?',
+  '05': 'Where should intelligence live?',
+  '06': 'How do I make the whole machine reliable?',
+  '07': 'What should I build if I control the architecture?',
+  '08': 'What happens when nobody is watching?',
+};
+
+const chapterQuestion = chapterKey ? CHAPTER_QUESTIONS[chapterKey] : undefined;
 ---
 
 <Base title={`${name} — MACHINES — FAHIM FAISAL`} description={summary}>
@@ -63,6 +76,9 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
         <span class:list={['chip', `chip-${tone}`]}>{status}</span>
         <span class="mono-label">{yearLabel}</span>
       </div>
+      {chapterQuestion && (
+        <a class="chapter-backlink mono-label" href="/about">← CHAPTER {chapterKey} / {chapterQuestion}</a>
+      )}
       <h1 class="display detail-name">{name}</h1>
       {hasRepo && (
         <a class="source-button" href={repoLink} target="_blank" rel="noopener noreferrer">
@@ -130,6 +146,15 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
     }
 
     .back-link:hover {
+      color: var(--signal);
+    }
+
+    .chapter-backlink {
+      color: var(--ink-muted);
+      width: fit-content;
+    }
+
+    .chapter-backlink:hover {
       color: var(--signal);
     }
 
