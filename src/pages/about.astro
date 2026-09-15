@@ -1,9 +1,39 @@
 ---
 import Base from '../layouts/Base.astro';
 import StackDescent from '../components/StackDescent.astro';
+import Trajectories from '../components/Trajectories.astro';
 
-// Verbatim manifesto block, brief #46 (plan line 63). Kept literal in this
-// page so the source is grep-assertable; identical to PROFILE.manifestoLines.
+// --- CHAPTER TIMELINE DATA ---
+// 8 chapters (WHAT I BUILT) + 7 transition questions + terminal [NEXT].
+// Evidence: AERD (real-world-aerd.md), Duburi (real-world-duburi.md),
+// persona arc (real-world-persona.md). [VERIFY] markers only on new v2 claims.
+const CHAPTERS = [
+  { id: '01', built: 'AERD / ROCKETS', question: 'How do machines move?', verify: '[VERIFY]' },
+  { id: '02', built: 'DUBURI / ROBOSUB 2024', question: 'How does a machine see?' },
+  { id: '03', built: 'MACHINE VISION', question: 'How do you know the map is true?' },
+  { id: '04', built: '2025 SUBTEAM LEAD', question: 'How do subsystems agree?' },
+  { id: '05', built: 'ARCHITECTURE', question: 'Where should intelligence live?' },
+  { id: '06', built: 'ROBOSUB 2026 / ENGINEERING LEAD', question: 'How do I make the whole machine reliable?' },
+  { id: '07', built: 'MONGOL TORI', question: 'What should I build if I control the architecture?', verify: '[VERIFY]' },
+  { id: '08', built: 'INDEPENDENT SYSTEMS / UE', question: 'What happens when nobody is watching?', verify: '[VERIFY]' },
+];
+
+// WHAT I WAS LEARNING — horizontal thread axis (one per chapter).
+const THREADS = [
+  'motion',
+  'perception',
+  'estimation',
+  'integration',
+  'leadership',
+  'architecture',
+  'autonomy',
+  'independence',
+];
+
+// --- THE LOOP ---
+const LOOP_STEPS = ['Build', 'Observe', 'Fail', 'Understand', 'Rebuild'];
+
+// --- MANIFESTO (verbatim — brief #46, plan line 63) ---
 const MANIFESTO = [
   'I like machines that have to deal with reality.',
   'I like understanding what sits beneath the abstraction.',
@@ -16,19 +46,7 @@ const MANIFESTO = [
   'And I am still building.',
 ];
 
-// brief #45 — the loop, in order.
-const LOOP = [
-  { label: 'CURIOSITY', note: 'a question about what is underneath' },
-  { label: 'DECONSTRUCTION', note: 'taking the system apart conceptually' },
-  { label: 'EXPERIMENT', note: 'the smallest thing that tests the idea' },
-  { label: 'INTEGRATION', note: 'putting it back together, differently' },
-  { label: 'REALITY', note: 'the machine meets the world' },
-  { label: 'OPTIMIZATION', note: 'fast enough, small enough, cheap enough' },
-  { label: 'ROBUSTNESS', note: 'from it worked once to it works every time' },
-  { label: 'SHARING', note: 'open source, because knowledge should compound' },
-];
-
-// brief #64 — six contradictions (plan line 67).
+// --- CONTRADICTIONS (brief #64, plan line 67) ---
 const CONTRADICTIONS = [
   {
     left: 'AMBITIOUS',
@@ -68,7 +86,7 @@ const CONTRADICTIONS = [
   },
 ];
 
-// brief #20 — influences, restrained. What he borrows, not hero-worship.
+// --- INFLUENCES (brief #20, restrained) ---
 const INFLUENCES = [
   {
     name: 'GEORGE HOTZ',
@@ -93,54 +111,153 @@ const INFLUENCES = [
   title="FAHIM FAISAL — ABOUT"
   description="The machine and the person behind it — the descent, the loop, the contradictions, the manifesto."
 >
+  <!-- ============================================================
+       HERO — deep-characterization statement from v1,
+       framed by "then the questions became harder" (continuity-story.md 59).
+       ============================================================ -->
   <!-- [VERIFY]: brief #65 deep-characterization drafted from the approved signature lines (plan line 62); confirm wording before publishing. -->
   <section class="about-hero" data-reveal>
-    <p class="mono-label">[02] ABOUT</p>
+    <p class="mono-label">ABOUT</p>
     <h1 class="display about-h1">
-      MOST OF MY WORK STARTS WITH A QUESTION ABOUT WHAT IS HAPPENING UNDERNEATH THE ABSTRACTION.
+      Most of my work starts with a question about what is happening underneath the abstraction.
     </h1>
-    <p class="hero-sub">The path was non-linear. The engineering became increasingly serious.</p>
+    <p class="hero-sub">The path was non-linear. The questions became harder. The engineering became increasingly serious.</p>
     <p class="hero-body">
-      Fahim Faisal builds machines that perceive the world and act inside it. He works across robotics,
-      computer vision, embedded systems, control, and AI — usually starting from a simple question: what
-      is actually happening underneath the abstraction?
+      Fahim Faisal builds machines that perceive the world and act inside it.
+      He works across robotics, computer vision, embedded systems, control, and AI —
+      usually starting from a simple question: what is actually happening underneath?
     </p>
   </section>
 
+  <!-- ============================================================
+       THE TIMELINE — Pattern A: vertical center hairline
+       (sticky, scroll-progress fill — CSS enhancement, static default).
+       8 chapters as alternating-column nodes with semantic <ol>/<li>/<article>.
+       Question interstitials own the center column (serif italic).
+       ============================================================ -->
+  <section class="about-section timeline-section" data-reveal>
+    <header class="section-head">
+      <h2>THE TIMELINE</h2>
+    </header>
+    <p class="section-intro">Each chapter built on the previous one. Then the questions became harder.</p>
+
+    <div class="timeline">
+      <div class="timeline-line" aria-hidden="true"></div>
+      <ol class="timeline-list">
+        {CHAPTERS.map((ch, i) => (
+          <>
+            <li class="timeline-item timeline-chapter" data-type="chapter">
+              <article class="chapter">
+                <div class="chapter-content">
+                  <p class="chapter-id mono-label">[{ch.id}]</p>
+                  <h3 class="chapter-heading">{ch.built}</h3>
+                  {ch.verify && <span class="verify-tag mono-label">{ch.verify}</span>}
+                </div>
+                <div class="chapter-thread">
+                  <span class="thread-label mono-label">LEARNING: {THREADS[i]}</span>
+                </div>
+              </article>
+            </li>
+            <li class="timeline-item timeline-question" data-type="question">
+              <p class="question-text">{ch.question}</p>
+            </li>
+          </>
+        ))}
+        <li class="timeline-item timeline-terminal" data-type="terminal">
+          <span class="terminal-marker mono-label">[NEXT]</span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       THE TWO TRAJECTORIES — essay preamble + component + reflection.
+       "I was falling behind in one graph while moving forward in another"
+       (continuity-story.md 37).
+       ============================================================ -->
+  <!-- [VERIFY]: university story drafted from brief #61 framing (plan line 66); confirm details. Now folded into the trajectories essay. -->
+  <section class="about-section" data-reveal>
+    <header class="section-head">
+      <span class="mono-label num">[03]</span>
+      <h2>THE TWO TRAJECTORIES</h2>
+    </header>
+    <p class="editorial">
+      There were periods when the formal path did not look clean. University transitions,
+      imperfect grades, the sense of running late while other people's robots were already in the water.
+      I was falling behind in one graph while moving forward in another.
+    </p>
+    <Trajectories />
+    <p class="editorial">
+      The two paths did not move at the same speed. But the engineering trajectory was becoming
+      clearer — more difficult problems, broader scope, heavier responsibility. The machine
+      was being built at a different pace than the résumé, and the machine was what mattered.
+    </p>
+  </section>
+
+  <!-- ============================================================
+       THE DESCENT — StackDescent interactive (v1 about component).
+       Placed under the timeline as the "understand" artifact.
+       ============================================================ -->
   <!-- [VERIFY]: descent item lists drafted from brief #3 layer titles and site themes; confirm items. -->
   <section class="about-section" data-reveal>
     <header class="section-head">
-      <span class="mono-label num">[02.1]</span>
+      <span class="mono-label num">[04]</span>
       <h2>THE DESCENT</h2>
     </header>
     <p class="section-intro">Five layers, from intent down to the world. The descent is the default mode.</p>
     <StackDescent />
   </section>
 
+  <!-- ============================================================
+       THE LOOP — compact loop/spiral motif.
+       "Each project is one loop at a deeper level" (continuity-story.md 51).
+       Static under reduced motion.
+       ============================================================ -->
   <!-- [VERIFY]: loop node notes drafted from brief #45 sequence; confirm wording. -->
   <section class="about-section" data-reveal>
     <header class="section-head">
-      <span class="mono-label num">[02.2]</span>
+      <span class="mono-label num">[05]</span>
       <h2>THE LOOP</h2>
     </header>
-    <p class="section-intro">The cycle the work actually runs on.</p>
-    <ol class="loop">
-      {LOOP.map((node, i) => (
-        <li class="loop-node" data-reveal>
-          <span class="loop-index mono-label">[{String(i + 1).padStart(2, '0')}]</span>
-          <div class="loop-body">
-            <span class="loop-label">{node.label}</span>
-            <span class="loop-note">{node.note}</span>
-          </div>
-        </li>
-      ))}
-    </ol>
+    <div class="loop-wrap">
+      <!-- Compact spiral SVG — one visual cycle representing the loop motif -->
+      <svg
+        class="loop-spiral"
+        viewBox="0 0 48 48"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label="Loop spiral: each project cycles through build, observe, fail, understand, rebuild at a deeper level"
+      >
+        <path
+          d="M 24 24
+             C 24 14 34 14 34 24
+             C 34 34 22 36 22 24
+             C 22 10 38 10 38 24
+             C 38 40 18 42 18 24
+             C 18 6 42 4 42 24"
+          fill="none"
+          stroke="var(--line)"
+          stroke-width="1"
+          stroke-linecap="square"
+        />
+        <circle cx="24" cy="24" r="1.5" fill="var(--line)" />
+      </svg>
+      <ol class="loop-steps">
+        {LOOP_STEPS.map((step) => (
+          <li class="loop-step">{step}</li>
+        ))}
+      </ol>
+    </div>
+    <p class="loop-caption">Each project is one loop at a deeper level.</p>
   </section>
 
+  <!-- ============================================================
+       CONTRADICTIONS — 6 pairs (verbatim data, plan line 67).
+       ============================================================ -->
   <!-- [VERIFY]: contradiction descriptors drafted from brief #64 pairs (plan line 67); confirm wording. -->
   <section class="about-section" data-reveal>
     <header class="section-head">
-      <span class="mono-label num">[02.3]</span>
+      <span class="mono-label num">[06]</span>
       <h2>CONTRADICTIONS</h2>
     </header>
     <p class="section-intro">Six pairs that are all true at once.</p>
@@ -160,9 +277,12 @@ const INFLUENCES = [
     </div>
   </section>
 
+  <!-- ============================================================
+       MANIFESTO — verbatim, grep-assertable.
+       ============================================================ -->
   <section class="about-section" data-reveal>
     <header class="section-head">
-      <span class="mono-label num">[02.4]</span>
+      <span class="mono-label num">[07]</span>
       <h2>MANIFESTO</h2>
     </header>
     <div class="manifesto">
@@ -177,25 +297,13 @@ const INFLUENCES = [
     </div>
   </section>
 
-  <!-- [VERIFY]: university story drafted from brief #61 framing (plan line 66); confirm details. -->
-  <section class="about-section" data-reveal>
-    <header class="section-head">
-      <span class="mono-label num">[02.5]</span>
-      <h2>THE UNIVERSITY STORY</h2>
-    </header>
-    <p class="editorial">
-      The path was not a straight line. There was a university detour, and with it the feeling of running
-      late — the sense that the machine was being built elsewhere, faster. What changed was not the
-      destination but the pace: the engineering became increasingly serious. The detour did not stop the
-      work; it changed what the work was. When the machine came back online, it came back with more of the
-      stack understood.
-    </p>
-  </section>
-
+  <!-- ============================================================
+       BANGLADESH — brief #62 (plan line 69).
+       ============================================================ -->
   <!-- [VERIFY]: Bangladesh passage drafted from brief #62 (plan line 69); confirm wording. -->
   <section class="about-section" data-reveal>
     <header class="section-head">
-      <span class="mono-label num">[02.6]</span>
+      <span class="mono-label num">[08]</span>
       <h2>BANGLADESH</h2>
     </header>
     <p class="editorial">
@@ -204,10 +312,13 @@ const INFLUENCES = [
     </p>
   </section>
 
+  <!-- ============================================================
+       INFLUENCES — brief #20, restrained.
+       ============================================================ -->
   <!-- [VERIFY]: influence borrow-lines drafted from brief #20 (plan todo 9); confirm wording. -->
   <section class="about-section" data-reveal>
     <header class="section-head">
-      <span class="mono-label num">[02.7]</span>
+      <span class="mono-label num">[09]</span>
       <h2>INFLUENCES</h2>
     </header>
     <p class="section-intro">Not idols — sources. What I borrow is the approach: idea, implementation, working system.</p>
@@ -221,11 +332,17 @@ const INFLUENCES = [
     </div>
   </section>
 
+  <!-- ============================================================
+       CLOSE — [STATUS: STILL BUILDING]
+       ============================================================ -->
   <footer class="about-close" data-reveal>
     <p class="status-line">[STATUS: STILL BUILDING]</p>
   </footer>
 
   <style>
+    /* ============================================================
+       HERO — statement pages open at 96px (learnings: v1 task 17 fix).
+       ============================================================ */
     .about-hero {
       display: grid;
       gap: var(--space-6);
@@ -236,7 +353,7 @@ const INFLUENCES = [
 
     .about-h1 {
       font-size: var(--text-h1);
-      font-weight: 800;
+      font-weight: 700;
       max-width: 24ch;
     }
 
@@ -252,6 +369,9 @@ const INFLUENCES = [
       max-width: var(--max-width-editorial);
     }
 
+    /* ============================================================
+       SECTIONS (shared)
+       ============================================================ */
     .about-section {
       display: grid;
       gap: var(--space-8);
@@ -286,44 +406,165 @@ const INFLUENCES = [
       max-width: var(--max-width-editorial);
     }
 
-    /* ---- THE LOOP ---- */
-    .loop {
-      display: grid;
+    /* ============================================================
+       TIMELINE — Pattern A: vertical center hairline with alternating nodes.
+       Static default: hairline fully visible (scroll-progress fill is CSS
+       enhancement added in todo 11 via @supports).
+       ============================================================ */
+    .timeline {
+      position: relative;
+      max-width: 900px;
     }
 
-    .loop-node {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: var(--space-6);
-      padding: var(--space-6) 0;
-      border-top: 1px solid var(--line);
-      align-items: baseline;
+    .timeline-list {
+      list-style: none;
     }
 
-    .loop-index {
+    /* Center hairline — 1px vertical rule, full height */
+    .timeline-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 100%;
+      background: var(--line);
+      transform: translateX(-50%);
+      z-index: 0;
+    }
+
+    /* Base item — chapter rows have enough space for alternating layout */
+    .timeline-item {
+      position: relative;
+      z-index: 1;
+    }
+
+    .timeline-chapter {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-8);
+      padding: var(--space-8) 0;
+    }
+
+    /* Alternating column placement.
+       List pattern: chapter(1) question(2) chapter(3) question(4) ...
+       Chapters sit at 4n+1 (left) and 4n+3 (right). */
+    .timeline-chapter:nth-child(4n+1) .chapter-content {
+      grid-column: 1;
+      text-align: right;
+    }
+    .timeline-chapter:nth-child(4n+1) .chapter-thread {
+      grid-column: 3;
+      text-align: left;
+    }
+
+    .timeline-chapter:nth-child(4n+3) .chapter-content {
+      grid-column: 3;
+      text-align: left;
+    }
+    .timeline-chapter:nth-child(4n+3) .chapter-thread {
+      grid-column: 1;
+      text-align: right;
+    }
+
+    .chapter {
+      display: contents;
+    }
+
+    .chapter-heading {
+      font-family: var(--font-display), ui-monospace, monospace;
+      font-weight: 700;
+      font-size: clamp(2rem, 2.5vw, 2.375rem);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display-small);
+      margin-top: var(--space-2);
+    }
+
+    .chapter-id {
       color: var(--ink-muted);
     }
 
-    .loop-body {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: var(--space-2) var(--space-4);
+    .verify-tag {
+      color: var(--signal-amber);
+      margin-top: var(--space-2);
+      display: block;
     }
 
-    .loop-label {
+    /* Thread label — horizontal axis (mono, muted, not signal) */
+    .thread-label {
+      display: inline-block;
+      margin-top: var(--space-3);
+      color: var(--ink-muted);
+    }
+
+    /* Question interstitials — center column, serif italic */
+    .timeline-question {
+      padding: var(--space-12) var(--space-8);
+      text-align: center;
+    }
+
+    .question-text {
+      font-family: var(--font-serif), serif;
+      font-style: italic;
+      font-size: var(--text-h3);
+      color: var(--ink);
+    }
+
+    /* Terminal node */
+    .timeline-terminal {
+      padding: var(--space-8) 0;
+      text-align: center;
+    }
+
+    .terminal-marker {
+      color: var(--signal);
+    }
+
+    /* ============================================================
+       THE LOOP — compact spiral motif
+       ============================================================ */
+    .loop-wrap {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+    }
+
+    .loop-spiral {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+
+    .loop-steps {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      list-style: none;
+    }
+
+    .loop-step {
       font-family: var(--font-mono), ui-monospace, monospace;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: var(--tracking-label);
-      font-size: var(--text-h3);
+      font-size: var(--text-mono);
     }
 
-    .loop-note {
+    .loop-step + .loop-step::before {
+      content: '→ ';
       color: var(--ink-muted);
+      font-weight: 400;
     }
 
-    /* ---- CONTRADICTIONS ---- */
+    .loop-caption {
+      font-family: var(--font-serif), serif;
+      font-style: italic;
+      color: var(--ink-muted);
+      margin-top: var(--space-4);
+    }
+
+    /* ============================================================
+       CONTRADICTIONS
+       ============================================================ */
     .contradictions {
       display: grid;
     }
@@ -356,7 +597,9 @@ const INFLUENCES = [
       color: var(--ink-muted);
     }
 
-    /* ---- MANIFESTO ---- */
+    /* ============================================================
+       MANIFESTO
+       ============================================================ */
     .manifesto {
       display: grid;
       gap: var(--space-4);
@@ -384,7 +627,9 @@ const INFLUENCES = [
       color: var(--signal);
     }
 
-    /* ---- INFLUENCES ---- */
+    /* ============================================================
+       INFLUENCES
+       ============================================================ */
     .influences {
       display: grid;
     }
@@ -411,7 +656,9 @@ const INFLUENCES = [
       color: var(--ink-muted);
     }
 
-    /* ---- CLOSE ---- */
+    /* ============================================================
+       CLOSE
+       ============================================================ */
     .about-close {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -428,7 +675,50 @@ const INFLUENCES = [
       color: var(--signal);
     }
 
-    @media (max-width: 640px) {
+    /* ============================================================
+       MOBILE — stack timeline alternating layout to left-aligned.
+       ============================================================ */
+    @media (max-width: 768px) {
+      .timeline-chapter {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+        padding: var(--space-8) 0 var(--space-8) var(--space-8);
+      }
+
+      .timeline-line {
+        left: 0;
+        transform: none;
+      }
+
+      .timeline-chapter:nth-child(4n+1) .chapter-content,
+      .timeline-chapter:nth-child(4n+3) .chapter-content {
+        grid-column: 1;
+        text-align: left;
+      }
+
+      .timeline-chapter:nth-child(4n+1) .chapter-thread,
+      .timeline-chapter:nth-child(4n+3) .chapter-thread {
+        grid-column: 1;
+        text-align: left;
+      }
+
+      .timeline-question {
+        padding: var(--space-8) var(--space-6);
+        padding-left: var(--space-8);
+        text-align: left;
+      }
+
+      .loop-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .loop-steps {
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+
       .contradiction-row {
         grid-template-columns: 1fr;
       }
