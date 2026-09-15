@@ -1,0 +1,206 @@
+---
+import Base from '../layouts/Base.astro';
+import { PROFILE } from '../data/profile';
+
+// Titles come from the PROFILE data module (todo 5), drafted from the
+// Now-page spec. Notes are page-local copy in the site's register.
+const RUN_NOTES: Record<string, string> = {
+  'low-cost autonomous systems':
+    'Autonomy is still priced like a research grant. The interesting work is making it cheap enough to fail in the field — and then run again.',
+  'integrated vision/control boards and embedded architecture':
+    'The boundary between sensing and control is where the loop actually lives. Who owns the latency decides whether the machine steers on fresh data or stale.',
+  'visual navigation without expensive sensing':
+    'Cameras are cheap. The expensive part is making them behave like a sensor instead of a firehose. If vision can carry navigation, the whole stack gets cheaper.',
+  'AUV robustness on Duburi — the same mission, every time':
+    'The benchmark is not a new trick that works once. It is the same mission working every time — in water that does not care how elegant the code looks.',
+  'the Unauthorized Engineering collective':
+    'Irreverent, open research, practical autonomy — young engineers building unreasonable things. The motto-spirit: whatever we built is better than it was before, far better.',
+  'camera pipelines and frame timing':
+    'The detector worked; the vehicle didn\u2019t. The problem was frames that were already too old for the controller — stale data steering the robot.',
+};
+
+const runs = PROFILE.obsessions.map((title) => ({ title, note: RUN_NOTES[title] }));
+
+// Brief #39 targets. Only the last row carries a note — it is the anchor.
+const NEXT_NOTES: Record<string, string> = {
+  'built from Bangladesh': 'This is where the machine is being built.',
+};
+
+const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title] }));
+---
+
+<Base
+  title="NOW — CURRENT RUNS"
+  description="What is running now, and what is next — obsessions, experiments, and targets."
+>
+  <section class="now-page">
+    <header class="now-header">
+      <p class="mono-label">[06] NOW</p>
+      <h1 class="display">Now</h1>
+      <p class="now-lede">
+        The current build list — what is running, what is next. Obsessions,
+        experiments, and the next targets, in one place.
+      </p>
+    </header>
+
+    <section class="running" aria-labelledby="running-label">
+      <p class="mono-label section-label" id="running-label">[CURRENTLY RUNNING]</p>
+      <!-- [VERIFY]: UE motto-spirit line (row 5 below) — "whatever we built is better than it was before, far better" — confirm exact wording with the collective before publishing. -->
+      <div class="run-rows">
+        {runs.map((run) => (
+          <div class="run-row">
+            <span class="run-stamp mono-label">[RUN]</span>
+            <div class="run-body">
+              <h2 class="run-title">{run.title}</h2>
+              <p class="run-note">{run.note}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="next" aria-labelledby="next-label">
+      <p class="mono-label section-label" id="next-label">[NEXT:]</p>
+      <div class="next-rows">
+        {nextItems.map((item, i) => (
+          <div class="next-row">
+            <span class="next-index mono-label">[{String(i + 1).padStart(2, '0')}]</span>
+            <div class="next-body">
+              <h2 class:list={['next-title', { 'is-anchor': item.title === 'built from Bangladesh' }]}>
+                {item.title}
+              </h2>
+              {item.note && <p class="next-note">{item.note}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <footer class="now-close">
+      <p class="mono-label">[STATUS: STILL BUILDING]</p>
+      <p class="final-line">I am not finished.</p>
+    </footer>
+  </section>
+
+  <style>
+    .now-page {
+      max-width: var(--max-width-editorial);
+      margin: 0 auto;
+      padding: var(--space-24) var(--space-6) var(--space-16);
+      display: grid;
+      gap: var(--space-16);
+    }
+
+    .now-header {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .now-header h1 {
+      font-weight: 900;
+    }
+
+    .now-lede {
+      color: var(--gray);
+      max-width: 44ch;
+    }
+
+    .running,
+    .next {
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .section-label {
+      color: var(--gray);
+    }
+
+    .run-rows,
+    .next-rows {
+      border-top: 1px solid var(--border);
+    }
+
+    .run-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      gap: var(--space-6);
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .run-stamp {
+      color: var(--paper);
+      white-space: nowrap;
+    }
+
+    .run-body {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .run-title,
+    .next-title {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      font-size: var(--text-h3);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      line-height: 1.1;
+    }
+
+    .run-note {
+      color: var(--gray);
+      max-width: 60ch;
+    }
+
+    .next-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      gap: var(--space-6);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .next-index {
+      color: var(--gray);
+      white-space: nowrap;
+    }
+
+    .next-body {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .next-title.is-anchor {
+      color: var(--accent);
+    }
+
+    .next-note {
+      color: var(--gray);
+      max-width: 60ch;
+    }
+
+    .now-close {
+      display: grid;
+      gap: var(--space-4);
+      padding-top: var(--space-8);
+      border-top: 1px solid var(--border);
+    }
+
+    .final-line {
+      font-family: var(--font-serif), serif;
+      font-style: italic;
+      font-size: var(--text-h2);
+      color: var(--paper);
+    }
+
+    @media (max-width: 720px) {
+      .run-row,
+      .next-row {
+        gap: var(--space-4);
+      }
+    }
+  </style>
+</Base>
