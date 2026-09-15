@@ -60,7 +60,7 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
     </section>
 
     <section class="next" aria-labelledby="next-label" data-reveal>
-      <p class="mono-label section-label" id="next-label">[NEXT:]</p>
+      <p class="mono-label section-label" id="next-label">[ACT IV: NEXT]</p>
       <div class="next-rows">
         {nextItems.map((item, i) => (
           <div class="next-row">
@@ -77,8 +77,9 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
     </section>
 
     <footer class="now-close" data-reveal>
+      <p class="closing-serif">I don't know exactly what the final machine looks like yet. I know the questions that are taking me there.</p>
+      <p class="closing-loop mono-label">Build. Measure. Break. Understand. Rebuild.</p>
       <p class="mono-label">[STATUS: STILL BUILDING]</p>
-      <p class="final-line">I am not finished.</p>
     </footer>
   </section>
 
@@ -189,11 +190,16 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       border-top: 1px solid var(--line);
     }
 
-    .final-line {
+    .closing-serif {
       font-family: var(--font-serif), serif;
       font-style: italic;
       font-size: var(--text-h2);
       color: var(--ink);
+      max-width: 52ch;
+    }
+
+    .closing-loop {
+      color: var(--ink-muted);
     }
 
     @media (max-width: 720px) {
