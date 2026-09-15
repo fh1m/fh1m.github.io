@@ -139,8 +139,8 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
   </section>
 
   <style>
-    /* F3 FLAG: 5 raw var(--signal) refs (timeline rail + phase-title hover +
-       continues-link CTA base+hover = 3 applications) — verify <=3 visible. */
+    /* F3 FLAG: 4 raw var(--signal) refs (phase-title hover + continues-link
+       CTA base+hover = 2 applications) — verify <=3 visible. */
     .log-page {
       max-width: var(--max-width-editorial);
       margin: 0 auto;
@@ -170,6 +170,9 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       padding: 0;
       display: grid;
       gap: var(--space-12);
+      /* Below-fold timeline: skip off-screen rendering. */
+      content-visibility: auto;
+      contain-intrinsic-size: 0 500px;
     }
 
     /* Static hairline rail connecting the nodes. */
@@ -183,7 +186,8 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       background: var(--line);
     }
 
-    /* Accent fill — static by default; animated once on load when motion is allowed. */
+    /* Hairline fill — scroll-progress scrub (CSS scroll-driven in scroll.css,
+       GSAP fallback in motion.ts). Static default: fully visible. */
     .timeline::after {
       content: '';
       position: absolute;
@@ -191,25 +195,15 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       left: 0;
       width: 1px;
       height: 100%;
-      background: var(--signal);
-      transform: scaleY(0);
+      background: var(--line-strong);
+      transform: scaleY(var(--log-fill, 1));
       transform-origin: top;
     }
 
     @media (prefers-reduced-motion: no-preference) {
-      .timeline::after {
-        animation: timeline-fill calc(var(--dur-slow) * 3) var(--ease-out) forwards;
-      }
-
       .timeline-item {
         animation: node-rise var(--dur-slow) var(--ease-out) both;
-        animation-delay: calc(var(--dur-slow) * 3 + var(--i, 0) * 90ms);
-      }
-    }
-
-    @keyframes timeline-fill {
-      to {
-        transform: scaleY(1);
+        animation-delay: calc(var(--i, 0) * 90ms);
       }
     }
 

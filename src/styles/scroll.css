@@ -1,0 +1,88 @@
+/* ============================================================
+   Scroll-driven motion layer — CSS scroll-driven animations.
+   Primary layer in browsers supporting `animation-timeline`;
+   GSAP (src/scripts/motion.ts) is the fallback for the rest.
+   Everything is gated on `prefers-reduced-motion: no-preference`.
+   Default state (no @supports match): all content fully visible.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    /* ---- View-timeline reveals (primary; GSAP fallback in motion.ts) ---- */
+    [data-reveal] {
+      view-timeline: --reveal;
+      animation: reveal-in linear both;
+      animation-timeline: --reveal;
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* ---- About timeline hairline fill ---- */
+    .timeline-section .timeline {
+      view-timeline: --about-timeline;
+    }
+
+    .timeline-section .timeline-line::after {
+      animation: hairline-fill linear both;
+      animation-timeline: --about-timeline;
+      animation-range: entry 0% exit 100%;
+    }
+
+    /* ---- Log timeline hairline fill ---- */
+    .log-page .timeline {
+      view-timeline: --log-timeline;
+    }
+
+    .log-page .timeline::after {
+      animation: hairline-fill linear both;
+      animation-timeline: --log-timeline;
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hairline-fill {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* ---- Reduced-motion reset: nothing animates, everything visible ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .timeline-line::after,
+  .timeline::after {
+    transform: scaleY(1) !important;
+  }
+
+  .traj-curve {
+    stroke-dashoffset: 0 !important;
+  }
+
+  .traj-area {
+    opacity: 1 !important;
+  }
+}
