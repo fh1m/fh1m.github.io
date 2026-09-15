@@ -1,0 +1,235 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+// Phase sequence is the canonical order (brief #48 timeline). The log
+// collection has a year tie at 2026 (Systems Engineer + Independent Builder),
+// so sorting by year would tie-break wrong. Sort by phase sequence explicitly.
+const PHASE_ORDER = [
+  'Student',
+  'Builder',
+  'Vision Engineer',
+  'Technical Lead',
+  'Systems Engineer',
+  'Independent Builder',
+] as const;
+
+const entries = (await getCollection('log')).sort(
+  (a, b) => PHASE_ORDER.indexOf(a.data.phase) - PHASE_ORDER.indexOf(b.data.phase),
+);
+
+const rendered = await Promise.all(entries.map((entry) => render(entry)));
+const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }));
+---
+
+<Base
+  title="LOG — MISSION TIMELINE"
+  description="Six phases of transformation — from student to independent builder."
+>
+  <section class="log-page">
+    <header class="log-header">
+      <p class="mono-label">[MISSION LOG]</p>
+      <h1 class="display">Log</h1>
+      <p class="log-lede">
+        Six phases of the same question — what is happening underneath the abstraction.
+        The emphasis is transformation, not achievements.
+      </p>
+    </header>
+
+    <ol class="timeline">
+      {nodes.map(({ entry, Content }, i) => (
+        <li class="phase-node" style={`--i: ${i}`}>
+          <div class="phase-body">
+            <div class="phase-meta">
+              <span class="phase-stamp mono-label">[t+{entry.data.year}]</span>
+              <span class="phase-badge">{entry.data.phaseLabel}</span>
+            </div>
+            <h2 class="phase-title">{entry.data.title}</h2>
+            <div class="phase-narrative"><Content /></div>
+          </div>
+        </li>
+      ))}
+      <li class="phase-node continues">
+        <div class="phase-body">
+          <div class="phase-meta">
+            <span class="phase-stamp mono-label">[t+now]</span>
+            <span class="phase-badge">OPEN</span>
+          </div>
+          <h2 class="phase-title"><a href="/now">Continues</a></h2>
+          <p class="phase-narrative">The phase is open — the machine is still being built.</p>
+          <a class="continues-link" href="/now">[CONTINUES] → /now</a>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <style>
+    .log-page {
+      max-width: var(--max-width-editorial);
+      margin: 0 auto;
+      padding: var(--space-24) var(--space-6) var(--space-16);
+      display: grid;
+      gap: var(--space-12);
+    }
+
+    .log-header {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .log-header h1 {
+      font-weight: 900;
+    }
+
+    .log-lede {
+      color: var(--gray);
+      max-width: 44ch;
+    }
+
+    .timeline {
+      position: relative;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: var(--space-12);
+    }
+
+    /* Static hairline rail connecting the nodes. */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 1px;
+      background: var(--border);
+    }
+
+    /* Accent fill — static by default; animated once on load when motion is allowed. */
+    .timeline::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 100%;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .timeline::after {
+        animation: timeline-fill calc(var(--dur-slow) * 3) var(--ease-out) forwards;
+      }
+
+      .phase-node {
+        animation: node-rise var(--dur-slow) var(--ease-out) both;
+        animation-delay: calc(var(--dur-slow) * 3 + var(--i, 0) * 90ms);
+      }
+    }
+
+    @keyframes timeline-fill {
+      to {
+        transform: scaleY(1);
+      }
+    }
+
+    @keyframes node-rise {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .phase-node {
+      position: relative;
+      padding-left: var(--space-8);
+    }
+
+    /* Node dot centered on the rail. */
+    .phase-node::before {
+      content: '';
+      position: absolute;
+      left: -3px;
+      top: var(--space-2);
+      width: 7px;
+      height: 7px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .phase-node.continues::before {
+      border-color: var(--ok);
+      background: var(--ok);
+    }
+
+    .phase-body {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .phase-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .phase-stamp {
+      color: var(--paper);
+    }
+
+    .phase-badge {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--gray);
+      border: 1px solid var(--border);
+      padding: var(--space-1) var(--space-2);
+    }
+
+    .phase-title {
+      font-family: var(--font-display), sans-serif;
+      font-weight: 700;
+      font-size: var(--text-h2);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-display);
+      line-height: 1.1;
+    }
+
+    .phase-title a:hover {
+      color: var(--accent);
+    }
+
+    .phase-narrative {
+      color: var(--gray);
+      max-width: 60ch;
+    }
+
+    .continues-link {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-size: var(--text-label);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: var(--space-2) var(--space-3);
+      width: fit-content;
+    }
+
+    .continues-link:hover {
+      color: var(--bg);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+  </style>
+</Base>
