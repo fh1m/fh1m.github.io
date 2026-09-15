@@ -23,6 +23,9 @@ import Base from '../layouts/Base.astro';
 
     .not-found h1 {
       font-weight: 900;
+      /* Scoped display size: --text-display (8vw/9rem) overflows the 68ch
+         column at desktop ("DETACHED" at 115px > 632px content width). */
+      font-size: clamp(2.5rem, 7vw, 6.75rem);
     }
 
     .not-found-body {
