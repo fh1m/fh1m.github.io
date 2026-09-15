@@ -23,6 +23,20 @@ const next = index >= 0 && index < all.length - 1 ? all[index + 1] : null;
 
 const STATUS_LABEL = { open: 'OPEN', ongoing: 'ONGOING', closed: 'CLOSED' } as const;
 const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip-closed' } as const;
+
+// WHAT I WAS LEARNING axis — same slug-keyed mapping as the index page.
+// Uppercase in source so the label survives text-transform-independent greps.
+const THREAD_MAP: Record<string, string> = {
+  'turning-a-camera-into-a-sensor': 'PERCEPTION',
+  'tracking-without-detection': 'PERCEPTION',
+  'low-cost-vio-and-the-dvl-question': 'ESTIMATION',
+  'why-radar-doesnt-work-underwater': 'ESTIMATION',
+  'the-frame-age-problem': 'INTEGRATION',
+  'hardware-excavation': 'INTEGRATION',
+  'opening-the-box': 'PERCEPTION',
+  'from-worked-once-to-works-every-time': 'ARCHITECTURE',
+};
+const threadOf = (id: string): string => THREAD_MAP[id] ?? 'INTEGRATION';
 ---
 
 <Base
@@ -40,6 +54,7 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
             {STATUS_LABEL[entry.data.status]}
           </span>
           <span class="mono-label">{entry.data.tags.join(' / ')}</span>
+          <span class="mono-label thread-label">THREAD: {threadOf(entry.id)}</span>
         </div>
       </header>
 
