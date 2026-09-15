@@ -25,7 +25,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
 
 <Base title="FAHIM FAISAL — AUTONOMOUS SYSTEMS" description={PROFILE.roleLine}>
   <!-- [VERIFY]: LOC derives from PROFILE.location ("Dhaka, Bangladesh" → "DHAKA BD"); confirm the abbreviation mapping before publishing. -->
-  <section class="hero">
+  <section class="hero" data-reveal>
     <p class="mono-label">
       [SYS: ONLINE] [LOC: {locCity} {locCountry}] [BLDG: {buildYear}]
     </p>
@@ -49,12 +49,12 @@ const featured = FEATURED_SLUGS.map((slug) =>
     <span class="mono-label">[FRAMES:—]</span>
   </section>
 
-  <section class="pipeline-section">
+  <section class="pipeline-section" data-reveal>
     <p class="mono-label section-label">[PIPELINE]</p>
     <Pipeline />
   </section>
 
-  <section class="featured">
+  <section class="featured" data-reveal>
     <p class="mono-label section-label">[FEATURED MACHINES]</p>
     <div class="machine-rows">
       {featured.map((m) => (
@@ -68,7 +68,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
     </div>
   </section>
 
-  <section class="now-teaser">
+  <section class="now-teaser" data-reveal>
     <p class="mono-label section-label">[NOW]</p>
     <p class="now-line">The current build list — what is running, what is next.</p>
     <p class="now-line">Obsessions, experiments, and the next targets, in one place.</p>

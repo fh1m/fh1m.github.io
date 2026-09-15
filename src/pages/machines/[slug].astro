@@ -55,7 +55,7 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
 ---
 
 <Base title={`${name} — MACHINES — FAHIM FAISAL`} description={summary}>
-  <article class="machine-detail">
+  <article class="machine-detail" data-reveal>
     <header class="detail-header">
       <a class="back-link mono-label" href="/machines">← MACHINES</a>
       <div class="meta-strip">
@@ -72,7 +72,7 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
     </header>
 
     {hasMetrics && (
-      <div class="metrics-strip">
+      <div class="metrics-strip" data-reveal>
         {metrics.map((metric) => (
           <div class="metric-row">
             <span class="metric-label mono-label">{metric.label}</span>
@@ -82,18 +82,18 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
       </div>
     )}
 
-    <figure class="media-pending">
+    <figure class="media-pending" data-reveal>
       <div class="media-frame">
         <span class="mono-label">[MEDIA: PENDING]</span>
       </div>
       <figcaption class="media-caption mono-label">{summary}</figcaption>
     </figure>
 
-    <div class="journal-body">
+    <div class="journal-body" data-reveal>
       <Content />
     </div>
 
-    <nav class="machine-nav" aria-label="Machine navigation">
+    <nav class="machine-nav" aria-label="Machine navigation" data-reveal>
       {prev && (
         <a class="nav-prev" href={`/machines/${prev.id}`}>
           <span class="mono-label">← PREV</span>

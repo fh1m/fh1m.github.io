@@ -49,7 +49,7 @@ const newest = ordered
 ---
 
 <Base title="MACHINES — FAHIM FAISAL">
-  <section class="machines-index">
+  <section class="machines-index" data-reveal>
     <header class="index-header">
       <p class="mono-label">[03] MACHINES</p>
       <h1 class="display">MACHINES</h1>
@@ -57,7 +57,7 @@ const newest = ordered
     </header>
 
     {groups.map((group) => (
-      <section class="category">
+      <section class="category" data-reveal>
         <h2 class="category-header mono-label">[ {group.label} ]</h2>
         <div class="category-rows">
           {group.entries.map((entry) => {

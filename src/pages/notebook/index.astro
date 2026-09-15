@@ -16,7 +16,7 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
   title="NOTEBOOK — FIELD LOG"
   description="Field log — notes from the Duburi build."
 >
-  <section class="notebook-index">
+  <section class="notebook-index" data-reveal>
     <div class="index-inner">
       <header class="index-head">
         <p class="mono-label">[04] NOTEBOOK // FIELD LOG</p>
@@ -29,7 +29,7 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
         </p>
       </header>
 
-      <ul class="entry-list">
+      <ul class="entry-list" data-reveal>
         {entries.map((entry) => (
           <li>
             <a class="entry-row" href={`/notebook/${entry.id}`}>

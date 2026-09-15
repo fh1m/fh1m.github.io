@@ -33,7 +33,7 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
   title="NOW — CURRENT RUNS"
   description="What is running now, and what is next — obsessions, experiments, and targets."
 >
-  <section class="now-page">
+  <section class="now-page" data-reveal>
     <header class="now-header">
       <p class="mono-label">[06] NOW</p>
       <h1 class="display">Now</h1>
@@ -43,7 +43,7 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       </p>
     </header>
 
-    <section class="running" aria-labelledby="running-label">
+    <section class="running" aria-labelledby="running-label" data-reveal>
       <p class="mono-label section-label" id="running-label">[CURRENTLY RUNNING]</p>
       <!-- [VERIFY]: UE motto-spirit line (row 5 below) — "whatever we built is better than it was before, far better" — confirm exact wording with the collective before publishing. -->
       <div class="run-rows">
@@ -59,7 +59,7 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       </div>
     </section>
 
-    <section class="next" aria-labelledby="next-label">
+    <section class="next" aria-labelledby="next-label" data-reveal>
       <p class="mono-label section-label" id="next-label">[NEXT:]</p>
       <div class="next-rows">
         {nextItems.map((item, i) => (
@@ -76,7 +76,7 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       </div>
     </section>
 
-    <footer class="now-close">
+    <footer class="now-close" data-reveal>
       <p class="mono-label">[STATUS: STILL BUILDING]</p>
       <p class="final-line">I am not finished.</p>
     </footer>

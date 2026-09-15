@@ -1,0 +1,73 @@
+---
+// Crosshair cursor — fixed 20px ring + center dot following the pointer.
+// Only rendered for `pointer: fine` devices; hidden on touch. No trail,
+// no particles, no elaborate effects. Reduced-motion: static follow only
+// (no transitions), which is already the default here.
+---
+
+<div class="cursor" aria-hidden="true">
+  <span class="cursor-ring"></span>
+  <span class="cursor-dot"></span>
+</div>
+
+<script>
+  (function () {
+    var cursor = document.querySelector<HTMLElement>('.cursor');
+    if (!cursor) return;
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    var el: HTMLElement = cursor;
+
+    var x = -100;
+    var y = -100;
+    var raf: number | null = null;
+
+    function place() {
+      el.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+      raf = null;
+    }
+
+    function onMove(e: MouseEvent) {
+      x = e.clientX;
+      y = e.clientY;
+      if (!raf) raf = requestAnimationFrame(place);
+    }
+
+    document.addEventListener('mousemove', onMove, { passive: true });
+  })();
+</script>
+
+<style>
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: calc(var(--z-grain) + 1);
+    pointer-events: none;
+    display: none;
+    transform: translate(-100px, -100px);
+  }
+
+  @media (pointer: fine) {
+    .cursor {
+      display: block;
+    }
+  }
+
+  .cursor-ring {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--accent);
+  }
+
+  .cursor-dot {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 2px;
+    height: 2px;
+    background: var(--accent);
+  }
+</style>

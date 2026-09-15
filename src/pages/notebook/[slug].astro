@@ -29,7 +29,7 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
   title={`${entry.data.title} — NOTEBOOK`}
   description={`Field log entry — ${entry.data.title}.`}
 >
-  <article class="entry">
+  <article class="entry" data-reveal>
     <div class="entry-inner">
       <header class="entry-head">
         <p class="mono-label">[NOTEBOOK] // FIELD LOG</p>
@@ -43,11 +43,11 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
         </div>
       </header>
 
-      <div class="prose">
+      <div class="prose" data-reveal>
         <Content />
       </div>
 
-      <footer class="entry-foot">
+      <footer class="entry-foot" data-reveal>
         <a class="back-link" href="/notebook">← BACK TO LOG</a>
         <nav class="entry-nav" aria-label="Entry navigation">
           {prev && (

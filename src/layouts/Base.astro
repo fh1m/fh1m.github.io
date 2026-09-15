@@ -1,6 +1,7 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
 import { PROFILE } from '../data/profile';
+import Cursor from '../components/Cursor.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/fonts.css';
@@ -51,6 +52,7 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
   <body>
     <a class="skip-link" href="#main">SKIP TO CONTENT</a>
     <div class="grain" aria-hidden="true"></div>
+    <Cursor />
 
     <header class="site-header">
       <div class="header-inner">
@@ -58,6 +60,7 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
           <a class="wordmark" href="/">FAHIM FAISAL</a>
           <div class="header-telemetry">
             <span class="clock mono-label" id="site-clock">{initialTime}</span>
+            <span class="scroll-readout mono-label" id="scroll-readout">[SCROLL: 00%]</span>
             <span class="status-dot" role="img" aria-label="Machine status: running" title={PROFILE.statusLine}></span>
           </div>
         </div>
@@ -113,6 +116,10 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         tick();
         setInterval(tick, 1000);
       })();
+    </script>
+
+    <script>
+      import '../scripts/motion';
     </script>
 
     <style>
@@ -180,6 +187,11 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
       .clock {
         font-variant-numeric: tabular-nums;
         color: var(--paper);
+      }
+
+      .scroll-readout {
+        font-variant-numeric: tabular-nums;
+        color: var(--gray);
       }
 
       .status-dot {
@@ -287,6 +299,36 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         text-transform: uppercase;
         letter-spacing: var(--tracking-label);
         color: var(--gray);
+      }
+
+      /* ---- Page transitions ---- */
+      ::view-transition-old(root) {
+        animation: page-out var(--dur-page) var(--ease-out) both;
+      }
+
+      ::view-transition-new(root) {
+        animation: page-in var(--dur-page) var(--ease-out) both;
+      }
+
+      @keyframes page-out {
+        to {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+      }
+
+      @keyframes page-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation: none;
+        }
       }
     </style>
   </body>
