@@ -15,6 +15,9 @@ tags:
   - p2p
   - terminal
 repoLink: https://github.com/fh1m/secure-terminal-p2p-chat
+stack:
+  - name: Python
+    weight: 100
 draft: false
 ---
 
@@ -28,7 +31,7 @@ The difficulty is that cryptography punishes the confident. Key exchange, encryp
 
 ## Built
 
-secure-terminal-p2p-chat — a terminal P2P chat where the security layer is built from the primitives: RSA key exchange and AES-GCM encryption, no framework doing the work.
+secure-terminal-p2p-chat — a terminal P2P chat where the security layer is built from the primitives: RSA key exchange and AES-GCM encryption, no framework doing the work. The session starts plaintext and upgrades to encrypted (PLAIN_CHAT → SEC_CHAT) via /share, with /rekey rotating session keys; RSA-2048 (RSA-OAEP/RSA-PSS) plus AES-256-GCM, verified with Wireshark packet captures.
 
 ## Owned
 

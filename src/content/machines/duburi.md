@@ -45,7 +45,7 @@ Water removes most of the tools a robot normally leans on. Radio dies within a m
 
 ## Built
 
-The Duburi AUV line, currently at Duburi 4.2 — a full RoboSub vehicle built by a student team at BRACU. Perception, control, mission planning, and the hull that has to survive being handled by students and water at the same time. The public home is bracu-duburi.com; the code lives at github.com/fh1m/Duburi.
+The Duburi AUV line, currently at Duburi 4.2 — a full RoboSub vehicle built by a student team at BRACU. Perception, control, mission planning, and the hull that has to survive being handled by students and water at the same time. The public home is bracu-duburi.com; the code lives at github.com/fh1m/Duburi. The substantive code lives in the duburi_ws and duburi-codebase_RND workspaces — the Duburi repo itself is a 1-commit placeholder.
 
 ## Owned
 

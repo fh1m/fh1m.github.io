@@ -15,6 +15,20 @@ tags:
   - sitl
   - auv
 repoLink: https://github.com/fh1m/duburi-sim_ws
+stack:
+  - name: Python
+    weight: 91
+  - name: JavaScript
+    weight: 5
+  - name: Shell
+    weight: 2
+  - name: CSS
+    weight: 1
+subsystems:
+  - name: SIM
+    status: ok
+  - name: OPERATOR LAB
+    status: warn
 draft: false
 ---
 
@@ -28,9 +42,9 @@ Simulation is where reality is approximated before it isn't. The difficulty is k
 
 ## Built
 
-duburi-sim_ws — a Gazebo Harmonic + ArduSub SITL simulator and operator lab for the Mongla AUV stack. The environment where the vehicle's software runs against a simulated world before it runs against the real one.
+duburi-sim_ws — a Gazebo Harmonic + ArduSub SITL simulator and operator lab for the Mongla AUV stack. The repo is a generated mirror — the canonical simulator lives at duburi_ws/sim/ and is regenerated here by tools/sync_sim_mirror.sh for sim-only work. The environment where the vehicle's software runs against a simulated world before it runs against the real one.
 
-<!-- [VERIFY]: "Mongla AUV stack" refers to the Mongol Tori project — confirm the project name and details from the v2 brief. -->
+<!-- [VERIFY]: "Mongla" is confirmed by the repo README (the codebase is named Mongla); the v2 plan calls the project "Mongol Tori" — spelling discrepancy flagged for the user. -->
 
 ## Owned
 

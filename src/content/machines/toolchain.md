@@ -14,6 +14,17 @@ tags:
   - python
   - arch
 repoLink: https://github.com/fh1m/Scripts
+stack:
+  - name: Python
+    weight: 65
+  - name: Shell
+    weight: 10
+  - name: Vim Script
+    weight: 5
+  - name: Lua
+    weight: 5
+  - name: JavaScript
+    weight: 3
 draft: false
 ---
 
@@ -27,7 +38,7 @@ The difficulty is that tooling is invisible when it works and expensive when it 
 
 ## Built
 
-A set of repos that are the environment itself: Scripts (Bash/Python for Arch), PDE (Neovim), and Start-Page. The shell scripts, the editor config, and the page the browser opens — the archaeology of the workspace.
+A set of repos that are the environment itself: [Scripts](https://github.com/fh1m/Scripts) (Bash/Python for Arch), [PDE](https://github.com/fh1m/PDE) (Neovim), and [Start-Page](https://github.com/fh1m/Start-Page). All three were pushed the same day (2023-10-15); PDE's screenshots date back to 2022 — the earliest visual evidence of the dev environment. The shell scripts, the editor config, and the page the browser opens — the archaeology of the workspace.
 
 ## Owned
 

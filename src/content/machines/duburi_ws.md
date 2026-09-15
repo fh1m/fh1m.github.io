@@ -15,6 +15,26 @@ tags:
   - robosub
   - robotics
 repoLink: https://github.com/fh1m/duburi_ws
+stack:
+  - name: Python
+    weight: 97
+  - name: JavaScript
+    weight: 1
+  - name: Shell
+    weight: 1
+  - name: CSS
+    weight: 1
+subsystems:
+  - name: CONTROL
+    status: ok
+  - name: VISION
+    status: ok
+  - name: PLANNER
+    status: ok
+  - name: MANAGER
+    status: ok
+  - name: SIM
+    status: ok
 draft: false
 ---
 
@@ -28,7 +48,7 @@ The stack has to hold together three different time scales at once: the control 
 
 ## Built
 
-duburi_ws — BRACU Duburi's ROS2 Humble control, mission, and simulation stack for AUV. The workspace that ties the vehicle's control, mission, and simulation together, with topics covering ros2, auv, ardusub, robosub, and robotics.
+duburi_ws — BRACU Duburi's ROS2 Humble control, mission, and simulation stack for AUV. The workspace holds 795 commits (Apr–Sep 2026) across 7 ROS 2 packages with 229 test files, MIT-licensed, and is the only repo with CI (poc-check.yml) and multi-contributor history (fh1m 750 / RakibulIslam1 9). The workspace that ties the vehicle's control, mission, and simulation together, with topics covering ros2, auv, ardusub, robosub, and robotics.
 
 ## Owned
 

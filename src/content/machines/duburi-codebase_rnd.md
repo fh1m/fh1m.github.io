@@ -1,6 +1,6 @@
 ---
 act: understand
-chapterKey: "02"
+chapterKey: "05"
 name: duburi-codebase_RND
 category: perception
 status: ongoing
@@ -15,6 +15,16 @@ tags:
   - computer-vision
   - experimental
 repoLink: https://github.com/fh1m/duburi-codebase_RND
+stack:
+  - name: Python
+    weight: 100
+subsystems:
+  - name: VISION
+    status: ok
+  - name: MAVLINK
+    status: ok
+  - name: SIM
+    status: ok
 draft: false
 ---
 
@@ -28,7 +38,7 @@ The water is the difficulty. Cheap underwater autonomy means perception that sur
 
 ## Built
 
-duburi-codebase_RND — the codebase for AUV, Research and Experimental Concepts tested on Duburi 4.2. The place where perception ideas go to meet the real vehicle.
+duburi-codebase_RND — the codebase for AUV, Research and Experimental Concepts tested on Duburi 4.2. The workspace is ~40 Python source files across 8 packages (~6,500 lines): ROS 2 Humble on Pixhawk 2.4.8 running ArduSub via pymavlink, YOLO11 CUDA inference with Kalman-filtered tracking and PID visual servoing, and a Gazebo Harmonic + ArduSub SITL simulation lane. The place where perception ideas go to meet the real vehicle.
 
 ## Owned
 

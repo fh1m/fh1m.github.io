@@ -14,6 +14,11 @@ tags:
   - embedded
   - microcontroller
 repoLink: https://github.com/fh1m/Arduino-Vision
+stack:
+  - name: Python
+    weight: 60
+  - name: C++
+    weight: 40
 draft: false
 ---
 
@@ -27,7 +32,7 @@ The difficulty is the constraint. A microcontroller has no GPU, no operating sys
 
 ## Built
 
-Arduino-Vision — a combination of ML and Arduino. A prototype that puts a machine-learning model on a microcontroller and asks it to see.
+Arduino-Vision — a combination of ML and Arduino. A pre-trained YOLOv5 model detects objects; the Arduino drives directional LED feedback (pins 9/6/11/6) and a distance buzzer (pin 5), with a push button to reset the ideal state (pin 2). A prototype that puts a machine-learning model on a microcontroller and asks it to see.
 
 ## Owned
 

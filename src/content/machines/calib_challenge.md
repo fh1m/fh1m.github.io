@@ -15,6 +15,9 @@ tags:
   - comma-ai
   - learning
 repoLink: https://github.com/fh1m/calib_challenge_fh1m
+stack:
+  - name: Python
+    weight: 100
 draft: false
 ---
 
@@ -28,7 +31,7 @@ The camera is moving, the scene is moving, and the only stable thing is the geom
 
 ## Built
 
-A fork of commaai/calibration_challenge (github.com/fh1m/calib_challenge_fh1m) — my attempt at the challenge, working through the problem the way the stack expects.
+A fork of commaai/calibration_challenge (github.com/fh1m/calib_challenge_fh1m) — my attempt at the challenge, working through the problem the way the stack expects. The fork carries 18 commits of attempt against the upstream brief — predict direction of travel from dashcam video (focal length ~910 px, MSE evaluation).
 
 ## Owned
 

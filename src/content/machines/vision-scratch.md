@@ -15,6 +15,11 @@ tags:
   - machine-learning
   - scratch
 repoLink: https://github.com/fh1m/Face-Regeneration
+stack:
+  - name: Python
+    weight: 75
+  - name: Jupyter Notebook
+    weight: 25
 draft: false
 ---
 
@@ -28,7 +33,7 @@ The difficulty was that nothing worked the first time, and there was no vehicle 
 
 ## Built
 
-A set of scratch experiments, each a small repo: Face-Regeneration (learning to use a computer to see stuff), Detect-color-signs, Track_and_Predict, and decision-tree-classifier. Small, honest, and built from scratch.
+A set of scratch experiments, each a small repo: [Face-Regeneration](https://github.com/fh1m/Face-Regeneration) (learning to use a computer to see stuff), [Detect-color-signs](https://github.com/fh1m/Detect-color-signs), [Track_and_Predict](https://github.com/fh1m/Track_and_Predict), and [decision-tree-classifier](https://github.com/fh1m/decision-tree-classifier). All four were pushed the same day (2023-11-29) — a single-day learning burst. Small, honest, and built from scratch.
 
 ## Owned
 
