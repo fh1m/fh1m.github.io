@@ -141,12 +141,12 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
 
     .run-title,
     .next-title {
-      font-family: var(--font-display), sans-serif;
-      font-weight: 700;
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-weight: 600;
       font-size: var(--text-h3);
       text-transform: uppercase;
-      letter-spacing: var(--tracking-display);
-      line-height: 1.1;
+      letter-spacing: var(--tracking-label);
+      line-height: var(--leading-h3);
     }
 
     .run-note {

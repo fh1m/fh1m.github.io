@@ -199,12 +199,12 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
     }
 
     .phase-title {
-      font-family: var(--font-display), sans-serif;
+      font-family: var(--font-display), ui-monospace, monospace;
       font-weight: 700;
       font-size: var(--text-h2);
       text-transform: uppercase;
-      letter-spacing: var(--tracking-display);
-      line-height: 1.1;
+      letter-spacing: var(--tracking-display-small);
+      line-height: var(--leading-h2);
     }
 
     .phase-title a:hover {

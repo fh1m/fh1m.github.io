@@ -84,11 +84,11 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
     }
 
     .entry-title {
-      font-family: var(--font-display), sans-serif;
-      font-weight: 900;
+      font-family: var(--font-display), ui-monospace, monospace;
+      font-weight: 700;
       font-size: var(--text-h1);
       text-transform: uppercase;
-      letter-spacing: var(--tracking-display);
+      letter-spacing: var(--tracking-display-small);
       line-height: var(--leading-display);
     }
 
@@ -154,13 +154,20 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
       text-underline-offset: 3px;
     }
 
-    .prose h2,
-    .prose h3 {
-      font-family: var(--font-display), sans-serif;
-      font-weight: 800;
+    .prose h2 {
+      font-family: var(--font-display), ui-monospace, monospace;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: var(--tracking-display);
+      letter-spacing: var(--tracking-display-small);
       line-height: var(--leading-display);
+    }
+
+    .prose h3 {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-label);
+      line-height: var(--leading-h3);
     }
 
     .prose h2 {
@@ -276,10 +283,10 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
     }
 
     .nav-title {
-      font-family: var(--font-display), sans-serif;
-      font-weight: 700;
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-weight: 600;
       font-size: var(--text-h3);
-      line-height: 1.2;
+      line-height: var(--leading-h3);
       transition: color var(--dur-fast) var(--ease-out);
     }
 

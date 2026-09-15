@@ -29,19 +29,27 @@
   --ring:         #6AB8FF;  /* focus-visible: 3px solid + 3px offset */
   --sel-bg:       #1B2E3D;  /* ::selection background */
 
-  /* ---- Type scale ---- */
-  --text-display: clamp(2.5rem, 8vw, 9rem);
-  --text-h1: clamp(2rem, 5vw, 3.5rem);
-  --text-h2: clamp(1.5rem, 3.5vw, 2.5rem);
-  --text-h3: clamp(1.25rem, 2.5vw, 1.75rem);
-  --text-body: clamp(1rem, 1.1vw, 1.1875rem); /* 16–19px */
-  --text-mono: clamp(0.625rem, 0.8vw, 0.875rem); /* 10–14px */
-  --text-label: 0.6875rem; /* 11px */
+  /* ---- Type scale (Perfect Fourth, capped) ----
+     Display capped at 4.5rem (72px) — the old 9rem overflowed the
+     68ch editorial column. Mono floored at 12px (was 10px). */
+  --text-display: clamp(2.5rem, 4.5vw, 4.5rem);            /* 40 → 72px */
+  --text-h1: clamp(2rem, 3.5vw, 3.25rem);                  /* 32 → 52px */
+  --text-h2: clamp(1.5rem, 2.5vw, 2.375rem);               /* 24 → 38px */
+  --text-h3: clamp(1.25rem, 1.75vw, 1.75rem);              /* 20 → 28px */
+  --text-body: clamp(1rem, 0.875rem + 0.5vw, 1.125rem);    /* 16 → 18px */
+  --text-mono: clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem); /* 12 → 14px (floor raised) */
+  --text-label: 0.75rem;                                   /* 12px (was 11px) */
 
-  --leading-display: 0.92;
+  /* Line-height inverse to size: display tight, body loose */
+  --leading-display: 0.95;
+  --leading-h1: 1.05;
+  --leading-h2: 1.1;
+  --leading-h3: 1.15;
   --leading-body: 1.6;
-  --tracking-display: -0.03em;
-  --tracking-label: 0.08em;
+  --leading-mono: 1.5;
+  --tracking-display: -0.03em;        /* large display (hero, h1) */
+  --tracking-display-small: 0.01em;   /* small display (h1/h2 markers) */
+  --tracking-label: 0.08em;           /* mono labels, uppercase 12–14px */
   --max-width-editorial: 68ch;
 
   /* ---- Spacing ---- */

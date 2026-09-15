@@ -22,10 +22,9 @@ import Base from '../layouts/Base.astro';
     }
 
     .not-found h1 {
-      font-weight: 900;
-      /* Scoped display size: --text-display (8vw/9rem) overflows the 68ch
-         column at desktop ("DETACHED" at 115px > 632px content width). */
-      font-size: clamp(2.5rem, 7vw, 6.75rem);
+      font-weight: 700;
+      /* --text-display now caps at 4.5rem (72px) — "SIGNAL DETACHED"
+         in Iosevka fits the 68ch column without a scoped override. */
     }
 
     .not-found-body {
