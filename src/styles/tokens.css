@@ -1,19 +1,33 @@
 /* ============================================================
-   Design Tokens — fahim-personal-site
+   Design Tokens — fahim-personal-site (HADAL-BLUE)
    Single source of truth: palette, type scale, spacing,
    z-index, durations. No rounded corners. No pure black.
    ============================================================ */
 
 :root {
-  /* ---- Palette ---- */
-  --bg: #0A0B0C;        /* near-black canvas */
-  --bg-raise: #121316;  /* raised surface */
-  --paper: #E8E6E1;     /* warm paper text */
-  --gray: #9A9B99;      /* body gray / secondary text */
-  --border: #26282B;    /* hairline borders */
-  --accent: #FFB000;    /* instrument amber — max 3 uses per viewport */
-  --ok: #3FB950;        /* terminal green — status dot only */
-  --fail: #E5484D;      /* failure red — FAIL states only */
+  /* ---- Surfaces (elevation by lightness) ---- */
+  --surface-0: #01060A;   /* page background */
+  --surface-1: #0A1620;   /* cards/panels */
+  --surface-2: #10202E;   /* overlays/modals */
+
+  /* ---- Ink (text hierarchy) ---- */
+  --ink:          #C9D6E0;  /* body text */
+  --ink-muted:    #6E8294;  /* secondary text */
+
+  /* ---- Lines ---- */
+  --line:         #1B2E3D;  /* decorative hairlines */
+  --line-strong:  #4A8FC4;  /* interactive boundaries (>=3:1) */
+
+  /* ---- Signals ---- */
+  --signal:       #6AB8FF;  /* primary signal (<=3 uses/viewport) */
+  --signal-2:     #46F0D9;  /* secondary info/links (optional) */
+  --signal-amber: #FFB000;  /* instrument amber (<=1 use/viewport, never adjacent to --signal) */
+  --signal-ok:    #3FB950;  /* status green */
+  --signal-fail:  #E5484D;  /* status red */
+
+  /* ---- Chrome ---- */
+  --ring:         #6AB8FF;  /* focus-visible: 3px solid + 3px offset */
+  --sel-bg:       #1B2E3D;  /* ::selection background */
 
   /* ---- Type scale ---- */
   --text-display: clamp(2.5rem, 8vw, 9rem);

@@ -99,11 +99,11 @@ const LAYERS: Layer[] = [
 <style>
   .stack-descent {
     display: grid;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--line);
   }
 
   .layer {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
   }
 
   .layer summary {
@@ -125,7 +125,7 @@ const LAYERS: Layer[] = [
     margin-left: auto;
     font-family: var(--font-mono), ui-monospace, monospace;
     font-size: var(--text-label);
-    color: var(--gray);
+    color: var(--ink-muted);
   }
 
   .layer[open] summary::after {
@@ -138,7 +138,7 @@ const LAYERS: Layer[] = [
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: var(--tracking-label);
-    color: var(--gray);
+    color: var(--ink-muted);
   }
 
   .layer-title {
@@ -155,7 +155,7 @@ const LAYERS: Layer[] = [
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: var(--tracking-label);
-    color: var(--gray);
+    color: var(--ink-muted);
   }
 
   .layer-items {
@@ -165,9 +165,9 @@ const LAYERS: Layer[] = [
   }
 
   .layer-items li {
-    color: var(--gray);
+    color: var(--ink-muted);
     padding-left: var(--space-4);
-    border-left: 1px solid var(--border);
+    border-left: 1px solid var(--line);
     margin-left: var(--space-1);
   }
 </style>

@@ -91,6 +91,8 @@ const featured = FEATURED_SLUGS.map((slug) =>
   </script>
 
   <style>
+    /* F3 FLAG: 4 raw var(--signal) refs (hero CTA base+hover = 1 pattern,
+       machine-arrow hover = 1) — verify <=3 visible applications per viewport. */
     .hero {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -104,7 +106,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
     }
 
     .hero-sub {
-      color: var(--gray);
+      color: var(--ink-muted);
       max-width: 52ch;
     }
 
@@ -120,24 +122,24 @@ const featured = FEATURED_SLUGS.map((slug) =>
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: var(--tracking-label);
-      color: var(--accent);
-      border: 1px solid var(--border);
+      color: var(--signal);
+      border: 1px solid var(--line);
       padding: var(--space-2) var(--space-3);
       width: fit-content;
     }
 
     .cta:hover {
-      color: var(--bg);
-      background: var(--accent);
-      border-color: var(--accent);
+      color: var(--surface-0);
+      background: var(--signal);
+      border-color: var(--signal);
     }
 
     .status-strip {
       max-width: var(--container-max);
       margin: 0 auto;
       padding: var(--space-3) var(--space-6);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
       display: flex;
       gap: var(--space-6);
       flex-wrap: wrap;
@@ -152,7 +154,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
     }
 
     .section-label {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .featured {
@@ -164,7 +166,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
     }
 
     .machine-rows {
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--line);
     }
 
     .machine-row {
@@ -173,13 +175,13 @@ const featured = FEATURED_SLUGS.map((slug) =>
       align-items: baseline;
       gap: var(--space-6);
       padding: var(--space-4) 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--line);
     }
 
     .machine-chip {
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       padding: var(--space-1) var(--space-2);
-      color: var(--gray);
+      color: var(--ink-muted);
       white-space: nowrap;
     }
 
@@ -192,15 +194,15 @@ const featured = FEATURED_SLUGS.map((slug) =>
     }
 
     .machine-summary {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .machine-arrow {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .machine-row:hover .machine-arrow {
-      color: var(--accent);
+      color: var(--signal);
     }
 
     .now-teaser {
@@ -212,7 +214,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
     }
 
     .now-line {
-      color: var(--gray);
+      color: var(--ink-muted);
       max-width: 40ch;
     }
 

@@ -110,6 +110,9 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
   </article>
 
   <style>
+    /* F3 FLAG: 6 raw var(--signal) refs (back-link hover + status chip +
+       source-button CTA base+hover + entry-nav hover = 4 applications) —
+       verify <=3 visible per viewport; nav sits below the fold. */
     .machine-detail {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -122,12 +125,12 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
     }
 
     .back-link {
-      color: var(--gray);
+      color: var(--ink-muted);
       width: fit-content;
     }
 
     .back-link:hover {
-      color: var(--accent);
+      color: var(--signal);
     }
 
     .meta-strip {
@@ -151,15 +154,15 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
     }
 
     .chip-accent {
-      color: var(--accent);
+      color: var(--signal);
     }
 
     .chip-gray {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .chip-fail {
-      color: var(--fail);
+      color: var(--signal-fail);
     }
 
     .detail-name {
@@ -173,22 +176,22 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: var(--tracking-label);
-      color: var(--accent);
-      border: 1px solid var(--border);
+      color: var(--signal);
+      border: 1px solid var(--line);
       padding: var(--space-2) var(--space-3);
       width: fit-content;
     }
 
     .source-button:hover {
-      color: var(--bg);
-      background: var(--accent);
-      border-color: var(--accent);
+      color: var(--surface-0);
+      background: var(--signal);
+      border-color: var(--signal);
     }
 
     .metrics-strip {
       margin-top: var(--space-12);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
     }
 
     .metric-row {
@@ -200,11 +203,11 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
     }
 
     .metric-row + .metric-row {
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--line);
     }
 
     .metric-label {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .metric-value {
@@ -213,7 +216,7 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: var(--tracking-label);
-      color: var(--paper);
+      color: var(--ink);
       text-align: right;
     }
 
@@ -222,7 +225,7 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
     }
 
     .media-frame {
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       padding: var(--space-16) var(--space-6);
       display: flex;
       align-items: center;
@@ -230,11 +233,11 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
     }
 
     .media-frame .mono-label {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .media-caption {
-      color: var(--gray);
+      color: var(--ink-muted);
       padding-top: var(--space-3);
     }
 
@@ -252,7 +255,7 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
       line-height: 1.1;
       margin-top: var(--space-12);
       padding-top: var(--space-4);
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--line);
     }
 
     .journal-body h2:first-of-type {
@@ -274,7 +277,7 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
 
     .machine-nav {
       margin-top: var(--space-16);
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--line);
       padding-top: var(--space-6);
       display: flex;
       justify-content: space-between;
@@ -304,7 +307,7 @@ const hasMetrics = metrics !== undefined && metrics.length > 0;
 
     .nav-prev:hover .nav-name,
     .nav-next:hover .nav-name {
-      color: var(--accent);
+      color: var(--signal);
     }
   </style>
 </Base>

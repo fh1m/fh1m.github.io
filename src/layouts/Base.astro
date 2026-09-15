@@ -159,9 +159,9 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         top: var(--space-2);
         left: var(--space-2);
         z-index: calc(var(--z-header) + 2);
-        background: var(--bg-raise);
-        color: var(--paper);
-        border: 1px solid var(--border);
+        background: var(--surface-1);
+        color: var(--ink);
+        border: 1px solid var(--line);
         padding: var(--space-2) var(--space-3);
         font-family: var(--font-mono), ui-monospace, monospace;
         font-size: var(--text-label);
@@ -179,8 +179,8 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         position: sticky;
         top: 0;
         z-index: var(--z-header);
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
+        background: var(--surface-0);
+        border-bottom: 1px solid var(--line);
       }
 
       .header-inner {
@@ -206,7 +206,7 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
       }
 
       .wordmark:hover {
-        color: var(--accent);
+        color: var(--signal);
       }
 
       .header-telemetry {
@@ -217,19 +217,19 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
 
       .clock {
         font-variant-numeric: tabular-nums;
-        color: var(--paper);
+        color: var(--ink);
       }
 
       .scroll-readout {
         font-variant-numeric: tabular-nums;
-        color: var(--gray);
+        color: var(--ink-muted);
       }
 
       .status-dot {
         display: inline-block;
         width: 8px;
         height: 8px;
-        background: var(--ok);
+        background: var(--signal-ok);
         flex: none;
       }
 
@@ -254,17 +254,17 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: var(--tracking-label);
-        color: var(--gray);
+        color: var(--ink-muted);
         padding: var(--space-1) 0;
         white-space: nowrap;
       }
 
       .nav-link:hover {
-        color: var(--paper);
+        color: var(--ink);
       }
 
       .nav-link.is-active {
-        color: var(--accent);
+        color: var(--signal);
       }
 
       main {
@@ -272,7 +272,7 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
       }
 
       .site-footer {
-        border-top: 1px solid var(--border);
+        border-top: 1px solid var(--line);
         margin-top: var(--space-24);
       }
 
@@ -296,15 +296,15 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: var(--tracking-label);
-        color: var(--gray);
+        color: var(--ink-muted);
       }
 
       .footer-links a:hover {
-        color: var(--paper);
+        color: var(--ink);
       }
 
       .verify-flag {
-        color: var(--accent);
+        color: var(--signal);
       }
 
       .footer-status {
@@ -316,7 +316,7 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: var(--tracking-label);
-        color: var(--paper);
+        color: var(--ink);
       }
 
       .footer-meta {
@@ -329,7 +329,7 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: var(--tracking-label);
-        color: var(--gray);
+        color: var(--ink-muted);
       }
 
       /* ---- Page transitions ---- */

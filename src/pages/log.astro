@@ -64,6 +64,8 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
   </section>
 
   <style>
+    /* F3 FLAG: 5 raw var(--signal) refs (timeline rail + phase-title hover +
+       continues-link CTA base+hover = 3 applications) — verify <=3 visible. */
     .log-page {
       max-width: var(--max-width-editorial);
       margin: 0 auto;
@@ -82,7 +84,7 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
     }
 
     .log-lede {
-      color: var(--gray);
+      color: var(--ink-muted);
       max-width: 44ch;
     }
 
@@ -103,7 +105,7 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       bottom: 0;
       left: 0;
       width: 1px;
-      background: var(--border);
+      background: var(--line);
     }
 
     /* Accent fill — static by default; animated once on load when motion is allowed. */
@@ -114,7 +116,7 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       left: 0;
       width: 1px;
       height: 100%;
-      background: var(--accent);
+      background: var(--signal);
       transform: scaleY(0);
       transform-origin: top;
     }
@@ -160,13 +162,13 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       top: var(--space-2);
       width: 7px;
       height: 7px;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: var(--surface-0);
+      border: 1px solid var(--line);
     }
 
     .phase-node.continues::before {
-      border-color: var(--ok);
-      background: var(--ok);
+      border-color: var(--signal-ok);
+      background: var(--signal-ok);
     }
 
     .phase-body {
@@ -182,7 +184,7 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
     }
 
     .phase-stamp {
-      color: var(--paper);
+      color: var(--ink);
     }
 
     .phase-badge {
@@ -191,8 +193,8 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: var(--tracking-label);
-      color: var(--gray);
-      border: 1px solid var(--border);
+      color: var(--ink-muted);
+      border: 1px solid var(--line);
       padding: var(--space-1) var(--space-2);
     }
 
@@ -206,11 +208,11 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
     }
 
     .phase-title a:hover {
-      color: var(--accent);
+      color: var(--signal);
     }
 
     .phase-narrative {
-      color: var(--gray);
+      color: var(--ink-muted);
       max-width: 60ch;
     }
 
@@ -220,16 +222,16 @@ const nodes = entries.map((entry, i) => ({ entry, Content: rendered[i].Content }
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: var(--tracking-label);
-      color: var(--accent);
-      border: 1px solid var(--border);
+      color: var(--signal);
+      border: 1px solid var(--line);
       padding: var(--space-2) var(--space-3);
       width: fit-content;
     }
 
     .continues-link:hover {
-      color: var(--bg);
-      background: var(--accent);
-      border-color: var(--accent);
+      color: var(--surface-0);
+      background: var(--signal);
+      border-color: var(--signal);
     }
   </style>
 </Base>

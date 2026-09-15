@@ -71,18 +71,18 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
     .log-line {
       font-family: var(--font-mono), ui-monospace, monospace;
       font-size: var(--text-mono);
-      color: var(--gray);
-      border-left: 1px solid var(--border);
+      color: var(--ink-muted);
+      border-left: 1px solid var(--line);
       padding-left: var(--space-4);
       margin-top: var(--space-4);
     }
 
     .index-count {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .entry-list {
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--line);
     }
 
     .entry-row {
@@ -95,12 +95,12 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
       row-gap: var(--space-2);
       align-items: baseline;
       padding: var(--space-4) 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--line);
     }
 
     .entry-date {
       grid-area: date;
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .entry-title {
@@ -113,7 +113,7 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
     }
 
     .entry-row:hover .entry-title {
-      color: var(--accent);
+      color: var(--signal);
     }
 
     .status-chip {
@@ -129,20 +129,20 @@ const STATUS_CLASS = { open: 'chip-open', ongoing: 'chip-ongoing', closed: 'chip
     }
 
     .chip-open {
-      color: var(--accent);
+      color: var(--signal);
     }
 
     .chip-ongoing {
-      color: var(--ok);
+      color: var(--signal-ok);
     }
 
     .chip-closed {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .entry-tags {
       grid-area: tags;
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     @media (max-width: 640px) {

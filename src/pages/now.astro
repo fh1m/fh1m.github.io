@@ -101,7 +101,7 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
     }
 
     .now-lede {
-      color: var(--gray);
+      color: var(--ink-muted);
       max-width: 44ch;
     }
 
@@ -112,12 +112,12 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
     }
 
     .section-label {
-      color: var(--gray);
+      color: var(--ink-muted);
     }
 
     .run-rows,
     .next-rows {
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--line);
     }
 
     .run-row {
@@ -126,11 +126,11 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       align-items: baseline;
       gap: var(--space-6);
       padding: var(--space-4) 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--line);
     }
 
     .run-stamp {
-      color: var(--paper);
+      color: var(--ink);
       white-space: nowrap;
     }
 
@@ -150,7 +150,7 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
     }
 
     .run-note {
-      color: var(--gray);
+      color: var(--ink-muted);
       max-width: 60ch;
     }
 
@@ -160,11 +160,11 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       align-items: baseline;
       gap: var(--space-6);
       padding: var(--space-3) 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--line);
     }
 
     .next-index {
-      color: var(--gray);
+      color: var(--ink-muted);
       white-space: nowrap;
     }
 
@@ -174,11 +174,11 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
     }
 
     .next-title.is-anchor {
-      color: var(--accent);
+      color: var(--signal);
     }
 
     .next-note {
-      color: var(--gray);
+      color: var(--ink-muted);
       max-width: 60ch;
     }
 
@@ -186,14 +186,14 @@ const nextItems = PROFILE.nextUp.map((title) => ({ title, note: NEXT_NOTES[title
       display: grid;
       gap: var(--space-4);
       padding-top: var(--space-8);
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--line);
     }
 
     .final-line {
       font-family: var(--font-serif), serif;
       font-style: italic;
       font-size: var(--text-h2);
-      color: var(--paper);
+      color: var(--ink);
     }
 
     @media (max-width: 720px) {
