@@ -9,6 +9,10 @@
  * v2 additions: optional `act` (move|understand|decide|next) and
  * `chapterKey` fields on all three collections for story binding.
  *
+ * v2 visual guides (todo 14): optional `stack`, `subsystems`, and `trend`
+ * fields on `machines` only — they drive the TechStack, MachineOverview
+ * status matrix, and PerformanceChart components on the detail page.
+ *
  * Date formats are load-bearing for sorting (plan todo 5):
  *   dateStart / dateEnd / notebook.date = ISO `YYYY-MM`
  *   log.year = `YYYY`
@@ -22,6 +26,36 @@ import { glob } from 'astro/loaders';
 const machines = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/machines' }),
   schema: z.object({
+    stack: z
+      .array(
+        z.object({
+          name: z.string().describe('Technology name, e.g. "Python"'),
+          weight: z.number().describe('Proportional share of the codebase, 0-100'),
+        }),
+      )
+      .optional()
+      .describe('Optional tech-stack composition for the TechStack visual guide'),
+    subsystems: z
+      .array(
+        z.object({
+          name: z.string().describe('Subsystem name, e.g. "PERCEPTION"'),
+          status: z
+            .enum(['ok', 'warn', 'fail', 'off'])
+            .describe('Operational status of the subsystem'),
+        }),
+      )
+      .optional()
+      .describe('Optional subsystem status matrix for the MachineOverview visual guide'),
+    trend: z
+      .array(
+        z.object({
+          year: z.string().describe('Year label, e.g. "2023"'),
+          label: z.string().describe('Short result label, e.g. "2ND"'),
+          value: z.number().describe('Numeric value for the sparkline, e.g. 2'),
+        }),
+      )
+      .optional()
+      .describe('Optional numeric trend series for the PerformanceChart visual guide'),
     act: z
       .enum(['move', 'understand', 'decide', 'next'])
       .optional()

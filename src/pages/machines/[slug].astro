@@ -1,6 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
+import MachineOverview from '../../components/MachineOverview.astro';
+import TechStack from '../../components/TechStack.astro';
+import ArchDiagram from '../../components/ArchDiagram.astro';
+import PerformanceChart from '../../components/PerformanceChart.astro';
 
 const CATEGORY_ORDER = ['underwater', 'air', 'perception', 'compute', 'systems'] as const;
 const CATEGORY_LABELS: Record<string, string> = {
@@ -98,12 +102,31 @@ const chapterQuestion = chapterKey ? CHAPTER_QUESTIONS[chapterKey] : undefined;
       </div>
     )}
 
+    <MachineOverview
+      name={name}
+      category={category}
+      status={status}
+      yearLabel={yearLabel}
+      repoLink={repoLink}
+      subsystems={machine.data.subsystems}
+    />
+
+    {machine.data.stack && machine.data.stack.length > 0 && (
+      <TechStack stack={machine.data.stack} />
+    )}
+
     <figure class="media-pending" data-reveal>
       <div class="media-frame">
         <span class="mono-label">[MEDIA: PENDING]</span>
       </div>
       <figcaption class="media-caption mono-label">{summary}</figcaption>
     </figure>
+
+    <ArchDiagram slug={machine.id} />
+
+    {machine.data.trend && machine.data.trend.length > 0 && (
+      <PerformanceChart trend={machine.data.trend} />
+    )}
 
     <div class="journal-body" data-reveal>
       <Content />
@@ -126,9 +149,12 @@ const chapterQuestion = chapterKey ? CHAPTER_QUESTIONS[chapterKey] : undefined;
   </article>
 
   <style>
-    /* F3 FLAG: 6 raw var(--signal) refs (back-link hover + status chip +
-       source-button CTA base+hover + entry-nav hover = 4 applications) —
-       verify <=3 visible per viewport; nav sits below the fold. */
+    /* F3 FLAG: 11 raw var(--signal) refs across the page bundle — 7 here
+       (back-link hover + chapter-backlink hover + status chip +
+       source-button CTA base+hover + entry-nav hover) + 1 MachineOverview
+       top-edge accent + 3 ArchDiagram manager node (border + 2 labels).
+       Applications: 3 always-visible above the fold (chip + source-button
+       + overview edge); the rest are hover states or sit below the fold. */
     .machine-detail {
       max-width: var(--container-max);
       margin: 0 auto;

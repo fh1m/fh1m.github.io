@@ -1,0 +1,89 @@
+---
+/**
+ * TechStack — horizontal proportional bars from optional `stack` frontmatter.
+ *
+ * The largest share gets the --line-strong primary bar; the rest use
+ * --line. No --signal here: the page's signal budget is spent above the
+ * fold (header chip + source button + overview top edge).
+ */
+interface StackItem {
+  name: string;
+  weight: number;
+}
+
+interface Props {
+  stack: StackItem[];
+}
+
+const { stack } = Astro.props;
+
+const maxWeight = Math.max(...stack.map((item) => item.weight));
+---
+
+<section class="tech-stack" data-reveal aria-label="Tech stack composition">
+  <h2 class="guide-heading mono-label">TECH STACK</h2>
+  <div class="stack-list">
+    {stack.map((item) => (
+      <div class:list={['stack-row', item.weight === maxWeight ? 'stack-primary' : '']}>
+        <span class="stack-name mono-label">{item.name}</span>
+        <div class="stack-track" aria-hidden="true">
+          <div class="stack-fill" style={`--w: ${item.weight}%`}></div>
+        </div>
+        <span class="stack-weight mono-label">{item.weight}%</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .tech-stack {
+    margin-top: var(--space-12);
+  }
+
+  .guide-heading {
+    color: var(--ink-muted);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stack-list {
+    margin-top: var(--space-4);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .stack-row {
+    display: grid;
+    grid-template-columns: minmax(5rem, 9rem) 1fr 3.5rem;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .stack-name {
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .stack-track {
+    height: 8px;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+  }
+
+  .stack-fill {
+    height: 100%;
+    width: var(--w);
+    background: var(--line);
+  }
+
+  .stack-primary .stack-fill {
+    background: var(--line-strong);
+  }
+
+  .stack-weight {
+    color: var(--ink-muted);
+    text-align: right;
+  }
+</style>

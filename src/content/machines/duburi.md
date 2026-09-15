@@ -22,6 +22,16 @@ metrics:
     value: 9TH
   - label: ROBOSUB 2026
     value: 8TH — 6230 PTS
+trend:
+  - year: "2023"
+    label: 2ND
+    value: 2
+  - year: "2025"
+    label: 9TH
+    value: 9
+  - year: "2026"
+    label: 8TH — 6230 PTS
+    value: 8
 draft: false
 ---
 
