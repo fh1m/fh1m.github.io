@@ -2,10 +2,10 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// PLACEHOLDER DOMAIN — replace with real domain (README todo 16)
+// Live domain — GitHub Pages user site (fh1m.github.io), served from root, no base path.
 export default defineConfig({
   output: 'static',
-  site: 'https://fahim-faisal.dev',
+  site: 'https://fh1m.github.io',
   integrations: [sitemap()],
   image: {
     service: {

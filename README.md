@@ -50,7 +50,7 @@ Import the repo in Vercel — zero-config static deploy. No `vercel.json` needed
 
 ### Domain
 
-`astro.config.mjs` sets `site: 'https://fahim-faisal.dev'` — a placeholder. Search the repo for `fahim-faisal.dev` and replace with the real domain before publishing. The email link in `src/data/profile.ts` is also a placeholder (`hello@fahimfaisal.dev`).
+The live domain is `https://fh1m.github.io` — a GitHub Pages user site, served from the root with no base path (`site` in `astro.config.mjs`). The email link in `src/data/profile.ts` is the real address (`fahim.2002.faisal@gmail.com`).
 
 ## Content review checklist
 
@@ -73,5 +73,5 @@ Run before shipping. All copy is drafted — replace or correct anything that do
 - [ ] Engineering-lead transition date is confirmed (2026 — log phase-05)
 - [ ] Notebook publish dates are confirmed (all are draft placeholders)
 - [ ] Log phase dates and role titles are confirmed (2022 start year, subteam-lead to engineering-lead arc)
-- [ ] Email link is real (currently `hello@fahimfaisal.dev` placeholder)
+- [ ] Email link is real (`fahim.2002.faisal@gmail.com`)
 - [ ] Media: all machine pages show `[MEDIA: PENDING]` placeholders — no images or video are shipped yet

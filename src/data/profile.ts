@@ -33,8 +33,8 @@ export const PROFILE: Profile = {
   links: {
     github: 'https://github.com/fh1m',
     duburi: 'https://bracu-duburi.com',
-    // [VERIFY] placeholder domain — confirm the real contact address before publishing.
-    email: 'mailto:hello@fahimfaisal.dev',
+    // Real contact address (git config user.email) — live since the fh1m.github.io deploy.
+    email: 'mailto:fahim.2002.faisal@gmail.com',
   },
   statusLine: 'MACHINE STATUS: RUNNING',
   // Verbatim manifesto block, brief #46 (plan line 63) — one line per array entry.
