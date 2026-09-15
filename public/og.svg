@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- fahim-personal-site Open Graph card — instrument panel identity.
+       Tokens mirror src/styles/tokens.css: bg #0A0B0C, paper #E8E6E1,
+       gray #9A9B99, border #26282B, accent #FFB000, ok #3FB950.
+       No pure black, no rounded corners, no external font loads. -->
+
+  <!-- near-black canvas -->
+  <rect width="1200" height="630" fill="#0A0B0C" />
+
+  <!-- hairline grid -->
+  <g stroke="#26282B" stroke-width="1">
+    <line x1="0" y1="210" x2="1200" y2="210" />
+    <line x1="0" y1="420" x2="1200" y2="420" />
+    <line x1="400" y1="0" x2="400" y2="630" />
+    <line x1="800" y1="0" x2="800" y2="630" />
+  </g>
+
+  <!-- crosshair mark (favicon motif, scaled) -->
+  <g stroke="#E8E6E1" stroke-width="2">
+    <line x1="80" y1="36" x2="80" y2="124" />
+    <line x1="36" y1="80" x2="124" y2="80" />
+  </g>
+  <circle cx="80" cy="80" r="16" fill="none" stroke="#FFB000" stroke-width="2" />
+  <circle cx="80" cy="80" r="4" fill="#FFB000" />
+
+  <!-- display title — Archivo -->
+  <text x="80" y="360" font-family="'Archivo Variable', 'Helvetica Neue', Arial, sans-serif" font-size="120" font-weight="900" fill="#E8E6E1" letter-spacing="-0.03em">FAHIM FAISAL</text>
+
+  <!-- mono caption -->
+  <text x="80" y="416" font-family="'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace" font-size="22" font-weight="500" fill="#9A9B99" letter-spacing="0.08em">MACHINES THAT PERCEIVE, REASON, ACT</text>
+
+  <!-- bottom status bar -->
+  <line x1="80" y1="520" x2="1120" y2="520" stroke="#26282B" stroke-width="1" />
+  <text x="80" y="562" font-family="'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace" font-size="16" font-weight="500" fill="#9A9B99" letter-spacing="0.08em">AUTONOMOUS SYSTEMS // FH1M</text>
+  <circle cx="1000" cy="556" r="5" fill="#3FB950" />
+  <text x="1016" y="562" font-family="'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace" font-size="16" font-weight="500" fill="#E8E6E1" letter-spacing="0.08em">[STATUS: RUNNING]</text>
+</svg>

@@ -13,6 +13,28 @@ interface Props {
 
 const { title = 'FAHIM FAISAL', description = PROFILE.roleLine } = Astro.props;
 
+// SEO: canonical + OG URLs built from Astro.site (never hardcoded).
+const site = Astro.site!;
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL('/og.png', site).href;
+const personUrl = new URL('/', site).href;
+const [addressLocality] = PROFILE.location.split(',');
+
+// JSON-LD Person — real values only from src/data/profile.ts.
+// No jobTitle: PROFILE has no jobTitle field, so none is fabricated.
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: PROFILE.name,
+  url: personUrl,
+  sameAs: [PROFILE.links.github, PROFILE.links.duburi],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality,
+    addressCountry: 'BD',
+  },
+};
+
 const NAV = [
   { num: '01', label: 'HOME', href: '/' },
   { num: '02', label: 'ABOUT', href: '/about' },
@@ -45,8 +67,17 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="FAHIM FAISAL" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="canonical" href={canonical} />
     <slot name="head" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(personJsonLd)} />
     <ViewTransitions />
   </head>
   <body>

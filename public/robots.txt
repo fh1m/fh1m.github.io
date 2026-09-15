@@ -1,0 +1,7 @@
+# fahim-personal-site robots.txt
+# Allow all crawlers. The Sitemap line is intentionally omitted: the domain
+# in astro.config.mjs is a placeholder (https://fahim-faisal.dev). Add
+# `Sitemap: https://<real-domain>/sitemap-index.xml` before publishing.
+
+User-agent: *
+Allow: /
