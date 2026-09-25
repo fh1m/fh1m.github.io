@@ -2,6 +2,7 @@
   import { EXPERIENCE, EDUCATION } from '$lib/data/experience';
   import { PROFILE } from '$lib/data/profile';
   import { reveal } from '$lib/actions/reveal';
+  import DeviceFrame from '$lib/components/DeviceFrame.svelte';
 
   const tagColor: Record<string, string> = {
     underwater: 'var(--sea-lit)',
@@ -48,6 +49,18 @@
       </div>
     </div>
   </header>
+
+  <div class="field-photo" use:reveal>
+    <DeviceFrame
+      src="/media/lab/vehicle-estop.png"
+      alt="Hands on the vehicle during an emergency-stop, mid-run"
+      label="the field // mongla e-stop"
+      caption="Not a render. Mid-run, hands on the machine, the abort path proving it works."
+      credit="fh1m"
+      fit="cover"
+      ratio="16 / 9"
+    />
+  </div>
 
   <section class="xp">
     <p class="silk sec-lbl">// experience</p>
@@ -160,6 +173,10 @@
   }
   .run {
     color: var(--ok);
+  }
+  .field-photo {
+    max-width: 760px;
+    margin: 0 auto var(--sp-10);
   }
   .sec-lbl {
     color: var(--red-lit);

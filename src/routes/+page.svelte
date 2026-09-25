@@ -5,6 +5,7 @@
   import WorkStrip from '$lib/components/WorkStrip.svelte';
   import Story from '$lib/components/Story.svelte';
   import DeepDives from '$lib/components/DeepDives.svelte';
+  import LabTeaser from '$lib/components/LabTeaser.svelte';
   import ProofDashboard from '$lib/components/ProofDashboard.svelte';
   import Certificates from '$lib/components/Certificates.svelte';
   import Greats from '$lib/components/Greats.svelte';
@@ -32,6 +33,7 @@
 <Story story={STORIES[0]} />
 <Story story={STORIES[1]} />
 <DeepDives />
+<LabTeaser />
 <ProofDashboard />
 <Certificates />
 <Greats />

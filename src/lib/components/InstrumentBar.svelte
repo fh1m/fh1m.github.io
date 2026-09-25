@@ -10,7 +10,7 @@
 </script>
 
 <div class="bar" aria-hidden="true">
-  <span class="lbl mono">[{current.num}/06] {current.label}</span>
+  <span class="lbl mono">[{current.num}/{String(NAV.length).padStart(2, '0')}] {current.label}</span>
   <div class="track">
     <div class="fill" style="transform:scaleX({$scrollProgress})"></div>
   </div>

@@ -2,6 +2,7 @@
   import SectionHead from './SectionHead.svelte';
   import TerminalBlock from './TerminalBlock.svelte';
   import CompareTable from './CompareTable.svelte';
+  import DeviceFrame from './DeviceFrame.svelte';
   import { DEEPDIVES } from '$lib/data/deepdives';
   import { reveal } from '$lib/actions/reveal';
 </script>
@@ -32,6 +33,9 @@
         </div>
 
         <div class="dive-r">
+          {#if d.image}
+            <DeviceFrame src={d.image} alt={d.title} label={d.id} caption={d.imageCap} credit="fh1m" fit="contain" ratio="16 / 10" />
+          {/if}
           {#if d.stats}
             <div class="statgrid">
               {#each d.stats as s}
