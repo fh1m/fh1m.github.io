@@ -146,11 +146,21 @@ const bodyHtml = lines
     line-height: var(--leading-mono);
   }
 
-  .code-line {
+  /* ⛔ `:global()` on all six of these, not just the token spans: the
+     whole line/lineno/text/token structure comes from `set:html`
+     (bodyHtml, built in frontmatter), and Astro only ever scopes markup
+     it compiles from the template — set:html content never receives the
+     component's data-astro-cid attribute, so an unscoped `.code-line {
+     display: block }` silently never matches anything. Found by actually
+     scrolling to this component after the font pass: every line was
+     rendering `display: inline` (the default), collapsing all ~20 lines
+     of the excerpt onto one row. `.code-body :global(...)` scopes off
+     the one real (non-injected) ancestor instead. */
+  .code-body :global(.code-line) {
     display: block;
   }
 
-  .code-lineno {
+  .code-body :global(.code-lineno) {
     display: inline-block;
     width: 2.5ch;
     margin-right: var(--space-3);
@@ -159,20 +169,20 @@ const bodyHtml = lines
     user-select: none;
   }
 
-  .code-text {
+  .code-body :global(.code-text) {
     color: var(--ink);
     white-space: pre;
   }
 
-  .code-text :global(.tok-kw) {
+  .code-body :global(.tok-kw) {
     color: var(--signal);
   }
 
-  .code-text :global(.tok-str) {
+  .code-body :global(.tok-str) {
     color: var(--signal-2);
   }
 
-  .code-text :global(.tok-comment) {
+  .code-body :global(.tok-comment) {
     color: var(--ink-muted);
   }
 

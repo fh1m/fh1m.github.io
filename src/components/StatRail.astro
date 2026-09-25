@@ -27,7 +27,7 @@ const STATS: Stat[] = [
 <div class="stat-rail">
   {STATS.map((s) => (
     <div class="stat-tile">
-      <p class="stat-value display" data-count={s.value}>{s.value}{s.suffix ?? ''}</p>
+      <p class="stat-value" data-count={s.value}>{s.value}{s.suffix ?? ''}</p>
       <p class="stat-label mono-label">{s.label}</p>
       <p class="stat-sub mono-label">{s.sub}</p>
     </div>
@@ -97,6 +97,10 @@ const STATS: Stat[] = [
   }
 
   .stat-value {
+    /* Numbers stay in mono (mongla_ws's rule) rather than the display
+       face — the whole point is that a reading is data, not a headline. */
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-weight: 700;
     font-size: clamp(1.75rem, 3vw, 2.75rem);
     color: var(--signal);
     font-variant-numeric: tabular-nums;

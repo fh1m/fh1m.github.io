@@ -1,70 +1,99 @@
 /* Self-hosted typography layer.
-   Exactly four families — zero external font CDN requests.
-   Every generated @font-face ships `font-display: swap` by default.
-   Metric-override fallback faces (Fontaine-style) keep CLS at 0:
-   when a real font is still loading, the browser renders the
-   size-adjusted system fallback, so the swap never shifts layout. */
+   Three families, copied directly from mongla_ws's own
+   docs/assets/fonts/*.woff2 (same author, same self-hosting approach
+   across both sites — not a re-implementation, the actual files) —
+   zero external font CDN requests, matching that repo's own rule.
+   Every generated @font-face ships `font-display: swap` by default. */
 
-/* Display: Iosevka (static, latin subset — weights actually used) */
-@import '@fontsource/iosevka/latin-400.css';
-@import '@fontsource/iosevka/latin-700.css';
+/* Display: Manrope (variable, wght 200-800) — headings/hero wordmark only. */
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/manrope-latin.woff2') format('woff2-variations'), url('../fonts/manrope-latin.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
 
-/* Mono workhorse: Roboto Mono Variable (100–700, unicode-range subsets) */
-@import '@fontsource-variable/roboto-mono';
+/* Body: Zed Sans (an Iosevka-derived proportional build) — prose only. */
+@font-face {
+  font-family: 'Zed Sans';
+  src: url('../fonts/zed-sans-extended.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zed Sans';
+  src: url('../fonts/zed-sans-extendedbold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zed Sans';
+  src: url('../fonts/zed-sans-extendeditalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
 
-/* Body: IBM Plex Sans (regular + medium) */
-@import '@fontsource/ibm-plex-sans/400.css';
-@import '@fontsource/ibm-plex-sans/500.css';
-
-/* Serif accent: Instrument Serif (regular + italic) */
-@import '@fontsource/instrument-serif/400.css';
-@import '@fontsource/instrument-serif/400-italic.css';
+/* Mono: Zed Mono — every label, chip, and number. mongla_ws's own rule,
+   carried over verbatim: numbers stay in mono or the columns stop
+   aligning. See `.font-numeric` in base.css. */
+@font-face {
+  font-family: 'Zed Mono';
+  src: url('../fonts/zed-mono-extended.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zed Mono';
+  src: url('../fonts/zed-mono-extendedbold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ---- Metric-override fallback faces (zero-CLS) ----
-   Each face maps the real family's metrics onto a local system font so
-   `font-display: swap` swaps without layout shift. Values are
-   Fontaine-style: size-adjust = target advance / fallback advance;
-   ascent/descent overrides = target metric / (fallback metric × size-adjust). */
+   Fontaine-style: size-adjust/ascent/descent computed from the REAL font
+   tables (unitsPerEm, hhea ascent/descent, OS/2 xAvgCharWidth — read
+   directly out of each .woff2 with fontTools) against the standard
+   published metrics for the local system font each falls back to
+   (Arial: unitsPerEm 2048, ascent 1854, descent 434, xAvgCharWidth 904;
+   Courier New: unitsPerEm 2048, ascent 1705, descent 615, xAvgCharWidth
+   1233) — not eyeballed. size-adjust = (target avg-width/em) / (fallback
+   avg-width/em); ascent/descent-override = (target metric/em) / size-adjust. */
 
 @font-face {
-  font-family: 'Iosevka Fallback';
-  src: local('SF Mono'), local('Menlo'), local('Consolas'), local('Courier New');
-  size-adjust: 83.33%;
-  ascent-override: 113.68%;
-  descent-override: 144%;
-  line-gap-override: 0%;
-}
-
-@font-face {
-  font-family: 'Roboto Mono Fallback';
-  src: local('SF Mono'), local('Menlo'), local('Consolas'), local('Courier New');
-  size-adjust: 100%;
-  ascent-override: 97.68%;
-  descent-override: 97.6%;
-  line-gap-override: 0%;
-}
-
-@font-face {
-  font-family: 'IBM Plex Sans Fallback';
+  font-family: 'Manrope Fallback';
   src: local('Arial'), local('Helvetica Neue'), local('Segoe UI');
-  size-adjust: 100%;
-  ascent-override: 95.41%;
-  descent-override: 128.2%;
+  size-adjust: 128.13%;
+  ascent-override: 83.21%;
+  descent-override: 23.41%;
   line-gap-override: 0%;
 }
 
 @font-face {
-  font-family: 'Instrument Serif Fallback';
-  src: local('Georgia'), local('Times New Roman');
-  size-adjust: 90.91%;
-  ascent-override: 94.94%;
-  descent-override: 126.7%;
+  font-family: 'Zed Sans Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Segoe UI');
+  size-adjust: 135.95%;
+  ascent-override: 71.12%;
+  descent-override: 15.81%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Zed Mono Fallback';
+  src: local('SF Mono'), local('Menlo'), local('Consolas'), local('Courier New');
+  size-adjust: 99.65%;
+  ascent-override: 97.04%;
+  descent-override: 21.58%;
   line-gap-override: 0%;
 }
 
 :root {
-  --font-display: 'Iosevka', 'Iosevka Fallback', 'Roboto Mono Variable', ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', monospace;
-  --font-mono: 'Roboto Mono Variable', 'Roboto Mono Fallback', ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', monospace;
-  --font-body: 'IBM Plex Sans', 'IBM Plex Sans Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  --font-serif: 'Instrument Serif', 'Instrument Serif Fallback', Georgia, 'Times New Roman', serif;
+  --font-display: 'Manrope', 'Manrope Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Zed Sans', 'Zed Sans Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Zed Mono', 'Zed Mono Fallback', ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', monospace;
 }

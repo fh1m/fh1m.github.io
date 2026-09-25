@@ -61,6 +61,12 @@
   --text-body: clamp(1rem, 0.875rem + 0.5vw, 1.125rem);    /* 16 → 18px */
   --text-mono: clamp(0.75rem, 0.625rem + 0.5vw, 0.875rem); /* 12 → 14px (floor raised) */
   --text-label: 0.75rem;                                   /* 12px (was 11px) */
+  /* One uniform pull-quote size, close to body — italic + color carry the
+     "this is a quote" signal, not a jump to heading scale. Previously
+     every pull-quote site (hero, About influences, press cards, question
+     interstitials...) picked its own size ad hoc, from --text-h3 up to
+     --text-h2 (38px) — inconsistent and loud. This replaces all of them. */
+  --text-quote: clamp(1rem, 0.94rem + 0.3vw, 1.1875rem);   /* 16 → 19px */
 
   /* Line-height inverse to size: display tight, body loose */
   --leading-display: 0.95;
@@ -72,7 +78,7 @@
   --tracking-display: -0.03em;        /* large display (hero, h1) */
   --tracking-display-small: 0.01em;   /* small display (h1/h2 markers) */
   --tracking-label: 0.08em;           /* mono labels, uppercase 12–14px */
-  --max-width-editorial: 68ch;
+  --max-width-editorial: 70ch;        /* matches mongla_ws's --measure */
 
   /* ---- Spacing ---- */
   --space-1: 0.25rem;
@@ -85,6 +91,11 @@
   --space-16: 4rem;
   --space-24: 6rem;
   --space-32: 8rem;
+  /* One fluid section-rhythm formula, mirroring mongla_ws's own
+     `clamp(72px, 9.5vh, 132px)` — replaces the flat `--space-16` (64px)
+     that every top-level <section> used, so the page breathes with
+     viewport height instead of a fixed gap regardless of screen size. */
+  --space-section: clamp(4.5rem, 4rem + 5vh, 8.25rem);
 
   /* ---- Layout ---- */
   --grid-columns: 12;

@@ -95,7 +95,7 @@ const threadOf = (id: string): string => THREAD_MAP[id] ?? 'INTEGRATION';
     .entry-head {
       display: grid;
       gap: var(--space-6);
-      padding: var(--space-16) 0 var(--space-8);
+      padding: var(--space-section) 0 var(--space-8);
     }
 
     .entry-title {
@@ -158,7 +158,7 @@ const threadOf = (id: string): string => THREAD_MAP[id] ?? 'INTEGRATION';
     }
 
     .prose em {
-      font-family: var(--font-serif), serif;
+      font-family: var(--font-body), sans-serif;
       font-style: italic;
       font-size: 1.08em;
     }
@@ -215,6 +215,7 @@ const threadOf = (id: string): string => THREAD_MAP[id] ?? 'INTEGRATION';
       padding-left: var(--space-6);
       color: var(--ink-muted);
       font-style: italic;
+      font-size: var(--text-quote);
     }
 
     .prose hr {

@@ -144,18 +144,16 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
 
   <StatRail />
 
-  <section class="question-node" data-reveal>
+  <section class="question-node" data-reveal aria-label="System telemetry">
     <a class="question-link" href="/about">
       <span class="question-text">How do machines move?</span>
       <span class="question-arrow" aria-hidden="true">→</span>
     </a>
-  </section>
-
-  <section class="status-strip" aria-label="System telemetry">
-    <span class="mono-label">[SYS:ONLINE]</span>
-    <span class="mono-label">[SCROLL:00%]</span>
-    <span class="mono-label">[T: <span id="home-clock">{initialTime}</span>]</span>
-    <span class="mono-label">[FRAMES:—]</span>
+    <div class="status-strip">
+      <span class="mono-label">[SYS:ONLINE]</span>
+      <span class="mono-label">[T: <span id="home-clock">{initialTime}</span>]</span>
+      <span class="mono-label">[FRAMES:—]</span>
+    </div>
   </section>
 
   <!-- ============================================================
@@ -193,7 +191,10 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     <Pipeline />
   </section>
 
-  <section class="act-teaser" data-reveal>
+  <!-- act-teaser + featured merged into one section (was two thin,
+       back-to-back bordered blocks with near-identical row-list
+       layouts) — one section boundary instead of two. -->
+  <section class="featured" data-reveal>
     <p class="mono-label section-label">[THE STORY]</p>
     <div class="act-rows">
       {ACTS.map((a) => (
@@ -204,10 +205,8 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
         </a>
       ))}
     </div>
-  </section>
 
-  <section class="featured" data-reveal>
-    <p class="mono-label section-label">[FEATURED MACHINES]</p>
+    <p class="mono-label section-label section-label-inset">[FEATURED MACHINES]</p>
     <div class="machine-rows">
       {featured.map((m) => {
         const act = m.data.act ?? 'next';
@@ -290,7 +289,7 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
       position: relative;
       max-width: var(--container-max);
       margin: 0 auto;
-      padding: var(--space-24) var(--space-6) var(--space-16);
+      padding: var(--space-24) var(--space-6) var(--space-section);
       display: grid;
       grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr);
       gap: var(--space-12);
@@ -310,19 +309,19 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
        person instead of a project, so the headline reads as HIS line, not
        a borrowed one. */
     .hero-name {
-      font-family: var(--font-mono), ui-monospace, monospace;
+      font-family: var(--font-display), ui-sans-serif, sans-serif;
       font-weight: 800;
-      font-size: clamp(2.75rem, 9vw, 7rem);
+      font-size: clamp(2.75rem, 10vw, 8rem);
       line-height: 0.92;
-      letter-spacing: -0.02em;
+      letter-spacing: var(--tracking-display);
       text-transform: uppercase;
       color: var(--ink);
     }
 
     .hero-title {
-      font-family: Georgia, 'Times New Roman', var(--font-serif), serif;
+      font-family: var(--font-body), sans-serif;
       font-style: italic;
-      font-size: var(--text-h3);
+      font-size: var(--text-quote);
       line-height: 1.4;
       color: var(--ink);
       max-width: 44ch;
@@ -364,12 +363,18 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
       border-color: var(--signal);
     }
 
-    /* ── Question node — story entry pull line ───── */
+    /* ── Question node — story entry pull line + telemetry, merged into
+       one strip instead of two thin sections stacked back to back ───── */
     .question-node {
       max-width: var(--container-max);
       margin: 0 auto;
       padding: var(--space-8) var(--space-6);
       border-top: 1px solid var(--line);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-6);
+      flex-wrap: wrap;
     }
 
     .question-link {
@@ -380,9 +385,9 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     }
 
     .question-text {
-      font-family: Georgia, 'Times New Roman', var(--font-serif), serif;
+      font-family: var(--font-body), sans-serif;
       font-style: italic;
-      font-size: var(--text-h2);
+      font-size: var(--text-quote);
       color: var(--ink);
       max-width: 48ch;
     }
@@ -405,11 +410,6 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     }
 
     .status-strip {
-      max-width: var(--container-max);
-      margin: 0 auto;
-      padding: var(--space-3) var(--space-6);
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
       display: flex;
       gap: var(--space-6);
       flex-wrap: wrap;
@@ -419,7 +419,7 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     .field-section {
       max-width: var(--container-max);
       margin: 0 auto;
-      padding: var(--space-16) var(--space-6);
+      padding: var(--space-section) var(--space-6);
       display: grid;
       gap: var(--space-6);
     }
@@ -487,9 +487,9 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     }
 
     .field-quote {
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: var(--font-body), sans-serif;
       font-style: italic;
-      font-size: var(--text-h3);
+      font-size: var(--text-quote);
       line-height: 1.4;
       color: var(--ink);
       max-width: 36ch;
@@ -502,7 +502,7 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     .pipeline-section {
       max-width: var(--container-max);
       margin: 0 auto;
-      padding: var(--space-16) var(--space-6);
+      padding: var(--space-section) var(--space-6);
       display: grid;
       gap: var(--space-6);
     }
@@ -516,13 +516,9 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
       max-width: var(--max-width-editorial);
     }
 
-    /* ── Act teaser strip ────────────────────────── */
-    .act-teaser {
-      max-width: var(--container-max);
-      margin: 0 auto;
-      padding: var(--space-16) var(--space-6);
-      display: grid;
-      gap: var(--space-6);
+    /* ── Act rows (now a sub-group inside .featured) ─────────── */
+    .section-label-inset {
+      margin-top: var(--space-4);
     }
 
     .act-rows {
@@ -560,7 +556,7 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     .featured {
       max-width: var(--container-max);
       margin: 0 auto;
-      padding: var(--space-16) var(--space-6);
+      padding: var(--space-section) var(--space-6);
       display: grid;
       /* ⛔ EXPLICIT, NOT omitted. A bare `display: grid` with no
          grid-template-columns still lets a descendant's un-wrappable
@@ -655,7 +651,7 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     .pub-section {
       max-width: var(--container-max);
       margin: 0 auto;
-      padding: var(--space-16) var(--space-6);
+      padding: var(--space-section) var(--space-6);
       display: grid;
       gap: var(--space-6);
     }
@@ -664,7 +660,7 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
     .now-teaser {
       max-width: var(--container-max);
       margin: 0 auto;
-      padding: var(--space-16) var(--space-6) var(--space-24);
+      padding: var(--space-section) var(--space-6) var(--space-24);
       display: grid;
       gap: var(--space-4);
     }

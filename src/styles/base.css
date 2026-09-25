@@ -153,25 +153,54 @@ h6 {
   border-top: 1px solid var(--line-strong);
 }
 
-/* ---- Reading serif (mongla-style dual voice) ----
-   Mongla's documentation site pairs a serif body ("conveys technical
-   authority") with mono for exact data. This site's UI chrome (nav, labels,
-   chips, card metadata) stays sans/mono — it reads better small and dense.
-   Long-form NARRATIVE prose — essay paragraphs, journal bodies, editorial
-   blocks — gets the serif voice instead, applied via this class rather than
-   swapping the whole --font-body: the two are used for different kinds of
-   text and mixing them at the token level would blur that distinction.
-   Georgia is a system font (present on effectively every OS since the
-   1990s) — zero new @font-face, zero new network request, keeping the
-   "self-hosted, no extra CDN" rule intact for a font that was never fetched
-   at all. */
-.prose-serif {
-  font-family: Georgia, 'Times New Roman', var(--font-serif), serif;
-  font-size: var(--text-body);
-  line-height: 1.7;
+/* ---- Shared bordered surface (mongla_ws's single `.glass` primitive) ----
+   One reusable card/panel treatment instead of every component inventing
+   its own `border: 1px solid var(--line)` — a border-count audit found 78
+   separate hairline-border declarations across 22 files, most of them
+   this exact rule copy-pasted. Use this class instead of a new one-off. */
+.surface {
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-top-color: var(--line-strong);
 }
 
-/* ---- Mono label (Roboto Mono Variable) ---- */
+/* ---- Section corner brackets (mongla_ws motif) ----
+   Every top-level page section gets two small open corner marks instead
+   of a full border box around it -- the "instrument panel" identity
+   without boxing every block in a hairline rule. Scoped to `main >
+   section[data-reveal]` so it only hits top-level sections, not sections
+   nested inside them (machine category groups, /now's sub-sections) --
+   those would just repeat the mark too densely to read as anything. */
+main > section[data-reveal] {
+  position: relative;
+}
+
+main > section[data-reveal]::before,
+main > section[data-reveal]::after {
+  content: '';
+  position: absolute;
+  top: var(--space-4);
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  opacity: 0.5;
+  border-top: 1px solid var(--line-strong);
+}
+
+main > section[data-reveal]::before {
+  left: var(--space-6);
+  border-left: 1px solid var(--line-strong);
+}
+
+main > section[data-reveal]::after {
+  right: var(--space-6);
+  border-right: 1px solid var(--line-strong);
+}
+
+/* ---- Mono label (Zed Mono) ----
+   mongla_ws's own rule, carried over verbatim: every label, chip, and
+   NUMBER renders in mono, never the display or body face — "or the
+   columns stop aligning." See StatRail/metric values. */
 .mono-label {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--text-label);
@@ -181,11 +210,14 @@ h6 {
   color: var(--ink-muted);
 }
 
-/* ---- Display headline (Iosevka 700) ----
+/* ---- Display headline (Manrope 700) ----
    Sentence-case for hero/story statements; short section markers
-   keep their own uppercase content. Large display tracking −0.03em. */
+   keep their own uppercase content. Large display tracking −0.03em.
+   Manrope is proportional, unlike the mono faces used for labels/body —
+   the contrast between them (not a fourth typeface) is what gives
+   headings their own voice against UI chrome. */
 .display {
-  font-family: var(--font-display), ui-monospace, monospace;
+  font-family: var(--font-display), ui-sans-serif, sans-serif;
   font-weight: 700;
   font-size: var(--text-display);
   letter-spacing: var(--tracking-display);
