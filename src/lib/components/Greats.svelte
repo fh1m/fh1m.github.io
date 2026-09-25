@@ -38,7 +38,10 @@
           <span class="g-v hl">{g.why}</span>
         </div>
       </div>
-      {#if g.url}<a class="link src" href={g.url} target="_blank" rel="noopener">read the source ↗</a>{/if}
+      <div class="g-links">
+        {#if g.blog}<a class="link src" href={g.blog.url} target="_blank" rel="noopener">their writing — {g.blog.label} ↗</a>{/if}
+        {#if g.url}<a class="link src" href={g.url} target="_blank" rel="noopener">the source ↗</a>{/if}
+      </div>
     </div>
   </div>
 
@@ -159,6 +162,11 @@
   }
   .g-v.hl {
     color: var(--ink);
+  }
+  .g-links {
+    display: flex;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
   }
   .src {
     font-size: 0.66rem;

@@ -21,16 +21,15 @@
     <div class="hero-copy">
       <p class="eyebrow">autonomy · robotics · ml — dhaka, bangladesh</p>
       <h1 class="title">
-        <span class="l l1">machines that</span>
-        <span class="l l2">perceive, reason,</span>
-        <span class="l l3">and <em>act.</em></span>
+        <span class="l l1">fahim</span>
+        <span class="l l2">faisal<em>.</em></span>
       </h1>
-      <p class="lede">{PROFILE.intro}</p>
+      <p class="role-line">i build <strong>machines that perceive, reason, and act</strong> — from the firmware on the board to the neural net that sees.</p>
+      <p class="thesis mono">“{PROFILE.thesis}”</p>
       <div class="cta">
         <a class="key primary" href="/work" data-cursor>view the work →</a>
         <a class="key" href="/cv" data-cursor>download cv</a>
       </div>
-      <p class="thesis mono">“{PROFILE.thesis}”</p>
     </div>
 
     <div class="hero-device">
@@ -188,18 +187,30 @@
     line-height: 1.5;
     margin-bottom: var(--sp-5);
   }
+  .role-line {
+    max-width: 42ch;
+    color: var(--ink-2);
+    font-size: var(--text-lede);
+    line-height: 1.5;
+    margin-bottom: var(--sp-3);
+  }
+  .role-line strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
   .cta {
     display: flex;
     gap: var(--sp-3);
     flex-wrap: wrap;
-    margin-bottom: var(--sp-6);
+    margin-top: var(--sp-5);
   }
   .thesis {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--ink-3);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
     border-left: 2px solid var(--red-lit);
     padding-left: 0.9em;
+    max-width: 44ch;
   }
   .device-cap {
     display: flex;

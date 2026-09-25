@@ -17,6 +17,7 @@ export interface Great {
   why: string; // what it changed for fahim
   accent: string;
   url?: string;
+  blog?: { label: string; url: string }; // their own writing
 }
 
 export const GREATS: Great[] = [
@@ -42,6 +43,7 @@ export const GREATS: Great[] = [
     work: 'tinygrad — “the RISC of the ML stack” — and openpilot, self-driving on a phone.',
     why: 'The reason the stack stays small. Every new layer has to justify itself against a delete. I attempted his comma.ai calibration challenge for the same reason.',
     accent: 'var(--sea-lit)',
+    blog: { label: 'geohot.github.io/blog', url: 'https://geohot.github.io/blog/' },
     url: 'https://www.latent.space/p/geohot',
   },
   {
@@ -67,6 +69,7 @@ export const GREATS: Great[] = [
     work: 'The Software 2.0 essay, micrograd, nanoGPT, cs231n — teaching a generation to see nets clearly.',
     why: 'The dataset is the program. My detection work lives or dies on the pipeline that makes the data, not the model that eats it.',
     accent: 'var(--state-water)',
+    blog: { label: 'karpathy.github.io', url: 'https://karpathy.github.io/' },
     url: 'https://karpathy.medium.com/software-2-0-a64152b37c35',
   },
   {
@@ -90,6 +93,7 @@ export const GREATS: Great[] = [
     work: 'LLVM, Clang, Swift, MLIR, Mojo — the compilers everything else stands on.',
     why: 'Know the hardware’s real ceiling, then write toward it. The board runs 500 Hz because that is what the silicon allows, measured.',
     accent: 'var(--sea-lit)',
+    blog: { label: 'nondot.org/sabre', url: 'https://nondot.org/sabre/' },
   },
   {
     slug: 'graham',
@@ -101,6 +105,7 @@ export const GREATS: Great[] = [
     work: 'Viaweb, Arc/Bel, On Lisp, and the essays that started a thousand startups.',
     why: 'Build the thing you wish existed. Mongla exists because I wanted an AUV stack that refused to lie, and none did.',
     accent: 'var(--amber-lit)',
+    blog: { label: 'paulgraham.com/essays', url: 'https://paulgraham.com/articles.html' },
     url: 'https://paulgraham.com/startupideas.html',
   },
   {
@@ -113,6 +118,7 @@ export const GREATS: Great[] = [
     work: 'Wait But Why — hard ideas drawn in stick figures until they’re obvious.',
     why: 'Decide whether you’re cooking or being a chef, on purpose. On the hard parts of the vehicle, I try to be the chef.',
     accent: 'var(--red-lit)',
+    blog: { label: 'waitbutwhy.com', url: 'https://waitbutwhy.com/' },
   },
   {
     slug: 'west',
@@ -135,5 +141,6 @@ export const GREATS: Great[] = [
     work: 'Def Jam, Johnny Cash’s American Recordings, The Creative Act — subtraction as a craft.',
     why: 'Subtraction is a feature. The best commits I write are the ones that delete more than they add.',
     accent: 'var(--amber-lit)',
+    blog: { label: 'tetragrammaton', url: 'https://www.tetragrammaton.com/' },
   },
 ];

@@ -64,11 +64,11 @@
 
   /* ---- Type scale (fluid) — teenage.engineering register: small, restrained,
      functional. Display is modest, never billboard-huge. ---- */
-  --text-hero: clamp(1.9rem, 1.2rem + 3vw, 3.5rem); /* 30 → 56 */
-  --text-display: clamp(1.55rem, 1.2rem + 1.6vw, 2.35rem); /* 25 → 38 */
-  --text-h1: clamp(1.35rem, 1.15rem + 1vw, 1.85rem);
-  --text-h2: clamp(1.15rem, 1.02rem + 0.7vw, 1.45rem);
-  --text-h3: clamp(1rem, 0.94rem + 0.35vw, 1.15rem);
+  --text-hero: clamp(1.7rem, 1.1rem + 2.2vw, 2.9rem); /* 27 → 46 */
+  --text-display: clamp(1.4rem, 1.15rem + 1.1vw, 2rem); /* 22 → 32 */
+  --text-h1: clamp(1.25rem, 1.1rem + 0.7vw, 1.65rem);
+  --text-h2: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+  --text-h3: clamp(0.98rem, 0.93rem + 0.3vw, 1.1rem);
   --text-lede: clamp(0.98rem, 0.92rem + 0.3vw, 1.12rem);
   --text-body: clamp(0.875rem, 0.84rem + 0.16vw, 0.94rem); /* ~14–15px */
   --text-mono: 0.75rem; /* 12px */
@@ -98,9 +98,9 @@
   --sp-section: clamp(5rem, 4rem + 6vh, 10rem);
 
   /* ---- Layout ---- */
-  --container: 1360px;
-  --container-wide: 1600px;
-  --gutter: clamp(1rem, 0.5rem + 3vw, 3rem);
+  --container: 1140px;
+  --container-wide: 1280px;
+  --gutter: clamp(1rem, 0.5rem + 2vw, 2.25rem);
 
   /* ---- Z-index ---- */
   --z-grain: 9999;
