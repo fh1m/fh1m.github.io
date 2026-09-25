@@ -91,7 +91,7 @@ const bodyHtml = lines
   .join('');
 ---
 
-<figure class="code-pane">
+<figure class="code-pane surface">
   <figcaption class="code-titlebar">
     <span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>
     <span class="code-filename mono-label">{filename}</span>
@@ -101,9 +101,9 @@ const bodyHtml = lines
 </figure>
 
 <style>
+  /* border + background come from the shared .surface class (base.css)
+     now, not a local copy of the same two declarations. */
   .code-pane {
-    border: 1px solid var(--line);
-    background: var(--surface-1);
     /* Defense in depth, at the source: `.code-body` below has
        `white-space: pre`, which is exactly the kind of unbreakable
        content that inflates an ancestor grid's implicit track (see the

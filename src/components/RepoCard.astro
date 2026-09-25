@@ -23,7 +23,7 @@ const ogSrc = `https://opengraph.githubassets.com/1/${owner}/${repo}`;
 ---
 
 <a class="repo-card" href={repoUrl} target="_blank" rel="noopener noreferrer" data-tilt>
-  <div class="repo-image-frame">
+  <div class="repo-image-frame surface">
     <img
       class="repo-image"
       src={ogSrc}
@@ -60,12 +60,11 @@ const ogSrc = `https://opengraph.githubassets.com/1/${owner}/${repo}`;
     border-color: var(--line-strong);
   }
 
+  /* border + background come from the shared .surface class (base.css). */
   .repo-image-frame {
     position: relative;
     aspect-ratio: 1280 / 640;
     overflow: hidden;
-    background: var(--surface-1);
-    border: 1px solid var(--line);
     display: grid;
     place-items: center;
   }
