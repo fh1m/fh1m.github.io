@@ -109,22 +109,39 @@ const CONTRADICTIONS = [
 ];
 
 // --- INFLUENCES (brief #20, restrained) ---
+// Each `quote` is verbatim and sourced — not a paraphrase standing in for a
+// real quote. Exact wording and citation checked against the primary source
+// before this went in; see the comment on each row.
 const INFLUENCES = [
   {
     name: 'GEORGE HOTZ',
     borrow: 'the willingness to open the box and rebuild it — first principles over received wisdom',
+    // Verbatim, Lex Fridman Podcast #387, 29 Jun 2023, 2h06m05s.
+    quote: '“If there’s two great evils in the world, it’s centralization and complexity.”',
+    quoteSource: 'Lex Fridman Podcast #387, 2023',
   },
   {
     name: 'ANDREJ KARPATHY',
     borrow: 'the discipline of teaching from the bottom up — mechanisms, not magic',
+    // Verbatim, from his own post — the line this repo's whole ethos ("what
+    // is happening underneath the abstraction") is downstream of.
+    quote: '“Neural net training is a leaky abstraction.”',
+    quoteSource: '"A Recipe for Training Neural Networks", 2019',
   },
   {
     name: 'COMMA.AI',
-    borrow: 'the calibration mindset — there is no magic, just long calibration',
+    borrow: 'the calibration mindset — took their public calib_challenge myself; repo below',
+    quote: '“make driving chill”',
+    quoteSource: 'comma.ai, current tagline',
+    repo: { owner: 'fh1m', name: 'calib_challenge_fh1m' },
   },
   {
-    name: 'THE OPEN-SOURCE COMMUNITY',
+    name: 'ERIC S. RAYMOND',
     borrow: 'the habit of publishing the work so knowledge compounds',
+    // Correcting an earlier draft that credited this to "the open-source
+    // community" in the abstract — the line has an actual author.
+    quote: '“Given enough eyeballs, all bugs are shallow.”',
+    quoteSource: '"The Cathedral and the Bazaar", 1997 (Linus’s Law)',
   },
 ];
 ---
@@ -357,7 +374,23 @@ const INFLUENCES = [
       {INFLUENCES.map((influence) => (
         <div class="influence-row">
           <span class="influence-name">{influence.name}</span>
-          <span class="influence-borrow">{influence.borrow}</span>
+          <div class="influence-body">
+            <p class="influence-quote">
+              {influence.quote}
+              <span class="influence-quote-source mono-label">— {influence.quoteSource}</span>
+            </p>
+            <span class="influence-borrow">{influence.borrow}</span>
+            {influence.repo && (
+              <a
+                class="influence-repo-link mono-label"
+                href={`https://github.com/${influence.repo.owner}/${influence.repo.name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {influence.repo.owner}/{influence.repo.name} ↗
+              </a>
+            )}
+          </div>
         </div>
       ))}
     </div>
@@ -718,8 +751,35 @@ const INFLUENCES = [
       color: var(--ink);
     }
 
+    .influence-body {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .influence-quote {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-size: var(--text-h3);
+      line-height: 1.4;
+      color: var(--ink);
+      border-left: 2px solid var(--signal-2);
+      padding-left: var(--space-3);
+    }
+
+    .influence-quote-source {
+      display: block;
+      margin-top: var(--space-1);
+      font-style: normal;
+      color: var(--ink-muted);
+    }
+
     .influence-borrow {
       color: var(--ink-muted);
+    }
+
+    .influence-repo-link {
+      color: var(--signal);
+      width: fit-content;
     }
 
     /* ============================================================

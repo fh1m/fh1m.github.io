@@ -45,6 +45,46 @@ function updateScrollReadout(progress: number): void {
   el.textContent = `[SCROLL: ${String(pct).padStart(2, '0')}%]`;
 }
 
+// Elements already wired for tilt, so a second `astro:page-load` (view
+// transitions re-fire this) doesn't double-bind pointermove listeners.
+const boundTilt = new WeakSet<HTMLElement>();
+
+/**
+ * Bind a subtle magnetic tilt to every `[data-tilt]` element — cert cards,
+ * repo cards, press cards. Pointer position within the element drives a
+ * small rotateX/rotateY via `gsap.quickTo` (a persistent tween that only
+ * updates its target, not a new tween per pointermove — the cheap way to
+ * do this at 60fps). Resets smoothly on pointerleave. No-op entirely under
+ * `prefers-reduced-motion: reduce` and on coarse/touch pointers, where a
+ * tilt effect is either unwanted or physically meaningless.
+ */
+function bindTilt(): void {
+  if (!window.matchMedia('(pointer: fine)').matches) return;
+  const targets = document.querySelectorAll<HTMLElement>('[data-tilt]');
+  targets.forEach((el) => {
+    if (boundTilt.has(el)) return;
+    boundTilt.add(el);
+    el.style.transformStyle = 'preserve-3d';
+    el.style.perspective = '600px';
+    const setX = gsap.quickTo(el, 'rotateX', { duration: 0.4, ease: 'power2.out' });
+    const setY = gsap.quickTo(el, 'rotateY', { duration: 0.4, ease: 'power2.out' });
+    const setLift = gsap.quickTo(el, 'y', { duration: 0.4, ease: 'power2.out' });
+    el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5; // -0.5..0.5
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      setY(px * 8); // rotateY from horizontal position
+      setX(py * -8); // rotateX from vertical position
+      setLift(-2);
+    });
+    el.addEventListener('pointerleave', () => {
+      setX(0);
+      setY(0);
+      setLift(0);
+    });
+  });
+}
+
 /** Bind reveal animations to every `[data-reveal]` element (GSAP fallback). */
 function bindReveals(): void {
   if (SCROLL_DRIVEN) return; // CSS view-timeline reveals own this in supporting browsers.
@@ -206,6 +246,7 @@ function init(): void {
   bindReveals();
   bindScrollReadout();
   bindScrubMoments();
+  bindTilt();
 }
 
 init();

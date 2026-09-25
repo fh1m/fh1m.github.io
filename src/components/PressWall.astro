@@ -1,0 +1,236 @@
+---
+/**
+ * PressWall — real coverage, not link chips pretending to be evidence.
+ *
+ * The three FEATURED cards carry an actual lede sentence and (where the
+ * source article quoted someone) a real quote, fetched from the live
+ * article at build-research time — not summarized from the headline. The
+ * remaining links are real too (every URL is the one in the resume's
+ * Achievements list) but are shown as plain source chips because their
+ * lede text was not independently fetched and verified for this file —
+ * that distinction is deliberate, not an oversight.
+ */
+interface Featured {
+  outlet: string;
+  headline: string;
+  date: string;
+  lede: string;
+  quote?: { text: string; attribution: string };
+  url: string;
+}
+
+interface Chip {
+  outlet: string;
+  headline: string;
+  url: string;
+}
+
+const FEATURED: Featured[] = [
+  {
+    outlet: 'THE DAILY STAR',
+    headline: 'First hybrid rocket engine in Bangladesh tested successfully',
+    date: 'SEP 2023',
+    lede:
+      'Amateur Experimental Rocketry Dhaka (AERD) successfully tested the first hybrid rocket engine in Bangladesh at AIUB’s research facility, witnessed by AERD members, parents, and visiting students from BRAC, NSU, and AIUB.',
+    quote: {
+      text: '“After months of hard work and data collection, we were finally able to see what we have designed come to life.”',
+      attribution: 'Szu Heng Baldwin Chen, project leader',
+    },
+    url: 'https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016',
+  },
+  {
+    outlet: 'TBS NEWS',
+    headline: 'BRACU Duburi qualifies directly for RoboSub 2025 semi-final',
+    date: 'AUG 2025',
+    lede:
+      'BRACU Duburi, the country’s first autonomous underwater robotics research team, secured direct qualification to the RoboSub 2025 semi-finals in Irvine, California.',
+    url: 'https://www.tbsnews.net/graduates/bracu-duburi-qualifies-directly-robosub-2025-semi-final-1202131',
+  },
+  {
+    outlet: 'TBS NEWS',
+    headline: 'BRACU Duburi qualifies two underwater vehicles for RoboSub 2026 semi-finals',
+    date: 'JUN 2026',
+    lede:
+      'BRACU Duburi qualified two AUVs — Duburi 4.5 and DuboMini 2.0 — for the RoboSub 2026 semi-finals, placing the team among only two in the world to qualify multiple vehicles for that stage.',
+    url: 'https://www.tbsnews.net/economy/corporates/bracu-duburi-qualifies-two-underwater-vehicles-robosub-2026-semi-finals-1467436',
+  },
+];
+
+const CHIPS: Chip[] = [
+  {
+    outlet: 'AIUB',
+    headline: 'Agreement Signing — Dr. Anwarul Abedin Institute of Innovation × AERD',
+    url: 'https://www.aiub.edu/agreement-signing-ceremony-between-dr-anwarul-abedin-institute-of-innovation-aiub-and-amateur-experimental-rocketry-dhaka',
+  },
+  {
+    outlet: 'PCBWAY',
+    headline: "AERD — Bangladesh's First Hybrid Rocketry Team",
+    url: 'https://www.pcbway.com/project/sponsor/AERD_Bangladesh_s_First_Hybrid_Rocketry_Team_3cf1cf00.html',
+  },
+  {
+    outlet: 'DHAKA TRIBUNE',
+    headline: 'AIUB, AERD launch first weather balloon',
+    url: 'https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon',
+  },
+  {
+    outlet: 'BRAC UNIVERSITY',
+    headline: "BRACU Duburi wins special 'Entrepreneurship' award at RoboSub 2025",
+    url: 'https://www.bracu.ac.bd/news/bracu-duburi-wins-special-entrepreneurship-award-robosub-2025',
+  },
+  {
+    outlet: 'BRACU EXPRESS',
+    headline: "BRACU Duburi's Innovation Elevates Bangladesh in Robotics",
+    url: 'https://bracuexpress.com/bracu-duburis-innovation-elevates-bangladesh-in-robotics/',
+  },
+  {
+    outlet: 'BRAC UNIVERSITY',
+    headline: 'Mongol-Tori Ranks Among Global Top 10 at University Rover Challenge 2025',
+    url: 'https://www.bracu.ac.bd/news/brac-universitys-mongol-tori-team-ranks-among-global-top-10-university-rover-challenge-2025',
+  },
+  {
+    outlet: 'BRAC UNIVERSITY',
+    headline: 'Mongol-Tori first runner-up, Bangladesh ICT and Innovation Awards 2025',
+    url: 'https://www.bracu.ac.bd/news/bracu-mongol-tori-first-runner-bangladesh-ict-and-innovation-awards-2025',
+  },
+];
+---
+
+<div class="press-wall">
+  <div class="press-featured">
+    {FEATURED.map((f) => (
+      <a class="press-card" href={f.url} target="_blank" rel="noopener noreferrer" data-tilt>
+        <div class="press-card-head">
+          <span class="press-outlet mono-label">{f.outlet}</span>
+          <span class="press-date mono-label">{f.date}</span>
+        </div>
+        <h3 class="press-headline">{f.headline}</h3>
+        <p class="press-lede">{f.lede}</p>
+        {f.quote && (
+          <p class="press-quote">
+            {f.quote.text}
+            <span class="press-quote-attr mono-label">— {f.quote.attribution}</span>
+          </p>
+        )}
+        <span class="press-cta mono-label">READ ↗</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="press-chips">
+    {CHIPS.map((c) => (
+      <a class="press-chip" href={c.url} target="_blank" rel="noopener noreferrer">
+        <span class="chip-outlet mono-label">{c.outlet}</span>
+        <span class="chip-headline">{c.headline}</span>
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .press-wall {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .press-featured {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+  }
+
+  .press-card {
+    display: grid;
+    gap: var(--space-3);
+    border: 1px solid var(--line);
+    padding: var(--space-4);
+    align-content: start;
+    will-change: transform;
+  }
+
+  .press-card:hover {
+    border-color: var(--line-strong);
+  }
+
+  .press-card-head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .press-outlet {
+    color: var(--signal-2);
+  }
+
+  .press-date {
+    color: var(--ink-muted);
+  }
+
+  .press-headline {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-weight: 600;
+    font-size: var(--text-h3);
+    line-height: 1.3;
+  }
+
+  .press-lede {
+    color: var(--ink-muted);
+    line-height: var(--leading-body);
+  }
+
+  .press-quote {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    color: var(--ink);
+    border-left: 2px solid var(--signal-2);
+    padding-left: var(--space-3);
+  }
+
+  .press-quote-attr {
+    display: block;
+    margin-top: var(--space-1);
+    font-style: normal;
+    color: var(--ink-muted);
+  }
+
+  .press-cta {
+    color: var(--signal);
+    margin-top: auto;
+  }
+
+  .press-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-6);
+  }
+
+  .press-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    border: 1px solid var(--line);
+    padding: var(--space-2) var(--space-3);
+    max-width: 100%;
+  }
+
+  .press-chip:hover {
+    border-color: var(--ink-muted);
+  }
+
+  .chip-outlet {
+    color: var(--ink-muted);
+    white-space: nowrap;
+  }
+
+  .chip-headline {
+    color: var(--ink);
+    font-size: var(--text-label);
+  }
+
+  @media (max-width: 900px) {
+    .press-featured {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

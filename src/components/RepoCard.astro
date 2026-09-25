@@ -1,0 +1,121 @@
+---
+/**
+ * RepoCard — a real GitHub repository, shown as GitHub's own auto-generated
+ * social preview image rather than a fabricated screenshot.
+ *
+ * `https://opengraph.githubassets.com/1/{owner}/{repo}` is GitHub's own
+ * service: it renders the repo's real name, description, primary language
+ * and star count into an image, server-side, on every request. Using it
+ * means this card can never drift from the repo (no local screenshot to
+ * go stale) and never claims a "screenshot" that wasn't actually taken —
+ * it's GitHub's card, embedded, not a re-creation of one.
+ */
+interface Props {
+  owner: string;
+  repo: string;
+  href?: string; // defaults to the github.com repo URL
+  label?: string; // optional caption override
+}
+
+const { owner, repo, href, label } = Astro.props;
+const repoUrl = href ?? `https://github.com/${owner}/${repo}`;
+const ogSrc = `https://opengraph.githubassets.com/1/${owner}/${repo}`;
+---
+
+<a class="repo-card" href={repoUrl} target="_blank" rel="noopener noreferrer" data-tilt>
+  <div class="repo-image-frame">
+    <img
+      class="repo-image"
+      src={ogSrc}
+      alt={`GitHub preview card for ${owner}/${repo}`}
+      loading="lazy"
+      width="1280"
+      height="640"
+      onerror="this.closest('.repo-image-frame').classList.add('repo-image-failed')"
+    />
+    <!-- GitHub's own card service rate-limits by IP and occasionally 4xxs a
+         fresh request (measured: 429 from this build's own network). A
+         broken-image icon on a real visitor's screen is worse than no image,
+         so a failed load swaps to a plain text fallback instead — never a
+         missing-image glyph. -->
+    <span class="repo-image-fallback mono-label" aria-hidden="true">[github.com/{owner}/{repo}]</span>
+  </div>
+  <div class="repo-meta">
+    <span class="repo-path mono-label">{owner}/{repo}</span>
+    {label && <span class="repo-label">{label}</span>}
+    <span class="repo-cta mono-label">SOURCE ↗</span>
+  </div>
+</a>
+
+<style>
+  .repo-card {
+    display: grid;
+    gap: var(--space-3);
+    border: 1px solid var(--line);
+    padding: var(--space-3);
+    will-change: transform;
+  }
+
+  .repo-card:hover {
+    border-color: var(--line-strong);
+  }
+
+  .repo-image-frame {
+    position: relative;
+    aspect-ratio: 1280 / 640;
+    overflow: hidden;
+    background: var(--surface-1);
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+  }
+
+  .repo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    grid-area: 1 / 1;
+    filter: grayscale(0.35) contrast(1.05);
+    transition: filter var(--dur-base) var(--ease-out);
+  }
+
+  .repo-card:hover .repo-image {
+    filter: grayscale(0) contrast(1);
+  }
+
+  .repo-image-fallback {
+    display: none;
+    grid-area: 1 / 1;
+    color: var(--ink-muted);
+  }
+
+  .repo-image-failed .repo-image {
+    display: none;
+  }
+
+  .repo-image-failed .repo-image-fallback {
+    display: block;
+  }
+
+  .repo-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .repo-path {
+    color: var(--ink);
+  }
+
+  .repo-label {
+    color: var(--ink-muted);
+    font-size: var(--text-label);
+  }
+
+  .repo-cta {
+    color: var(--signal);
+    margin-left: auto;
+  }
+</style>

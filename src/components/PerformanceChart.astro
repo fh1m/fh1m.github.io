@@ -3,9 +3,10 @@
  * PerformanceChart — SVG sparkline from optional `trend` frontmatter.
  *
  * Line uses --line-strong (not --signal: the page's signal budget is spent
- * above the fold). The gradient fill uses the allowed hardcoded hex #6AB8FF
- * (the --signal token) because SVG gradient stop-color cannot use var()
- * across browsers. The best-value point (peak) carries the page's single
+ * above the fold). The gradient fill uses the allowed hardcoded hex #000EFF
+ * (--signal-brand, the literal brand blue — a large decorative fill, not
+ * text, so the lift that --signal gets for contrast doesn't apply here)
+ * because SVG gradient stop-color cannot use var() across browsers. The best-value point (peak) carries the page's single
  * --signal-amber marker.
  *
  * Values are ranks: lower is better, so the minimum value plots at the top.
@@ -55,10 +56,10 @@ const peak = points.reduce((best, p) => (p.value < best.value ? p : best), point
     >
       <defs>
         <linearGradient id="perf-fill" x1="0" y1="0" x2="0" y2="1">
-          <!-- Hardcoded #6AB8FF = --signal token. SVG gradient stop-color
+          <!-- Hardcoded #000EFF = --signal-brand. SVG gradient stop-color
                cannot use var() across browsers (Safari) — allowed exception. -->
-          <stop offset="0%" stop-color="#6AB8FF" stop-opacity="0.18" />
-          <stop offset="100%" stop-color="#6AB8FF" stop-opacity="0" />
+          <stop offset="0%" stop-color="#000EFF" stop-opacity="0.18" />
+          <stop offset="100%" stop-color="#000EFF" stop-opacity="0" />
         </linearGradient>
       </defs>
 

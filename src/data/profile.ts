@@ -33,8 +33,10 @@ export const PROFILE: Profile = {
   links: {
     github: 'https://github.com/fh1m',
     duburi: 'https://bracu-duburi.com',
-    // Real contact address (git config user.email) — live since the fh1m.github.io deploy.
-    email: 'mailto:fahim.2002.faisal@gmail.com',
+    // Cross-checked against the resume header (the current authoritative
+    // source, 2026) — updated from fahim.2002.faisal@gmail.com. The old
+    // address is not wrong, it's just not the one the resume leads with.
+    email: 'mailto:fh1m.faisal.work@gmail.com',
   },
   statusLine: 'MACHINE STATUS: RUNNING',
   // Verbatim manifesto block, brief #46 (plan line 63) — one line per array entry.

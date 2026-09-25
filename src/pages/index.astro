@@ -1,5 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
+import Boot from '../components/Boot.astro';
+import Scope from '../components/Scope.astro';
+import StatRail from '../components/StatRail.astro';
+import CertWall from '../components/CertWall.astro';
+import PressWall from '../components/PressWall.astro';
+import PublicationCards from '../components/PublicationCards.astro';
+import RepoCard from '../components/RepoCard.astro';
+import CodePane from '../components/CodePane.astro';
 import Pipeline from '../components/Pipeline.astro';
 import { PROFILE } from '../data/profile';
 import { getCollection } from 'astro:content';
@@ -47,26 +55,90 @@ const allMachines = await getCollection('machines');
 const featured = FEATURED_SLUGS.map((slug) =>
   allMachines.find((m) => m.id === slug && !m.data.draft),
 ).filter((m): m is CollectionEntry<'machines'> => Boolean(m));
+
+// ---- Scope contacts — derived from the real machines collection, not
+// hand-typed. Range = normalized age (oldest dateStart → range 1, newest →
+// range ~0.15), bearing is a fixed fan spread so five labels don't overlap.
+// This is the same data the /machines pages render; the scope just reads
+// it back as a radar instead of a table.
+const SCOPE_SLUGS = ['duburi', 'calib_challenge', 'arduino-vision', 'duburi_ws', 'air-gnc'] as const;
+const scopeSource = SCOPE_SLUGS.map((slug) => allMachines.find((m) => m.id === slug))
+  .filter((m): m is CollectionEntry<'machines'> => Boolean(m));
+const starts = scopeSource.map((m) => m.data.dateStart);
+const oldest = starts.reduce((a, b) => (a < b ? a : b));
+const newest = starts.reduce((a, b) => (a > b ? a : b));
+const toMonths = (d: string) => {
+  const [y, m] = d.split('-').map(Number);
+  return y * 12 + m;
+};
+const span = Math.max(1, toMonths(newest) - toMonths(oldest));
+const BEARINGS = [340, 60, 130, 200, 270];
+const scopeContacts = scopeSource.map((m, i) => ({
+  label: m.data.name.length > 18 ? m.data.name.slice(0, 16).toUpperCase() + '…' : m.data.name.toUpperCase(),
+  bearingDeg: BEARINGS[i % BEARINGS.length],
+  range: 0.15 + 0.75 * ((toMonths(newest) - toMonths(m.data.dateStart)) / span),
+  href: `/machines/${m.id}`,
+}));
+
+// ---- Flagship code excerpt — verbatim from mongla_ws (fh1m/mongla_ws,
+// main, src/mongla_control/mongla_control/geometric_allocation.py:66-90).
+// Not written to look like sample code: this is the actual thrust-allocation
+// matrix builder for the AUV hull, cross product and all.
+const ALLOCATOR_EXCERPT = `def _cross(a: Sequence[float], b: Sequence[float]) -> Tuple[float, float, float]:
+    return (a[1] * b[2] - a[2] * b[1],
+            a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0])
+
+
+def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
+    """The 6xN allocation matrix: force rows then moment rows.
+
+    Column j is what thruster j produces at unit output -- its axis as a force,
+    and \`r x axis\` as a moment. That is the whole model, and it is why the
+    moment arms are real distances instead of signs.
+    """
+    rows = [[0.0] * len(thrusters) for _ in range(6)]
+    for j, (_name, pos, axis) in enumerate(thrusters):
+        n = (axis[0] ** 2 + axis[1] ** 2 + axis[2] ** 2) ** 0.5
+        unit = tuple(c / n for c in axis)
+        moment = _cross(pos, unit)
+        for i in range(3):
+            rows[i][j] = unit[i]
+            rows[i + 3][j] = moment[i]
+    return tuple(tuple(r) for r in rows)
+`;
 ---
 
 <Base title="FAHIM FAISAL — AUTONOMOUS SYSTEMS" description={PROFILE.roleLine}>
-  <!-- [VERIFY]: LOC derives from PROFILE.location ("Dhaka, Bangladesh" → "DHAKA BD"); confirm the abbreviation mapping before publishing. -->
+  <Boot />
+
+  <!-- ============================================================
+       HERO — headline + CTAs on the left, the sonar Scope on the right.
+       Real, sourced contacts, not decoration (see SCOPE_SLUGS above).
+       ============================================================ -->
   <section class="hero" data-reveal>
-    <p class="mono-label">
-      [SYS: ONLINE] [LOC: {locCity} {locCountry}] [BLDG: {buildYear}]
-    </p>
-    <h1 class="display hero-title">
-      Machines that have to work when nobody is watching.
-    </h1>
-    <p class="hero-sub">
-      I build machines that perceive the world and act inside it. Most of my work
-      starts with a question about what is happening underneath the abstraction.
-    </p>
-    <div class="hero-ctas">
-      <a class="cta" href="/machines">[03] MACHINES →</a>
-      <a class="cta" href="/about">[01] ABOUT →</a>
+    <div class="hero-copy">
+      <p class="mono-label">
+        [SYS: ONLINE] [LOC: {locCity} {locCountry}] [BLDG: {buildYear}]
+      </p>
+      <h1 class="display hero-title">
+        Machines that have to work when nobody is watching.
+      </h1>
+      <p class="hero-sub">
+        I build machines that perceive the world and act inside it. Most of my work
+        starts with a question about what is happening underneath the abstraction.
+      </p>
+      <div class="hero-ctas">
+        <a class="cta" href="/machines">[03] MACHINES →</a>
+        <a class="cta" href="/about">[01] ABOUT →</a>
+      </div>
+    </div>
+    <div class="hero-scope">
+      <Scope contacts={scopeContacts} />
     </div>
   </section>
+
+  <StatRail />
 
   <section class="question-node" data-reveal>
     <a class="question-link" href="/about">
@@ -80,6 +152,36 @@ const featured = FEATURED_SLUGS.map((slug) =>
     <span class="mono-label">[SCROLL:00%]</span>
     <span class="mono-label">[T: <span id="home-clock">{initialTime}</span>]</span>
     <span class="mono-label">[FRAMES:—]</span>
+  </section>
+
+  <!-- ============================================================
+       THE FIELD — the one real photograph on the site: the AUV in the
+       water at a BRACU Duburi pool session, mid-session on a dual-screen
+       rig. Duotone-treated to sit in the palette, not stock imagery.
+       ============================================================ -->
+  <section class="field-section" data-reveal>
+    <p class="mono-label section-label">[IN THE FIELD]</p>
+    <div class="field-grid">
+      <figure class="field-photo-frame">
+        <img
+          class="field-photo"
+          src="/media/poolside.jpg"
+          alt="Fahim Faisal at a BRACU Duburi pool test session, working at a dual-screen laptop rig beside the AUV floating at the water's edge"
+          width="1125"
+          height="2000"
+          loading="eager"
+        />
+        <span class="field-scan" aria-hidden="true"></span>
+      </figure>
+      <div class="field-copy">
+        <p class="field-quote">
+          The vehicle has to work in water, on battery, with nobody driving it by hand.
+          Everything upstream of that moment is rehearsal.
+        </p>
+        <p class="field-caption mono-label">POOL SESSION — BRACU DUBURI — AUV IN WATER, DUAL-SCREEN TELEMETRY RIG</p>
+        <a class="cta" href="/machines/duburi">[MACHINE] DUBURI →</a>
+      </div>
+    </div>
   </section>
 
   <section class="pipeline-section" data-reveal>
@@ -120,15 +222,42 @@ const featured = FEATURED_SLUGS.map((slug) =>
         );
       })}
     </div>
+
+    <!-- Flagship real code, from the actual repo. -->
+    <div class="flagship">
+      <CodePane
+        filename="mongla_control/geometric_allocation.py"
+        lang="python"
+        code={ALLOCATOR_EXCERPT}
+        caption="fh1m/mongla_ws — real thrust-allocation matrix builder for the AUV hull, read verbatim off main"
+      />
+      <RepoCard owner="fh1m" repo="mongla_ws" label="Mongla — the AUV autonomy stack, independent of duburi_ws" />
+    </div>
   </section>
 
-  <section class="press-strip" data-reveal>
+  <!-- ============================================================
+       CREDENTIALS — the real RoboSub certificates.
+       ============================================================ -->
+  <section class="cert-section" data-reveal>
+    <p class="mono-label section-label">[CREDENTIALS]</p>
+    <p class="section-intro">Three RoboSub campaigns, three certificates, one team.</p>
+    <CertWall />
+  </section>
+
+  <!-- ============================================================
+       PRESS — real headlines, real ledes, real quotes.
+       ============================================================ -->
+  <section class="press-section" data-reveal>
     <p class="mono-label section-label">[AS COVERED BY]</p>
-    <div class="press-links">
-      <a class="press-link mono-label" href="https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016" target="_blank" rel="noopener noreferrer">THE DAILY STAR</a>
-      <a class="press-link mono-label" href="https://robonation.org" target="_blank" rel="noopener noreferrer">ROBONATION</a>
-      <a class="press-link mono-label" href="https://bracuduburi.com/" target="_blank" rel="noopener noreferrer">BRACU DUBURI</a>
-    </div>
+    <PressWall />
+  </section>
+
+  <!-- ============================================================
+       PUBLICATIONS
+       ============================================================ -->
+  <section class="pub-section" data-reveal>
+    <p class="mono-label section-label">[PUBLICATIONS]</p>
+    <PublicationCards />
   </section>
 
   <section class="now-teaser" data-reveal>
@@ -153,13 +282,17 @@ const featured = FEATURED_SLUGS.map((slug) =>
   </script>
 
   <style>
-    /* F3 FLAG: 7 raw var(--signal) refs (hero CTA base+hover = 1 pattern,
-       act chips = 1 pattern, machine-arrow hover = 1 pattern,
-       question hover = 1 conditional pattern) — ≤3 simultaneous per viewport. */
     .hero {
       max-width: var(--container-max);
       margin: 0 auto;
       padding: var(--space-24) var(--space-6) var(--space-16);
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr);
+      gap: var(--space-12);
+      align-items: center;
+    }
+
+    .hero-copy {
       display: grid;
       gap: var(--space-8);
     }
@@ -213,7 +346,7 @@ const featured = FEATURED_SLUGS.map((slug) =>
     }
 
     .question-text {
-      font-family: var(--font-serif), serif;
+      font-family: Georgia, 'Times New Roman', var(--font-serif), serif;
       font-style: italic;
       font-size: var(--text-h2);
       color: var(--ink);
@@ -248,6 +381,79 @@ const featured = FEATURED_SLUGS.map((slug) =>
       flex-wrap: wrap;
     }
 
+    /* ── The Field — real photo ──────────────────── */
+    .field-section {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-16) var(--space-6);
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: var(--space-8);
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: var(--space-8);
+    }
+
+    .field-photo-frame {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      max-height: 640px;
+    }
+
+    .field-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Duotone-adjacent treatment: desaturate, then let the near-black
+         background and blue signal read through as the "tint" via the
+         page around it rather than a heavy CSS duotone filter — keeps the
+         real photo honest (recognizable) instead of stylized into
+         illegibility. */
+      filter: grayscale(0.4) contrast(1.08) saturate(0.9) brightness(0.96);
+    }
+
+    .field-scan {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(94, 119, 255, 0.06) 50%, transparent 100%);
+      background-size: 100% 220%;
+      animation: field-scan-move 6s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes field-scan-move {
+      from {
+        background-position: 0 0;
+      }
+      to {
+        background-position: 0 220%;
+      }
+    }
+
+    .field-copy {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .field-quote {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-size: var(--text-h3);
+      line-height: 1.4;
+      color: var(--ink);
+      max-width: 36ch;
+    }
+
+    .field-caption {
+      color: var(--ink-muted);
+    }
+
     .pipeline-section {
       max-width: var(--container-max);
       margin: 0 auto;
@@ -258,6 +464,11 @@ const featured = FEATURED_SLUGS.map((slug) =>
 
     .section-label {
       color: var(--ink-muted);
+    }
+
+    .section-intro {
+      color: var(--ink-muted);
+      max-width: var(--max-width-editorial);
     }
 
     /* ── Act teaser strip ────────────────────────── */
@@ -306,6 +517,15 @@ const featured = FEATURED_SLUGS.map((slug) =>
       margin: 0 auto;
       padding: var(--space-16) var(--space-6);
       display: grid;
+      /* ⛔ EXPLICIT, NOT omitted. A bare `display: grid` with no
+         grid-template-columns still lets a descendant's un-wrappable
+         min-content (here: .flagship > .code-pane > pre, white-space: pre)
+         push the implicit column wider than the viewport — nested grids
+         leak min-content upward through every level that doesn't cap it,
+         and `.flagship`'s own `minmax(0, ...)` tracks only protect ITS
+         children, not .featured's sizing of .flagship itself. Measured:
+         without this, a 390px viewport produced a 6992px page. */
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--space-6);
     }
 
@@ -344,6 +564,18 @@ const featured = FEATURED_SLUGS.map((slug) =>
 
     .machine-summary {
       color: var(--ink-muted);
+      /* This is a grid item that spans `grid-column: 1 / -1` on narrow
+         viewports (see the media query below). `min-width: 0` alone did
+         NOT fix this measured 425px-in-a-342px-track overflow -- a span
+         that crosses a flexible (`1fr`) track keeps some max-content
+         contribution to that track under the grid sizing algorithm even
+         with min-width: 0 on the item. `width: 100%` forces the item to
+         its resolved grid-area width outright, and `overflow-wrap` is the
+         belt-and-braces: whatever width it ends up with, prose breaks
+         inside it rather than pushing the box wider. */
+      min-width: 0;
+      width: 100%;
+      overflow-wrap: anywhere;
     }
 
     .machine-arrow {
@@ -357,39 +589,30 @@ const featured = FEATURED_SLUGS.map((slug) =>
       padding: var(--space-1) var(--space-2);
       width: fit-content;
       line-height: 1;
+      min-width: 0;
     }
 
     .machine-row:hover .machine-arrow {
       color: var(--signal);
     }
 
-    /* ── Press strip ─────────────────────────────── */
-    .press-strip {
+    .flagship {
+      margin-top: var(--space-8);
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    /* ── Credentials / Press / Publications section shells ────── */
+    .cert-section,
+    .press-section,
+    .pub-section {
       max-width: var(--container-max);
       margin: 0 auto;
       padding: var(--space-16) var(--space-6);
       display: grid;
       gap: var(--space-6);
-    }
-
-    .press-links {
-      display: flex;
-      gap: var(--space-6);
-      flex-wrap: wrap;
-      border-top: 1px solid var(--line);
-      padding-top: var(--space-4);
-    }
-
-    .press-link {
-      color: var(--ink-muted);
-      border: 1px solid var(--line);
-      padding: var(--space-1) var(--space-2);
-      line-height: 1;
-    }
-
-    .press-link:hover {
-      color: var(--ink);
-      border-color: var(--ink-muted);
     }
 
     /* ── NOW / Act IV teaser ─────────────────────── */
@@ -406,9 +629,36 @@ const featured = FEATURED_SLUGS.map((slug) =>
       max-width: 40ch;
     }
 
+    @media (max-width: 1000px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-scope {
+        order: -1;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flagship {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 720px) {
+      /* A single flexible column, not a spanning item across mixed
+         auto/1fr tracks: with `auto auto 1fr auto` + a `grid-column: 1/-1`
+         item, the spanning item's max-content size can still inflate the
+         `auto` tracks even with min-width:0/width:100% on the item itself
+         (measured: 425px content in a 342px track, at 390px viewport).
+         One `minmax(0, 1fr)` column sidesteps the interaction outright —
+         every child is full-width and wraps on its own line. */
       .machine-row {
-        grid-template-columns: auto auto 1fr auto;
+        grid-template-columns: minmax(0, 1fr);
       }
 
       .machine-summary,

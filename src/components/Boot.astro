@@ -1,0 +1,149 @@
+---
+/**
+ * Boot — a terminal boot sequence over the homepage, once per browser
+ * session, before the hero is visible.
+ *
+ * Rules, all load-bearing:
+ *   - Runs ONCE per session (sessionStorage flag) — a returning visitor
+ *     mid-session never sees it twice.
+ *   - `prefers-reduced-motion: reduce` skips it ENTIRELY, synchronously,
+ *     before first paint — no flash of the overlay, no typed animation.
+ *   - Content underneath is real DOM from the first frame; this is a
+ *     `position: fixed` scrim on top, not a gate on rendering. A crawler,
+ *     a JS-disabled browser, or a slow connection all see the real page.
+ *   - Always skippable: click, keypress, or a 2.4s max hold before it
+ *     dismisses itself even if nothing is clicked.
+ */
+const LINES = [
+  '[BOOT] mongla-class personal instrumentation v3',
+  '[INIT] loading profile — FAHIM FAISAL (fh1m)',
+  '[INIT] subsystems: control · vision · estimation · systems',
+  '[LINK] 3× RoboSub campaigns — 2ND (2023) · 9TH (2025) · 8TH (2026)',
+  '[OK]   all systems nominal — press any key',
+];
+---
+
+<div class="boot-scrim" data-boot aria-hidden="true">
+  <div class="boot-inner">
+    <pre class="boot-lines mono-label" data-boot-lines>{LINES.map((l) => l + '\n')}</pre>
+    <p class="boot-skip mono-label">[ANY KEY / CLICK TO CONTINUE]</p>
+  </div>
+</div>
+
+<script is:inline define:vars={{ LINES }}>
+  (function () {
+    var KEY = 'fh1m-boot-seen-v3';
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var seen = false;
+    try {
+      seen = sessionStorage.getItem(KEY) === '1';
+    } catch (e) {
+      seen = false; // storage blocked (private mode etc.) — degrade to "always skip"
+      seen = true;
+    }
+
+    var scrim = document.querySelector('[data-boot]');
+    if (!scrim) return;
+
+    if (reduce || seen) {
+      scrim.remove();
+      return;
+    }
+
+    try {
+      sessionStorage.setItem(KEY, '1');
+    } catch (e) {
+      /* best-effort only */
+    }
+
+    document.documentElement.classList.add('boot-lock');
+
+    var linesEl = scrim.querySelector('[data-boot-lines]');
+    var full = LINES.join('\n') + '\n';
+    var i = 0;
+    var typeTimer = null;
+    var dismissTimer = null;
+
+    function dismiss() {
+      if (!scrim || scrim.dataset.done) return;
+      scrim.dataset.done = '1';
+      clearTimeout(typeTimer);
+      clearTimeout(dismissTimer);
+      document.documentElement.classList.remove('boot-lock');
+      scrim.classList.add('boot-out');
+      window.setTimeout(function () {
+        scrim && scrim.remove();
+      }, 260);
+      window.removeEventListener('keydown', dismiss);
+      window.removeEventListener('pointerdown', dismiss);
+    }
+
+    function type() {
+      if (i > full.length) return;
+      if (linesEl) linesEl.textContent = full.slice(0, i);
+      i += 2; // two chars per tick — fast enough not to feel like a stall
+      if (i <= full.length) {
+        typeTimer = window.setTimeout(type, 8);
+      }
+    }
+
+    if (linesEl) linesEl.textContent = '';
+    type();
+    window.addEventListener('keydown', dismiss);
+    window.addEventListener('pointerdown', dismiss);
+    dismissTimer = window.setTimeout(dismiss, 2400);
+  })();
+</script>
+
+<style>
+  .boot-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-grain) + 10);
+    background: var(--surface-0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    cursor: pointer;
+  }
+
+  .boot-scrim.boot-out {
+    animation: boot-fade var(--dur-page) var(--ease-out) both;
+  }
+
+  @keyframes boot-fade {
+    to {
+      opacity: 0;
+    }
+  }
+
+  .boot-inner {
+    max-width: 640px;
+    width: 100%;
+  }
+
+  .boot-lines {
+    color: var(--signal);
+    white-space: pre-wrap;
+    line-height: var(--leading-mono);
+    min-height: 6.5em;
+  }
+
+  .boot-skip {
+    margin-top: var(--space-6);
+    color: var(--ink-muted);
+    animation: boot-blink 1.1s steps(1) infinite;
+  }
+
+  @keyframes boot-blink {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  /* Lock scroll while the boot overlay is up — set on <html> by the script. */
+  :global(html.boot-lock) {
+    overflow: hidden;
+  }
+</style>

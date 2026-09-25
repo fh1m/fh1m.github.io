@@ -21,8 +21,8 @@
   >
     <defs>
       <linearGradient id="traj-area-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#6AB8FF" stop-opacity="0.12" />
-        <stop offset="100%" stop-color="#6AB8FF" stop-opacity="0.02" />
+        <stop offset="0%" stop-color="#000EFF" stop-opacity="0.12" />
+        <stop offset="100%" stop-color="#000EFF" stop-opacity="0.02" />
       </linearGradient>
     </defs>
 
@@ -100,8 +100,8 @@
    * Scroll-driven draw-on enhancement.
    * Gated behind both reduced-motion and feature support.
    * Default state (outside this block): both curves fully drawn, area visible.
-   * SVG stop-color for gradient is hardcoded to hex #6AB8FF (maps to the
-   * signal token) because CSS custom properties are unreliable in SVG
+   * SVG stop-color for gradient is hardcoded to hex #000EFF (--signal-brand,
+   * the literal brand blue) because CSS custom properties are unreliable in SVG
    * gradient stops across browsers. This is the one allowed exception.
    */
   @media (prefers-reduced-motion: no-preference) {

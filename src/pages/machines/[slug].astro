@@ -5,6 +5,7 @@ import MachineOverview from '../../components/MachineOverview.astro';
 import TechStack from '../../components/TechStack.astro';
 import ArchDiagram from '../../components/ArchDiagram.astro';
 import PerformanceChart from '../../components/PerformanceChart.astro';
+import RepoCard from '../../components/RepoCard.astro';
 
 const CATEGORY_ORDER = ['underwater', 'air', 'perception', 'compute', 'systems'] as const;
 const CATEGORY_LABELS: Record<string, string> = {
@@ -56,6 +57,14 @@ const categoryLabel = CATEGORY_LABELS[category] ?? category.toUpperCase();
 const tone = STATUS_TONE[status] ?? 'gray';
 const hasRepo = repoLink !== undefined && repoLink.trim() !== '';
 const hasMetrics = metrics !== undefined && metrics.length > 0;
+
+// Owner/repo parsed straight from the frontmatter URL, not re-typed per
+// machine — one source of truth, and a typo in either would break the
+// GitHub link (which every page already renders) the same way it breaks
+// this card.
+const repoMatch = hasRepo ? repoLink!.match(/github\.com\/([^/]+)\/([^/]+)\/?$/) : null;
+const repoOwner = repoMatch?.[1];
+const repoName = repoMatch?.[2];
 const hasSources = sources !== undefined && sources.length > 0;
 
 const CHAPTER_QUESTIONS: Record<string, string> = {
@@ -129,12 +138,21 @@ const chapterQuestion = chapterKey ? CHAPTER_QUESTIONS[chapterKey] : undefined;
       <TechStack stack={machine.data.stack} />
     )}
 
-    <figure class="media-pending" data-reveal>
-      <div class="media-frame">
-        <span class="mono-label">[MEDIA: PENDING]</span>
+    {repoOwner && repoName ? (
+      <div class="media-repo" data-reveal>
+        <RepoCard owner={repoOwner} repo={repoName} href={repoLink} label={summary} />
       </div>
-      <figcaption class="media-caption mono-label">{summary}</figcaption>
-    </figure>
+    ) : (
+      <!-- The one machine with no public repo (air-gnc — "no public repo,
+           drafted from the brief narrative" per the README checklist) gets
+           the honest placeholder rather than a card with nothing behind it. -->
+      <figure class="media-pending" data-reveal>
+        <div class="media-frame">
+          <span class="mono-label">[MEDIA: PENDING — NO PUBLIC REPO]</span>
+        </div>
+        <figcaption class="media-caption mono-label">{summary}</figcaption>
+      </figure>
+    )}
 
     <ArchDiagram slug={machine.id} />
 
@@ -316,8 +334,10 @@ const chapterQuestion = chapterKey ? CHAPTER_QUESTIONS[chapterKey] : undefined;
       border-color: var(--ink-muted);
     }
 
-    .media-pending {
+    .media-pending,
+    .media-repo {
       margin-top: var(--space-12);
+      max-width: 640px;
     }
 
     .media-frame {

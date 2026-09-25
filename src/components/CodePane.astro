@@ -1,0 +1,184 @@
+---
+/**
+ * CodePane — a real source excerpt, rendered as a terminal window.
+ *
+ * The code passed in is copied verbatim from an actual file in a real repo
+ * (see each call site's comment for exactly which commit/path) — not
+ * written to look plausible. A minimal server-side tokenizer (Python-only,
+ * ~20 lines below) colors comments/strings/keywords; this is the entire
+ * "syntax highlighting" the site ships. No client JS, no highlighter
+ * dependency: it runs once at build time and outputs plain HTML.
+ */
+interface Props {
+  filename: string;
+  lang?: 'python' | 'text';
+  code: string;
+  caption?: string;
+}
+
+const { filename, lang = 'python', code, caption } = Astro.props;
+
+const PY_KEYWORDS = new Set([
+  'def', 'class', 'import', 'from', 'return', 'if', 'elif', 'else', 'for',
+  'while', 'in', 'not', 'and', 'or', 'is', 'None', 'True', 'False', 'self',
+  'try', 'except', 'finally', 'raise', 'with', 'as', 'pass', 'break',
+  'continue', 'yield', 'lambda', 'async', 'await', 'global', 'assert',
+]);
+
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Tokenize one line: comment tail, string literals, keywords. Regex-based,
+ * intentionally approximate (no nested-quote or f-string-expression
+ * awareness) — a visual aid, not a parser. */
+function highlightLine(line: string): string {
+  if (lang !== 'python') return esc(line);
+
+  // Split off a trailing comment first (naive: first unquoted '#').
+  let code_ = line;
+  let comment = '';
+  let inStr: string | null = null;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inStr) {
+      if (ch === inStr && line[i - 1] !== '\\') inStr = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      inStr = ch;
+      continue;
+    }
+    if (ch === '#') {
+      code_ = line.slice(0, i);
+      comment = line.slice(i);
+      break;
+    }
+  }
+
+  const strRe = /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g;
+  const parts = code_.split(strRe);
+  let out = '';
+  parts.forEach((part, i) => {
+    if (i % 2 === 1) {
+      out += `<span class="tok-str">${esc(part)}</span>`;
+      return;
+    }
+    out += part
+      .split(/(\b\w+\b)/)
+      .map((word) => (PY_KEYWORDS.has(word) ? `<span class="tok-kw">${esc(word)}</span>` : esc(word)))
+      .join('');
+  });
+
+  if (comment) out += `<span class="tok-comment">${esc(comment)}</span>`;
+  return out;
+}
+
+const lines = code.replace(/\n$/, '').split('\n');
+
+// ⛔ BUILT AS ONE STRING, NOT JSX. `<pre>` preserves whitespace verbatim, and
+// a multi-line JSX map() body — however it's indented in this file's source —
+// puts literal newlines and indentation INSIDE each <span class="code-line">,
+// which renders as a blank line under every real line. Concatenating plain
+// HTML server-side, with no whitespace between tags, is what actually
+// produces one line of code per line of code.
+const bodyHtml = lines
+  .map((line, i) => {
+    const lineno = String(i + 1).padStart(2, ' ');
+    const text = highlightLine(line) || ' ';
+    return `<span class="code-line"><span class="code-lineno" aria-hidden="true">${lineno}</span><span class="code-text">${text}</span></span>`;
+  })
+  .join('');
+---
+
+<figure class="code-pane">
+  <figcaption class="code-titlebar">
+    <span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="code-filename mono-label">{filename}</span>
+  </figcaption>
+  <pre class="code-body"><code set:html={bodyHtml} /></pre>
+  {caption && <figcaption class="code-caption mono-label">{caption}</figcaption>}
+</figure>
+
+<style>
+  .code-pane {
+    border: 1px solid var(--line);
+    background: var(--surface-1);
+    /* Defense in depth, at the source: `.code-body` below has
+       `white-space: pre`, which is exactly the kind of unbreakable
+       content that inflates an ancestor grid's implicit track (see the
+       comment on `.featured` in index.astro, where this actually broke
+       the page at 390px). Capping min-width here too means a future
+       caller that drops this component into ANOTHER bare `display: grid`
+       section doesn't have to remember to repeat that fix. */
+    min-width: 0;
+  }
+
+  .code-titlebar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .code-dots {
+    display: inline-flex;
+    gap: 5px;
+  }
+
+  .code-dots i {
+    width: 7px;
+    height: 7px;
+    background: var(--line-strong);
+    display: block;
+  }
+
+  .code-filename {
+    color: var(--ink-muted);
+  }
+
+  .code-body {
+    overflow-x: auto;
+    padding: var(--space-4);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: var(--text-mono);
+    line-height: var(--leading-mono);
+  }
+
+  .code-line {
+    display: block;
+  }
+
+  .code-lineno {
+    display: inline-block;
+    width: 2.5ch;
+    margin-right: var(--space-3);
+    color: var(--ink-muted);
+    opacity: 0.5;
+    user-select: none;
+  }
+
+  .code-text {
+    color: var(--ink);
+    white-space: pre;
+  }
+
+  .code-text :global(.tok-kw) {
+    color: var(--signal);
+  }
+
+  .code-text :global(.tok-str) {
+    color: var(--signal-2);
+  }
+
+  .code-text :global(.tok-comment) {
+    color: var(--ink-muted);
+  }
+
+  .code-caption {
+    padding: var(--space-2) var(--space-3);
+    border-top: 1px solid var(--line);
+    color: var(--ink-muted);
+  }
+</style>
