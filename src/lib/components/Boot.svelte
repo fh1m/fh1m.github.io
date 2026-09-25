@@ -197,6 +197,6 @@
     opacity: 0.6;
     text-align: center;
     letter-spacing: 0.2em;
-    text-transform: uppercase;
+    text-transform: lowercase;
   }
 </style>

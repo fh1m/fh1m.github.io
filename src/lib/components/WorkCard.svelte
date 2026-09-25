@@ -74,7 +74,7 @@
     top: 10px;
     left: 10px;
     background: color-mix(in oklab, var(--surface-0) 78%, transparent);
-    backdrop-filter: blur(4px);
+    
     padding: 0.35em 0.6em;
   }
   .wc-chip::before,

@@ -19,6 +19,7 @@
         <a href={PROFILE.links.github} target="_blank" rel="noopener" data-cursor>GITHUB</a>
         <a href={PROFILE.links.duburi} target="_blank" rel="noopener" data-cursor>BRACU DUBURI</a>
         <a href="https://fh1m.github.io/mongla_ws/" target="_blank" rel="noopener" data-cursor>MONGLA</a>
+        <a href="/cv" data-cursor>CV</a>
         <a href={PROFILE.links.email} data-cursor>EMAIL</a>
       </div>
       <div class="ft-meta mono">

@@ -192,7 +192,7 @@
     font-size: 0.58rem;
     color: var(--sea-lit);
     letter-spacing: 0.14em;
-    text-transform: uppercase;
+    text-transform: lowercase;
   }
   .p-text {
     color: var(--ink);

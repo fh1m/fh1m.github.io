@@ -98,6 +98,12 @@ export const WORK: WorkItem[] = [
       { label: 'AWARD', value: 'Entrepreneurship' },
       { label: 'PLATFORM', value: 'Jetson Orin' },
     ],
+    images: [
+      { src: '/media/duburi/auv42.png', alt: 'Duburi 4.2 render', credit: 'bracuduburi.com' },
+      { src: '/media/duburi/winning.jpg', alt: 'RoboSub award moment, San Diego', credit: 'bracuduburi.com' },
+      { src: '/media/duburi/grabber.png', alt: 'Manipulator subsystem', credit: 'bracuduburi.com' },
+      { src: '/media/duburi/pool-test.jpg', alt: 'Pool test', credit: 'bracuduburi.com' },
+    ],
     links: [
       { label: 'Team', url: 'https://bracuduburi.com' },
       { label: 'Repo', url: 'https://github.com/fh1m/Duburi' },
@@ -208,10 +214,15 @@ export const WORK: WorkItem[] = [
     status: 'soft',
     statusLabel: 'released',
     summary:
-      'A secure terminal-based peer-to-peer chat in Python — RSA key exchange, AES-GCM messaging. No central server holds the plaintext.',
+      'A secure terminal-based peer-to-peer chat in Python — RSA key exchange, AES-GCM messaging. No central server holds the plaintext. Built to be inspectable: you can watch the packets go from cleartext to ciphertext in Wireshark.',
     metrics: [
       { label: 'KEY EXCHANGE', value: 'RSA' },
       { label: 'MESSAGING', value: 'AES-GCM' },
+    ],
+    images: [
+      { src: '/media/securechat/chatview-sec.png', alt: 'Secure session view', credit: 'github.com/fh1m' },
+      { src: '/media/securechat/wireshark-clear.png', alt: 'Wireshark — cleartext capture', credit: 'github.com/fh1m' },
+      { src: '/media/securechat/wireshark-sec.png', alt: 'Wireshark — encrypted capture', credit: 'github.com/fh1m' },
     ],
     links: [{ label: 'Repository', url: 'https://github.com/fh1m/secure-terminal-p2p-chat' }],
     tags: ['cryptography', 'p2p', 'networking'],
@@ -229,6 +240,33 @@ export const WORK: WorkItem[] = [
       'Proof that a vision system does not need a GPU — machine learning plus an Arduino Uno, squeezing perception onto the smallest possible compute.',
     links: [{ label: 'Repository', url: 'https://github.com/fh1m/Arduino-Vision' }],
     tags: ['embedded', 'ml', 'arduino'],
+  },
+  {
+    slug: 'dristy',
+    name: 'Dristy',
+    tagline: 'দৃষ্টি — a camera that answers with a number, not a video stream.',
+    category: 'Vision Firmware',
+    domain: 'ml',
+    years: '2026',
+    status: 'soft',
+    statusLabel: 'firmware v1.0.0',
+    featured: true,
+    summary:
+      'Open firmware and a host API for a Kendryte K210 camera that does vision on-device — so a robot gets a compact answer (“object at error_x, error_y”) over USB serial instead of a raw video stream. Tiny neural nets on the KPU plus classical vision (colour, line, motion, QR, AprilTag) on the RISC-V cores.',
+    body: [
+      'The idea is bandwidth and honesty. A microcontroller robot cannot carry a Pi and a GPU, and it does not need to: most of the time it only needs to know where the thing is, as an error to drive toward. Dristy turns light into that number on the sensor and sends four bytes, not a frame.',
+      'The whole design is a budget problem — the K210 has kilobytes of SRAM, so every model and buffer is placed by hand. The docs draw the “light to a number” pipeline and the memory budget, because on a chip this small the budget IS the architecture.',
+    ],
+    images: [
+      { src: '/media/dristy/hero.png', alt: 'Dristy — the K210 vision camera', credit: 'github.com/fh1m/Dristy' },
+      { src: '/media/dristy/object.png', alt: 'On-device object detection', credit: 'github.com/fh1m/Dristy' },
+      { src: '/media/dristy/pipeline.png', alt: 'Light-to-a-number pipeline', credit: 'github.com/fh1m/Dristy' },
+      { src: '/media/dristy/colour.png', alt: 'Colour-track overlay with blob histogram', credit: 'github.com/fh1m/Dristy' },
+      { src: '/media/dristy/k210-budget.png', alt: 'K210 SRAM budget', credit: 'github.com/fh1m/Dristy' },
+      { src: '/media/dristy/motion.png', alt: 'Motion detection overlay', credit: 'github.com/fh1m/Dristy' },
+    ],
+    links: [{ label: 'Repository', url: 'https://github.com/fh1m/Dristy' }],
+    tags: ['k210', 'edge-vision', 'firmware', 'risc-v'],
   },
   {
     slug: 'track-and-predict',
@@ -255,6 +293,7 @@ export const WORK: WorkItem[] = [
     statusLabel: 'attempted (fork)',
     summary:
       'My attempt at comma.ai’s open calibration challenge — recovering the direction of travel from a moving camera. A fork of commaai/calib_challenge; the fun was in the estimation, not the leaderboard.',
+    images: [{ src: '/media/calib/challenge.png', alt: 'comma.ai calibration challenge', credit: 'commaai/calib_challenge' }],
     links: [
       { label: 'My fork', url: 'https://github.com/fh1m/calib_challenge_fh1m' },
       { label: 'Original challenge', url: 'https://github.com/commaai/calib_challenge' },

@@ -1,13 +1,17 @@
 <script lang="ts">
   import Hero from '$lib/components/Hero.svelte';
-  import Manifesto from '$lib/components/Manifesto.svelte';
+  import FunFacts from '$lib/components/FunFacts.svelte';
   import Domains from '$lib/components/Domains.svelte';
-  import ProofDashboard from '$lib/components/ProofDashboard.svelte';
   import WorkStrip from '$lib/components/WorkStrip.svelte';
-  import PressWall from '$lib/components/PressWall.svelte';
+  import Story from '$lib/components/Story.svelte';
+  import DeepDives from '$lib/components/DeepDives.svelte';
+  import ProofDashboard from '$lib/components/ProofDashboard.svelte';
+  import Certificates from '$lib/components/Certificates.svelte';
+  import Greats from '$lib/components/Greats.svelte';
   import Publications from '$lib/components/Publications.svelte';
-  import PrinciplesConsole from '$lib/components/PrinciplesConsole.svelte';
+  import Manifesto from '$lib/components/Manifesto.svelte';
   import Contact from '$lib/components/Contact.svelte';
+  import { STORIES } from '$lib/data/stories';
   import { PROFILE } from '$lib/data/profile';
 </script>
 
@@ -22,11 +26,15 @@
 </svelte:head>
 
 <Hero />
+<FunFacts />
 <Domains />
-<ProofDashboard />
 <WorkStrip />
-<PressWall />
+<Story story={STORIES[0]} />
+<Story story={STORIES[1]} />
+<DeepDives />
+<ProofDashboard />
+<Certificates />
+<Greats />
 <Publications />
-<PrinciplesConsole />
 <Manifesto />
 <Contact />

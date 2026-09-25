@@ -22,7 +22,7 @@
     }
     float fbm(vec2 p){
       float v=0.0, a=0.5;
-      for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.02; a*=0.5; }
+      for(int i=0;i<3;i++){ v+=a*noise(p); p*=2.02; a*=0.5; }
       return v;
     }
 
@@ -74,16 +74,22 @@
       return;
     }
     let raf = 0;
-    let renderer: any, mesh: any, mat: any, geo: any, scene: any, cam: any, ro: ResizeObserver;
+    let renderer: any, mesh: any, mat: any, geo: any, scene: any, cam: any, ro: ResizeObserver, io: IntersectionObserver;
     let mouse = { x: 0.5, y: 0.5 };
     let alive = true;
+    let visible = true;
+    let running = false;
 
+    const defer = (fn: () => void) =>
+      'requestIdleCallback' in window ? (window as any).requestIdleCallback(fn, { timeout: 800 }) : setTimeout(fn, 200);
+
+    defer(() => {
     (async () => {
       try {
         const THREE = await import('three');
         const canvas = document.createElement('canvas');
         renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'low-power' });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
         host.appendChild(canvas);
 
         scene = new THREE.Scene();
@@ -124,7 +130,7 @@
 
         const start = performance.now();
         const loop = () => {
-          if (!alive) return;
+          if (!alive || !visible) { running = false; return; }
           const now = performance.now();
           mat.uniforms.u_time.value = (now - start) / 1000;
           mat.uniforms.u_mouse.value.x += (mouse.x - mat.uniforms.u_mouse.value.x) * 0.05;
@@ -132,7 +138,15 @@
           renderer.render(scene, cam);
           raf = requestAnimationFrame(loop);
         };
-        loop();
+        const startLoop = () => { if (!running && alive && visible) { running = true; raf = requestAnimationFrame(loop); } };
+
+        // Pause the render loop whenever the hero is scrolled off-screen.
+        io = new IntersectionObserver((entries) => {
+          visible = entries[0].isIntersecting;
+          if (visible) startLoop();
+        }, { threshold: 0.01 });
+        io.observe(host);
+        startLoop();
 
         (renderer as any)._cleanup = () => window.removeEventListener('pointermove', onMove);
       } catch (e) {
@@ -140,11 +154,13 @@
         console.warn('WebGL field unavailable', e);
       }
     })();
+    });
 
     return () => {
       alive = false;
       cancelAnimationFrame(raf);
       ro?.disconnect();
+      io?.disconnect();
       renderer?._cleanup?.();
       geo?.dispose?.();
       mat?.dispose?.();

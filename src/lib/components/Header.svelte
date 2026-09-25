@@ -54,8 +54,7 @@
     position: sticky;
     top: 0;
     z-index: var(--z-header);
-    background: color-mix(in oklab, var(--surface-0) 82%, transparent);
-    backdrop-filter: blur(10px);
+    background: color-mix(in oklab, var(--surface-0) 94%, transparent);
     border-bottom: 1px solid var(--line);
   }
   .hd-in {
@@ -99,7 +98,7 @@
     font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
+    text-transform: lowercase;
     color: var(--ink-3);
     display: inline-flex;
     align-items: baseline;

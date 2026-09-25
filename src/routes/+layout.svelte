@@ -43,7 +43,7 @@
     padding: 0.6em 1em;
     font-family: var(--font-mono);
     font-size: 0.7rem;
-    text-transform: uppercase;
+    text-transform: lowercase;
     letter-spacing: 0.12em;
     box-shadow: var(--e1);
     transform: translateY(-160%);

@@ -126,14 +126,14 @@ h4 {
   font-size: var(--text-label);
   font-weight: 700;
   letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--ink-3);
 }
 .mark {
   font-family: var(--font-mono);
   font-size: var(--text-mono);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--ink-2);
   display: inline-flex;
   align-items: center;
@@ -161,7 +161,7 @@ h4 {
   font-family: var(--font-mono);
   font-size: var(--text-mono);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--ink-3);
 }
 .eyebrow::before {
@@ -216,7 +216,7 @@ h4 {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--ink-2);
   white-space: nowrap;
 }
@@ -259,7 +259,7 @@ h4 {
   font-family: var(--font-mono);
   font-size: var(--text-mono);
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: lowercase;
   color: var(--ink);
   background: linear-gradient(180deg, var(--surface-3), var(--surface-1));
   box-shadow: var(--e1);
@@ -349,33 +349,21 @@ h4 {
 /* ============================================================
    EFFECTS — grain + scanlines (fixed overlays)
    ============================================================ */
+/* Static, cheap grain — no blend-mode (blend on a fixed full-screen layer
+   forces a repaint every scroll frame). A faint fixed noise texture only. */
 .fx-grain {
   position: fixed;
   inset: 0;
   z-index: var(--z-grain);
   pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.fx-scanline {
-  position: fixed;
-  inset: 0;
-  z-index: calc(var(--z-grain) - 1);
-  pointer-events: none;
-  opacity: 0.35;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0 2px,
-    rgba(0, 0, 0, 0.14) 2px 3px
-  );
-}
+/* scanline + vignette removed for perf; the WebGL hero and shadow ladder
+   carry the depth instead. Kept as no-op classes for markup stability. */
+.fx-scanline,
 .fx-vignette {
-  position: fixed;
-  inset: 0;
-  z-index: calc(var(--z-grain) - 2);
-  pointer-events: none;
-  background: radial-gradient(120% 80% at 50% 0%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  display: none;
 }
 
 /* ---- Scroll-reveal (GSAP toggles .is-in; CSS is the resting/entry state) ---- */

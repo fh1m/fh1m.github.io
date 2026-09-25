@@ -9,18 +9,26 @@
   <WebglField intensity={0.9} class="hero-field" />
   <div class="hero-grid" aria-hidden="true"></div>
 
+  <div class="slate mono" aria-hidden="true">
+    <span class="reel">▶ now showing</span>
+    <span class="sep">·</span>
+    <span>a film about a machine that works when nobody is watching</span>
+    <span class="sep">·</span>
+    <span class="feat">featuring fh1m — you are the audience</span>
+  </div>
+
   <div class="hero-in container-wide">
     <div class="hero-copy">
-      <p class="eyebrow">Autonomy · robotics · ML — Dhaka, Bangladesh</p>
+      <p class="eyebrow">autonomy · robotics · ml — dhaka, bangladesh</p>
       <h1 class="title">
-        <span class="l l1">Machines that</span>
+        <span class="l l1">machines that</span>
         <span class="l l2">perceive, reason,</span>
         <span class="l l3">and <em>act.</em></span>
       </h1>
       <p class="lede">{PROFILE.intro}</p>
       <div class="cta">
-        <a class="key primary" href="/work" data-cursor>VIEW THE WORK →</a>
-        <a class="key" href={PROFILE.links.email} data-cursor>HIRE FAHIM</a>
+        <a class="key primary" href="/work" data-cursor>view the work →</a>
+        <a class="key" href="/cv" data-cursor>download cv</a>
       </div>
       <p class="thesis mono">“{PROFILE.thesis}”</p>
     </div>
@@ -28,14 +36,20 @@
     <div class="hero-device">
       <Console />
       <div class="device-cap">
-        <span class="silk">FIG. 01 — THE OPERATOR CONSOLE</span>
-        <span class="chip ok"><i class="dot"></i>ALL SYSTEMS NOMINAL</span>
+        <span class="silk">fig. 01 — the operator console</span>
+        <span class="chip ok"><i class="dot"></i>all systems nominal</span>
+      </div>
+      <div class="specs">
+        <div class="spec"><span class="s-v num">500 hz</span><span class="s-l mono">control loop</span></div>
+        <div class="spec"><span class="s-v num">53.9 hz</span><span class="s-l mono">hailo-8 vision</span></div>
+        <div class="spec"><span class="s-v num">1,038</span><span class="s-l mono">commits</span></div>
+        <div class="spec"><span class="s-v num">3,756</span><span class="s-l mono">tests</span></div>
       </div>
     </div>
   </div>
 
   <div class="scroll-hint mono" aria-hidden="true">
-    <span>SCROLL</span>
+    <span>scroll</span>
     <span class="arr">↓</span>
   </div>
 </section>
@@ -84,8 +98,59 @@
     align-items: center;
     width: 100%;
   }
+  .slate {
+    position: absolute;
+    top: 66px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0.4em var(--gutter);
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in oklab, var(--surface-0) 60%, transparent);
+  }
+  .slate .reel {
+    color: var(--red-lit);
+  }
+  .slate .feat {
+    color: var(--sea-lit);
+  }
+  .slate .sep {
+    opacity: 0.4;
+  }
   .eyebrow {
     margin-bottom: var(--sp-4);
+  }
+  .specs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    margin-top: var(--sp-3);
+    background: var(--line);
+    box-shadow: var(--e1);
+  }
+  .spec {
+    display: grid;
+    gap: 0.2em;
+    padding: 0.7em 0.8em;
+    background: var(--d1);
+  }
+  .spec .s-v {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .spec .s-l {
+    font-size: 0.54rem;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
   }
   .title {
     font-size: var(--text-hero);

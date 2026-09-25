@@ -69,7 +69,7 @@
   .fork {
     font-size: 0.55rem;
     color: var(--amber-lit);
-    text-transform: uppercase;
+    text-transform: lowercase;
     letter-spacing: 0.1em;
     padding: 0.1em 0.4em;
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--amber) 40%, transparent);

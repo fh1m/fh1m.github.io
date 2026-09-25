@@ -43,3 +43,59 @@ credit and link their coverage of the teams the author worked on.
 | `media/repos/Face-Regeneration.png` | github.com/fh1m/Face-Regeneration |
 | `media/repos/decision-tree-classifier.png` | github.com/fh1m/decision-tree-classifier |
 | `media/repos/Linear-Regression.png` | github.com/fh1m/Linear-Regression |
+
+| `media/duburi/auv42.png` | bracuduburi.com |
+| `media/duburi/whole-auv.png` | bracuduburi.com |
+| `media/duburi/logo.png` | bracuduburi.com |
+| `media/duburi/v1.jpg` | bracuduburi.com |
+| `media/duburi/v2.jpg` | bracuduburi.com |
+| `media/duburi/v3.png` | bracuduburi.com |
+| `media/duburi/v4.png` | bracuduburi.com |
+| `media/duburi/v41.png` | bracuduburi.com |
+| `media/duburi/pool-test.jpg` | bracuduburi.com |
+| `media/duburi/team-2018.jpg` | bracuduburi.com |
+| `media/duburi/team-2019.jpg` | bracuduburi.com |
+| `media/duburi/team-2022.jpg` | bracuduburi.com |
+| `media/duburi/team-2023.png` | bracuduburi.com |
+| `media/duburi/winning.jpg` | bracuduburi.com |
+| `media/duburi/robosub25-1.png` | bracuduburi.com |
+| `media/duburi/robosub25-2.png` | bracuduburi.com |
+| `media/duburi/robosub25-3.png` | bracuduburi.com |
+| `media/duburi/grabber.png` | bracuduburi.com |
+| `media/duburi/torpedo.png` | bracuduburi.com |
+| `media/duburi/dropper.png` | bracuduburi.com |
+| `media/duburi/pcb.png` | bracuduburi.com |
+| `media/duburi/software.png` | bracuduburi.com |
+| `media/duburi/cfd.jpg` | bracuduburi.com |
+| `media/dristy/hero.png` | github.com/fh1m/Dristy |
+| `media/dristy/pipeline.png` | github.com/fh1m/Dristy |
+| `media/dristy/k210-budget.png` | github.com/fh1m/Dristy |
+| `media/dristy/camera.png` | github.com/fh1m/Dristy |
+| `media/dristy/object.png` | github.com/fh1m/Dristy |
+| `media/dristy/colour.png` | github.com/fh1m/Dristy |
+| `media/dristy/motion.png` | github.com/fh1m/Dristy |
+| `media/dristy/qr.png` | github.com/fh1m/Dristy |
+| `media/securechat/chatview.png` | github.com/fh1m/secure-terminal-p2p-chat |
+| `media/securechat/chatview-sec.png` | github.com/fh1m/secure-terminal-p2p-chat |
+| `media/securechat/packet-clear.png` | github.com/fh1m/secure-terminal-p2p-chat |
+| `media/securechat/packet-sec.png` | github.com/fh1m/secure-terminal-p2p-chat |
+| `media/securechat/wireshark-clear.png` | github.com/fh1m/secure-terminal-p2p-chat |
+| `media/securechat/wireshark-sec.png` | github.com/fh1m/secure-terminal-p2p-chat |
+| `media/aerd/cover.jpg` | pcbway.com — AERD |
+| `media/aerd/mou-03.jpg` | aiub.edu |
+| `media/aerd/mou-01.jpg` | aiub.edu |
+| `media/aerd/mou-02.jpg` | aiub.edu |
+| `media/aerd/dailystar-engine.png` | thedailystar.net |
+| `media/calib/challenge.png` | commaai/calib_challenge |
+
+| `media/greats/feynman.jpg` | Wikimedia Commons (Richard Feynman) |
+| `media/greats/karpathy.png` | Wikimedia Commons (Andrej Karpathy) |
+| `media/greats/graham.jpg` | Wikimedia Commons (Paul Graham (programmer)) |
+| `media/greats/west.jpg` | Wikimedia Commons (Kanye West) |
+| `media/greats/rubin.jpg` | Wikimedia Commons |
+| `media/greats/hotz.jpg` | Wikimedia Commons |
+| `media/greats/lattner.jpg` | Wikimedia Commons |
+| `media/greats/keller.jpg` | Wikimedia Commons |
+| `media/certs/robosub-2024.png` | RoboNation — RoboSub 2024 participation |
+| `media/certs/robosub-2025.png` | RoboNation — RoboSub 2025 participation |
+| `media/certs/robosub-2026.png` | RoboNation — RoboSub 2026 participation |

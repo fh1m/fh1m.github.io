@@ -29,8 +29,7 @@
     gap: var(--sp-4);
     height: 34px;
     padding: 0 var(--sp-4);
-    background: color-mix(in oklab, var(--surface-1) 90%, transparent);
-    backdrop-filter: blur(8px);
+    background: var(--surface-1);
     border-top: 1px solid var(--line);
     pointer-events: none;
   }
@@ -38,7 +37,7 @@
     font-size: 0.66rem;
     letter-spacing: 0.14em;
     color: var(--ink-3);
-    text-transform: uppercase;
+    text-transform: lowercase;
     white-space: nowrap;
   }
   .track {

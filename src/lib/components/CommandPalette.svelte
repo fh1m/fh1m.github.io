@@ -29,6 +29,7 @@
     { label: 'Email Fahim', hint: PROFILE.links.emailPlain, kind: 'link', run: () => (location.href = PROFILE.links.email) },
     { label: 'BRACU Duburi', hint: 'bracuduburi.com', kind: 'link', run: () => open(PROFILE.links.duburi) },
     { label: 'View Mongla docs', hint: 'the flagship AUV stack', kind: 'link', run: () => open('https://fh1m.github.io/mongla_ws/') },
+    { label: 'Download CV', hint: 'PDF', kind: 'action', run: () => { const a = document.createElement('a'); a.href = '/fahim-faisal-cv.pdf'; a.download = ''; a.click(); } },
     { label: 'sudo hire fahim', hint: 'permission granted', kind: 'action', run: () => (location.href = PROFILE.links.email) },
     { label: 'Replay boot sequence', hint: 'POST', kind: 'action', run: () => { sessionStorage.removeItem('booted'); location.reload(); } },
   ];
@@ -116,8 +117,7 @@
     position: fixed;
     inset: 0;
     z-index: var(--z-palette);
-    background: rgba(2, 3, 6, 0.6);
-    backdrop-filter: blur(3px);
+    background: rgba(2, 3, 6, 0.72);
   }
   .pal {
     position: fixed;
