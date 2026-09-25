@@ -88,14 +88,16 @@ const newest = ordered
             const thread = THREAD_MAP[entry.id];
             return (
               <a class="machine-row" href={`/machines/${entry.id}`}>
-                {actLabel && (
-                  <span class="act-chip mono-label">{actLabel}</span>
-                )}
-                <span class:list={['chip', `chip-${tone}`]}>{entry.data.status}</span>
-                <span class="machine-name">{entry.data.name}</span>
-                <span class="machine-year">{entry.data.yearLabel}</span>
+                <span class="machine-row-head">
+                  {actLabel && (
+                    <span class="act-chip mono-label">{actLabel}</span>
+                  )}
+                  <span class:list={['chip', `chip-${tone}`]}>{entry.data.status}</span>
+                  <span class="machine-name">{entry.data.name}</span>
+                  <span class="machine-year">{entry.data.yearLabel}</span>
+                  <span class="machine-arrow" aria-hidden="true">→</span>
+                </span>
                 <span class="machine-summary">{entry.data.summary}</span>
-                <span class="machine-arrow" aria-hidden="true">→</span>
                 {thread && (
                   <span class="machine-thread mono-label">{thread}</span>
                 )}
@@ -143,15 +145,26 @@ const newest = ordered
       border-bottom: 1px solid var(--line);
     }
 
+    /* Two lines per row instead of one crammed 6-column ledger track
+       (act chip, status chip, name, year, summary, arrow all fighting
+       for the same row) — a header line (chips + name + year + arrow)
+       and a full-width summary line beneath it reads calmer at every
+       viewport, not just on the mobile breakpoint that used to be the
+       only place this collapsed to something readable. */
     .machine-row {
       display: grid;
-      grid-template-columns: auto 8rem minmax(0, 1fr) auto minmax(0, 1.4fr) auto;
-      column-gap: var(--space-4);
-      row-gap: var(--space-2);
-      align-items: baseline;
+      gap: var(--space-2);
       padding: var(--space-4) 0;
       border-top: 1px solid var(--line);
     }
+
+    .machine-row-head {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+
 
     .act-chip {
       color: var(--signal);
@@ -208,14 +221,8 @@ const newest = ordered
       min-width: 0;
     }
 
-    .machine-thread {
-      grid-column: 3 / -1;
-      color: var(--ink-muted);
-      min-width: 0;
-    }
-
+    .machine-thread,
     .machine-tags {
-      grid-column: 3 / -1;
       color: var(--ink-muted);
       min-width: 0;
     }
@@ -223,6 +230,7 @@ const newest = ordered
     .machine-arrow {
       font-family: var(--font-mono), ui-monospace, monospace;
       color: var(--ink-muted);
+      margin-left: auto;
       transition:
         color var(--dur-fast) var(--ease-out),
         transform var(--dur-fast) var(--ease-out);
@@ -235,22 +243,6 @@ const newest = ordered
     .machine-row:hover .machine-arrow {
       color: var(--signal);
       transform: translateX(2px);
-    }
-
-    @media (max-width: 720px) {
-      .machine-row {
-        grid-template-columns: 1fr;
-        row-gap: var(--space-1);
-      }
-
-      .machine-thread,
-      .machine-tags {
-        grid-column: 1 / -1;
-      }
-
-      .machine-arrow {
-        justify-self: end;
-      }
     }
   </style>
 </Base>
