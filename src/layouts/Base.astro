@@ -46,10 +46,12 @@ const NAV = [
 ] as const;
 
 const pathname = Astro.url.pathname;
-const activeHref = NAV.find((item) => {
-  if (item.href === '/') return pathname === '/';
-  return pathname.startsWith(item.href);
-})?.href;
+const activeItem =
+  NAV.find((item) => {
+    if (item.href === '/') return pathname === '/';
+    return pathname.startsWith(item.href);
+  }) ?? NAV[0];
+const activeHref = activeItem.href;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const buildTime = new Date();
@@ -92,7 +94,6 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
           <a class="wordmark" href="/">FAHIM FAISAL</a>
           <div class="header-telemetry">
             <span class="clock mono-label" id="site-clock">{initialTime}</span>
-            <span class="scroll-readout mono-label" id="scroll-readout">[SCROLL: 00%]</span>
             <span class="status-dot" role="img" aria-label="Machine status: running" title={PROFILE.statusLine}></span>
           </div>
         </div>
@@ -134,6 +135,22 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         </div>
       </div>
     </footer>
+
+    <!-- ============================================================
+         INSTRUMENT BAR — a fixed bottom readout, the one element that is
+         the same on every page: which page you're on, how far down the
+         current page you are, and the machine's clock. Modeled on the
+         mongla_ws site's own bottom transport bar (page/29 + a live scrub
+         track) — real telemetry here too: the fill width IS the actual
+         scroll depth of THIS page, not a decorative loop.
+         ============================================================ -->
+    <div class="instrument-bar" aria-hidden="true">
+      <span class="instrument-page mono-label">[{activeItem.num}/06] {activeItem.label}</span>
+      <div class="instrument-track">
+        <div class="instrument-fill" id="instrument-fill"></div>
+      </div>
+      <span class="instrument-pct mono-label" id="instrument-pct">00%</span>
+    </div>
 
     <script is:inline>
       (function () {
@@ -275,6 +292,10 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
       .site-footer {
         border-top: 1px solid var(--line);
         margin-top: var(--space-24);
+        /* The fixed instrument bar sits over the last ~40px of the page —
+           give the footer that much breathing room so its own links are
+           never covered. */
+        padding-bottom: var(--space-12);
       }
 
       .footer-inner {
@@ -327,6 +348,58 @@ const emailLabel = PROFILE.links.email.replace('mailto:', '').toUpperCase();
         text-transform: uppercase;
         letter-spacing: var(--tracking-label);
         color: var(--ink-muted);
+      }
+
+      /* ---- Instrument bar — fixed bottom transport readout ---- */
+      .instrument-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: var(--z-header);
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        height: 40px;
+        padding: 0 var(--space-4);
+        background: var(--surface-1);
+        border-top: 1px solid var(--line);
+        pointer-events: none;
+      }
+
+      .instrument-page {
+        color: var(--ink-muted);
+        white-space: nowrap;
+        flex: none;
+      }
+
+      .instrument-track {
+        position: relative;
+        flex: 1 1 auto;
+        height: 3px;
+        background: var(--line);
+        min-width: 0;
+      }
+
+      .instrument-fill {
+        position: absolute;
+        inset: 0;
+        width: 0%;
+        background: var(--signal);
+        transform-origin: left center;
+      }
+
+      .instrument-pct {
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        flex: none;
+      }
+
+      @media (max-width: 560px) {
+        .instrument-page {
+          display: none;
+        }
       }
 
       /* ---- Page transitions ---- */

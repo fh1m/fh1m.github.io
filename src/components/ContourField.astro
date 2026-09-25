@@ -1,0 +1,75 @@
+---
+/**
+ * ContourField — ambient topographic contour lines behind the hero.
+ *
+ * Pure decoration, but a specific one: it's the visual signature borrowed
+ * from mongla_ws's own hero (the site this personal site is meant to
+ * evoke, not copy sentence-for-sentence) — a bathymetric-chart texture
+ * behind the headline, appropriate for an AUV engineer's site. Static
+ * paths, not a canvas: six flowing bezier curves, drawn once, then given
+ * a very slow CSS transform drift. `prefers-reduced-motion: reduce` is
+ * handled in plain CSS (no JS dependency) since this is purely decorative
+ * and never needs to be "skipped" the way the Boot overlay does.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  class={`contour-field ${className ?? ''}`}
+  viewBox="0 0 1440 900"
+  preserveAspectRatio="xMidYMid slice"
+  aria-hidden="true"
+>
+  <g class="contour-drift">
+    <path d="M-100,120 C 200,40 400,200 700,110 S 1200,60 1540,150" />
+    <path d="M-100,260 C 250,180 450,340 760,240 S 1250,200 1540,300" />
+    <path d="M-100,400 C 220,340 480,470 780,380 S 1260,340 1540,430" />
+    <path d="M-100,540 C 260,470 470,600 800,500 S 1240,470 1540,560" />
+    <path d="M-100,680 C 240,610 500,740 820,640 S 1260,610 1540,700" />
+    <path d="M-100,20 C 180,-40 420,90 680,10 S 1180,-30 1540,60" />
+  </g>
+</svg>
+
+<style>
+  .contour-field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .contour-field path {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 1;
+    opacity: 0.22;
+  }
+
+  .contour-field path:nth-child(even) {
+    opacity: 0.13;
+  }
+
+  .contour-drift {
+    animation: contour-pan 90s linear infinite;
+  }
+
+  @keyframes contour-pan {
+    from {
+      transform: translate(0, 0);
+    }
+    to {
+      transform: translate(-60px, 20px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contour-drift {
+      animation: none;
+    }
+  }
+</style>

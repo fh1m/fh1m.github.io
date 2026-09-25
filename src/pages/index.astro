@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Boot from '../components/Boot.astro';
 import Scope from '../components/Scope.astro';
+import ContourField from '../components/ContourField.astro';
 import StatRail from '../components/StatRail.astro';
 import CertWall from '../components/CertWall.astro';
 import PressWall from '../components/PressWall.astro';
@@ -117,16 +118,19 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
        Real, sourced contacts, not decoration (see SCOPE_SLUGS above).
        ============================================================ -->
   <section class="hero" data-reveal>
+    <ContourField />
     <div class="hero-copy">
       <p class="mono-label">
         [SYS: ONLINE] [LOC: {locCity} {locCountry}] [BLDG: {buildYear}]
       </p>
-      <h1 class="display hero-title">
-        Machines that have to work when nobody is watching.
-      </h1>
+      <h1 class="hero-name">FAHIM FAISAL</h1>
+      <p class="hero-title">
+        I build machines that have to work when nobody is watching — underwater, mostly,
+        where there's no one to ask for a second chance.
+      </p>
       <p class="hero-sub">
-        I build machines that perceive the world and act inside it. Most of my work
-        starts with a question about what is happening underneath the abstraction.
+        Perception, control, and the flight-controller boundary for BRACU Duburi's RoboSub
+        entry — three campaigns, one obsession: does the machine actually do the thing.
       </p>
       <div class="hero-ctas">
         <a class="cta" href="/machines">[03] MACHINES →</a>
@@ -283,6 +287,7 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
 
   <style>
     .hero {
+      position: relative;
       max-width: var(--container-max);
       margin: 0 auto;
       padding: var(--space-24) var(--space-6) var(--space-16);
@@ -290,20 +295,49 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
       grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr);
       gap: var(--space-12);
       align-items: center;
+      overflow: hidden;
     }
 
     .hero-copy {
+      position: relative;
+      z-index: 1;
       display: grid;
-      gap: var(--space-8);
+      gap: var(--space-6);
+    }
+
+    /* The giant name wordmark — the mongla_ws hero treats its own name
+       ("Mongla") at this scale; this is the same instrument reused for a
+       person instead of a project, so the headline reads as HIS line, not
+       a borrowed one. */
+    .hero-name {
+      font-family: var(--font-mono), ui-monospace, monospace;
+      font-weight: 800;
+      font-size: clamp(2.75rem, 9vw, 7rem);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: var(--ink);
     }
 
     .hero-title {
-      font-weight: 700;
+      font-family: Georgia, 'Times New Roman', var(--font-serif), serif;
+      font-style: italic;
+      font-size: var(--text-h3);
+      line-height: 1.4;
+      color: var(--ink);
+      max-width: 44ch;
+      border-left: 2px solid var(--signal-2);
+      padding-left: var(--space-4);
     }
 
     .hero-sub {
       color: var(--ink-muted);
       max-width: 52ch;
+    }
+
+    .hero-scope {
+      position: relative;
+      z-index: 1;
     }
 
     .hero-ctas {
@@ -392,7 +426,13 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
 
     .field-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      /* The photo column is sized to the photo, not the other way round:
+         poolside.jpg is a tall phone portrait (1125x2000). Forcing it into
+         a wide `1.1fr` box with `object-fit: cover` cropped most of the
+         frame away — the fix is an image column whose width tracks its
+         own aspect ratio instead of stretching to fill a track shaped for
+         landscape photography. */
+      grid-template-columns: minmax(260px, 400px) minmax(0, 1fr);
       gap: var(--space-8);
       align-items: center;
       border-top: 1px solid var(--line);
@@ -403,7 +443,12 @@ def build_b(thrusters=THRUSTERS) -> Tuple[Tuple[float, ...], ...]:
       position: relative;
       overflow: hidden;
       border: 1px solid var(--line);
+      /* Match the source aspect ratio exactly so `cover` below has nothing
+         to crop — the frame's shape IS the photo's shape, scaled. */
+      aspect-ratio: 1125 / 2000;
       max-height: 640px;
+      width: 100%;
+      margin: 0 auto;
     }
 
     .field-photo {

@@ -37,12 +37,12 @@ const boundReveals = new WeakSet<HTMLElement>();
 let readoutTrigger: ScrollTrigger | null = null;
 let scrubTriggers: ScrollTrigger[] = [];
 
-/** Update the header SCROLL readout, e.g. `[SCROLL: 42%]`. */
+/** Update the bottom instrument bar's fill + percentage readout. */
 function updateScrollReadout(progress: number): void {
-  const el = document.getElementById('scroll-readout');
-  if (!el) return;
-  const pct = Math.round(progress * 100);
-  el.textContent = `[SCROLL: ${String(pct).padStart(2, '0')}%]`;
+  const fill = document.getElementById('instrument-fill');
+  const pct = document.getElementById('instrument-pct');
+  if (fill) fill.style.width = `${Math.round(progress * 1000) / 10}%`;
+  if (pct) pct.textContent = `${String(Math.round(progress * 100)).padStart(2, '0')}%`;
 }
 
 // Elements already wired for tilt, so a second `astro:page-load` (view
@@ -106,9 +106,9 @@ function bindReveals(): void {
   });
 }
 
-/** Bind the header scroll-progress readout. */
+/** Bind the bottom instrument bar's scroll-progress readout. */
 function bindScrollReadout(): void {
-  const el = document.getElementById('scroll-readout');
+  const el = document.getElementById('instrument-fill');
   if (!el) return;
   readoutTrigger?.kill();
   readoutTrigger = ScrollTrigger.create({
