@@ -1,0 +1,76 @@
+/* Self-hosted typography — the real mongla_ws faces (SIL OFL / self-hosted),
+   zero external CDN. Manrope (display), Zed Sans (prose, Iosevka-derived),
+   Zed Mono (all numbers/labels). */
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('/fonts/manrope-latin.woff2') format('woff2-variations'),
+    url('/fonts/manrope-latin.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Zed Sans';
+  src: url('/fonts/zed-sans-extended.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zed Sans';
+  src: url('/fonts/zed-sans-extendedbold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zed Sans';
+  src: url('/fonts/zed-sans-extendeditalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Zed Mono';
+  src: url('/fonts/zed-mono-extended.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zed Mono';
+  src: url('/fonts/zed-mono-extendedbold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Metric-override fallback faces (near-zero CLS), computed from the real
+   font tables against Arial / Courier New standard metrics. */
+@font-face {
+  font-family: 'Manrope Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Segoe UI');
+  size-adjust: 128.13%;
+  ascent-override: 83.21%;
+  descent-override: 23.41%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Zed Sans Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Segoe UI');
+  size-adjust: 135.95%;
+  ascent-override: 71.12%;
+  descent-override: 15.81%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Zed Mono Fallback';
+  src: local('SF Mono'), local('Menlo'), local('Consolas'), local('Courier New');
+  size-adjust: 99.65%;
+  ascent-override: 97.04%;
+  descent-override: 21.58%;
+  line-gap-override: 0%;
+}

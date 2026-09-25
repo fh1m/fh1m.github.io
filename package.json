@@ -1,28 +1,28 @@
 {
-  "name": "fahim-personal-site",
-  "type": "module",
-  "version": "0.1.0",
+  "name": "fahim-faisal-site",
   "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "check": "astro check && tsc --noEmit"
-  },
-  "dependencies": {
-    "@astrojs/sitemap": "^3.7.4",
-    "@fontsource-variable/roboto-mono": "^5.3.0",
-    "@fontsource/ibm-plex-sans": "^5.3.0",
-    "@fontsource/instrument-serif": "^5.3.0",
-    "@fontsource/iosevka": "^5.3.0",
-    "astro": "^5.18.2",
-    "gsap": "^3.15.0",
-    "lenis": "^1.3.26"
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
-    "@playwright/test": "^1.63.0",
-    "lighthouse": "^13.4.1",
-    "typescript": "^5.9.3"
+    "@sveltejs/adapter-static": "^3.0.6",
+    "@sveltejs/kit": "^2.8.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@types/node": "^22.9.0",
+    "@types/three": "^0.170.0",
+    "svelte": "^5.1.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "lenis": "^1.1.18",
+    "three": "^0.170.0"
   }
 }
