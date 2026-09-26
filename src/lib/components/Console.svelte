@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import AuvScene from './AuvScene.svelte';
 
   const knobs = [
     { label: 'perception', v: 0.72 },
@@ -18,7 +19,6 @@
   let meter = $state(0.3);
   let depth = $state(-1.24);
   let yaw = $state(89);
-  let scope: HTMLCanvasElement;
 
   onMount(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -30,81 +30,16 @@
       yaw = Math.round(80 + Math.random() * 20);
     }, 320);
 
-    // Forward sonar sweep — a multibeam fan from the nose of the vehicle,
-    // painting detections as the beam passes. Cheap, ~30fps, on-narrative.
-    const ctx = scope?.getContext('2d');
+    // Signal meter tracks the AUV scene's own sonar-ping cadence (cheap sine,
+    // no coupling needed) so the LEDs still breathe with the 3D view.
     let raf = 0;
-    let last = 0;
-    let t = 0;
-    // fixed "contacts" in the water: [angle -1..1 across the fan, range 0..1, label]
-    const contacts = [
-      { a: -0.55, r: 0.62 },
-      { a: -0.12, r: 0.84 },
-      { a: 0.28, r: 0.5 },
-      { a: 0.66, r: 0.72 },
-    ];
-    const draw = (now: number) => {
-      raf = requestAnimationFrame(draw);
-      if (now - last < 33 || !ctx) return;
-      last = now;
-      t += 0.02;
-      const w = scope.width, h = scope.height;
-      const ox = w / 2, oy = h + 4, R = h * 1.15;
-      ctx.clearRect(0, 0, w, h);
-      // range arcs
-      ctx.strokeStyle = 'rgba(90,141,255,0.12)';
-      ctx.lineWidth = 1;
-      for (let k = 1; k <= 4; k++) {
-        ctx.beginPath();
-        ctx.arc(ox, oy, (R * k) / 4, Math.PI, Math.PI * 2);
-        ctx.stroke();
-      }
-      // bearing spokes
-      for (let s = -2; s <= 2; s++) {
-        const ang = -Math.PI / 2 + (s / 2) * (Math.PI * 0.48);
-        ctx.beginPath();
-        ctx.moveTo(ox, oy);
-        ctx.lineTo(ox + Math.cos(ang) * R, oy + Math.sin(ang) * R);
-        ctx.stroke();
-      }
-      // sweep angle: ping-pong across the fan
-      const span = Math.PI * 0.48;
-      const sweepA = -Math.PI / 2 + Math.sin(t) * span;
-      // afterglow wedge
-      const grad = ctx.createRadialGradient(ox, oy, 0, ox, oy, R);
-      grad.addColorStop(0, 'rgba(90,141,255,0.28)');
-      grad.addColorStop(1, 'rgba(90,141,255,0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.moveTo(ox, oy);
-      ctx.arc(ox, oy, R, sweepA - 0.22, sweepA);
-      ctx.closePath();
-      ctx.fill();
-      // sweep line
-      ctx.strokeStyle = 'rgba(120,165,255,0.9)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(ox, oy);
-      ctx.lineTo(ox + Math.cos(sweepA) * R, oy + Math.sin(sweepA) * R);
-      ctx.stroke();
-      // contacts light up when the beam passes
-      let anyHot = 0;
-      for (const c of contacts) {
-        const cAng = -Math.PI / 2 + c.a * span;
-        const cx = ox + Math.cos(cAng) * R * c.r;
-        const cy = oy + Math.sin(cAng) * R * c.r;
-        const d = Math.abs(((cAng - sweepA + Math.PI) % (Math.PI * 2)) - Math.PI);
-        const hot = Math.max(0, 1 - d / 0.35);
-        anyHot = Math.max(anyHot, hot);
-        ctx.fillStyle = hot > 0.5 ? `rgba(255,87,71,${0.5 + hot * 0.5})` : `rgba(90,141,255,${0.25 + hot * 0.5})`;
-        const rad = 2 + hot * 2.5;
-        ctx.beginPath();
-        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      meter = 0.3 + anyHot * 0.6 + Math.random() * 0.08;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = (now - start) / 1000;
+      meter = 0.35 + Math.max(0, Math.sin(t * 1.4)) * 0.55 + Math.random() * 0.06;
+      raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(draw);
+    raf = requestAnimationFrame(tick);
     return () => { clearInterval(seq); cancelAnimationFrame(raf); };
   });
 
@@ -115,7 +50,7 @@
   <!-- screen row -->
   <div class="screen-row">
     <div class="screen well">
-      <canvas bind:this={scope} width="320" height="96" class="scope"></canvas>
+      <AuvScene />
       <div class="screen-hud mono">
         <span class="hud-l">sonar · forward scan</span>
         <span class="hud-r">◉ ping</span>
@@ -208,14 +143,9 @@
   .screen {
     position: relative;
     padding: 6px;
+    height: clamp(150px, 20vw, 230px);
     background: #03040a;
     overflow: hidden;
-  }
-  .scope {
-    display: block;
-    width: 100%;
-    height: clamp(70px, 9vw, 96px);
-    image-rendering: pixelated;
   }
   .screen-hud {
     position: absolute;

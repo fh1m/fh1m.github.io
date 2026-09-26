@@ -3,6 +3,10 @@
   import { PROFILE } from '$lib/data/profile';
   import { reveal } from '$lib/actions/reveal';
   import DeviceFrame from '$lib/components/DeviceFrame.svelte';
+  import FunFacts from '$lib/components/FunFacts.svelte';
+  import Greats from '$lib/components/Greats.svelte';
+  import Publications from '$lib/components/Publications.svelte';
+  import Manifesto from '$lib/components/Manifesto.svelte';
 
   const tagColor: Record<string, string> = {
     underwater: 'var(--sea-lit)',
@@ -102,6 +106,11 @@
     </div>
   </section>
 </div>
+
+<FunFacts />
+<Greats />
+<Publications />
+<Manifesto />
 
 <style>
   .page {

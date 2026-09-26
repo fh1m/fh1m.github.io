@@ -1,5 +1,6 @@
 <script lang="ts">
   import Gallery from '$lib/components/Gallery.svelte';
+  import DeepDives from '$lib/components/DeepDives.svelte';
   import { reveal } from '$lib/actions/reveal';
 </script>
 
@@ -21,6 +22,8 @@
 
   <Gallery />
 </div>
+
+<DeepDives />
 
 <style>
   .page {

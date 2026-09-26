@@ -9,7 +9,7 @@
 </script>
 
 <section class="section container" id="proof">
-  <SectionHead index="02 / THE RECEIPTS" eyebrow="numbers, with their source" title="Proof of work, not adjectives." />
+  <SectionHead index="03 / THE RECEIPTS" eyebrow="numbers, with their source" title="Proof of work, not adjectives." />
 
   <div class="tiles">
     {#each HEADLINE_STATS as s, i}

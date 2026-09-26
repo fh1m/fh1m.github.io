@@ -5,7 +5,7 @@
 </script>
 
 <section class="section container">
-  <SectionHead index="04 / PUBLISHED" eyebrow="peer-reviewed & indexed" title="Research, with my name on it." />
+  <SectionHead index="published / indexed" eyebrow="peer-reviewed & indexed" title="Research, with my name on it." />
 
   <div class="pubs">
     {#each PUBLICATIONS as p, i}

@@ -2,8 +2,11 @@
   import SectionHead from '$lib/components/SectionHead.svelte';
   import WorkCard from '$lib/components/WorkCard.svelte';
   import RepoCard from '$lib/components/RepoCard.svelte';
+  import Story from '$lib/components/Story.svelte';
+  import Certificates from '$lib/components/Certificates.svelte';
   import { WORK } from '$lib/data/work';
   import { REPOS } from '$lib/data/repos';
+  import { STORIES } from '$lib/data/stories';
   import { reveal } from '$lib/actions/reveal';
 </script>
 
@@ -40,6 +43,10 @@
     </div>
   </section>
 </div>
+
+<Story story={STORIES[0]} />
+<Story story={STORIES[1]} />
+<Certificates />
 
 <style>
   .page {

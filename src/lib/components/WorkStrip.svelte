@@ -5,7 +5,7 @@
 </script>
 
 <section class="section container">
-  <SectionHead index="06 / SELECTED WORK" eyebrow="machines & systems" title="Things I built that had to work." meta="10+ projects" />
+  <SectionHead index="02 / SELECTED WORK" eyebrow="machines & systems" title="Things I built that had to work." meta="10+ projects" />
 
   <div class="grid">
     {#each FEATURED_WORK as w, i}
