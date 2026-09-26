@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import { reveal } from '$lib/actions/reveal';
+  import { inlineMd } from '$lib/inlineMd';
   let { data }: { data: PageData } = $props();
   const e = $derived(data.essay);
 </script>
@@ -27,9 +28,9 @@
       {#if para.startsWith('## ')}
         <h2 class="h">{para.slice(3)}</h2>
       {:else if para.startsWith('> ')}
-        <blockquote class="pull">{para.slice(2)}</blockquote>
+        <blockquote class="pull">{@html inlineMd(para.slice(2))}</blockquote>
       {:else}
-        <p class="p">{para}</p>
+        <p class="p">{@html inlineMd(para)}</p>
       {/if}
     {/each}
   </div>
@@ -89,6 +90,22 @@
     color: var(--ink-2);
     line-height: 1.75;
     margin-bottom: var(--sp-4);
+  }
+  .p :global(code),
+  .pull :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    color: var(--sea-lit);
+    background: color-mix(in oklab, var(--sea) 12%, transparent);
+    padding: 0.1em 0.35em;
+  }
+  .p :global(strong) {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .p :global(em) {
+    font-style: italic;
+    color: var(--ink);
   }
   .pull {
     font-family: var(--font-display);

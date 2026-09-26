@@ -1,5 +1,6 @@
 <script lang="ts">
   import { reveal } from '$lib/actions/reveal';
+  import PartsTour from '$lib/components/PartsTour.svelte';
   import type { PageData } from './$types';
   let { data }: { data: PageData } = $props();
   const item = $derived(data.item);
@@ -120,6 +121,10 @@
     <span class="next-name">{data.next.name} →</span>
   </a>
 </article>
+
+{#if item.slug === 'mongla'}
+  <PartsTour />
+{/if}
 
 <style>
   .page {

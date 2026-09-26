@@ -1,11 +1,11 @@
 <script lang="ts">
   import SectionHead from './SectionHead.svelte';
   import WorkCard from './WorkCard.svelte';
-  import { FEATURED_WORK } from '$lib/data/work';
+  import { FEATURED_WORK, WORK } from '$lib/data/work';
 </script>
 
 <section class="section container">
-  <SectionHead index="02 / SELECTED WORK" eyebrow="machines & systems" title="Things I built that had to work." meta="10+ projects" />
+  <SectionHead index="03 / SELECTED WORK" eyebrow="machines & systems" title="Things I built that had to work." meta="{FEATURED_WORK.length} of {WORK.length} projects" />
 
   <div class="grid">
     {#each FEATURED_WORK as w, i}

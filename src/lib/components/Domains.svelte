@@ -5,7 +5,7 @@
 </script>
 
 <section class="section container">
-  <SectionHead index="01 / WHAT I BUILD" eyebrow="three mediums, one problem" title="Perception and control, wherever the machine has to move." />
+  <SectionHead index="02 / WHAT I BUILD" eyebrow="three mediums, one problem" title="Perception and control, wherever the machine has to move." />
 
   <div class="grid">
     {#each DOMAINS as d, i}

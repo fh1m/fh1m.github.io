@@ -1,6 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
+  // Which subsystem the accompanying narrative is currently pointing at —
+  // 'perception' (nose/cameras) | 'control' (the board) | 'estimator' (the
+  // EKF/status brain) | 'thrust' (props + ducts) | null (idle, ambient).
+  let { highlight = null }: { highlight?: 'perception' | 'control' | 'estimator' | 'thrust' | null } = $props();
+
   let host: HTMLDivElement;
   let failed = $state(false);
 
@@ -62,8 +67,14 @@
 
           const hullMat = new THREE.MeshStandardMaterial({ color: 0x4a5468, metalness: 0.72, roughness: 0.26, emissive: 0x0d1420, emissiveIntensity: 0.6 });
           const trimMat = new THREE.MeshStandardMaterial({ color: 0x5c6780, metalness: 0.7, roughness: 0.24 });
-          const glowMat = new THREE.MeshStandardMaterial({ color: 0x5a8dff, emissive: 0x5a8dff, emissiveIntensity: 1.4, metalness: 0.1, roughness: 0.25 });
-          const redMat = new THREE.MeshStandardMaterial({ color: 0xff5747, emissive: 0xff5747, emissiveIntensity: 1.6, metalness: 0.1, roughness: 0.3 });
+          // Each highlightable subsystem gets its OWN material instance (never
+          // shared) so pulsing one part never bleeds into another.
+          const noseMat = new THREE.MeshStandardMaterial({ color: 0x5a8dff, emissive: 0x5a8dff, emissiveIntensity: 1.1, metalness: 0.1, roughness: 0.25 });
+          const controlMat = new THREE.MeshStandardMaterial({ color: 0x5c6780, emissive: 0x5a8dff, emissiveIntensity: 0.4, metalness: 0.5, roughness: 0.3 });
+          const thrustMat = new THREE.MeshStandardMaterial({ color: 0x5a8dff, emissive: 0x5a8dff, emissiveIntensity: 1.1, metalness: 0.1, roughness: 0.25 });
+          const hubMat = new THREE.MeshStandardMaterial({ color: 0xff5747, emissive: 0xff5747, emissiveIntensity: 1.1, metalness: 0.1, roughness: 0.3 });
+          const statusMat = new THREE.MeshStandardMaterial({ color: 0xff5747, emissive: 0xff5747, emissiveIntensity: 1.6, metalness: 0.1, roughness: 0.3 });
+          disposables.push(hullMat, trimMat, noseMat, controlMat, thrustMat, hubMat, statusMat);
 
           const hullGeo = new THREE.CapsuleGeometry(0.42, 1.05, 6, 14);
           const hull = new THREE.Mesh(hullGeo, hullMat);
@@ -72,14 +83,15 @@
           disposables.push(hullGeo);
 
           const noseGeo = new THREE.SphereGeometry(0.16, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2);
-          const nose = new THREE.Mesh(noseGeo, glowMat);
+          const nose = new THREE.Mesh(noseGeo, noseMat);
           nose.rotation.x = -Math.PI / 2;
           nose.position.set(0, 0, 0.92);
           rig.add(nose);
           disposables.push(noseGeo);
 
+          // the "board" — a lit ring around the hull's midsection
           const bandGeo = new THREE.TorusGeometry(0.435, 0.025, 8, 24);
-          const band = new THREE.Mesh(bandGeo, trimMat);
+          const band = new THREE.Mesh(bandGeo, controlMat);
           band.rotation.y = Math.PI / 2;
           band.position.set(0, 0, 0.15);
           rig.add(band);
@@ -107,29 +119,30 @@
             prop.add(blade);
           }
           const hubGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.08, 10);
-          const hub = new THREE.Mesh(hubGeo, redMat);
+          const hub = new THREE.Mesh(hubGeo, hubMat);
           hub.rotation.x = Math.PI / 2;
           prop.add(hub);
           rig.add(prop);
           disposables.push(bladeGeo, hubGeo);
 
-          // side thruster housings
+          // side thruster housings + glowing ducts (the "thrust" group)
           const housingGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.16, 12);
+          const thrustRingGeo = new THREE.TorusGeometry(0.075, 0.012, 6, 16);
           [-1, 1].forEach((side) => {
             const housing = new THREE.Mesh(housingGeo, trimMat);
             housing.rotation.z = Math.PI / 2;
             housing.position.set(side * 0.46, -0.02, -0.25);
             rig.add(housing);
-            const ring = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.012, 6, 16), glowMat);
+            const ring = new THREE.Mesh(thrustRingGeo, thrustMat);
             ring.rotation.y = Math.PI / 2;
             ring.position.set(side * (0.46 + 0.09), -0.02, -0.25);
             rig.add(ring);
           });
-          disposables.push(housingGeo);
+          disposables.push(housingGeo, thrustRingGeo);
 
-          // blinking status beacon on top
+          // blinking status beacon on top — the estimator's heartbeat
           const beaconGeo = new THREE.SphereGeometry(0.035, 8, 8);
-          statusLight = new THREE.Mesh(beaconGeo, redMat);
+          statusLight = new THREE.Mesh(beaconGeo, statusMat);
           statusLight.position.set(0, 0.4, 0.2);
           rig.add(statusLight);
           disposables.push(beaconGeo);
@@ -204,8 +217,21 @@
             ping.scale.set(scale, scale, scale);
             (ping.material as any).opacity = p < 0.06 ? p / 0.06 * 0.5 : Math.max(0, 0.5 * (1 - p));
 
-            const beacon = 0.6 + Math.max(0, Math.sin(t * 3.2)) * 1.2;
-            (statusLight.material as any).emissiveIntensity = beacon;
+            // Spotlight whichever subsystem the narrative is on; ease everyone
+            // else back to their idle glow. Each part owns its material, so
+            // this never bleeds into a neighbour.
+            const hiBoost = 2.6 + Math.sin(t * 2.6) * 0.5;
+            const setGlow = (mat: any, idle: number, key: string) => {
+              const target = highlight === key ? hiBoost : idle;
+              mat.emissiveIntensity += (target - mat.emissiveIntensity) * 0.07;
+            };
+            setGlow(noseMat, 1.1, 'perception');
+            setGlow(controlMat, 0.4, 'control');
+            setGlow(thrustMat, 1.1, 'thrust');
+            setGlow(hubMat, 1.1, 'thrust');
+
+            const beacon = 0.6 + Math.max(0, Math.sin(t * (highlight === 'estimator' ? 7 : 3.2))) * (highlight === 'estimator' ? 2.4 : 1.2);
+            statusMat.emissiveIntensity = beacon;
             thrusterLight.intensity = 1.1 + Math.sin(t * 5) * 0.3 + Math.random() * 0.08;
 
             const pos = bubbles.geometry.attributes.position as any;

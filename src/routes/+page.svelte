@@ -19,8 +19,8 @@
 </svelte:head>
 
 <Hero />
+<ProofDashboard />
 <Domains />
 <WorkStrip />
-<ProofDashboard />
 <LabTeaser />
 <Contact />
