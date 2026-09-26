@@ -64,16 +64,16 @@
 
   /* ---- Type scale (fluid) — teenage.engineering register: small, restrained,
      functional. Display is modest, never billboard-huge. ---- */
-  --text-hero: clamp(1.7rem, 1.1rem + 2.2vw, 2.9rem); /* 27 → 46 */
-  --text-display: clamp(1.4rem, 1.15rem + 1.1vw, 2rem); /* 22 → 32 */
-  --text-h1: clamp(1.25rem, 1.1rem + 0.7vw, 1.65rem);
-  --text-h2: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
-  --text-h3: clamp(0.98rem, 0.93rem + 0.3vw, 1.1rem);
-  --text-lede: clamp(0.98rem, 0.92rem + 0.3vw, 1.12rem);
-  --text-body: clamp(0.875rem, 0.84rem + 0.16vw, 0.94rem); /* ~14–15px */
-  --text-mono: 0.75rem; /* 12px */
-  --text-label: 0.625rem; /* 10px silk labels */
-  --text-quote: clamp(1.05rem, 0.9rem + 0.7vw, 1.5rem);
+  --text-hero: clamp(1.5rem, 1rem + 1.9vw, 2.5rem); /* 24 → 40 */
+  --text-display: clamp(1.2rem, 1rem + 0.9vw, 1.7rem); /* 19 → 27 */
+  --text-h1: clamp(1.1rem, 1rem + 0.55vw, 1.4rem);
+  --text-h2: clamp(1rem, 0.94rem + 0.4vw, 1.18rem);
+  --text-h3: clamp(0.92rem, 0.88rem + 0.25vw, 1.02rem);
+  --text-lede: clamp(0.92rem, 0.87rem + 0.25vw, 1.03rem);
+  --text-body: clamp(0.83rem, 0.8rem + 0.14vw, 0.89rem); /* ~13–14px */
+  --text-mono: 0.7rem; /* ~11px */
+  --text-label: 0.6rem;
+  --text-quote: clamp(0.96rem, 0.84rem + 0.55vw, 1.28rem);
 
   --lh-tight: 1;
   --lh-snug: 1.14;
@@ -86,16 +86,16 @@
 
   /* ---- Spacing ---- */
   --sp-1: 0.25rem;
-  --sp-2: 0.5rem;
-  --sp-3: 0.75rem;
-  --sp-4: 1rem;
-  --sp-5: 1.5rem;
-  --sp-6: 2rem;
-  --sp-8: 3rem;
-  --sp-10: 4rem;
-  --sp-12: 6rem;
-  --sp-16: 8rem;
-  --sp-section: clamp(3.25rem, 2.5rem + 3.5vh, 6rem);
+  --sp-2: 0.45rem;
+  --sp-3: 0.65rem;
+  --sp-4: 0.85rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.65rem;
+  --sp-8: 2.4rem;
+  --sp-10: 3.2rem;
+  --sp-12: 4.5rem;
+  --sp-16: 6rem;
+  --sp-section: clamp(2rem, 1.5rem + 2.2vh, 3.75rem);
 
   /* ---- Layout ---- */
   --container: 1140px;
