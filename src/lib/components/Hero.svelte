@@ -56,10 +56,10 @@
 <style>
   .hero {
     position: relative;
-    min-height: 100svh;
+    min-height: 88svh;
     display: flex;
     align-items: center;
-    padding: 90px 0 60px;
+    padding: 116px 0 48px;
     overflow: hidden;
     border-bottom: 1px solid var(--line);
   }

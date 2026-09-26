@@ -58,8 +58,6 @@ export const DEEPDIVES: DeepDive[] = [
       { v: '19.2 ms', l: 'frame age (max)' },
       { v: '0', l: 'decoded-but-never-inferred' },
     ],
-    image: '/media/lab/chip-efficiency.png',
-    imageCap: 'the chip-efficiency readout, live',
     source: 'mongla — chip-efficiency readout',
   },
   {
@@ -88,8 +86,6 @@ export const DEEPDIVES: DeepDive[] = [
       { v: '36.5 → 77 Hz', l: 'detections' },
       { v: '~30%', l: 'less CPU' },
     ],
-    image: '/media/lab/gil-audit.png',
-    imageCap: 'tools/gil_audit.py — the real ranking',
     source: 'mongla — tools/gil_audit.py',
   },
   {
@@ -112,8 +108,6 @@ export const DEEPDIVES: DeepDive[] = [
         ['verdict', { v: 'sensor is the limit', accent: 'ok' }, { v: 'sensor is the limit', accent: 'ok' }],
       ],
     },
-    image: '/media/lab/latency-verdict.png',
-    imageCap: 'photon-to-command, both cameras',
     source: 'mongla — photon-to-command latency, live hardware',
   },
   {

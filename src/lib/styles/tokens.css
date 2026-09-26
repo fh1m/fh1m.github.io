@@ -95,7 +95,7 @@
   --sp-10: 4rem;
   --sp-12: 6rem;
   --sp-16: 8rem;
-  --sp-section: clamp(5rem, 4rem + 6vh, 10rem);
+  --sp-section: clamp(3.25rem, 2.5rem + 3.5vh, 6rem);
 
   /* ---- Layout ---- */
   --container: 1140px;

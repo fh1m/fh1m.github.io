@@ -30,37 +30,79 @@
       yaw = Math.round(80 + Math.random() * 20);
     }, 320);
 
-    // Oscilloscope — a cheap live trace on a small canvas, ~30fps.
+    // Forward sonar sweep — a multibeam fan from the nose of the vehicle,
+    // painting detections as the beam passes. Cheap, ~30fps, on-narrative.
     const ctx = scope?.getContext('2d');
     let raf = 0;
     let last = 0;
     let t = 0;
+    // fixed "contacts" in the water: [angle -1..1 across the fan, range 0..1, label]
+    const contacts = [
+      { a: -0.55, r: 0.62 },
+      { a: -0.12, r: 0.84 },
+      { a: 0.28, r: 0.5 },
+      { a: 0.66, r: 0.72 },
+    ];
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
       if (now - last < 33 || !ctx) return;
       last = now;
-      t += 0.08;
+      t += 0.02;
       const w = scope.width, h = scope.height;
+      const ox = w / 2, oy = h + 4, R = h * 1.15;
       ctx.clearRect(0, 0, w, h);
-      // grid
-      ctx.strokeStyle = 'rgba(90,141,255,0.10)';
+      // range arcs
+      ctx.strokeStyle = 'rgba(90,141,255,0.12)';
       ctx.lineWidth = 1;
-      for (let x = 0; x < w; x += 16) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-      for (let y = 0; y < h; y += 12) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-      // two traces
-      const trace = (color: string, freq: number, amp: number, off: number) => {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
+      for (let k = 1; k <= 4; k++) {
         ctx.beginPath();
-        for (let x = 0; x < w; x++) {
-          const y = h / 2 + off + Math.sin(x * freq + t) * amp * (0.6 + 0.4 * Math.sin(t * 0.7 + x * 0.01));
-          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
+        ctx.arc(ox, oy, (R * k) / 4, Math.PI, Math.PI * 2);
         ctx.stroke();
-      };
-      trace('rgba(90,141,255,0.9)', 0.09, h * 0.22, -h * 0.12);
-      trace('rgba(255,87,71,0.85)', 0.14, h * 0.14, h * 0.16);
-      meter = 0.25 + Math.abs(Math.sin(t)) * 0.6 + Math.random() * 0.1;
+      }
+      // bearing spokes
+      for (let s = -2; s <= 2; s++) {
+        const ang = -Math.PI / 2 + (s / 2) * (Math.PI * 0.48);
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.lineTo(ox + Math.cos(ang) * R, oy + Math.sin(ang) * R);
+        ctx.stroke();
+      }
+      // sweep angle: ping-pong across the fan
+      const span = Math.PI * 0.48;
+      const sweepA = -Math.PI / 2 + Math.sin(t) * span;
+      // afterglow wedge
+      const grad = ctx.createRadialGradient(ox, oy, 0, ox, oy, R);
+      grad.addColorStop(0, 'rgba(90,141,255,0.28)');
+      grad.addColorStop(1, 'rgba(90,141,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.arc(ox, oy, R, sweepA - 0.22, sweepA);
+      ctx.closePath();
+      ctx.fill();
+      // sweep line
+      ctx.strokeStyle = 'rgba(120,165,255,0.9)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ox + Math.cos(sweepA) * R, oy + Math.sin(sweepA) * R);
+      ctx.stroke();
+      // contacts light up when the beam passes
+      let anyHot = 0;
+      for (const c of contacts) {
+        const cAng = -Math.PI / 2 + c.a * span;
+        const cx = ox + Math.cos(cAng) * R * c.r;
+        const cy = oy + Math.sin(cAng) * R * c.r;
+        const d = Math.abs(((cAng - sweepA + Math.PI) % (Math.PI * 2)) - Math.PI);
+        const hot = Math.max(0, 1 - d / 0.35);
+        anyHot = Math.max(anyHot, hot);
+        ctx.fillStyle = hot > 0.5 ? `rgba(255,87,71,${0.5 + hot * 0.5})` : `rgba(90,141,255,${0.25 + hot * 0.5})`;
+        const rad = 2 + hot * 2.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      meter = 0.3 + anyHot * 0.6 + Math.random() * 0.08;
     };
     raf = requestAnimationFrame(draw);
     return () => { clearInterval(seq); cancelAnimationFrame(raf); };
@@ -75,8 +117,8 @@
     <div class="screen well">
       <canvas bind:this={scope} width="320" height="96" class="scope"></canvas>
       <div class="screen-hud mono">
-        <span class="hud-l">fh1m · op-01</span>
-        <span class="hud-r">◉ live</span>
+        <span class="hud-l">sonar · forward scan</span>
+        <span class="hud-r">◉ ping</span>
       </div>
       <div class="screen-tele mono">
         <span>depth <b>{depth.toFixed(2)}m</b></span>
