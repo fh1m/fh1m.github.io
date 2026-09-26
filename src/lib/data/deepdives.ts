@@ -36,6 +36,12 @@ export const DEEPDIVES: DeepDive[] = [
       'The payoff shows up as a number you can read off the running system: when vision spikes, control does not. The loop on the Pi is slow on purpose, and the vehicle is steady anyway, because the fast loop lives where it belongs.',
       '> Control costs vision nothing — that’s the srot/Hailo separation doing its job, measured.',
     ],
+    stats: [
+      { v: '500 Hz', l: 'board control loop (ESP32)' },
+      { v: '53.9 Hz', l: 'vision through the ROS graph' },
+      { v: '18.0 ms', l: 'photon-to-detection' },
+      { v: '1', l: 'usb-c cable between the two' },
+    ],
     terminal: [
       'control costs vision nothing — the srot/Hailo separation,',
       'measured: control loop jitter unchanged under vision load.',
