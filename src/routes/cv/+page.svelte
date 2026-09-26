@@ -271,15 +271,7 @@
     }
   }
   @media print {
-    :global(body) {
-      background: #fff;
-    }
-    .no-print,
-    :global(.site-header),
-    :global(header.hd),
-    :global(.ft),
-    :global(.bar),
-    :global(.fx-grain) {
+    .no-print {
       display: none !important;
     }
     .cv-page {
@@ -288,7 +280,19 @@
     }
     .paper {
       box-shadow: none;
-      padding: 0.4in 0.5in;
+      padding: 0.3in 0.5in;
+      font-size: 12.5px;
+    }
+    section {
+      margin-bottom: 1.1rem;
+    }
+    .entry {
+      margin-bottom: 0.7rem;
+    }
+    .foot {
+      margin-top: 1rem;
+      padding-top: 0.6rem;
+      break-before: avoid;
     }
   }
 </style>

@@ -401,3 +401,33 @@ h4 {
     display: none;
   }
 }
+
+/* ============================================================
+   PRINT — site-wide chrome & overlays never belong in a printout
+   or an exported PDF (incl. the boot sequence, which is time-based
+   and may still be mid-animation when a headless renderer prints).
+   Individual pages (e.g. /cv) layer their own print rules on top.
+   ============================================================ */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  .fx-grain,
+  .fx-scanline,
+  .fx-vignette,
+  .boot,
+  .cur,
+  .skip-link,
+  header.hd,
+  footer.ft,
+  .bar,
+  .pal,
+  .scrim {
+    display: none !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

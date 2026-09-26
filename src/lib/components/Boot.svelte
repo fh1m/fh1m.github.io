@@ -33,10 +33,11 @@
 
   onMount(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const printing = window.matchMedia('print').matches;
     let already = false;
     try { already = sessionStorage.getItem('booted') === '1'; } catch {}
 
-    if (reduce || already) {
+    if (reduce || already || printing) {
       show = false;
       bootDone.set(true);
       return;
