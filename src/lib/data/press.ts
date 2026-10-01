@@ -89,12 +89,6 @@ export const PRESS: Press[] = [
 // Press-verified competition timeline — stated the way the sources support it.
 export const COMPETITIONS = [
   {
-    year: '2023',
-    event: 'RoboSub 2023',
-    team: 'BRACU Duburi',
-    line: 'Competed at RoboSub, San Diego — one of the few teams from Bangladesh on the world stage.',
-  },
-  {
     year: '2025',
     event: 'RoboSub 2025',
     team: 'BRACU Duburi',
