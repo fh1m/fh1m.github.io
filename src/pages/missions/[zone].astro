@@ -6,12 +6,20 @@
  */
 import Base from "../../layouts/Base.astro";
 import Schematic from "../../components/game/Schematic.astro";
+import Explore from "../../components/note/Explore.astro";
 import { MISSIONS, type Mission } from "../../game/missions";
 import { ZONE_INFO } from "../../game/zones";
 import { lessons } from "../../data/lessons";
 import { projects } from "../../data/elements";
 import { dims } from "../../data/media";
 
+// the failure, reproducible: one explorable per mission
+const TRY: Record<string, { id?: string; bench?: string; title: string; hint: string }> = {
+  air: { id: "filter", title: "The 2024 estimator, with and without memory", hint: "pick an estimator, drag the gyro weight" },
+  water: { id: "fossil", title: "What a full camera queue actually holds", hint: "drag the stall and pick a policy" },
+  earth: { bench: "ebhapa", title: "E-Bhapa as flashed in 2024, and as fixed", hint: "watch both run" },
+  fire: { id: "liveness", title: "Alive is not working", hint: "pick a monitoring policy" },
+};
 const LINK: Record<string, { lesson: string; project: string; photo?: [string, string] }> = {
   air: { lesson: "a-filter-with-no-memory", project: "gimbal" },
   water: { lesson: "a-mailbox-not-a-queue", project: "mongla", photo: ["/media/lab/latency-verdict.webp", "Measured on live hardware, both cameras: the verdict is the one you want."] },
@@ -21,7 +29,7 @@ const LINK: Record<string, { lesson: string; project: string; photo?: [string, s
 export const getStaticPaths = () => MISSIONS.map((m) => ({ params: { zone: m.zone }, props: { m } }));
 const { m } = Astro.props as { m: Mission };
 const z = ZONE_INFO.find((x) => x.id === m.zone)!;
-const L = LINK[m.zone];
+const L = LINK[m.zone], ex = TRY[m.zone];
 const lesson = lessons.find((l) => l.slug === L.lesson)!;
 const project = projects.find((p) => p.slug === L.project)!;
 const photo = L.photo ? { src: L.photo[0], cap: L.photo[1], ...dims(L.photo[0]) } : null;
@@ -43,6 +51,7 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
           <ul class="tried">{m.hypotheses.filter((h) => !h.right).map((h) => <li><span class="wrong">{h.text}</span> <span class="why">{h.reply}</span></li>)}</ul>
         </section>
         <section><h2>What was true</h2><p>{lesson.truth}</p></section>
+        <section class="try"><h2>Try it yourself</h2><Explore id={ex.id} bench={ex.bench} title={ex.title} hint={ex.hint} /></section>
         <section><h2>The fix</h2><p>{m.fix}</p>{m.numbers && <p class="nums">{m.numbers}</p>}<p class="ev">Evidence: {lesson.refs.map((r, k) => <>{k > 0 && ", "}<a href={r.href} class:list={{ h: r.href.includes("/commit/") }}>{r.label}</a></>)}</p></section>
         <section class="two"><div><h2>Keep doing</h2><p>{lesson.lesson}</p></div><div><h2>Do differently</h2><p>{lesson.recommendation}</p></div></section>
       </article>
@@ -65,6 +74,7 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
   .dek { font: 400 var(--t1)/1.5 var(--sans); color: #c8c8c8; max-width: 40ch; margin: 0 0 2.4rem; }
   .aar-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem); gap: 2.4rem; align-items: start; }
   .report section { margin: 0 0 1.8rem; max-width: 62ch; }
+  .report section.try { max-width: none; }
   h2 { font: 600 var(--t1) var(--sans); color: var(--c); margin: 0 0 .4rem; }
   .report p { font: 400 var(--t0)/1.65 var(--sans); color: #e2e2e2; margin: 0 0 .6rem; }
   .obs { color: #fff !important; font-weight: 700 !important; }
@@ -80,7 +90,7 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
   .note { margin: 0; padding: .9rem 1rem; border-radius: 1rem; background: rgb(255 255 255 / .06); font: 500 var(--t-1)/1.55 var(--sans); color: #e2e2e2; }
   .note p { margin: 0 0 .4rem; }
   .note .who { font: 500 var(--t-2) var(--sans); color: #ff9ec2; margin-bottom: .2rem; }
-  .bunnu { background: #fff; color: #111; transform: rotate(-1.2deg); }
+  .bunnu { border-left: 2px solid var(--c); border-radius: 0 8px 8px 0; }
   blockquote.note p { font-style: italic; color: #fff; }
   blockquote.note footer { font: 500 var(--t-2) var(--sans); color: #8c8c8c; }
   .photo img { width: 100%; height: auto; border-radius: .6rem; display: block; }
