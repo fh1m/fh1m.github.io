@@ -1,0 +1,41 @@
+---
+/**
+ * The river map: primary navigation down the page. Plain links (works without JS);
+ * the client marks the reach in view. Bangla markers on hover, numbers always.
+ */
+import type { Chapter } from "../data/story";
+interface Props { chapters: Chapter[] }
+const { chapters } = Astro.props;
+const bnDigit = (n: number) => String(n).split("").map((d) => "০১২৩৪৫৬৭৮৯"[Number(d)]).join("");
+---
+<nav class="rivermap" aria-label="Chapters, downstream">
+  <ol>
+    {chapters.map((c) => (
+      <li class={`d-${c.domain}`}>
+        <a href={`#${c.id}`} data-map={c.n}>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="lab"><span class="bn">{bnDigit(c.n)} {c.bn}</span> {c.title}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+<style>
+  .rivermap { position: fixed; left: calc(var(--gutter) * 0.42); top: 50%; transform: translateY(-50%); z-index: 30; opacity: 0; pointer-events: none; transition: opacity .4s; }
+  :global(body.past-hero) .rivermap { opacity: 1; pointer-events: auto; }
+  ol { list-style: none; margin: 0; padding: 0; position: relative; display: grid; gap: 0.85rem; }
+  ol::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(var(--pink), var(--air), var(--water), var(--ground), var(--sight), var(--time)); opacity: .45; border-radius: 2px; }
+  a { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent); background: #000; transition: transform .25s var(--ease), background .25s; flex: none; }
+  .lab { font: 500 0.78rem var(--display); color: var(--chalk); opacity: 0; transform: translateX(-6px); transition: opacity .2s, transform .2s; white-space: nowrap; background: #000; border: 1px solid var(--accent); padding: 0.15rem 0.55rem; border-radius: 999px; }
+  .lab .bn { color: var(--accent); margin-right: .3rem; }
+  a:hover .lab, a:focus-visible .lab, a.active .lab { opacity: 1; transform: none; }
+  a.active .dot { background: var(--accent); transform: scale(1.35); box-shadow: 0 0 14px var(--accent); }
+  @media (max-width: 900px) {
+    .rivermap { left: 0; right: 0; top: auto; bottom: 0; transform: none; background: rgb(0 0 0 / .88); backdrop-filter: blur(8px); padding: 0.5rem var(--gutter); border-top: 1px solid var(--line); }
+    ol { grid-auto-flow: column; justify-content: space-between; gap: 0; }
+    ol::before { left: 6px; right: 6px; top: 50%; bottom: auto; width: auto; height: 2px; }
+    .lab { display: none; }
+    a { padding: 6px; }
+  }
+</style>

@@ -1,0 +1,20 @@
+---
+/**
+ * An explorable diagram. The module in src/explore/<id>.ts (or a bench from src/benches/)
+ * mounts into .x-body when it scrolls near. Without JS the caption and fallback still say
+ * what the diagram shows, so nothing is lost.
+ */
+interface Props { id?: string; bench?: string; n?: string; title: string; hint?: string; caption?: string; src?: string; fallback?: string }
+const { id, bench, n, title, hint, caption, src, fallback } = Astro.props;
+---
+<figure class="x wide" data-explore={id} data-bench-mount={bench}>
+  <header class="x-head"><span class="pixel x-n">{n}</span><span class="x-title">{title}</span>{hint && <span class="x-hint">{hint}</span>}</header>
+  <div class="x-body">
+    <p class="x-wait mono">{fallback ?? "Loading the diagram. It needs JavaScript; the text around it says the same thing in words."}</p>
+  </div>
+  {caption && <figcaption set:html={caption} />}
+  {src && <p class="src x-src" set:html={src} />}
+</figure>
+<script>
+  import "../../explore/loader";
+</script>

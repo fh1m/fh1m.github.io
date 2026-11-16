@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 640" width="1160" height="640" role="img">
+  <style>
+    text{font-family:Zed Mono,ui-monospace,monospace}
+    .h{font-size:20px;fill:#fff;font-weight:700;letter-spacing:-.02em}
+    .l{font-size:11px;fill:#7b8598;letter-spacing:.12em}
+    .v{font-size:13px;fill:#e4e8ef}
+    .r{font-size:13px;fill:#ff5747}
+    .big{font-size:42px;fill:#fff;font-weight:700;letter-spacing:-.04em}
+  </style>
+  <rect width="1160" height="640" fill="#000"/>
+  <text x="36" y="40" class="h">Where the camera stops</text>
+  <text x="36" y="64" class="l">SIDE VIEW, TO SCALE. ONE HEADLESS LEG, 30 SECONDS.</text>
+  <line x1="80" y1="500" x2="1100" y2="500" stroke="#2b3448" stroke-width="1.5"/>
+  <text x="80" y="524" class="l">GROUND</text>
+  <line x1="980" y1="500" x2="980" y2="300" stroke="#e4e8ef" stroke-width="8"/>
+  <rect x="956" y="248" width="48" height="48" fill="#000" stroke="#ff0000" stroke-width="2"/>
+  <text x="980" y="230" text-anchor="middle" class="r">TAG  0.88 m</text>
+  <rect x="430" y="430" width="90" height="28" fill="none" stroke="#e4e8ef" stroke-width="1.5"/>
+  <text x="475" y="420" text-anchor="middle" class="l">BODY</text>
+  <circle cx="560" cy="444" r="8" fill="#ff0000"/>
+  <text x="560" y="478" text-anchor="middle" class="r">CAMERA  0.44 m</text>
+  <line x1="560" y1="444" x2="980" y2="272" stroke="#ff0000" stroke-width="2"/>
+  <text x="620" y="330" class="r">17 deg up. The tag stays in the frame.</text>
+  <line x1="560" y1="444" x2="980" y2="500" stroke="#7b8598" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="620" y="548" class="l">8 deg down. The tag left the top of the frame.</text>
+  <line x1="560" y1="140" x2="980" y2="140" stroke="#e4e8ef"/>
+  <line x1="560" y1="132" x2="560" y2="148" stroke="#e4e8ef"/>
+  <line x1="980" y1="132" x2="980" y2="148" stroke="#e4e8ef"/>
+  <text x="770" y="126" text-anchor="middle" class="v">1.69 m   camera to the tag face</text>
+  <line x1="36" y1="560" x2="1124" y2="560" stroke="#1a2030"/>
+  <text x="36" y="616" class="big">1.69 m</text>
+  <text x="230" y="604" class="v">inside the 2.5 m verify limit.</text>
+  <text x="230" y="626" class="l">BODY STAYED 2.09 m FROM THE POST. THE BAR WAS 0.8 m.</text>
+</svg>

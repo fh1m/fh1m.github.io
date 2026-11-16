@@ -1,14 +1,17 @@
 ---
+import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "@fontsource-variable/newsreader/opsz.css";
 import "@fontsource-variable/newsreader/opsz-italic.css";
+import "@fontsource/instrument-serif/400-italic.css";
+import "@fontsource/tiro-bangla/400.css";
 import "../styles/global.css";
 import { person } from "../data/facts";
 
 interface Props { title?: string; description?: string; bodyClass?: string }
-const { title, description = "Fahim Faisal (fh1m): autonomy and robotics engineer. A test range of real machines and the physics that graded them.", bodyClass = "" } = Astro.props;
-const fullTitle = title ? `${title} · ${person.name}` : `${person.name}: the range`;
+const { title, description = "Fahim Faisal (fh1m): autonomy and robotics engineer in Dhaka. Rockets, rovers, underwater vehicles and the firmware and vision under them, told downstream.", bodyClass = "" } = Astro.props;
+const fullTitle = title ? `${title} · ${person.name}` : `${person.name}: downstream`;
 const nav = [
-  { href: "/#bench-zero", label: "range" },
+  { href: "/#source", label: "river" },
   { href: "/notes", label: "notes" },
   { href: "/log", label: "log" },
   { href: "/cv", label: "cv" },
@@ -31,16 +34,16 @@ const here = Astro.url.pathname;
     <meta property="og:image" content={new URL("/og.png", Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body class={bodyClass}>
+  <body class={`grain ${bodyClass}`}>
     <a class="skip" href="#main">Skip to content</a>
     <header class="top">
       <a class="mark" href="/" aria-label={`${person.name}, home`}>
-        <span class="pixel">fh1m</span><span class="who">{person.name}</span>
+        <span class="sprite mark-sprite" aria-hidden="true"></span><span class="pixel">fh1m</span><span class="who">{person.name}</span>
       </a>
       <nav aria-label="Site">
         <ul>
           {nav.map((n) => (
-            <li><a href={n.href} aria-current={here.startsWith(n.href) && n.href !== "/#bench-zero" ? "page" : undefined}>{n.label}</a></li>
+            <li><a href={n.href} aria-current={here.startsWith(n.href) && n.href !== "/#source" ? "page" : undefined}>{n.label}</a></li>
           ))}
         </ul>
       </nav>
@@ -52,7 +55,7 @@ const here = Astro.url.pathname;
         <a href={person.github}>github.com/fh1m</a>
         {person.linkedin && <a href={person.linkedin}>linkedin</a>}
       </p>
-      <p class="mono dim">Made in Dhaka. No number on this site without its source. <a href="https://github.com/fh1m/fh1m.github.io">Source</a>.</p>
+      <p class="mono dim">Made in Dhaka. read. derive. build. break. repeat. No number here without its source. <a href="https://github.com/fh1m/fh1m.github.io">Source</a>.</p>
     </footer>
   </body>
 </html>
@@ -60,12 +63,16 @@ const here = Astro.url.pathname;
 <style>
   .top { position: fixed; inset: 0 0 auto 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 1rem var(--gutter); pointer-events: none; }
   .top > * { pointer-events: auto; }
+  .top { transition: background .3s, backdrop-filter .3s; }
+  :global(body.past-hero) .top, :global(body:not(.home)) .top { background: linear-gradient(rgb(0 0 0 / .92), rgb(0 0 0 / .6)); backdrop-filter: blur(8px); }
   .mark { display: inline-flex; gap: 0.7rem; align-items: baseline; text-decoration: none; }
-  .mark .pixel { font-size: 1.15rem; color: var(--measured); letter-spacing: 0.04em; }
+  .mark { align-items: center; }
+  .mark-sprite { width: 34px; height: 44px; }
+  .mark .pixel { font-size: 1.15rem; color: var(--pink); letter-spacing: 0.04em; }
   .mark .who { font: 400 0.8rem var(--mono); color: var(--dim); }
   nav ul { list-style: none; display: flex; gap: 1.4rem; margin: 0; padding: 0.35rem 0.8rem; background: rgb(0 0 0 / 0.55); backdrop-filter: blur(6px); border-radius: 4px; }
   nav a { font: 400 0.8rem var(--mono); text-decoration: none; color: var(--dim); }
-  nav a:hover, nav a[aria-current="page"] { color: var(--measured); }
+  nav a:hover, nav a[aria-current="page"] { color: var(--pink); }
   .foot { position: relative; z-index: 2; padding: 4rem var(--gutter) 3rem; border-top: 1px solid var(--line); background: var(--black); display: grid; gap: 0.4rem; }
   .foot p { margin: 0; display: flex; gap: 1.4rem; flex-wrap: wrap; }
   .dim { color: var(--faint); }

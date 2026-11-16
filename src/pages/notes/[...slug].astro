@@ -1,26 +1,30 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { getCollection, render } from "astro:content";
-import { arenas } from "../../data/arenas";
+import { seriesById } from "../../data/series";
 
 export async function getStaticPaths() {
-  const notes = (await getCollection("notes")).sort((a, b) => b.data.date.localeCompare(a.data.date));
-  return notes.map((note, i) => ({ params: { slug: note.id }, props: { note, newer: notes[i - 1], older: notes[i + 1] } }));
+  const notes = await getCollection("notes");
+  return notes.map((note) => {
+    const parts = notes.filter((n) => n.data.series === note.data.series).sort((a, b) => a.data.part - b.data.part);
+    const i = parts.findIndex((n) => n.id === note.id);
+    return { params: { slug: note.id }, props: { note, parts, prev: parts[i - 1], next: parts[i + 1] } };
+  });
 }
-const { note, newer, older } = Astro.props;
+const { note, parts, prev, next } = Astro.props;
 const { Content, headings } = await render(note);
 const d = note.data;
-const arena = arenas.find((a) => a.id === d.arena);
+const ser = seriesById[d.series];
 const kindLabel = { project: "project", essay: "from the notebook", regrade: "re-graded", story: "story" }[d.kind];
 ---
 <Base title={d.title} description={d.dek} bodyClass="note-page">
-  <main id="main" class:list={["note", arena ? `sig-${arena.signal}` : "sig-measured"]}>
+  <main id="main" class:list={["note", `d-${ser.domain}`]}>
     <header class="head">
       {d.hero && <img class:list={["hero", { plot: d.heroPlot }]} src={d.hero} alt={d.heroAlt ?? ""} fetchpriority="high" />}
       <div class="head-text">
         <p class="kicker mono">
-          {arena && <a href={`/#${arena.id}`}><span class="pixel" data-bn={arena.bn}>{String(arena.n).padStart(2, "0")}</span> {arena.title}</a>}
-          <span>{kindLabel}</span><time datetime={d.date}>{d.date}</time>
+          <a href={`/notes#${ser.id}`}><span class="bn">{ser.bn}</span> {ser.title}</a>
+          <span>part {d.part} of {parts.length}</span><span>{kindLabel}</span><time datetime={d.date}>{d.date}</time>
         </p>
         <h1>{d.title}</h1>
         <p class="dek">{d.dek}</p>
@@ -28,6 +32,10 @@ const kindLabel = { project: "project", essay: "from the notebook", regrade: "re
     </header>
     <div class="layout">
       <aside class="rail" aria-label="About this note">
+        <nav class="series" aria-label={`Series: ${ser.title}`}>
+          <p class="mono dim"><span class="bn">{ser.bn}</span> {ser.title}</p>
+          <ol>{parts.map((p) => <li><a href={`/notes/${p.id}`} aria-current={p.id === note.id ? "page" : undefined}><span class="pn">{p.data.part}</span> {p.data.title}</a></li>)}</ol>
+        </nav>
         {headings.filter((h) => h.depth === 2).length > 1 && (
           <nav aria-label="In this note" class="toc">
             <p class="mono dim">in this note</p>
@@ -45,9 +53,9 @@ const kindLabel = { project: "project", essay: "from the notebook", regrade: "re
       <article class="body"><Content /></article>
     </div>
     <nav class="pager mono" aria-label="More notes">
-      {older ? <a href={`/notes/${older.id}`} rel="prev">← {older.data.title}</a> : <span />}
-      <a href="/notes">all notes</a>
-      {newer ? <a href={`/notes/${newer.id}`} rel="next">{newer.data.title} →</a> : <span />}
+      {prev ? <a href={`/notes/${prev.id}`} rel="prev">← part {prev.data.part}: {prev.data.title}</a> : <span />}
+      <a href="/notes">all series</a>
+      {next ? <a href={`/notes/${next.id}`} rel="next">part {next.data.part}: {next.data.title} →</a> : <span />}
     </nav>
   </main>
 </Base>
@@ -60,32 +68,35 @@ const kindLabel = { project: "project", essay: "from the notebook", regrade: "re
   .head::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / .2) 0%, rgb(0 0 0 / .35) 45%, #000 100%); }
   .head-text { position: relative; z-index: 1; max-width: 70rem; }
   .kicker { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; color: var(--dim); margin-bottom: 1.2rem; }
-  .kicker a { color: var(--sig); text-decoration: none; }
-  .kicker .pixel { font-size: 1rem; }
-  .kicker .pixel:hover::after { content: " " attr(data-bn); }
-  h1 { font-size: clamp(2.3rem, 5.4vw, 4.6rem); max-width: 22ch; font-weight: 450; }
-  .dek { font-size: var(--s1); color: #dedad0; max-width: 58ch; font-style: italic; }
+  .kicker a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .kicker .bn { font-size: 1.1rem; }
+  h1 { font-size: clamp(2.4rem, 5.6vw, 5rem); max-width: 20ch; font-weight: 700; letter-spacing: -0.035em; }
+  .dek { font: italic 400 clamp(1.3rem, 2vw, 1.7rem)/1.3 "Instrument Serif", var(--serif); color: var(--accent); max-width: 52ch; }
+  .series ol { counter-reset: none; }
+  .series a { display: grid; grid-template-columns: 1.6rem 1fr; gap: .3rem; }
+  .series .pn { font: 700 .72rem var(--mono); color: var(--accent); }
+  .series a[aria-current="page"] { color: #000; background: var(--accent); border-radius: 6px; padding: .25rem .4rem; }
+  .series a[aria-current="page"] .pn { color: #000; }
 
   .layout { display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr); gap: 2rem 4rem; padding: 2rem var(--gutter) 0; }
   .rail { position: sticky; top: 5.5rem; align-self: start; display: grid; gap: 1.6rem; font-size: 0.85rem; }
   .rail ol, .rail ul { list-style: none; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.45rem; }
   .rail a { font: 400 0.78rem/1.4 var(--mono); color: var(--dim); text-decoration: none; }
-  .rail a:hover { color: var(--sig); }
+  .rail a:hover { color: var(--accent); }
   .dim { color: var(--faint); margin: 0; }
 
   .body { max-width: 74rem; }
-  .body :global(> p), .body :global(> ul), .body :global(> ol) { font-size: 1.12rem; line-height: 1.7; max-width: 64ch; }
+  .body :global(> p), .body :global(> ul), .body :global(> ol) { font: 400 1.14rem/1.74 var(--serif); max-width: 64ch; color: #e9e6de; }
   .body :global(> h2) { font-size: var(--s3); margin-top: 3.4rem; color: var(--chalk); max-width: 30ch; }
-  .body :global(> h2)::before { content: "§ "; color: var(--sig); font-family: var(--pixel); font-size: 0.7em; }
+  .body :global(> h2)::before { content: "§ "; color: var(--accent); font-family: var(--pixel); font-size: 0.7em; }
   .body :global(> h3) { font-size: var(--s1); margin-top: 2.2rem; }
   .body :global(> figure:not(.wide)) { max-width: 64ch; }
   .body :global(table) { max-width: 64rem; }
   .body :global(li) { margin-bottom: 0.4rem; }
-  .body :global(li::marker) { color: var(--sig); }
+  .body :global(li::marker) { color: var(--accent); }
 
   .pager { display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; padding: 4rem var(--gutter) 0; }
   .pager a:last-child { text-align: right; }
-  .sig-measured { --sig: var(--measured); } .sig-failure { --sig: var(--failure); } .sig-medium { --sig: var(--medium); } .sig-estimate { --sig: var(--estimate); }
 
   @media (max-width: 900px) {
     .layout { grid-template-columns: 1fr; }

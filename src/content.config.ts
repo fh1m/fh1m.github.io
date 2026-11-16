@@ -8,7 +8,8 @@ const notes = defineCollection({
     title: z.string(),
     dek: z.string(),
     date: z.string(),               // YYYY-MM or YYYY-MM-DD
-    arena: z.string(),              // which arena on the range it belongs to
+    series: z.enum(["machines", "water", "seeing", "time", "truth", "build"]),
+    part: z.number().int().positive(),
     kind: z.enum(["project", "essay", "regrade", "story"]),
     repo: z.string().optional(),
     sources: z.array(z.object({ label: z.string(), href: z.string() })).default([]),

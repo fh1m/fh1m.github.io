@@ -1,159 +1,232 @@
 ---
 import Base from "../layouts/Base.astro";
-import RangeMap from "../components/RangeMap.astro";
-import Margin from "../components/Margin.astro";
-import { arenas } from "../data/arenas";
+import RiverMap from "../components/RiverMap.astro";
+import { chapters } from "../data/story";
 import { person } from "../data/facts";
 import stats from "../data/github.json";
 import { getCollection } from "astro:content";
 const noteCount = (await getCollection("notes")).length;
+const bnDigit = (n: number) => String(n).split("").map((d) => "০১২৩৪৫৬৭৮৯"[Number(d)]).join("");
 ---
-<Base bodyClass="range">
-  <canvas id="world" aria-hidden="true"></canvas>
-  <div class="world-still" aria-hidden="true"></div>
-  <RangeMap arenas={arenas} />
+<Base bodyClass="home">
+  <RiverMap chapters={chapters} />
 
   <main id="main">
-    <section class="hero" aria-labelledby="hero-h">
-      <svg class="hero-event" viewBox="0 0 800 360" role="img" aria-labelledby="hero-svg-t">
-        <title id="hero-svg-t">A small machine on the left; a water line rising over it from the right.</title>
-        <defs>
-          <linearGradient id="hw" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2ee6d6" stop-opacity=".55" /><stop offset="1" stop-color="#2ee6d6" stop-opacity="0" /></linearGradient>
-        </defs>
-        <g class="grid">{Array.from({ length: 17 }, (_, i) => <line x1={i * 50} y1="0" x2={i * 50} y2="360" />)}</g>
-        <path class="water" d="M0 210 C 120 196 200 224 320 208 S 560 192 800 206 L 800 360 L 0 360 Z" fill="url(#hw)" />
-        <path class="surface" d="M0 210 C 120 196 200 224 320 208 S 560 192 800 206" />
-        <g class="machine" transform="translate(300 232)">
-          <rect x="-60" y="-14" width="120" height="28" rx="14" />
-          <rect x="-74" y="-8" width="14" height="16" rx="3" />
-          <circle cx="44" cy="0" r="6" />
-          <line x1="-20" y1="-14" x2="-20" y2="-26" /><line x1="20" y1="-14" x2="20" y2="-26" />
-        </g>
-        <g class="ray"><line x1="356" y1="232" x2="520" y2="248" /><circle cx="520" cy="248" r="3" /></g>
-        <text x="528" y="252" class="lbl">red is gone by 5 m</text>
-        <text x="24" y="196" class="lbl">nature</text>
-        <text x="24" y="344" class="lbl dim">the judge</text>
-      </svg>
-      <div class="hero-text">
-        <p class="pixel kick">{person.handle} · range</p>
-        <h1 id="hero-h">Nature grades every machine. These are my bets, and their scores.</h1>
-        <p class="lede">I'm {person.name}, an autonomy and robotics engineer in Dhaka. I build machines that have to perceive the world and act in it: underwater vehicles, rovers, rockets, and the firmware and vision underneath them. This page is a test range. Each arena is one force of nature, one machine I built or helped build, and what actually happened.</p>
-        <p class="mono quick">
-          <a href="#water">jump to the water</a>
-          <a href="/notes">all notes ({noteCount})</a>
-          <a href="/cv">cv</a>
+    <header class="hero" aria-labelledby="hero-h">
+      <canvas id="world" aria-hidden="true"></canvas>
+      <div class="hero-copy">
+        <p class="kick"><span class="pixel">fh1m</span> <span class="bn">ঢাকা</span> <span class="mono">Dhaka</span></p>
+        <h1 id="hero-h"><span class="name">Fahim Faisal</span> builds machines that have to work <em>on their own</em>.</h1>
+        <p class="lede">Rockets, rovers and underwater vehicles, and the firmware, vision and estimation underneath them. This page runs the way the work did: <strong>downstream</strong>, from a laptop in 2021 to an autonomy stack waiting for its first dive.</p>
+        <p class="quick">
+          <a class="btn-pill pink" href="#source">start at the source ↓</a>
+          <a class="btn-pill" href="/notes">notes · {noteCount}</a>
+          <a class="btn-pill" href="/cv">cv</a>
         </p>
-        <p class="src">Live from GitHub, rebuilt {stats.generatedAtLabel}: {stats.publicRepos} public repositories, {stats.contributionsLastYear.toLocaleString("en-US")} contributions in the last year.</p>
+        <p class="src">Public GitHub, rebuilt {stats.generatedAtLabel}: {stats.publicRepos} repositories, {stats.contributionsLastYear.toLocaleString("en-US")} contributions in the last year.</p>
       </div>
+      <figure class="hero-photo">
+        <img src="/media/poolside.webp" alt="Fahim at a laptop running a terminal on a poolside table; an underwater vehicle floats in the green pool behind" width="900" height="1600" fetchpriority="high" />
+        <figcaption>A pool test. Me, a terminal, and the vehicle in the water.</figcaption>
+      </figure>
+      <nav class="ports" aria-label="Ports on the river (click one in the 3D map, or here)">
+        <p class="mono">the river, as a map: drag to look, click a port</p>
+        <ol>
+          {chapters.map((c) => <li class={`d-${c.domain}`}><a href={`#${c.id}`} data-port={c.n}><span class="bn">{c.bn}</span> {c.title}</a></li>)}
+        </ol>
+      </nav>
+    </header>
+
+    <section class="creed" aria-label="What each kind of machine taught">
+      <p><span class="k air">Rockets</span> taught me guidance and control. <span class="k ground">Rovers</span> taught me manipulation and vision. <span class="k water">Underwater vehicles</span> taught me to trust nothing I hadn't measured.</p>
+      <span class="sprite creed-sprite" aria-hidden="true"></span>
     </section>
 
-    {arenas.map((a) => (
-      <section id={a.id} class={`arena sig-${a.signal}`} data-arena={a.n} aria-labelledby={`${a.id}-h`}>
-        <div class="story">
-          <p class="force"><span class="pixel num" data-bn={a.bn}>{String(a.n).padStart(2, "0")}</span> <span class="mono">{a.force}</span></p>
-          <h2 id={`${a.id}-h`}>{a.title}</h2>
-          <p class="kicker">{a.kicker}</p>
-          {a.story.map((p) => <p set:html={p} />)}
-          <Margin text={a.margin} />
-          {a.evidence.length > 0 && (
-            <dl class="evidence">
-              {a.evidence.map((e) => (
-                <div>
-                  <dt class="num">{e.value}</dt>
-                  <dd>{e.label} <span class="src">{e.href ? <a href={e.href}>{e.source}</a> : e.source}</span></dd>
-                </div>
+    <div class="river-wrap">
+      <svg class="river" aria-hidden="true"><defs><linearGradient id="rg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff2e7e" /><stop offset=".18" stop-color="#ff6b2c" /><stop offset=".35" stop-color="#00e1ff" /><stop offset=".5" stop-color="#ffd23f" /><stop offset=".7" stop-color="#00e1ff" /><stop offset=".82" stop-color="#c6ff3d" /><stop offset="1" stop-color="#a98bff" /></linearGradient></defs><path class="bed" /><path class="flow" /></svg>
+
+      {chapters.map((c, i) => (
+        <section id={c.id} class:list={["chapter", `d-${c.domain}`, i % 2 ? "flip" : ""]} data-chapter={c.n} aria-labelledby={`${c.id}-h`}>
+          <div class="marker" data-river-anchor>
+            <span class="bn-big bn" aria-hidden="true">{c.bn}</span>
+            <p class="meta mono"><span class="bn">{bnDigit(c.n)}</span> · {c.bnGloss} · <time>{c.when}</time></p>
+          </div>
+          <div class="text">
+            <h2 id={`${c.id}-h`}>{c.title}</h2>
+            <p class="kicker">{c.kicker}</p>
+            {c.body.map((p) => <p set:html={p} />)}
+            {c.split && (
+              <dl class="split">
+                <div><dt>I did</dt><dd set:html={c.split.me} /></div>
+                {c.split.team && <div><dt>the team did</dt><dd set:html={c.split.team} /></div>}
+                {c.split.others && <div><dt>others did</dt><dd set:html={c.split.others} /></div>}
+              </dl>
+            )}
+          </div>
+          {c.media.length > 0 && (
+            <div class:list={["media", `n${c.media.length}`]}>
+              {c.media.map((m) => (
+                <figure class:list={["print", { wide: m.wide }]}>
+                  <img src={m.src} alt={m.alt} loading="lazy" decoding="async" />
+                  <figcaption><span set:html={m.caption} /> <span class="tier">{m.tier}</span></figcaption>
+                </figure>
               ))}
-            </dl>
+            </div>
           )}
-          {a.notes.length > 0 && (
-            <ul class="deeper mono" aria-label={`Read more about ${a.title}`}>
-              {a.notes.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
-            </ul>
+          {c.benches && c.benches.length > 0 && (
+            <div class:list={["benches", `n${c.benches.length}`]}>
+              {c.benches.map((b) => (
+                <aside class="bench" aria-label={`Bench: ${b.title}`}>
+                  <h3><span class="tag">bench</span> {b.title}</h3>
+                  <div class="bench-body" data-bench={b.key}><p class="mono">Loading the bench…</p></div>
+                </aside>
+              ))}
+            </div>
           )}
-        </div>
-        <aside class="bench" aria-label={`Test bench: ${a.benchTitle}`}>
-          <h3 class="mono">{a.benchTitle}</h3>
-          <div class="bench-body" data-bench={a.bench} data-arena-id={a.id}>
-            <p class="mono dim">Loading the bench…</p>
-          </div>
-        </aside>
-        {a.photos.length > 0 && (
-          <div class="photos">
-            {a.photos.map((ph) => (
-              <figure>
-                <img src={ph.src} alt={ph.alt} loading="lazy" decoding="async" />
-                <figcaption>{ph.caption}</figcaption>
-              </figure>
-            ))}
-          </div>
-        )}
-      </section>
-    ))}
+          <footer class="ch-foot">
+            <p class="lesson">{c.lesson}</p>
+            {c.notes.length > 0 && <ul class="pills" aria-label={`Read more: ${c.title}`}>{c.notes.map((n) => <li><a href={n.href}>{n.label} →</a></li>)}</ul>}
+          </footer>
+        </section>
+      ))}
+    </div>
 
     <section class="coda" aria-labelledby="coda-h">
-      <h2 id="coda-h">The range keeps going.</h2>
-      <p>New arenas get added when the machines do. The notes hold the long versions: essays from the Mongla notebook, re-graded old projects, and the failures with their timestamps.</p>
-      <p class="mono"><a href="/notes">Read the notes</a> <a href="/log">See the log</a> <a href={`mailto:${person.email}`}>Write to me</a></p>
+      <h2 id="coda-h">The river keeps going.</h2>
+      <p>New reaches get added when the machines do. The notes hold the long versions: how each thing works, what was measured, and what I had to take back.</p>
+      <p class="quick"><a class="btn-pill pink" href="/notes">read the notes</a> <a class="btn-pill" href="/log">the log</a> <a class="btn-pill" href={`mailto:${person.email}`}>write to me</a></p>
     </section>
   </main>
+
+  <dialog id="port-panel" aria-labelledby="port-h">
+    <form method="dialog"><button class="x" aria-label="Close">×</button></form>
+    <p class="mono pp-meta"></p>
+    <h2 id="port-h"></h2>
+    <p class="pp-kicker"></p>
+    <p class="pp-lesson"></p>
+    <p><a class="btn-pill pink pp-go" href="#">go to this reach ↓</a></p>
+  </dialog>
 </Base>
 
 <script>
-  import "../scripts/range-client.ts";
+  import "../scripts/river-client.ts";
 </script>
 
 <style>
-  #world { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; opacity: 0; transition: opacity 0.8s ease; }
+  /* Hero */
+  .hero { position: relative; min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(16rem, 0.75fr); grid-template-rows: 1fr auto; gap: 2rem var(--gutter); align-items: center; padding: 7rem var(--gutter) 2rem; overflow: hidden; isolation: isolate; }
+  #world { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; opacity: 0; transition: opacity 1.2s var(--ease); cursor: grab; }
   :global(body.world-ready) #world { opacity: 1; }
-  .world-still { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 80% at 70% 60%, #0a1416 0%, #000 60%); }
-  main { position: relative; z-index: 2; }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -2; background: radial-gradient(60% 50% at 70% 40%, #2a0617 0%, transparent 70%), radial-gradient(50% 40% at 20% 85%, #00242b 0%, transparent 70%), #000; }
+  .hero-copy { position: relative; z-index: 2; pointer-events: none; }
+  .hero-copy a, .hero-copy p { pointer-events: auto; }
+  .kick { display: flex; gap: 0.8rem; align-items: baseline; margin-bottom: 1.4rem; }
+  .kick .pixel { color: var(--pink); font-size: 1.1rem; }
+  .kick .bn { color: var(--water); font-size: 1.2rem; }
+  .kick .mono { color: var(--dim); }
+  h1 { font-size: clamp(2.6rem, 6.4vw, 6.2rem); font-weight: 700; line-height: 0.95; letter-spacing: -0.04em; max-width: 13ch; }
+  h1 .name { display: block; background: linear-gradient(92deg, var(--pink), var(--air) 45%, var(--ground)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: 0.06em; }
+  h1 em { font-family: "Instrument Serif", var(--serif); font-weight: 400; font-style: italic; letter-spacing: -0.01em; color: var(--water); }
+  .lede { font-size: var(--s1); line-height: 1.55; color: #e8e5dd; max-width: 46ch; }
+  .lede strong { color: var(--pink); }
+  .quick { display: flex; gap: 0.7rem; flex-wrap: wrap; margin: 1.8rem 0 1.2rem; }
+  .btn-pill { display: inline-block; font: 600 0.88rem var(--display); text-decoration: none; padding: 0.65rem 1.1rem; border-radius: 999px; border: 2px solid #3a3f52; color: var(--chalk); background: #000; transition: transform .2s var(--ease), border-color .2s, background .2s, color .2s; }
+  .btn-pill:hover { transform: translateY(-2px); border-color: var(--pink); color: var(--chalk); }
+  .btn-pill.pink { background: var(--pink); border-color: var(--pink); color: #000; }
+  .btn-pill.pink:hover { background: #ff5c9a; color: #000; }
+  .hero-photo { position: relative; z-index: 2; margin: 0; justify-self: end; width: min(100%, 25rem); rotate: 2deg; }
+  .hero-photo img { aspect-ratio: 9 / 13; object-fit: cover; object-position: 50% 62%; border-radius: 10px; box-shadow: 14px 14px 0 var(--pink); }
+  .hero-photo figcaption { margin-top: 1.4rem; }
+  .ports { grid-column: 1 / -1; position: relative; z-index: 2; }
+  .ports p { color: var(--faint); margin: 0 0 0.5rem; }
+  .ports ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .ports a { display: inline-flex; gap: 0.45rem; align-items: baseline; font: 500 0.78rem var(--display); text-decoration: none; padding: 0.3rem 0.7rem; border-radius: 999px; border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent); background: rgb(0 0 0 / .6); }
+  .ports a .bn { color: var(--accent); }
+  .ports a:hover, .ports a.lit { background: var(--accent); color: #000; border-color: var(--accent); }
+  .ports a:hover .bn, .ports a.lit .bn { color: #000; }
 
-  .hero { min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: var(--gutter); padding: 7rem var(--gutter) 4rem; }
-  .hero-event { width: 100%; height: auto; overflow: visible; }
-  .hero-event .grid line { stroke: #10161a; stroke-width: 1; }
-  .hero-event .surface { fill: none; stroke: var(--medium); stroke-width: 1.4; }
-  .hero-event .machine rect, .hero-event .machine circle, .hero-event .machine line { fill: none; stroke: var(--chalk); stroke-width: 1.4; }
-  .hero-event .machine rect:first-child { fill: #ff5c4d22; stroke: var(--failure); }
-  .hero-event .ray line { stroke: var(--measured); stroke-dasharray: 3 4; }
-  .hero-event .ray circle { fill: var(--measured); }
-  .hero-event .lbl { fill: var(--dim); font: 400 13px var(--mono); }
-  .hero-event .lbl.dim { fill: var(--faint); }
+  /* Creed */
+  .creed { position: relative; padding: 9rem var(--gutter) 6rem; max-width: 76rem; margin: 0 auto; }
+  .creed p { font: 600 clamp(1.8rem, 4vw, 3.4rem)/1.12 var(--display); letter-spacing: -0.03em; max-width: 26ch; }
+  .creed .k { font-weight: 750; }
+  .creed-sprite { position: absolute; right: var(--gutter); bottom: 4rem; width: 92px; height: 120px; }
+
+  /* The river */
+  .river-wrap { position: relative; }
+  .river { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: visible; }
+  .river path { fill: none; stroke-linecap: round; }
+  .river .bed { stroke: #10131c; stroke-width: 26; }
+  .river .flow { stroke: url(#rg); stroke-width: 4; filter: drop-shadow(0 0 6px rgb(255 46 126 / .5)); }
+
+  /* Chapters */
+  .chapter { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "marker marker" "text media" "bench bench" "foot foot"; gap: 2.4rem var(--gutter); padding: 7rem var(--gutter) 5rem calc(var(--gutter) + 3rem); max-width: 96rem; margin: 0 auto; }
+  .chapter.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "marker marker" "media text" "bench bench" "foot foot"; }
+  .marker { grid-area: marker; display: flex; align-items: flex-end; gap: 1.4rem; flex-wrap: wrap; }
+  .chapter.flip .marker { justify-content: flex-end; text-align: right; }
+  .bn-big { font-size: clamp(4.5rem, 12vw, 10rem); line-height: 0.9; color: transparent; -webkit-text-stroke: 2px var(--accent); transition: color .6s var(--ease); }
+  .chapter.in .bn-big { color: var(--accent); text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .meta { color: var(--dim); margin: 0 0 1rem; }
+  .meta .bn { color: var(--accent); }
+  .text { grid-area: text; background: rgb(0 0 0 / .78); border-radius: 12px; }
+  .text h2 { font-size: clamp(2.2rem, 4.6vw, 4.2rem); }
+  .kicker { font: italic 400 clamp(1.3rem, 2vw, 1.75rem)/1.3 "Instrument Serif", var(--serif); color: var(--accent); max-width: 34ch; }
+  .text > p:not(.kicker) { font: 400 1.12rem/1.72 var(--serif); color: #e7e4dc; }
+  .text :global(a) { --accent: inherit; }
+  .split { margin: 1.8rem 0 0; display: grid; gap: 0.2rem; border: 2px solid var(--accent); border-radius: 12px; padding: 0.9rem 1.1rem; }
+  .split div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 1rem; padding: 0.45rem 0; border-top: 1px dashed #262a38; }
+  .split div:first-child { border-top: 0; }
+  .split dt { font: 700 0.75rem var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+  .split dd { margin: 0; font-size: 0.95rem; color: #dcd9d0; }
+  .media { grid-area: media; display: grid; gap: 1.2rem; align-content: start; }
+  .media.n2, .media.n3 { grid-template-columns: 1fr 1fr; }
+  .media.n3 .print:first-child { grid-column: 1 / -1; }
+  .print { margin: 0; transition: transform .5s var(--ease), opacity .6s; }
+  .print.wide { grid-column: 1 / -1; }
+  .print img { border-radius: 8px; border: 2px solid #1d2130; aspect-ratio: auto; max-height: 34rem; object-fit: cover; }
+  .print:nth-child(odd) { rotate: -1.2deg; } .print:nth-child(even) { rotate: 1.4deg; }
+  .print:hover { rotate: 0deg; transform: scale(1.02); }
+  .print:hover img { border-color: var(--accent); }
+  .tier { display: inline-block; font: 700 0.62rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #000; background: var(--accent); padding: 0.05rem 0.4rem; border-radius: 3px; margin-left: 0.3rem; vertical-align: 1px; }
+  .benches { grid-area: bench; display: grid; gap: 2rem; }
+  .benches.n2 { grid-template-columns: 1fr 1fr; }
+  .bench { background: #05060a; border: 3px solid var(--accent); border-radius: 14px; padding: 1.2rem 1.3rem 1.4rem; box-shadow: 10px 10px 0 color-mix(in srgb, var(--accent) 45%, #000); max-width: 60rem; }
+  .benches.n1 .bench { justify-self: start; width: min(100%, 46rem); }
+  .chapter.flip .benches.n1 .bench { justify-self: end; }
+  .bench h3 { font-size: 1.15rem; margin-bottom: 0.9rem; display: flex; gap: 0.6rem; align-items: center; }
+  .tag { font: 700 0.65rem var(--mono); text-transform: uppercase; letter-spacing: .1em; background: var(--accent); color: #000; padding: 0.15rem 0.45rem; border-radius: 4px; }
+  .ch-foot { grid-area: foot; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem; border-top: 1px solid #1c1f2a; padding-top: 1.6rem; }
+  .lesson { font: italic 400 1.5rem/1.25 "Instrument Serif", var(--serif); margin: 0; color: var(--chalk); }
+  .lesson::before { content: "→ "; color: var(--accent); font-style: normal; }
+  .pills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pills a { display: inline-block; font: 600 0.82rem var(--display); text-decoration: none; padding: 0.45rem 0.85rem; border-radius: 999px; background: var(--accent); color: #000; transition: transform .2s var(--ease); }
+  .pills a:hover { transform: translateY(-2px) rotate(-1deg); color: #000; }
+
+  .coda { padding: 9rem var(--gutter) 8rem; text-align: center; }
+  .coda h2 { font-size: clamp(2.6rem, 7vw, 6rem); background: linear-gradient(92deg, var(--water), var(--sight), var(--ground), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .coda p { margin-inline: auto; font-size: var(--s1); }
+  .coda .quick { justify-content: center; }
+
+  /* Port panel */
+  dialog#port-panel { border: 3px solid var(--accent, var(--pink)); border-radius: 16px; background: #05060a; color: var(--chalk); max-width: 34rem; padding: 1.6rem 1.8rem; box-shadow: 12px 12px 0 var(--accent, var(--pink)); }
+  dialog#port-panel::backdrop { background: rgb(0 0 0 / .6); backdrop-filter: blur(3px); }
+  dialog .x { position: absolute; top: 0.6rem; right: 0.7rem; border-radius: 50%; width: 2.2rem; height: 2.2rem; padding: 0; font-size: 1.2rem; }
+  .pp-meta { color: var(--accent); }
+  .pp-kicker { font: italic 400 1.35rem/1.3 "Instrument Serif", var(--serif); color: var(--accent); }
+
+  /* Reveal */
   @media (prefers-reduced-motion: no-preference) {
-    .hero-event .water, .hero-event .surface { animation: rise 2.4s cubic-bezier(.2,.7,.2,1) both; }
-    @keyframes rise { from { transform: translateY(90px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .chapter .print, .chapter .text, .chapter .bench { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+    .chapter.in .print, .chapter.in .text, .chapter.in .bench { opacity: 1; transform: none; }
+    .chapter.in .print:nth-child(2) { transition-delay: .12s; } .chapter.in .print:nth-child(3) { transition-delay: .24s; }
   }
-  .kick { color: var(--measured); font-size: 0.95rem; margin-bottom: 1.2rem; }
-  .hero h1 { font-size: clamp(2.1rem, 4.2vw, var(--s6)); font-weight: 450; max-width: 18ch; }
-  .lede { font-size: var(--s1); line-height: 1.6; color: #dcd9d0; }
-  .quick { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 1.6rem; }
-
-  .arena { min-height: 100svh; display: grid; grid-template-columns: minmax(0, 46ch) minmax(18rem, 30rem); grid-template-areas: "story bench" "photos photos"; justify-content: space-between; align-content: center; gap: 2.5rem var(--gutter); padding: 8rem var(--gutter) 6rem calc(var(--gutter) + 3.5rem); }
-  .story { grid-area: story; background: linear-gradient(90deg, rgb(0 0 0 / .86), rgb(0 0 0 / .62) 80%, transparent); padding: 1.6rem 1.8rem 1.2rem 0; border-radius: 0 6px 6px 0; }
-  .force { display: flex; gap: 0.8rem; align-items: baseline; color: var(--dim); margin-bottom: 0.4rem; }
-  .force .pixel { font-size: 2.2rem; line-height: 1; color: var(--sig); }
-  .force .pixel:hover::after { content: " " attr(data-bn); color: var(--dim); font-family: var(--serif); }
-  .arena h2 { font-size: clamp(2rem, 3.6vw, var(--s5)); }
-  .kicker { font-style: italic; font-size: var(--s1); color: #e9e6dc; }
-  .evidence { display: grid; gap: 0.9rem; margin: 1.6rem 0 0; }
-  .evidence div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 1rem; align-items: baseline; border-top: 1px solid var(--line); padding-top: 0.7rem; }
-  .evidence dt { color: var(--sig); font-size: 1.05rem; }
-  .evidence dd { margin: 0; font-size: 0.93rem; color: #d6d3ca; }
-  .evidence .src { display: block; margin-top: 0.15rem; }
-  .deeper { list-style: none; padding: 0; margin: 1.6rem 0 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; }
-  .bench { grid-area: bench; align-self: end; background: rgb(7 9 11 / .9); border: 1px solid var(--line); border-top: 2px solid var(--sig); border-radius: 4px; padding: 1rem 1.1rem 1.2rem; backdrop-filter: blur(4px); }
-  .bench h3 { font-size: 0.8rem; color: var(--sig); margin: 0 0 0.8rem; font-weight: 400; }
-  .photos { grid-area: photos; display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.4rem; }
-  .photos figure { margin: 0; }
-  .photos img { aspect-ratio: 16 / 10; object-fit: cover; }
-  .sig-measured { --sig: var(--measured); } .sig-failure { --sig: var(--failure); } .sig-medium { --sig: var(--medium); } .sig-estimate { --sig: var(--estimate); }
-  .dim { color: var(--faint); }
-  .coda { padding: 10rem var(--gutter) 8rem calc(var(--gutter) + 3.5rem); background: linear-gradient(transparent, #000 30%); }
-  .coda .mono { display: flex; gap: 1.6rem; flex-wrap: wrap; }
 
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; padding-top: 6rem; }
-    .arena { grid-template-columns: 1fr; grid-template-areas: "story" "bench" "photos"; padding: 6rem var(--gutter) 4rem; }
-    .story { background: rgb(0 0 0 / .78); padding: 1.2rem; border-radius: 6px; }
-    .coda { padding-left: var(--gutter); }
+    .hero-photo { justify-self: start; width: min(80%, 20rem); }
+    .chapter, .chapter.flip { grid-template-columns: 1fr; grid-template-areas: "marker" "text" "media" "bench" "foot"; padding: 5rem var(--gutter) 4rem; }
+    .chapter.flip .marker { justify-content: flex-start; text-align: left; }
+    .benches.n2 { grid-template-columns: 1fr; }
+    .split div { grid-template-columns: 1fr; gap: 0.2rem; }
+    .creed-sprite { display: none; }
   }
 </style>

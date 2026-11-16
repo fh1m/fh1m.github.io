@@ -74,7 +74,7 @@ export function mount(el: HTMLElement, bus: EventTarget) {
     ctx.fillStyle = "#11161a"; ctx.strokeStyle = C.chalk; ctx.fillRect(-12, -9, 24, 18); ctx.strokeRect(-12, -9, 24, 18);
     ctx.fillStyle = C.estimate; ctx.beginPath(); ctx.arc(10, -4, 2.5, 0, 7); ctx.arc(10, 4, 2.5, 0, 7); ctx.fill();
     ctx.restore();
-    ctx.strokeStyle = "rgba(255,176,32,.35)"; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(px, py);
+    ctx.strokeStyle = "rgba(255,210,63,.4)"; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(px, py);
     const d = sonar() / 100; ctx.lineTo(px + Math.cos(st.th) * d * s, py + Math.sin(st.th) * d * s); ctx.stroke(); ctx.setLineDash([]);
     const pin = st.t ? (st.pinned / st.t) * 100 : 0;
     say(`${version} · ${st.t.toFixed(0)} s · pinned against a wall <b class="${pin > 30 ? "failure" : "measured"}">${pin.toFixed(0)} %</b> of the time`);

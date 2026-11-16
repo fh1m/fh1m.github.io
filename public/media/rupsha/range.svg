@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 560" width="1160" height="560" role="img">
+  <style>
+    text{font-family:Zed Mono,ui-monospace,monospace}
+    .h{font-size:22px;fill:#fff;font-weight:700;letter-spacing:-.02em}
+    .l{font-size:13px;fill:#7b8598;letter-spacing:.12em}
+    .v{font-size:16px;fill:#e4e8ef}
+    .r{font-size:16px;fill:#ff5747}
+    .a{font-size:16px;fill:#f88701}
+    .big{font-size:48px;fill:#fff;font-weight:700;letter-spacing:-.04em}
+  </style>
+  <rect width="1160" height="560" fill="#000"/>
+  <text x="40" y="48" class="h">A 20 cm tag, 640 by 480, 70 degree lens</text>
+  <text x="40" y="76" class="l">GAZEBO. TRUTH IS THE CAMERA TO THE TAG FACE.</text>
+
+  <text x="40" y="150" class="v">8 m</text>
+  <text x="130" y="150" class="l">11 px</text>
+  <rect x="280" y="128" width="70" height="28" fill="none" stroke="#7b8598" stroke-width="2"/>
+  <text x="370" y="150" class="l">NEVER SEEN</text>
+
+  <text x="40" y="230" class="a">6 m</text>
+  <text x="130" y="230" class="l">16 px</text>
+  <rect x="280" y="208" width="220" height="28" fill="#f88701"/>
+  <text x="520" y="230" class="a">FLICKERS</text>
+
+  <text x="40" y="310" class="r">4.5 m</text>
+  <text x="150" y="310" class="l">19 px</text>
+  <rect x="280" y="288" width="420" height="28" fill="#ff0000"/>
+  <text x="720" y="310" class="r">+3.6%   EVERY FRAME</text>
+
+  <text x="40" y="390" class="r">3.0 m</text>
+  <text x="150" y="390" class="l">29 px</text>
+  <rect x="280" y="368" width="560" height="28" fill="#ff0000"/>
+  <text x="860" y="390" class="r">+3.0%   EVERY FRAME</text>
+
+  <line x1="40" y1="450" x2="1120" y2="450" stroke="#1a2030"/>
+  <text x="40" y="520" class="big">+3%</text>
+  <text x="210" y="508" class="v">long at every station that sees the tag.</text>
+  <text x="210" y="534" class="l">STILL UNEXPLAINED. 2026-10-23. CAMERA PITCHED 17 DEG UP.</text>
+</svg>

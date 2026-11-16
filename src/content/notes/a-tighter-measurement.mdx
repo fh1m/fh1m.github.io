@@ -2,7 +2,8 @@
 title: "One fix anywhere, or many fixes everywhere"
 dek: "Characterising when a localisation fix should fire turned into retracting my own conclusion from the previous commit, and finding a square-root law hiding in the retraction."
 date: "2026-09"
-arena: noise
+series: truth
+part: 6
 kind: essay
 repo: mongla_ws
 hero: /media/mongla-docs/water-clear.webp
@@ -36,7 +37,7 @@ That's close to a square-root law: error falling roughly as 1/√N.
   <style>{`.t{font:12px var(--mono);fill:var(--dim)}`}</style>
   <line x1="80" y1="220" x2="860" y2="220" stroke="#2c333a" /><line x1="80" y1="20" x2="80" y2="220" stroke="#2c333a" />
   {[[1,0.383],[10,0.293],[40,0.139],[120,0.055]].map(([n, e]) => { const x = 80 + (Math.log10(n) / Math.log10(120)) * 760; const y = 220 - ((Math.log10(e) - Math.log10(0.03)) / (Math.log10(0.5) - Math.log10(0.03))) * 200; return <g><circle cx={x} cy={y} r="6" fill="var(--measured)" /><text x={x + 10} y={y - 8} class="t">{n} · {e} m</text></g>; })}
-  {(() => { const y = (e: number) => 220 - ((Math.log10(e) - Math.log10(0.03)) / (Math.log10(0.5) - Math.log10(0.03))) * 200; return <line x1="80" y1={y(0.383)} x2="840" y2={y(0.383 / Math.sqrt(120))} stroke="var(--estimate)" stroke-dasharray="5 5" />; })()}
+  {(() => { const y = (e) => 220 - ((Math.log10(e) - Math.log10(0.03)) / (Math.log10(0.5) - Math.log10(0.03))) * 200; return <line x1="80" y1={y(0.383)} x2="840" y2={y(0.383 / Math.sqrt(120))} stroke="var(--estimate)" stroke-dasharray="5 5" />; })()}
   <text x="600" y="60" class="t">dashed: 0.383 / √N</text>
   <text x="80" y="244" class="t">fixes (log)</text><text x="12" y="20" class="t">error (log)</text>
 </svg>

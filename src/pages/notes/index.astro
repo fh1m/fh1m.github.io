@@ -1,10 +1,10 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
-import { arenas } from "../../data/arenas";
+import { series } from "../../data/series";
 
-const notes = (await getCollection("notes")).sort((a, b) => b.data.date.localeCompare(a.data.date));
-const tracks = arenas.map((a) => ({ arena: a, notes: notes.filter((n) => n.data.arena === a.id) })).filter((t) => t.notes.length);
+const notes = await getCollection("notes");
+const shelves = series.map((s) => ({ s, parts: notes.filter((n) => n.data.series === s.id).sort((a, b) => a.data.part - b.data.part) }));
 const kinds = [
   { k: "all", label: "everything" },
   { k: "project", label: "machines & projects" },
@@ -12,13 +12,17 @@ const kinds = [
   { k: "regrade", label: "re-graded" },
   { k: "story", label: "stories" },
 ];
+const kindLabel: Record<string, string> = { project: "project", essay: "notebook", regrade: "re-graded", story: "story" };
 ---
-<Base title="Notes" description="Field notes from the range: machines, essays from the Mongla notebook, re-graded old projects, and the failures with their timestamps.">
+<Base title="Notes" description="Six series of field notes: the machines, water from first principles, seeing, time, measuring honestly, and building things that run.">
   <main id="main" class="notes">
     <header class="intro">
-      <p class="pixel kick">notes · {notes.length}</p>
+      <p class="kick"><span class="bn">খাতা</span> <span class="mono">the notebook · {notes.length} notes in {series.length} series</span></p>
       <h1>The long versions.</h1>
-      <p class="lede">Every arena on the range has a notebook behind it. These are the pages: what was built, what was measured, what broke, and what I'd tell the version of me who started it. Sorted by the force that graded them.</p>
+      <p class="lede">Every reach of the river has a notebook behind it. These are the pages, arranged as series you can read in order: each part builds on the last, the way you'd learn it at a bench. Most have something to drag.</p>
+      <ol class="toc">
+        {shelves.map(({ s, parts }) => <li class={`d-${s.domain}`}><a href={`#${s.id}`}><span class="bn">{s.bn}</span> {s.title} <span class="c">{parts.length}</span></a></li>)}
+      </ol>
       <div class="controls" role="group" aria-label="Filter notes">
         {kinds.map((k, i) => <button type="button" data-kind={k.k} aria-pressed={i === 0 ? "true" : "false"}>{k.label}</button>)}
         <label class="find"><span class="sr-only">Search notes</span><input type="search" placeholder="search: kalman, hailo, cat…" autocomplete="off" /></label>
@@ -26,21 +30,27 @@ const kinds = [
       <p class="count mono" aria-live="polite"></p>
     </header>
 
-    {tracks.map(({ arena, notes: ns }) => (
-      <section class={`track sig-${arena.signal}`} aria-labelledby={`t-${arena.id}`}>
-        <h2 id={`t-${arena.id}`}><a href={`/#${arena.id}`}><span class="pixel" data-bn={arena.bn}>{String(arena.n).padStart(2, "0")}</span> {arena.title}</a> <span class="mono force">{arena.force}</span></h2>
-        <ul class="tiles">
-          {ns.map((n) => (
+    {shelves.map(({ s, parts }) => (
+      <section id={s.id} class={`shelf d-${s.domain}`} aria-labelledby={`h-${s.id}`}>
+        <header class="shelf-head">
+          <span class="bn big" aria-hidden="true">{s.bn}</span>
+          <div>
+            <h2 id={`h-${s.id}`}>{s.title}</h2>
+            <p>{s.blurb}</p>
+          </div>
+        </header>
+        <ol class="tiles">
+          {parts.map((n) => (
             <li data-kind={n.data.kind} data-text={`${n.data.title} ${n.data.dek} ${n.data.repo ?? ""}`.toLowerCase()}>
               <a href={`/notes/${n.id}`}>
-                {n.data.hero && <img class:list={[{ plot: n.data.heroPlot }]} src={n.data.hero} alt="" loading="lazy" decoding="async" />}
-                <span class="meta mono">{n.data.date} · {({ project: "project", essay: "notebook", regrade: "re-graded", story: "story" })[n.data.kind]}</span>
+                <span class="pic">{n.data.hero && <img class:list={[{ plot: n.data.heroPlot }]} src={n.data.hero} alt="" loading="lazy" decoding="async" />}<span class="part">{n.data.part}</span></span>
+                <span class="meta mono">{kindLabel[n.data.kind]} · {n.data.date}</span>
                 <span class="t">{n.data.title}</span>
                 <span class="d">{n.data.dek}</span>
               </a>
             </li>
           ))}
-        </ul>
+        </ol>
       </section>
     ))}
   </main>
@@ -59,7 +69,7 @@ const kinds = [
       const ok = (kind === "all" || li.dataset.kind === kind) && (!q || li.dataset.text!.includes(q));
       li.hidden = !ok; if (ok) shown++;
     }
-    document.querySelectorAll<HTMLElement>(".track").forEach((t) => { t.hidden = !t.querySelector("li:not([hidden])"); });
+    document.querySelectorAll<HTMLElement>(".shelf").forEach((t) => { t.hidden = !t.querySelector("li:not([hidden])"); });
     buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kind === kind)));
     count.textContent = shown === items.length ? "" : `${shown} of ${items.length} notes`;
   };
@@ -69,32 +79,38 @@ const kinds = [
 </script>
 
 <style>
-  .notes { padding: 8rem var(--gutter) 4rem; }
-  .intro { max-width: 70rem; margin-bottom: 4rem; }
-  .kick { color: var(--measured); }
-  h1 { font-size: clamp(2.6rem, 6vw, 5rem); font-weight: 450; }
-  .lede { font-size: var(--s1); color: #dcd9d0; max-width: 60ch; }
-  .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; align-items: center; }
-  .controls button[aria-pressed="true"] { border-color: var(--measured); color: var(--measured); }
-  .find input { background: #000; border: 1px solid #2c333a; border-radius: 3px; color: var(--chalk); font: 400 0.8rem var(--mono); padding: 0.5rem 0.7rem; min-width: 16rem; }
+  .notes { padding: 8rem var(--gutter) 5rem; max-width: 100rem; margin: 0 auto; }
+  .intro { max-width: 72rem; margin-bottom: 5rem; }
+  .kick { display: flex; gap: .8rem; align-items: baseline; }
+  .kick .bn { color: var(--pink); font-size: 1.4rem; }
+  .kick .mono { color: var(--dim); }
+  h1 { font-size: clamp(3rem, 8vw, 7rem); font-weight: 750; letter-spacing: -0.045em; background: linear-gradient(92deg, var(--pink), var(--air) 40%, var(--ground) 70%, var(--sight)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { font: 400 var(--s1)/1.55 var(--serif); color: #e5e2da; max-width: 58ch; }
+  .toc { list-style: none; padding: 0; margin: 2rem 0 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+  .toc a { display: inline-flex; gap: .5rem; align-items: baseline; text-decoration: none; font: 600 .9rem var(--display); padding: .5rem .9rem; border-radius: 999px; background: var(--accent); color: #000; transition: transform .2s var(--ease); }
+  .toc a:hover { transform: translateY(-2px) rotate(-1deg); color: #000; }
+  .toc .c { font: 700 .72rem var(--mono); opacity: .7; }
+  .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.6rem; align-items: center; }
+  .find input { background: #000; border: 1.5px solid #2a2e3c; border-radius: 999px; color: var(--chalk); font: 400 0.82rem var(--mono); padding: 0.55rem 0.9rem; min-width: 16rem; }
+  .find input:focus { border-color: var(--pink); outline: none; }
   .count { color: var(--dim); min-height: 1.2em; }
 
-  .track { margin: 0 0 4.5rem; }
-  .track h2 { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; font-size: var(--s3); border-top: 1px solid var(--line); padding-top: 1.2rem; }
-  .track h2 a { text-decoration: none; }
-  .track h2 .pixel { color: var(--sig); }
-  .track h2 .pixel:hover::after { content: " " attr(data-bn); color: var(--dim); }
-  .force { color: var(--faint); font-size: 0.78rem; }
-  .tiles { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 1.4rem; }
-  .tiles a { display: grid; gap: 0.45rem; text-decoration: none; height: 100%; padding-bottom: 0.4rem; border-bottom: 1px solid var(--line); }
-  .tiles img { aspect-ratio: 16 / 9; object-fit: cover; border-radius: 3px; background: #050607; filter: saturate(0.85) brightness(0.85); transition: filter 0.25s ease, transform 0.25s ease; }
-  .tiles img.plot { filter: invert(1) hue-rotate(180deg) brightness(0.85); }
-  .tiles a:hover img.plot, .tiles a:focus-visible img.plot { filter: invert(1) hue-rotate(180deg); }
-  .tiles a:hover img, .tiles a:focus-visible img { filter: none; transform: translateY(-2px); }
-  .tiles a:hover .t { color: var(--sig); }
+  .shelf { margin: 0 0 6rem; }
+  .shelf-head { display: flex; gap: 1.6rem; align-items: flex-end; border-top: 3px solid var(--accent); padding-top: 1.4rem; margin-bottom: 2rem; }
+  .shelf-head .big { font-size: clamp(3rem, 7vw, 5.6rem); line-height: .9; color: var(--accent); }
+  .shelf-head h2 { font-size: clamp(1.9rem, 3.6vw, 3rem); margin: 0 0 .3rem; }
+  .shelf-head p { color: var(--dim); margin: 0; }
+  .tiles { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 2rem 1.6rem; }
+  .tiles a { display: grid; gap: 0.5rem; text-decoration: none; height: 100%; }
+  .pic { position: relative; display: block; border-radius: 10px; overflow: hidden; border: 2px solid #1d2130; background: #07080c; aspect-ratio: 16 / 9; transition: border-color .2s, transform .3s var(--ease), box-shadow .3s var(--ease); }
+  .pic img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) brightness(.85); transition: filter .3s; }
+  .pic img.plot { filter: invert(1) hue-rotate(180deg) brightness(.85); }
+  .part { position: absolute; left: .6rem; top: .6rem; font: 800 1rem var(--display); background: var(--accent); color: #000; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; }
+  .tiles a:hover .pic, .tiles a:focus-visible .pic { border-color: var(--accent); transform: translate(-4px, -4px); box-shadow: 8px 8px 0 var(--accent); }
+  .tiles a:hover img:not(.plot) { filter: none; }
+  .tiles a:hover .t { color: var(--accent); }
   .meta { color: var(--faint); font-size: 0.72rem; }
-  .t { font-size: 1.28rem; line-height: 1.2; font-weight: 500; }
-  .d { color: var(--dim); font-size: 0.95rem; line-height: 1.5; }
-  .sig-measured { --sig: var(--measured); } .sig-failure { --sig: var(--failure); } .sig-medium { --sig: var(--medium); } .sig-estimate { --sig: var(--estimate); }
-  @media (prefers-reduced-motion: reduce) { .tiles img { transition: none; } }
+  .t { font-size: 1.3rem; line-height: 1.15; font-weight: 650; letter-spacing: -0.015em; }
+  .d { color: var(--dim); font: 400 .98rem/1.5 var(--serif); }
+  @media (prefers-reduced-motion: reduce) { .pic, .pic img { transition: none; } }
 </style>
