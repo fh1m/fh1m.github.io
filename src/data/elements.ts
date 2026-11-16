@@ -153,7 +153,7 @@ const meta: Record<Element, Omit<ElementInfo, "projects" | "lessonCount" | "id" 
 const nation: Record<Element, { bn: string; colour: string }> = {
   water: { bn: "জল", colour: "#4f8fe0" }, earth: { bn: "মাটি", colour: "#79b35f" }, fire: { bn: "আগুন", colour: "#e5533d" }, air: { bn: "বাতাস", colour: "#eaa63b" },
 };
-export const elements: ElementInfo[] = (["water", "earth", "fire", "air"] as Element[]).map((id) => ({
+export const elements: ElementInfo[] = (["air", "water", "earth", "fire"] as Element[]).map((id) => ({
   id, layer: id, ...meta[id], ...nation[id], projects: projects.filter((p) => p.element === id), lessonCount: lessons.filter((l) => l.element === id).length,
 }));
 export const elementById = Object.fromEntries(elements.map((e) => [e.id, e])) as Record<Element, ElementInfo>;

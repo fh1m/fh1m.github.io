@@ -1,59 +1,69 @@
 ---
+/** One element as screens: what it does to a machine, the machine built for it, the works, and what it taught. */
 import Base from "../layouts/Base.astro";
-import Tracklist from "../components/album/Tracklist.astro";
-import Player from "../components/album/Player.astro";
-import Cover from "../components/album/Cover.astro";
-import { dims } from "../data/media";
+import WorkList from "../components/WorkList.astro";
 import { elements, type ElementInfo } from "../data/elements";
 import { byElement } from "../data/lessons";
+import { ZONE_INFO } from "../game/zones";
+import { MISSIONS } from "../game/missions";
 export const getStaticPaths = () => elements.map((el) => ({ params: { element: el.id }, props: { el } }));
 const { el } = Astro.props as { el: ElementInfo };
 const ll = byElement(el.id);
-const first = el.projects.find((p) => p.hero)!;
-const fd = dims(first.hero!);
+const z = ZONE_INFO.find((x) => x.id === el.id);
+const m = MISSIONS.find((x) => x.zone === el.id);
+const first = el.projects.find((p) => p.hero);
 ---
-<Base title={el.name} nation={el.id} description={`${el.name}: ${el.nature}`}>
-  <main id="main" class="side-page">
-    <header class="head">
-      <h1><span class="bn" lang="bn">{el.bn}</span><span class="en">{el.name}</span></h1>
-      <p class="says">{el.nature}</p>
-      <Cover src={first.hero!} alt={first.heroAlt ?? ""} caption={first.heroAlt ?? ""} w={fd.w} h={fd.h} />
+<Base title={el.name} nation={el.id} description={`${el.name}: ${el.nature}`} crumb={{ href: "/everything", label: "All the work" }}>
+  <main id="main" class="screens">
+    <header class="screen cover">
+      {first && <img class="cover-img" src={first.hero} alt="" aria-hidden="true" fetchpriority="high" />}
+      <div class="measure rel">
+        <p class="bnbig" lang="bn">{el.bn}</p>
+        <h1 class="s-h1">{el.name}</h1>
+        <p class="s-dek">{el.nature}</p>
+      </div>
     </header>
-    <div class="list">
-      <Tracklist sides={[el]} heads={false} />
-      {ll.length > 0 && (
-        <section class="ll" aria-labelledby="ll-h">
-          <h2 id="ll-h">What {el.name.toLowerCase()} taught me</h2>
-          <ul>
-            {ll.map((l) => (
-              <li>
-                <a href={`/lessons/${l.slug}`}>{l.title}</a>
-                <span class="wrong">{l.believed}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-      <Player />
-    </div>
+
+    {z && (
+      <section class="screen split" aria-labelledby="h-m">
+        <div>
+          <p class="s-label">The machine for it</p>
+          <h2 class="s-h2" id="h-m">{z.form}</h2>
+          <p class="s-txt">{z.line}</p>
+          <p class="s-meta">{z.real} <a href={z.source.href}>{z.source.label}</a></p>
+          {m && <p class="go"><a class="pill" href={m.report}>Mission: {m.title}</a></p>}
+        </div>
+        <dl>{z.specs.map(([k, v]) => <><dt>{k}</dt><dd>{v}</dd></>)}</dl>
+      </section>
+    )}
+
+    <section class="screen" aria-labelledby="h-w">
+      <h2 class="s-h2" id="h-w">What I built for {el.name.toLowerCase()}</h2>
+      <WorkList projects={el.projects} />
+    </section>
+
+    {ll.length > 0 && (
+      <section class="screen short" aria-labelledby="h-l">
+        <h2 class="s-h2" id="h-l">What {el.name.toLowerCase()} taught me</h2>
+        <ul class="wall">{ll.map((l) => <li><a href={`/lessons/${l.slug}`}><span class="t">{l.title}</span><span class="s-struck b">{l.believed}</span></a></li>)}</ul>
+      </section>
+    )}
   </main>
 </Base>
-<script>
-  import "../scripts/album.ts";
-</script>
 <style>
-  .side-page { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(16rem, 26rem) minmax(0, 44rem); column-gap: clamp(2.5rem, 7vw, 8rem); padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
-  .head { align-self: start; position: sticky; top: 2rem; }
-  h1 { margin: 0 0 1.2rem; display: grid; line-height: 1; }
-  h1 .bn { font: 400 clamp(4.5rem, 9vw, 7.5rem)/1 var(--bangla); color: var(--c); }
-  h1 .en { font: 500 var(--t2) var(--sans); color: var(--ink-hi); margin-top: .6rem; }
-  .says { font-size: var(--t1); color: var(--ink-hi); margin: 0 0 1.6rem; }
-  .intro { color: var(--dim); }
-  .ll { margin-top: 3rem; }
-  .ll h2 { font: 500 var(--t1) var(--sans); margin: 0 0 .8rem; }
-  .ll ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .9rem; }
-  .ll li { display: grid; gap: .15rem; }
-  .ll .wrong { font-size: var(--t-1); }
-  .list { position: relative; z-index: 1; }
-  @media (max-width: 860px) { .side-page { grid-template-columns: 1fr; padding-top: 1.4rem; } .head { position: static; margin-bottom: 2rem; } }
+  .cover { align-content: end; overflow: hidden; min-height: 92svh; }
+  .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .4; }
+  .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 30%, #0b1233 92%); }
+  .rel { position: relative; z-index: 1; }
+  .bnbig { font: 400 clamp(4.5rem, 12vw, 9rem)/1 var(--bangla); color: var(--c); margin: 0 0 .4rem; }
+  .split { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 4vw; align-items: center; }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: .9rem 1.6rem; margin: 0; padding: 1.6rem; border-radius: 1rem; background: rgb(255 255 255 / .05); }
+  dt { font: 600 var(--t-1) var(--story); color: #9aa6d8; }
+  dd { margin: 0; font: 400 var(--t0) var(--mono); color: #fff; }
+  .go { margin-top: 1.6rem; }
+  .wall { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 2rem 3rem; }
+  .wall a { display: grid; gap: .4rem; text-decoration: none; }
+  .t { font: 900 clamp(1.2rem, 1.8vw, 1.5rem)/1.25 var(--story); color: #fff; }
+  .b { font: 600 var(--t-1)/1.5 var(--story); }
+  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
 </style>

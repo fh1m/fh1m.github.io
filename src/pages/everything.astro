@@ -1,48 +1,65 @@
 ---
 /**
- * Home is an album. The cover is the Pale Blue Dot; the tracklist is the work, one side per nation.
+ * All the work, without the planet: every project by element, the writing, and every public
+ * repository. The GitHub numbers are read at build time (scripts/github-stats.mjs), never typed in.
  */
 import Base from "../layouts/Base.astro";
-import Tracklist from "../components/album/Tracklist.astro";
-import Player from "../components/album/Player.astro";
-import Cover from "../components/album/Cover.astro";
 import { elements } from "../data/elements";
+import { lessons } from "../data/lessons";
+import { MISSIONS } from "../game/missions";
+import WorkList from "../components/WorkList.astro";
+import gh from "../data/github.json";
+import { getCollection } from "astro:content";
+const notes = await getCollection("notes");
+const repos = gh.repos.filter((r) => !r.archived).sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
+const fmt = (n: number) => n.toLocaleString("en-US");
+const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 ---
-<Base chrome={false} bodyClass="album" title="Everything">
-  <main id="main" class="album">
-    <header class="cover">
-      <Cover src="/world/cover.webp" alt="The Pale Blue Dot: Earth as one pale pixel in a band of sunlight, photographed by Voyager 1 in 1990" caption="Voyager 1, 14 February 1990, about six billion kilometres out. That pixel is Earth." w={720} h={720} />
-      <h1>Fahim Faisal</h1>
-      <p class="sub">That pixel is home. I build machines that have to work on it without anyone holding their hand, and most of them were wrong before they were right.</p>
-      <nav class="more" aria-label="More">
-        <a href="/lessons">What I got wrong</a>
-        <a href="/notes">Notebook</a>
-        <a href="/shoulders">Shoulders</a>
-        <a href="/cv">CV</a>
-        <a href="https://github.com/fh1m">GitHub</a>
-      </nav>
+<Base title="All the work" description="Every project by Fahim Faisal, grouped by where it has to work: air, water, land and silicon. The writing, the lessons, and every public repository.">
+  <main id="main" class="screens">
+    <header class="screen short">
+      <div class="measure">
+        <h1 class="s-h1">All the work</h1>
+        <p class="s-dek">Machines that have to work on their own: in the air, under water, on land and on small chips. Each one links to what broke and what fixed it.</p>
+        <p class="s-meta gh">In the last year: {fmt(gh.contributionsLastYear)} contributions on GitHub, {fmt(gh.commitsLastYear)} of them commits, across {gh.ownRepos} repositories of my own. Counted from the GitHub API when this site was built, {gh.generatedAtLabel}.</p>
+      </div>
     </header>
-    <div class="list">
-      <Tracklist sides={elements} />
-      <Player />
-    </div>
+
+    {elements.map((el) => (
+      <section class="screen" style={`--c:${el.colour}`} aria-labelledby={`h-${el.id}`}>
+        <h2 class="s-h2" id={`h-${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name}</h2>
+        <WorkList projects={el.projects} />
+      </section>
+    ))}
+
+    <section class="screen short" aria-labelledby="h-w">
+      <h2 class="s-h2" id="h-w">The writing</h2>
+      <ul class="trio">
+        <li><a href="/missions/air"><span class="ti">Missions</span><span class="ln">{MISSIONS.length} real failures you can debug yourself, each with an after-action report.</span></a></li>
+        <li><a href="/notes"><span class="ti">Notebook</span><span class="ln">{notes.length} long notes, most with something to drag.</span></a></li>
+        <li><a href="/lessons"><span class="ti">What I got wrong</span><span class="ln">{lessons.length} lessons learned, filed the NASA way, each with its fix.</span></a></li>
+      </ul>
+    </section>
+
+    <section class="screen" aria-labelledby="h-r">
+      <h2 class="s-h2" id="h-r">Every public repository</h2>
+      <ul class="repos">
+        {repos.map((r) => (
+          <li><a href={r.url}><span class="rn">{r.name}</span><span class="ln">{r.description}</span><span class="s-meta">{r.language ? `${r.language}, ` : ""}updated {ago(r.pushedAt)}</span></a></li>
+        ))}
+      </ul>
+    </section>
   </main>
 </Base>
-<script>
-  import "../scripts/album.ts";
-</script>
 <style>
-  .album { position: relative; z-index: 1; min-height: 100svh; display: grid; grid-template-columns: minmax(16rem, 26rem) minmax(0, 44rem); column-gap: clamp(2.5rem, 7vw, 8rem); padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
-  .cover { align-self: start; position: sticky; top: 3rem; }
-  h1 { font: 500 var(--t3)/1.1 var(--sans); margin: 1.4rem 0 .6rem; }
-  .sub { color: var(--ink); margin: 0 0 .8rem; }
-  .sub { margin-bottom: 1.4rem; }
-  .more { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; }
-  .more a { color: var(--dim); }
-  .list { position: relative; z-index: 1; }
-  @media (max-width: 860px) {
-    .album { grid-template-columns: 1fr; padding-top: 1.6rem; }
-    .cover { position: static; margin-bottom: 2.4rem; }
-    .cover :global(.cover-art) { max-width: 22rem; }
-  }
+  .bn { color: var(--c); margin-right: .4rem; }
+  .gh { margin-top: 1.6rem; max-width: 56ch; }
+  .ti { font: 900 clamp(1.2rem, 2vw, 1.7rem)/1.2 var(--story); color: #fff; }
+  .ln { font: 600 var(--t0)/1.45 var(--story); color: #dfe4ff; }
+  .trio { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 2.4rem; }
+  .trio a, .repos a { display: grid; gap: .4rem; text-decoration: none; }
+  .repos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.8rem 2.6rem; }
+  .rn { font: 500 var(--t0) var(--mono); color: #fff; }
+  .repos .ln { font-weight: 500; font-size: var(--t-1); color: #c9d3ff; }
+  .repos a:hover .rn { text-decoration: underline; }
 </style>

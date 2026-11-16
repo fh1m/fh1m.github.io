@@ -27,9 +27,8 @@ const project = projects.find((p) => p.slug === L.project)!;
 const photo = L.photo ? { src: L.photo[0], cap: L.photo[1], ...dims(L.photo[0]) } : null;
 const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
 ---
-<Base title={`After-action report: ${m.title}`} description={lesson.lesson} bodyClass="planet-page" chrome={false}>
+<Base title={`After-action report: ${m.title}`} description={lesson.lesson} bodyClass="planet-page" crumb={{ href: "/missions/air", label: `Mission ${i + 1} of 4`, bn: z.bn }} progress>
   <main id="main" class="aar" style={`--c:${z.colour}`}>
-    <nav class="top"><a href="/">Back to the planet</a><a href={`/missions/${next.zone}`}>Next report: {next.title}</a></nav>
     <header>
       <p class="kick"><span class="bn" lang="bn">{z.bn}</span> {z.name}, mission {i + 1} of 4, after-action report</p>
       <h1>{m.title}</h1>
@@ -53,14 +52,13 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
         <div class="note"><p class="who">Where this lives</p><p><a href={`/projects/${project.slug}`}>{project.title}</a>. {project.line}</p><p><a href={`/lessons/${lesson.slug}`}>The lesson, in NASA's format</a></p></div>
       </aside>
     </div>
+    <p class="nextr"><a class="pill" href={`/missions/${next.zone}`}>Next report: {next.title}</a></p>
   </main>
 </Base>
 <style>
   :global(body.planet-page) { background: #0b1233; color: #e9edff; }
-  .aar { max-width: 76rem; margin: 0 auto; padding: 1.4rem clamp(1.2rem, 4vw, 3rem) 4rem; font-family: var(--story); }
-  .top { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 2.4rem; }
-  .top a { font: 700 var(--t-1) var(--story); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .95rem; text-decoration: none; }
-  .top a + a { background: rgb(255 255 255 / .12); color: #fff; }
+  .aar { max-width: 76rem; margin: 0 auto; padding: 3rem clamp(1.2rem, 4vw, 3rem) 4rem; font-family: var(--story); }
+  .nextr { margin: 3rem 0 0; }
   .kick { margin: 0 0 .5rem; font: 800 var(--t-1) var(--story); color: var(--c); }
   .bn { font-family: var(--bangla); font-weight: 400; }
   h1 { font: 900 clamp(2.2rem, 5vw, 3.6rem)/1.05 var(--story); color: #fff; margin: 0 0 .8rem; letter-spacing: -.01em; }

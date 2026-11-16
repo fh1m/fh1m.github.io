@@ -4,9 +4,10 @@ import "@fontsource/tiro-bangla/400.css";
 import "../styles/global.css";
 import { person } from "../data/facts";
 import { elements } from "../data/elements";
+import ScreenBar from "../components/ScreenBar.astro";
 
-interface Props { title?: string; description?: string; bodyClass?: string; nation?: string; chrome?: boolean }
-const { title, description = "Fahim Faisal, an engineer from Dhaka: machines that have to work alone in water, on land, in the air and on small chips, and the commits that fixed them.", bodyClass = "", nation, chrome = true } = Astro.props;
+interface Props { title?: string; description?: string; bodyClass?: string; nation?: string; chrome?: boolean; crumb?: { href: string; label: string; bn?: string }; progress?: boolean }
+const { title, description = "Fahim Faisal, an engineer from Dhaka: machines that have to work alone in water, on land, in the air and on small chips, and the commits that fixed them.", bodyClass = "", nation, chrome = true, crumb, progress = false } = Astro.props;
 const fullTitle = title ? `${title} | Fahim Faisal` : "Fahim Faisal";
 const here = Astro.url.pathname;
 const colour = elements.find((e) => e.id === nation)?.colour;
@@ -18,9 +19,9 @@ const colour = elements.find((e) => e.id === nation)?.colour;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#0b1233" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" href="/fonts/zed-sans-regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/nunito-var.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={new URL(here, Astro.site)} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -30,20 +31,7 @@ const colour = elements.find((e) => e.id === nation)?.colour;
   </head>
   <body class={bodyClass} style={colour ? `--c:${colour}` : undefined}>
     <a class="skip" href="#main">Skip to content</a>
-    {chrome && (
-      <header class="top">
-        <a class="me" href="/">Fahim Faisal</a>
-        <nav aria-label="Site">
-          <ul>
-            {elements.map((e) => <li><a href={`/${e.id}`} style={`--c:${e.colour}`} aria-current={here.startsWith(`/${e.id}`) ? "page" : undefined}><span class="bn" lang="bn">{e.bn}</span> {e.name}</a></li>)}
-            <li><a href="/lessons" aria-current={here.startsWith("/lessons") ? "page" : undefined}>Lessons</a></li>
-            <li><a href="/notes" aria-current={here.startsWith("/notes") ? "page" : undefined}>Notebook</a></li>
-            <li><a href="/shoulders" aria-current={here.startsWith("/shoulders") ? "page" : undefined}>Shoulders</a></li>
-            <li><a href="/cv" aria-current={here.startsWith("/cv") ? "page" : undefined}>CV</a></li>
-          </ul>
-        </nav>
-      </header>
-    )}
+    {chrome && <><ScreenBar crumb={crumb} progress={progress} /><div class="bar-space" aria-hidden="true"></div></>}
     <slot />
     {chrome && (
       <footer class="foot">
@@ -57,19 +45,7 @@ const colour = elements.find((e) => e.id === nation)?.colour;
 </html>
 
 <style>
-  .top { position: relative; z-index: 5; display: flex; align-items: baseline; justify-content: space-between; gap: 2rem; padding: 1.4rem var(--gutter) 0; }
-  .me { font: 500 var(--t1) var(--sans); color: var(--ink-hi); text-decoration: none; white-space: nowrap; }
-  nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; margin: 0; padding: 0; }
-  nav a { color: var(--dim); text-decoration: none; }
-  nav a:hover { color: var(--ink-hi); }
-  nav a[aria-current="page"] { color: var(--ink-hi); text-decoration: underline; text-decoration-color: var(--c, var(--ink-hi)); text-underline-offset: .35em; }
-  nav .bn { font-family: var(--bangla); color: var(--c, inherit); }
+  .bar-space { height: 3.4rem; }
   .foot { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.6rem; padding: 4rem var(--gutter) 2.4rem; }
   .foot a { color: var(--dim); }
-  @media (max-width: 760px) {
-    .top { flex-direction: column; gap: .6rem; }
-    nav { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
-    nav ul { flex-wrap: nowrap; }
-    nav li { flex: none; }
-  }
 </style>

@@ -1,26 +1,31 @@
 ---
+/** Every lesson learned, one screen per element: the beliefs, struck through, each linking to its lesson. */
 import Base from "../../layouts/Base.astro";
 import { lessons } from "../../data/lessons";
 import { elements, projects } from "../../data/elements";
 const title = (slug: string) => projects.find((p) => p.slug === slug)?.title ?? slug;
 ---
-<Base title="What I got wrong" description="Sixteen things I believed about machines that turned out to be false, what was true instead, and the commit that fixed each one.">
-  <main id="main" class="lessons">
-    <header>
-      <h1>What I got wrong</h1>
-      <p>Sixteen things I believed that turned out to be false. Each one is written the way NASA files a lesson learned: what happened, what we believed, what was true, and what to do next time. Each one links to the commit that fixed it.</p>
+<Base title="What I got wrong" description={`${lessons.length} things I believed about machines that turned out to be false, what was true instead, and the commit that fixed each one.`}>
+  <main id="main" class="screens">
+    <header class="screen short">
+      <div class="measure">
+        <h1 class="s-h1">What I got wrong</h1>
+        <p class="s-dek">{lessons.length} things I believed that turned out to be false. Each is filed the way NASA files a lesson learned: what happened, what was believed, what was true, what to do next time, and the commit that fixed it.</p>
+      </div>
     </header>
     {elements.map((el) => {
       const ll = lessons.filter((l) => l.element === el.id);
       return ll.length > 0 && (
-        <section style={`--c:${el.colour}`} aria-labelledby={`h-${el.id}`}>
-          <h2 id={`h-${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name}</h2>
-          <ul>
+        <section class="screen" style={`--c:${el.colour}`} aria-labelledby={`h-${el.id}`}>
+          <h2 class="s-h2" id={`h-${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name}</h2>
+          <ul class="wall">
             {ll.map((l) => (
               <li>
-                <a href={`/lessons/${l.slug}`}>{l.title}</a>
-                <span class="wrong">{l.believed}</span>
-                <span class="where">{title(l.project)}, {new Date(l.date + (l.date.length === 7 ? "-01" : "")).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</span>
+                <a href={`/lessons/${l.slug}`}>
+                  <span class="t">{l.title}</span>
+                  <span class="s-struck b">{l.believed}</span>
+                  <span class="s-meta">{title(l.project)}</span>
+                </a>
               </li>
             ))}
           </ul>
@@ -30,15 +35,10 @@ const title = (slug: string) => projects.find((p) => p.slug === slug)?.title ?? 
   </main>
 </Base>
 <style>
-  .lessons { padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 52rem; }
-  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
-  header p { color: var(--dim); max-width: 58ch; margin-bottom: 3rem; }
-  h2 { font: 500 var(--t2) var(--sans); color: var(--c); margin: 0 0 1rem; }
-  .bn { font-family: var(--bangla); font-weight: 400; }
-  section { margin-bottom: 3rem; }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
-  li { display: grid; gap: .2rem; }
-  li > a { font-size: var(--t1); text-decoration: none; color: var(--ink-hi); }
-  li > a:hover { text-decoration: underline; text-decoration-color: var(--c); }
-  .where { color: var(--faint); font-size: var(--t-1); }
+  .bn { color: var(--c); margin-right: .4rem; }
+  .wall { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); gap: 2.4rem 3rem; }
+  .wall a { display: grid; gap: .5rem; text-decoration: none; }
+  .t { font: 900 clamp(1.3rem, 2vw, 1.7rem)/1.2 var(--story); color: #fff; }
+  .b { font: 600 var(--t0)/1.5 var(--story); }
+  .wall a:hover .t { color: var(--c); }
 </style>

@@ -20,12 +20,8 @@ const story = rows((p.gallery ?? []).slice(g0 ? 1 : 0));
 const i = el.projects.findIndex((x) => x.slug === p.slug);
 const next = el.projects[i + 1];
 ---
-<Base title={p.title} nation={p.element} description={p.line ?? p.summary} chrome={false}>
+<Base title={p.title} nation={p.element} description={p.line ?? p.summary} crumb={{ href: `/${el.id}`, label: el.name, bn: el.bn }}>
   <main id="main" class="track-page">
-    <nav class="bar" aria-label="Where you are">
-      <a href="/" class="pill">Back to the planet</a>
-      <a href={`/${el.id}`} class="crumb"><span class="bn" lang="bn">{el.bn}</span> {el.name}</a>
-    </nav>
 
     <header class="screen cover">
       {lead && <img class="cover-img" src={lead.src} alt="" aria-hidden="true" fetchpriority="high" />}
@@ -107,9 +103,6 @@ const next = el.projects[i + 1];
 </script>
 <style>
   .track-page { position: relative; z-index: 1; font-family: var(--story); }
-  .bar { position: fixed; z-index: 20; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 1rem; padding: .7rem var(--gutter); background: #0b1233; border-bottom: 1px solid rgb(255 255 255 / .06); }
-  .pill { display: inline-block; font: 700 var(--t-1) var(--story); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .95rem; text-decoration: none; white-space: nowrap; }
-  .crumb { font: 600 var(--t-1) var(--story); color: #c9d3ff; text-decoration: none; }
   .bn { font-family: var(--bangla); color: var(--c); }
   .screen { position: relative; min-height: 100svh; padding: 12svh var(--gutter); display: grid; align-content: center; border-top: 1px solid rgb(255 255 255 / .06); }
   .cover { border: 0; align-content: end; overflow: hidden; }

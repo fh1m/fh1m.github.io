@@ -1,27 +1,35 @@
 ---
+/** The notebook: one screen per series, each note a numbered chapter. */
 import Base from "../../layouts/Base.astro";
-import Player from "../../components/album/Player.astro";
 import { getCollection } from "astro:content";
 import { series } from "../../data/series";
 const notes = await getCollection("notes");
+const ACCENT: Record<string, string> = { workshop: "#e0b062", water: "#4f8fe0", sight: "#ef6a4f", time: "#a98cf0", ground: "#79b35f", air: "#eaa63b" };
 ---
 <Base title="Notebook" description="The long versions: how the machines work, what water does to light and radio, seeing, time, measuring honestly, and building things that run. Most have something to drag.">
-  <main id="main" class="notebook">
-    <header>
-      <h1>Notebook</h1>
-      <p>The long versions. Most of them have something you can drag.</p>
+  <main id="main" class="screens">
+    <header class="screen short">
+      <div class="measure">
+        <h1 class="s-h1">Notebook</h1>
+        <p class="s-dek">The long versions, in {series.length} series that build from first principles. Most have something you can drag.</p>
+      </div>
     </header>
     {series.map((s) => {
       const parts = notes.filter((n) => n.data.series === s.id).sort((a, b) => a.data.part - b.data.part);
       return parts.length > 0 && (
-        <section id={s.id} aria-labelledby={`h-${s.id}`}>
-          <h2 id={`h-${s.id}`}><span class="bn" lang="bn">{s.bn}</span> {s.title}</h2>
-          <ol>
+        <section class="screen ser" id={s.id} style={`--acc:${ACCENT[s.domain]}`} aria-labelledby={`h-${s.id}`}>
+          <div class="ser-head">
+            <p class="s-kicker"><span class="bn" lang="bn">{s.bn}</span>{parts.length} notes</p>
+            <h2 class="s-h2" id={`h-${s.id}`}>{s.title}</h2>
+            <p class="s-txt">{s.blurb}</p>
+          </div>
+          <ol class="chap">
             {parts.map((n) => (
               <li>
-                <a class="track" href={`/notes/${n.id}`} data-art={n.data.heroPlot ? "" : (n.data.hero ?? "")}>
-                  <span class="ti">{n.data.title}</span>
-                  <span class="dek">{n.data.dek}</span>
+                <a href={`/notes/${n.id}`}>
+                  <span class="pn">{n.data.part}</span>
+                  <span class="tt"><span class="ti">{n.data.title}</span><span class="dk">{n.data.dek}</span></span>
+                  {n.data.hero && !n.data.heroPlot && <img src={n.data.hero} alt="" loading="lazy" />}
                 </a>
               </li>
             ))}
@@ -29,24 +37,19 @@ const notes = await getCollection("notes");
         </section>
       );
     })}
-    <Player />
   </main>
 </Base>
-<script>
-  import "../../scripts/album.ts";
-</script>
 <style>
-  .notebook { position: relative; z-index: 1; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 52rem; }
-  header { position: relative; z-index: 1; }
-  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
-  header p { color: var(--dim); margin-bottom: 3rem; }
-  section { position: relative; z-index: 1; margin-bottom: 3rem; scroll-margin-top: 1rem; }
-  h2 { font: 500 var(--t2) var(--sans); margin: 0 0 .8rem; }
-  .bn { font-family: var(--bangla); font-weight: 400; }
-  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .9rem; }
-  .track { display: grid; gap: .15rem; text-decoration: none; }
-  .ti { font-size: var(--t1); color: var(--ink-hi); }
-  .dek { color: var(--dim); }
-  .track:hover .ti, .track:focus-visible .ti { text-decoration: underline; }
-  .notebook :global(.player) { display: none; }
+  .ser { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 4vw; align-items: start; align-content: center; scroll-margin-top: 3.4rem; }
+  .bn { color: var(--acc); }
+  .chap { list-style: none; margin: 0; padding: 0; display: grid; }
+  .chap a { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) 7.5rem; gap: 1rem; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgb(255 255 255 / .08); text-decoration: none; }
+  .pn { font: 400 var(--t1) var(--mono); color: var(--acc); }
+  .tt { display: grid; gap: .2rem; }
+  .ti { font: 900 clamp(1.15rem, 1.7vw, 1.5rem)/1.25 var(--story); color: #fff; }
+  .dk { font: 500 var(--t-1)/1.5 var(--story); color: #aab4e6; }
+  .chap img { width: 7.5rem; height: 4.6rem; object-fit: cover; border-radius: .5rem; opacity: .85; }
+  .chap a:hover .ti { color: var(--acc); }
+  .chap a:hover img { opacity: 1; }
+  @media (max-width: 900px) { .ser { grid-template-columns: 1fr; } .chap a { grid-template-columns: 2rem minmax(0, 1fr); } .chap img { display: none; } }
 </style>

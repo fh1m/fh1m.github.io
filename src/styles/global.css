@@ -183,3 +183,24 @@ output { font: 400 var(--t-1) var(--mono); color: var(--ink-hi); }
 .x-byte i { position: absolute; top: 2px; left: 4px; font: normal 400 .58rem var(--mono); color: var(--faint); }
 .x-byte em { position: absolute; bottom: 3px; font: normal 400 .55rem var(--mono); color: var(--c); }
 .x-byte:hover, .x-byte:focus-visible { background: color-mix(in srgb, var(--c) 24%, #000); outline: none; }
+
+/* Screens: every page off the planet is a sequence of full-viewport screens, one idea each. */
+.pill { display: inline-block; font: 700 var(--t-1) var(--story); color: #0b1233; background: #fff; border: 0; border-radius: 999px; padding: .45rem .95rem; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.pill.ghost { background: rgb(255 255 255 / .1); color: #fff; }
+.screens { font-family: var(--story); }
+.screen { position: relative; min-height: 100svh; padding: 12svh var(--gutter); display: grid; align-content: center; border-top: 1px solid rgb(255 255 255 / .06); }
+.screen:first-child { border-top: 0; }
+.screen.short { min-height: 70svh; }
+.screen.center { justify-items: center; }
+.screen .measure { max-width: 56rem; width: 100%; }
+.s-kicker { font: 700 var(--t-1) var(--story); color: var(--c, var(--acc, #4f8fe0)); margin: 0 0 .8rem; }
+.s-kicker .bn { margin-right: .3rem; }
+.s-h1 { font: 900 clamp(2.6rem, 7vw, 6rem)/1 var(--story); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.02em; max-width: 18ch; }
+.s-h2 { font: 900 clamp(1.7rem, 3.4vw, 2.8rem)/1.1 var(--story); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.01em; max-width: 24ch; }
+.s-label { font: 800 var(--t0) var(--story); color: var(--c, var(--acc, #4f8fe0)); margin: 0 0 .8rem; }
+.s-dek { font: 600 clamp(1.15rem, 2vw, 1.6rem)/1.4 var(--story); color: #dfe4ff; max-width: 42ch; margin: 0; }
+.s-big { font: 800 clamp(1.5rem, 3vw, 2.5rem)/1.3 var(--story); color: #fff; max-width: 30ch; margin: 0; }
+.s-txt { font: 500 clamp(1.05rem, 1.3vw, 1.25rem)/1.7 var(--story); color: #dfe4ff; max-width: 56ch; margin: 0 0 1rem; }
+.s-struck { color: #aab4e6; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 3px; }
+.s-meta { font: 500 var(--t-1)/1.6 var(--story); color: #9aa6d8; }
+.s-meta a, .s-txt a { color: #fff; }

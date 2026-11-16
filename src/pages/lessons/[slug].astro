@@ -1,4 +1,5 @@
 ---
+/** One lesson learned, NASA-style, as a sequence of screens: what happened, the belief, the truth, next time. */
 import Base from "../../layouts/Base.astro";
 import { lessons, type Lesson } from "../../data/lessons";
 import { projects, elementById } from "../../data/elements";
@@ -6,39 +7,38 @@ export const getStaticPaths = () => lessons.map((l, i) => ({ params: { slug: l.s
 const { l, prev, next } = Astro.props as { l: Lesson; prev: Lesson | null; next: Lesson | null };
 const el = elementById[l.element];
 const proj = projects.find((p) => p.slug === l.project);
+const when = new Date(l.date + (l.date.length === 7 ? "-01" : "")).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 ---
-<Base title={l.title} nation={l.element} description={l.lesson}>
-  <main id="main" class="lesson">
-    <p class="from"><a href="/lessons">What I got wrong</a>{proj && <>, from <a href={`/projects/${proj.slug}`}>{proj.title}</a></>}</p>
-    <h1>{l.title}</h1>
-    <dl>
-      <dt>What happened</dt><dd>{l.driving}</dd>
-      <dt>What I believed</dt><dd><span class="wrong">{l.believed}</span></dd>
-      <dt>What was true</dt><dd class="true">{l.truth}</dd>
-      <dt>The lesson</dt><dd class="lesson-line">{l.lesson}</dd>
-      <dt>Next time</dt><dd>{l.recommendation}</dd>
-      <dt>Evidence</dt><dd>{l.refs.map((r, k) => <>{k > 0 && ", "}<a class:list={{ h: r.href.includes("/commit/") }} href={r.href}>{r.label}</a></>)}</dd>
-    </dl>
-    <nav class="pn" aria-label="More lessons">
-      {prev ? <a href={`/lessons/${prev.slug}`}>Previous: {prev.title}</a> : <span />}
-      {next && <a href={`/lessons/${next.slug}`}>Next: {next.title}</a>}
+<Base title={l.title} nation={l.element} description={l.lesson} crumb={{ href: "/lessons", label: "What I got wrong", bn: el.bn }} progress>
+  <main id="main" class="screens">
+    <header class="screen">
+      <div class="measure">
+        <p class="s-kicker"><span class="bn" lang="bn">{el.bn}</span>{proj ? <a href={`/projects/${proj.slug}`}>{proj.title}</a> : el.name}, {when}</p>
+        <h1 class="s-h1">{l.title}</h1>
+        <p class="s-dek">{l.lesson}</p>
+      </div>
+    </header>
+    <section class="screen short"><div class="measure"><p class="s-label">What happened</p><p class="s-big">{l.driving}</p></div></section>
+    <section class="screen short"><div class="measure"><p class="s-label">What I believed</p><p class="s-big"><span class="s-struck">{l.believed}</span></p></div></section>
+    <section class="screen short"><div class="measure"><p class="s-label">What was true</p><p class="s-big">{l.truth}</p></div></section>
+    <section class="screen short">
+      <div class="measure">
+        <p class="s-label">Next time</p>
+        <p class="s-big">{l.recommendation}</p>
+        <p class="s-meta ev">Evidence: {l.refs.map((r, k) => <>{k > 0 && ", "}<a class:list={{ h: r.href.includes("/commit/") }} href={r.href}>{r.label}</a></>)}</p>
+      </div>
+    </section>
+    <nav class="screen short moves" aria-label="More lessons">
+      <div class="measure row">
+        {prev && <a class="pill ghost" href={`/lessons/${prev.slug}`}>Previous: {prev.title}</a>}
+        {next && <a class="pill" href={`/lessons/${next.slug}`}>Next: {next.title}</a>}
+      </div>
     </nav>
   </main>
 </Base>
 <style>
-  .lesson { padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 56rem; }
-  .from { color: var(--dim); margin: 0 0 1rem; }
-  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 2.4rem; max-width: 20ch; }
-  dl { display: grid; grid-template-columns: 11rem 1fr; gap: 1.2rem 2rem; margin: 0 0 2.4rem; }
-  dt { color: var(--c); }
-  dd { margin: 0; max-width: 62ch; }
-  .true { color: var(--ink-hi); }
-  .lesson-line { font-size: var(--t2); line-height: 1.35; color: var(--ink-hi); }
+  .s-kicker a { color: inherit; }
+  .ev { margin-top: 2rem; }
   .h { font-family: var(--mono); }
-  blockquote { margin: 0 0 2.4rem; }
-  blockquote p { font-size: var(--t1); font-style: italic; margin: 0 0 .3rem; }
-  blockquote footer { color: var(--dim); }
-  .pn { display: flex; justify-content: space-between; gap: 2rem; padding-top: 1.4rem; }
-  .pn a { color: var(--dim); }
-  @media (max-width: 700px) { dl { grid-template-columns: 1fr; gap: .2rem; } dd { margin-bottom: 1rem; } }
+  .row { display: flex; flex-wrap: wrap; gap: .7rem; }
 </style>

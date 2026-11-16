@@ -22,13 +22,8 @@ const ser = seriesById[d.series];
 const ACCENT: Record<string, string> = { workshop: "#e0b062", water: "#4f8fe0", sight: "#ef6a4f", time: "#a98cf0", ground: "#79b35f", air: "#eaa63b" };
 const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 ---
-<Base title={d.title} description={d.dek} bodyClass="note-page" chrome={false}>
+<Base title={d.title} description={d.dek} bodyClass="note-page" crumb={{ href: `/notes#${ser.id}`, label: `${ser.title}, part ${d.part} of ${parts.length}`, bn: ser.bn }} progress>
   <main id="main" class="note" style={`--acc:${ACCENT[ser.domain] ?? "#4f8fe0"}`}>
-    <nav class="bar" aria-label="Where you are">
-      <a href="/" class="pill">Back to the planet</a>
-      <a href={`/notes#${ser.id}`} class="crumb"><span class="bn" lang="bn">{ser.bn}</span> {ser.title}, part {d.part} of {parts.length}</a>
-      <span class="progress" aria-hidden="true"><span id="note-progress"></span></span>
-    </nav>
 
     <header class="cover">
       {d.hero && <img class:list={["cover-img", { plot: d.heroPlot }]} src={d.hero} alt={d.heroAlt ?? ""} fetchpriority="high" />}
@@ -56,33 +51,27 @@ const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateS
 </Base>
 
 <script>
-  // the stage follows the beat being read; a thin bar shows how far through the note you are
-  const prog = document.getElementById("note-progress")!;
-  const onScroll = () => { const h = document.documentElement; prog.style.transform = `scaleX(${h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)})`; };
-  addEventListener("scroll", onScroll, { passive: true }); onScroll();
-  const scenes = [...document.querySelectorAll<HTMLElement>(".scene-split")];
-  for (const sc of scenes) sc.querySelector(".stage-item")?.classList.add("on");
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) {
-      if (!e.isIntersecting) continue;
-      const beat = e.target as HTMLElement, sc = beat.closest(".scene")!;
-      sc.querySelectorAll<HTMLElement>(".stage-item").forEach((it) => it.classList.toggle("on", it.dataset.step === beat.dataset.step));
-    }
-  }, { rootMargin: "-45% 0px -45% 0px" });
-  document.querySelectorAll(".scene-split .beat").forEach((b) => io.observe(b));
-  const seen = new IntersectionObserver((entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")), { threshold: 0.15 });
-  document.querySelectorAll(".scene").forEach((s) => seen.observe(s));
+  // the stage follows the beat being read; runs on every page load (ClientRouter swaps pages)
+  document.addEventListener("astro:page-load", () => {
+    const split = document.querySelectorAll<HTMLElement>(".scene-split");
+    if (!split.length && !document.querySelector(".scene")) return;
+    split.forEach((sc) => sc.querySelector(".stage-item")?.classList.add("on"));
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const beat = e.target as HTMLElement, sc = beat.closest(".scene")!;
+        sc.querySelectorAll<HTMLElement>(".stage-item").forEach((it) => it.classList.toggle("on", it.dataset.step === beat.dataset.step));
+      }
+    }, { rootMargin: "-45% 0px -45% 0px" });
+    document.querySelectorAll(".scene-split .beat").forEach((b) => io.observe(b));
+    const seen = new IntersectionObserver((entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")), { threshold: 0.15 });
+    document.querySelectorAll(".scene").forEach((s) => seen.observe(s));
+  });
 </script>
 
 <style>
   .note { --acc: #4f8fe0; position: relative; }
-  .bar { position: fixed; z-index: 20; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 1rem; padding: .7rem var(--gutter); background: #0b1233; border-bottom: 1px solid rgb(255 255 255 / .06); }
-  .pill { font: 700 var(--t-1) var(--story); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .95rem; text-decoration: none; white-space: nowrap; }
-  .pill.ghost { background: rgb(255 255 255 / .1); color: #fff; }
-  .crumb { font: 600 var(--t-1) var(--story); color: #c9d3ff; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .bn { font-family: var(--bangla); color: var(--acc); }
-  .progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgb(255 255 255 / .08); }
-  .progress span { display: block; height: 100%; background: var(--acc); transform-origin: left; transform: scaleX(0); }
 
   .cover { position: relative; min-height: 100svh; display: grid; align-items: end; overflow: hidden; }
   .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
@@ -135,7 +124,6 @@ const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateS
     .scenes :global(.stage-item img) { max-height: 38svh; }
     .scenes :global(.beat) { min-height: 40svh; }
     .end { grid-template-columns: 1fr; }
-    .crumb { display: none; }
-  }
+    }
   @media (prefers-reduced-motion: reduce) { .scenes :global(.scene) { opacity: 1; transform: none; transition: none; } .scenes :global(.stage-item) { transition: none; } }
 </style>

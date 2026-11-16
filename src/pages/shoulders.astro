@@ -8,45 +8,44 @@ const home = [
   { name: "Jamilur Reza Choudhury", where: "born in Sylhet, 1943", did: "Chaired the expert panels for the Jamuna and Padma bridges, and ran BUET's computer centre." },
 ];
 ---
-<Base title="Shoulders" description="The people whose ideas changed a decision in my work, the beliefs the work taught me.">
-  <main id="main" class="shoulders">
-    <h1>Shoulders</h1>
-    <p class="lede">People whose ideas changed a decision in my work. The quote is theirs; what it changed is mine.</p>
+<Base title="Shoulders" description="The beliefs the work taught me, and the people whose ideas changed a decision in it.">
+  <main id="main" class="screens">
+    <header class="screen short">
+      <div class="measure">
+        <h1 class="s-h1">Shoulders</h1>
+        <p class="s-dek">What the work taught me, in rules I still follow, and the people whose ideas changed a decision in it. The quote is theirs; what it changed is mine.</p>
+      </div>
+    </header>
 
-    <ul class="voices">
-      {voices.map((v) => (
-        <li>
-          <p class="q">{v.paraphrase ? "Roughly: " : ""}“{v.line}”</p>
-          <p class="who">{v.href ? <a href={v.href}>{v.name}</a> : v.name}, {v.source}</p>
-          <p class="ch">{v.changed}</p>
-        </li>
-      ))}
-    </ul>
+    <section class="screen" aria-labelledby="h-b">
+      <h2 class="s-h2" id="h-b">What the work taught me</h2>
+      <ul class="cols beliefs">{beliefs.map((b) => <li><p class="s-big sm">{b.line}</p><p class="s-meta">From {b.from}</p></li>)}</ul>
+    </section>
 
-    <h2>Closer to home</h2>
-    <ul class="home">
-      {home.map((h) => <li><p class="who"><b>{h.name}</b>, {h.where}</p><p class="ch">{h.did}</p></li>)}
-    </ul>
+    <section class="screen" aria-labelledby="h-v">
+      <h2 class="s-h2" id="h-v">Ideas that changed a decision</h2>
+      <ul class="cols">
+        {voices.map((v) => (
+          <li>
+            <p class="q">{v.paraphrase ? "Roughly: " : ""}“{v.line}”</p>
+            <p class="s-meta">{v.href ? <a href={v.href}>{v.name}</a> : v.name}, {v.source}</p>
+            <p class="ch">{v.changed}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
 
-    <h2>What the work taught me</h2>
-    <ul class="beliefs">
-      {beliefs.map((b) => <li><p>{b.line}</p><p class="src">From {b.from}</p></li>)}
-    </ul>
-
+    <section class="screen short" aria-labelledby="h-h">
+      <h2 class="s-h2" id="h-h">Closer to home</h2>
+      <ul class="cols">{home.map((h) => <li><p class="q nm">{h.name}</p><p class="s-meta">{h.where}</p><p class="ch">{h.did}</p></li>)}</ul>
+    </section>
   </main>
 </Base>
 <style>
-  .shoulders { padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 52rem; }
-  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
-  .lede { color: var(--dim); margin-bottom: 3rem; }
-  h2 { font: 500 var(--t2) var(--sans); margin: 4rem 0 1.4rem; }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.2rem; }
-  li p { margin: 0; }
-  .q { font-size: var(--t1); line-height: 1.45; font-style: italic; color: var(--ink-hi); margin-bottom: .35rem; }
-  .who { color: var(--dim); margin-bottom: .35rem; }
-  .who b { color: var(--ink-hi); font-weight: 500; }
-  .ch { color: var(--ink); }
-  .beliefs { gap: 1.4rem; }
-  .beliefs p:first-child { font-size: var(--t1); line-height: 1.45; color: var(--ink-hi); }
-  .src { color: var(--faint); font-size: var(--t-1); margin-top: .2rem; }
+  .cols { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 2.6rem 3.4rem; }
+  .cols p { margin: 0 0 .4rem; }
+  .sm { font-size: clamp(1.15rem, 1.7vw, 1.45rem) !important; }
+  .q { font: 800 clamp(1.1rem, 1.5vw, 1.35rem)/1.4 var(--story); color: #fff; }
+  .nm { font-weight: 900; }
+  .ch { font: 500 var(--t0)/1.6 var(--story); color: #dfe4ff; }
 </style>
