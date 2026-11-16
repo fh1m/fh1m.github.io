@@ -1,0 +1,64 @@
+scripts/snapshot-mongla.mjs
+  h_f1b9066eb9899c 1-73
+src/components/note/Bars.astro
+  h_f1b9066eb9899c 1-40
+src/components/note/Term.astro
+  h_f1b9066eb9899c 2
+src/content/notes/179-identity-switches.mdx
+  h_f1b9066eb9899c 1-48
+src/content/notes/a-capability-is-only-real.mdx
+  h_f1b9066eb9899c 1-47
+src/content/notes/a-tighter-measurement.mdx
+  h_f1b9066eb9899c 1-52
+src/content/notes/from-worked-once-to-works-every-time.mdx
+  h_f1b9066eb9899c 1-44
+src/content/notes/killing-a-process-tree.mdx
+  h_f1b9066eb9899c 1-61
+src/content/notes/low-cost-vio-and-the-dvl-question.mdx
+  h_f1b9066eb9899c 1-47
+src/content/notes/nobody-asked-what-the-camera-decided.mdx
+  h_f1b9066eb9899c 1-59
+src/content/notes/round-7-closes-no-twice.mdx
+  h_f1b9066eb9899c 1-52
+src/content/notes/scoring-an-estimator-against-a-truth-that-did-not-exist.mdx
+  h_f1b9066eb9899c 1-63
+src/content/notes/scoring-an-estimator-against-a-truth.mdx
+  h_f1b9066eb9899c 1-54
+src/content/notes/the-71-transposes.mdx
+  h_f1b9066eb9899c 1-69
+src/content/notes/the-anchor-that-learned-to-look-twice.mdx
+  h_f1b9066eb9899c 1-48
+src/content/notes/the-bank-that-ran-the-backbone-five-times.mdx
+  h_f1b9066eb9899c 1-58
+src/content/notes/the-canary-that-was-already-dead.mdx
+  h_f1b9066eb9899c 1-45
+src/content/notes/the-engine-room.mdx
+  h_f1b9066eb9899c 1-69
+src/content/notes/the-frame-age-problem.mdx
+  h_f1b9066eb9899c 1-52
+src/content/notes/the-sign-flip-at-the-mavlink-boundary.mdx
+  h_f1b9066eb9899c 1-59
+src/content/notes/the-tree-the-launcher-would-not-forward-signals-to.mdx
+  h_f1b9066eb9899c 1-65
+src/content/notes/tracking-without-detection.mdx
+  h_f1b9066eb9899c 1-54
+src/content/notes/turning-a-camera-into-a-sensor.mdx
+  h_f1b9066eb9899c 1-66
+src/content/notes/what-thirty-minutes-of-sitting-still-taught-us.mdx
+  h_f1b9066eb9899c 1-61
+src/content/notes/why-radar-doesnt-work-underwater.mdx
+  h_f1b9066eb9899c 1-44
+src/data/mongla.json
+  h_f1b9066eb9899c 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "f432aa0a596b5bbbe8468f950ed6c7dfccddbf11",
+  "prompts": {},
+  "humans": {
+    "h_f1b9066eb9899c": {
+      "author": "fh1m <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
