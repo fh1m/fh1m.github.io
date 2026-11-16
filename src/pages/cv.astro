@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import { person, education, roles, results, publications, skills, mongla } from "../data/facts";
 import stats from "../data/github.json";
 ---
-<Base title="CV" description="CV of Fahim Faisal (fh1m): autonomy and robotics: perception, control, embedded." bodyClass="cv-page" world={{ layer: "all", side: "left", dist: 5.4 }}>
+<Base title="CV" description="CV of Fahim Faisal (fh1m): autonomy and robotics: perception, control, embedded." bodyClass="cv-page">
   <main id="main" class="cv">
     <header class="cv-head">
       <div>
@@ -75,12 +75,12 @@ import stats from "../data/github.json";
 </Base>
 
 <style>
-  .cv { position: relative; z-index: 1; width: min(54rem, calc(100% - 2 * var(--gutter))); margin: 4.6rem var(--gutter) 3rem auto; padding: 2rem 2.2rem 2.4rem; background: rgb(3 6 14 / .9); backdrop-filter: blur(12px); border: 1px solid var(--line); --pink: var(--blue); }
+  .cv { position: relative; z-index: 1; max-width: 54rem; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; --pink: var(--ink-hi); }
   .cv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; border-bottom: 1px solid var(--line-2); padding-bottom: 1.2rem; margin-bottom: 1.6rem; }
   h1 { font: 500 var(--t5) var(--sans); color: var(--ink-hi); margin: 0 0 .3rem; }
   .role { font: italic 400 var(--t1) var(--sans); color: var(--ink); margin: 0 0 .6rem; }
   .contact { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0; color: var(--dim); font-size: var(--t-1); }
-  h2 { font: 400 var(--t-1) var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--dim); margin: 2rem 0 .8rem; }
+  h2 { font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 2.2rem 0 .8rem; }
   .results, .own, .pubs { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
   .results li { display: grid; grid-template-columns: 3.4rem 1fr; gap: .8rem; }
   .results .num { color: var(--ink-hi); }

@@ -1,0 +1,56 @@
+---
+/**
+ * The work as a tracklist, one side per nation. Playing a track (hover, focus, ↑↓) puts its real
+ * photo behind the page in that nation's colour and draws its commit history in the player.
+ */
+import type { ElementInfo } from "../../data/elements";
+import commits from "../../data/commits.json";
+import { dims } from "../../data/media";
+interface Props { sides: ElementInfo[]; heads?: boolean }
+const { sides, heads = true } = Astro.props;
+const perDay = (key?: string) => {
+  const P = key ? (commits.projects as Record<string, { commits: string[][] }>)[key] : undefined;
+  if (!P) return "";
+  const m = new Map<string, number>(); for (const r of P.commits) m.set(r[0], (m.get(r[0]) ?? 0) + 1);
+  const days = [...m.keys()].sort();
+  const t0 = Date.parse(days[0]), n = Math.round((Date.parse(days[days.length - 1]) - t0) / 864e5) + 1;
+  return Array.from({ length: n }, (_, i) => m.get(new Date(t0 + i * 864e5).toISOString().slice(0, 10)) ?? 0).join(",") + `|${days[0]}|${days[days.length - 1]}`;
+};
+const numeric = (s?: string) => !!s && /\d/.test(s);
+---
+<ol class="sides">
+  {sides.map((el) => (
+    <li class="side" style={`--c:${el.colour}`}>
+      {heads && (
+        <h2><a href={`/${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name}</a></h2>
+      )}
+      <ol class="tracks">
+        {el.projects.map((p) => (
+          <li>
+            <a class="track" href={`/projects/${p.slug}`} data-art={p.hero ?? ""} data-alt={p.heroAlt ?? ""} data-w={p.hero ? dims(p.hero).w : 0} data-h={p.hero ? dims(p.hero).h : 0} data-wave={perDay(p.commitsKey)} data-c={el.colour} data-stat={p.stat ?? ""}>
+              <span class="ti">{p.title}</span>
+              {numeric(p.stat) && <span class="st">{p.stat}</span>}
+              <span class="ln">{p.line}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </li>
+  ))}
+</ol>
+<style>
+  .sides { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.2rem; }
+  h2 { margin: 0 0 .5rem; font: 500 var(--t2)/1.2 var(--sans); }
+  h2 a { color: var(--c); text-decoration: none; }
+  .bn { font-family: var(--bangla); font-weight: 400; margin-right: .2rem; }
+  .tracks { list-style: none; margin: 0; padding: 0; }
+  .track { display: grid; grid-template-columns: 1fr auto; column-gap: 1rem; align-items: baseline; padding: .3rem 0; color: var(--ink); text-decoration: none; outline: none; }
+  .ti { font-size: var(--t1); }
+  .st { font: 400 var(--t-1) var(--mono); color: var(--faint); font-variant-numeric: tabular-nums; }
+  .ln { grid-column: 1 / -1; max-height: 0; overflow: hidden; color: var(--dim); transition: max-height .3s ease, margin .3s ease; }
+  .track.on .ln, .track:focus-visible .ln { max-height: 4.5em; margin-top: .2rem; }
+  .track.on .ti { color: var(--ink-hi); }
+  .track.on .st { color: var(--c); }
+  .track:focus-visible .ti { text-decoration: underline; text-decoration-color: var(--c); }
+  .side:has(.track.on) .track:not(.on) .ti { color: var(--faint); }
+</style>

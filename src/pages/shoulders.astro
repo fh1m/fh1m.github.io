@@ -1,52 +1,56 @@
 ---
 import Base from "../layouts/Base.astro";
-import Sheet from "../components/stage/Sheet.astro";
 import { voices, beliefs, taste } from "../data/influences";
 const home = [
-  { name: "Jagadish Chandra Bose", where: "born Mymensingh, 1858", did: "Millimetre waves, 1895: a radio receiver before radio had a name." },
-  { name: "Satyendra Nath Bose", where: "Dhaka University, 1924", did: "Bose statistics. Half the particles in the universe carry his name." },
-  { name: "Fazlur Rahman Khan", where: "born Dhaka, 1929", did: "The tube structure: how a skyscraper stands against the wind." },
-  { name: "Jamilur Reza Choudhury", where: "born Sylhet, 1943", did: "Chaired the expert panels for the Jamuna and Padma bridges. Ran BUET's computer centre." },
+  { name: "Jagadish Chandra Bose", where: "born in Mymensingh, 1858", did: "Worked with millimetre waves in 1895, a radio receiver before radio had a name." },
+  { name: "Satyendra Nath Bose", where: "Dhaka University, 1924", did: "Bose statistics. Every boson carries his name." },
+  { name: "Fazlur Rahman Khan", where: "born in Dhaka, 1929", did: "The tube structure: how a skyscraper stands up to the wind." },
+  { name: "Jamilur Reza Choudhury", where: "born in Sylhet, 1943", did: "Chaired the expert panels for the Jamuna and Padma bridges, and ran BUET's computer centre." },
 ];
 ---
-<Base bare title="Shoulders" description="The people whose ideas show up as decisions in the work, the beliefs the work taught, and the shows that smuggled engineering in." world={{ layer: "all", focus: [100, 23.5], dist: 3.2, side: "left", pins: ["mymensingh", "sylhet", "padma", "dhaka"] }}>
-  <Sheet wide title="Shoulders" meta="voices · beliefs · taste · closer to home">
-    <section>
-      <p class="label">Voices, and the decision each one changed</p>
-      <ul class="voices">{voices.map((v) => (
+<Base title="Shoulders" description="The people whose ideas changed a decision in my work, the beliefs the work taught me, and the shows that smuggled engineering in.">
+  <main id="main" class="shoulders">
+    <h1>Shoulders</h1>
+    <p class="lede">People whose ideas changed a decision in my work. The quote is theirs; what it changed is mine.</p>
+
+    <ul class="voices">
+      {voices.map((v) => (
         <li>
-          <p class="q">{v.paraphrase ? "≈ " : "“"}{v.line}{v.paraphrase ? "" : "”"}</p>
-          <p class="who mono">{v.href ? <a href={v.href}>{v.name}</a> : v.name} · <span class="faint">{v.source}</span></p>
+          <p class="q">{v.paraphrase ? "Roughly: " : ""}“{v.line}”</p>
+          <p class="who">{v.href ? <a href={v.href}>{v.name}</a> : v.name}, {v.source}</p>
           <p class="ch">{v.changed}</p>
         </li>
-      ))}</ul>
-    </section>
-    <section>
-      <p class="label">Beliefs, each from the record</p>
-      <ol class="beliefs">{beliefs.map((b) => <li><span>{b.line}</span><span class="mono faint">{b.from}</span></li>)}</ol>
-    </section>
-    <section>
-      <p class="label">Taste</p>
-      <ul class="taste">{taste.map((t) => <li><p class="q">“{t.line}”</p><p class="who mono">{t.who} · <span class="faint">{t.show}</span></p><p class="ch">{t.why}</p></li>)}</ul>
-    </section>
-    <section class="home">
-      <p class="label">Closer to home</p>
-      <ul>{home.map((h) => <li><b>{h.name}</b> <span class="mono faint">{h.where}</span><br /><span>{h.did}</span></li>)}</ul>
-    </section>
-  </Sheet>
+      ))}
+    </ul>
+
+    <h2>Closer to home</h2>
+    <ul class="home">
+      {home.map((h) => <li><p class="who"><b>{h.name}</b>, {h.where}</p><p class="ch">{h.did}</p></li>)}
+    </ul>
+
+    <h2>What the work taught me</h2>
+    <ul class="beliefs">
+      {beliefs.map((b) => <li><p>{b.line}</p><p class="src">From {b.from}</p></li>)}
+    </ul>
+
+    <h2>What I watch</h2>
+    <ul class="voices">
+      {taste.map((t) => <li><p class="q">“{t.line}”</p><p class="who">{t.who}, {t.show}</p><p class="ch">{t.why}</p></li>)}
+    </ul>
+  </main>
 </Base>
 <style>
-  section { margin-bottom: 2rem; }
-  .voices, .taste { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: .6rem; }
-  .voices li, .taste li { padding: .9rem 1rem; border: 1px solid var(--line); background: rgb(0 0 0 / .35); }
-  .q { margin: 0 0 .5rem; font-style: italic; color: var(--ink-hi); }
-  .who { margin: 0 0 .5rem; font-size: var(--t-2); color: var(--dim); }
-  .ch { margin: 0; font-size: var(--t-1); color: var(--ink); }
-  .beliefs { margin: .5rem 0 0; padding: 0; list-style: none; counter-reset: b; display: grid; gap: .55rem; }
-  .beliefs li { display: grid; grid-template-columns: 2rem 1fr minmax(10rem, 16rem); gap: 1rem; counter-increment: b; align-items: baseline; }
-  .beliefs li::before { content: counter(b, decimal-leading-zero); font: 400 var(--t-2) var(--mono); color: var(--faint); }
-  .beliefs .faint { font-size: var(--t-2); }
-  .home ul { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .9rem 1.4rem; font-size: var(--t-1); }
-  .home b { color: var(--sun); font-weight: 500; }
-  @media (max-width: 800px) { .beliefs li { grid-template-columns: 2rem 1fr; } .beliefs li .faint { grid-column: 2; } }
+  .shoulders { padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 52rem; }
+  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
+  .lede { color: var(--dim); margin-bottom: 3rem; }
+  h2 { font: 500 var(--t2) var(--sans); margin: 4rem 0 1.4rem; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2.2rem; }
+  li p { margin: 0; }
+  .q { font-size: var(--t1); line-height: 1.45; font-style: italic; color: var(--ink-hi); margin-bottom: .35rem; }
+  .who { color: var(--dim); margin-bottom: .35rem; }
+  .who b { color: var(--ink-hi); font-weight: 500; }
+  .ch { color: var(--ink); }
+  .beliefs { gap: 1.4rem; }
+  .beliefs p:first-child { font-size: var(--t1); line-height: 1.45; color: var(--ink-hi); }
+  .src { color: var(--faint); font-size: var(--t-1); margin-top: .2rem; }
 </style>

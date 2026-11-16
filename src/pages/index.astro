@@ -1,114 +1,48 @@
 ---
 /**
- * Home is an album. The cover is the Pale Blue Dot; the tracklist is the work, in four sides,
- * one per nation. Playing a track (hover, focus, ↑↓) puts its real artefact behind everything,
- * duotoned in its nation's colour, and draws its real commit history as a waveform.
+ * Home is an album. The cover is the Pale Blue Dot; the tracklist is the work, one side per nation.
  */
 import Base from "../layouts/Base.astro";
+import Tracklist from "../components/album/Tracklist.astro";
+import Player from "../components/album/Player.astro";
+import Cover from "../components/album/Cover.astro";
 import { elements } from "../data/elements";
-import commits from "../data/commits.json";
-
-const perDay = (key?: string) => {
-  const P = key ? (commits.projects as Record<string, { commits: string[][] }>)[key] : undefined;
-  if (!P) return "";
-  const m = new Map<string, number>(); for (const r of P.commits) m.set(r[0], (m.get(r[0]) ?? 0) + 1);
-  const days = [...m.keys()].sort(); if (!days.length) return "";
-  const t0 = Date.parse(days[0]), t1 = Date.parse(days[days.length - 1]), n = Math.round((t1 - t0) / 864e5) + 1;
-  return Array.from({ length: n }, (_, i) => m.get(new Date(t0 + i * 864e5).toISOString().slice(0, 10)) ?? 0).join(",") + `|${days[0]}|${days[days.length - 1]}`;
-};
-let n = 0;
-const sides = elements.map((el) => ({ el, tracks: el.projects.map((p) => ({ p, n: ++n, wave: perDay(p.commitsKey) })) }));
 ---
-<Base chrome={false} bare bodyClass="album" title="fh1m" description="Fahim Faisal: an engineer from Dhaka. Water, earth, fire and air, one track at a time, and the commits that corrected each one.">
+<Base chrome={false} bodyClass="album">
   <main id="main" class="album">
-    <div class="art" aria-hidden="true"><img alt="" /></div>
-
     <header class="cover">
-      <img class="pbd" src="/world/cover.webp" alt="The Pale Blue Dot: Earth as one pale pixel in a band of sunlight, Voyager 1, 1990" width="720" height="720" />
-      <div>
-        <h1>FAHIM FAISAL</h1>
-        <p class="sub">Everything here was built on that pixel. Most of it was wrong first. The commits say how it got fixed.</p>
-        <p class="credit">cover: Voyager 1, 14 Feb 1990, 6 billion km out · NASA/JPL</p>
-      </div>
+      <Cover src="/world/cover.webp" alt="The Pale Blue Dot: Earth as one pale pixel in a band of sunlight, photographed by Voyager 1 in 1990" caption="Voyager 1, 14 February 1990, about six billion kilometres out. That pixel is Earth." w={720} h={720} />
+      <h1>Fahim Faisal</h1>
+      <p class="sub">That pixel is home. I build machines that have to work on it without anyone holding their hand, and most of them were wrong before they were right.</p>
+      <nav class="more" aria-label="More">
+        <a href="/lessons">What I got wrong</a>
+        <a href="/notes">Notebook</a>
+        <a href="/shoulders">Shoulders</a>
+        <a href="/cv">CV</a>
+        <a href="https://github.com/fh1m">GitHub</a>
+      </nav>
     </header>
-
-    <ol class="sides">
-      {sides.map(({ el, tracks }) => (
-        <li class="side" style={`--c:${el.colour}`}>
-          <p class="side-h"><a href={`/${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name.toUpperCase()}</a><span class="vs">vs {el.force}</span></p>
-          <ol>
-            {tracks.map(({ p, n, wave }) => (
-              <li>
-                <a class="track" href={`/projects/${p.slug}`} data-art={p.hero ?? ""} data-wave={wave} data-c={el.colour} data-stat={p.stat}>
-                  <span class="no">{String(n).padStart(2, "0")}</span>
-                  <span class="ti">{p.title}</span>
-                  <span class="st">{p.stat}</span>
-                  <span class="ln">{p.line}</span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </li>
-      ))}
-    </ol>
-
-    <footer class="player" aria-live="polite">
-      <p class="now"><span class="np">now playing</span> <b class="np-t">nothing yet · ↑↓ or point at a track</b></p>
-      <canvas class="wave" aria-hidden="true"></canvas>
-      <p class="links"><a href="/lessons">lessons learned</a><a href="/notes">notebook</a><a href="/shoulders">shoulders</a><a href="/cv">cv</a><a href="https://github.com/fh1m">github</a></p>
-    </footer>
+    <div class="list">
+      <Tracklist sides={elements} />
+      <Player />
+    </div>
   </main>
 </Base>
 <script>
   import "../scripts/album.ts";
 </script>
 <style>
-  :global(body.album) { background: #000; }
-  .album { position: relative; min-height: 100svh; display: grid; grid-template-columns: minmax(16rem, 22rem) minmax(0, 46rem); grid-template-rows: 1fr auto; column-gap: clamp(2rem, 6vw, 7rem); padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; color: #f2f2f2; }
-
-  /* the artefact, duotoned in the nation's colour */
-  .art { position: fixed; inset: 0; z-index: 0; background: var(--c, #000); opacity: 0; transition: opacity .6s ease, background .6s ease; }
-  .art img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.15) brightness(.9); mix-blend-mode: multiply; }
-  .art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #000 0%, rgb(0 0 0 / .86) 45%, rgb(0 0 0 / .55) 100%); }
-  :global(body.playing) .art { opacity: .55; }
-
-  .cover, .sides, .player { position: relative; z-index: 1; }
+  .album { position: relative; z-index: 1; min-height: 100svh; display: grid; grid-template-columns: minmax(16rem, 26rem) minmax(0, 44rem); column-gap: clamp(2.5rem, 7vw, 8rem); padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
   .cover { align-self: start; position: sticky; top: 3rem; }
-  .pbd { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
-  h1 { font: 500 var(--t0) var(--sans); letter-spacing: .32em; margin: 1.4rem 0 .7rem; }
-  .sub { margin: 0 0 .9rem; font-size: var(--t-1); line-height: 1.55; color: #bdbdbd; }
-  .credit { margin: 0; font: 400 var(--t-2) var(--mono); color: #6b6b6b; }
-
-  .sides { list-style: none; margin: 0; padding: 0 0 2rem; display: grid; gap: 1.6rem; align-content: start; }
-  .side ol { list-style: none; margin: 0; padding: 0; }
-  .side-h { display: flex; align-items: baseline; gap: 1rem; margin: 0 0 .35rem; font: 500 var(--t-1) var(--sans); letter-spacing: .24em; }
-  .side-h a { color: var(--c); text-decoration: none; }
-  .bn { font-family: var(--bangla); letter-spacing: 0; font-size: 1.15em; margin-right: .3rem; }
-  .vs { font: 400 var(--t-2) var(--mono); letter-spacing: 0; color: #5c5c5c; }
-
-  .track { display: grid; grid-template-columns: 2.4rem 1fr auto; column-gap: .9rem; align-items: baseline; padding: .32rem 0; color: #e8e8e8; text-decoration: none; border-top: 1px solid #141414; outline: none; }
-  .no { font: 400 var(--t-2) var(--mono); color: #5c5c5c; }
-  .ti { font-size: var(--t0); }
-  .st { font: 400 var(--t-2) var(--mono); color: #6b6b6b; }
-  .ln { grid-column: 2 / -1; max-height: 0; overflow: hidden; color: #cfcfcf; font-size: var(--t-1); transition: max-height .35s ease, margin .35s ease; }
-  .track.on .ln { max-height: 3em; margin-top: .25rem; }
-  .track.on .no, .track.on .st { color: var(--c); }
-  .track.on .ti { color: #fff; }
-  .side:has(.track.on) .track:not(.on) { color: #7a7a7a; }
-
-  .player { grid-column: 1 / -1; position: sticky; bottom: 0; display: grid; grid-template-columns: minmax(16rem, 22rem) 1fr auto; column-gap: clamp(2rem, 6vw, 7rem); align-items: center; padding: .9rem 0 1.1rem; background: linear-gradient(transparent, #000 35%); }
-  .now { margin: 0; font-size: var(--t-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .np { font: 400 var(--t-2) var(--mono); color: #5c5c5c; margin-right: .4rem; }
-  .np-t { font-weight: 400; color: #e8e8e8; }
-  .wave { width: 100%; height: 34px; display: block; }
-  .links { display: flex; gap: 1.2rem; margin: 0; font: 400 var(--t-2) var(--mono); }
-  .links a { color: #8a8a8a; text-decoration: none; }
-  .links a:hover { color: #fff; }
-
+  h1 { font: 500 var(--t3)/1.1 var(--sans); margin: 1.4rem 0 .6rem; }
+  .sub { color: var(--ink); margin: 0 0 .8rem; }
+  .sub { margin-bottom: 1.4rem; }
+  .more { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; }
+  .more a { color: var(--dim); }
+  .list { position: relative; z-index: 1; }
   @media (max-width: 860px) {
     .album { grid-template-columns: 1fr; padding-top: 1.6rem; }
-    .cover { position: static; display: grid; grid-template-columns: 6.5rem 1fr; gap: 1rem; align-items: center; margin-bottom: 2rem; }
-    h1 { margin-top: 0; }
-    .player { grid-template-columns: 1fr; row-gap: .5rem; }
+    .cover { position: static; margin-bottom: 2.4rem; }
+    .cover :global(.cover-art) { max-width: 22rem; }
   }
 </style>

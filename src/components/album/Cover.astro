@@ -1,0 +1,15 @@
+---
+/** The cover. While a track plays it shows that track's real photo, contained (never cropped, never upscaled). */
+interface Props { src: string; alt: string; caption: string; w: number; h: number }
+const { src, alt, caption, w, h } = Astro.props;
+---
+<figure class="cover-art">
+  <div class="frame"><img src={src} alt={alt} width={w} height={h} data-home={src} data-home-alt={alt} /></div>
+  <figcaption data-home={caption}>{caption}</figcaption>
+</figure>
+<style>
+  .cover-art { margin: 0; }
+  .frame { height: min(24rem, 44svh); display: flex; align-items: flex-end; justify-content: flex-start; }
+  .frame img { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; object-fit: contain; }
+  figcaption { margin-top: .6rem; font-size: var(--t-1); color: var(--dim); min-height: 2.9em; }
+</style>

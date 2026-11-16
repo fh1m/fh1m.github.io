@@ -1,13 +1,59 @@
 ---
 import Base from "../layouts/Base.astro";
-import Stage from "../components/stage/Stage.astro";
-import { elements } from "../data/elements";
-import type { ElementInfo } from "../data/elements";
+import Tracklist from "../components/album/Tracklist.astro";
+import Player from "../components/album/Player.astro";
+import Cover from "../components/album/Cover.astro";
+import { dims } from "../data/media";
+import { elements, type ElementInfo } from "../data/elements";
+import { byElement } from "../data/lessons";
 export const getStaticPaths = () => elements.map((el) => ({ params: { element: el.id }, props: { el } }));
 const { el } = Astro.props as { el: ElementInfo };
-const focus: Record<string, [number, number]> = { water: [89.6, 21.5], earth: [89.5, 23], fire: [100, 25], air: [90, 30] };
-const pins: Record<string, string[]> = { water: ["mongla", "irvine", "dhaka"], earth: ["khulna", "dhaka"], fire: ["dhaka"], air: ["dhaka"] };
+const ll = byElement(el.id);
+const first = el.projects.find((p) => p.hero)!;
+const fd = dims(first.hero!);
 ---
-<Base bare title={el.name} description={`${el.name}: ${el.intro}`} world={{ layer: el.id, ui: true, sats: true, active: el.id, side: "left", focus: focus[el.id], dist: 4.2, pins: pins[el.id] }}>
-  <Stage el={el} />
+<Base title={el.name} nation={el.id} description={`${el.name}: ${el.nature}`}>
+  <main id="main" class="side-page">
+    <header class="head">
+      <h1><span class="bn" lang="bn">{el.bn}</span><span class="en">{el.name}</span></h1>
+      <p class="says">{el.nature}</p>
+      <Cover src={first.hero!} alt={first.heroAlt ?? ""} caption={first.heroAlt ?? ""} w={fd.w} h={fd.h} />
+    </header>
+    <div class="list">
+      <Tracklist sides={[el]} heads={false} />
+      {ll.length > 0 && (
+        <section class="ll" aria-labelledby="ll-h">
+          <h2 id="ll-h">What {el.name.toLowerCase()} taught me</h2>
+          <ul>
+            {ll.map((l) => (
+              <li>
+                <a href={`/lessons/${l.slug}`}>{l.title}</a>
+                <span class="wrong">{l.believed}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <Player />
+    </div>
+  </main>
 </Base>
+<script>
+  import "../scripts/album.ts";
+</script>
+<style>
+  .side-page { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(16rem, 26rem) minmax(0, 44rem); column-gap: clamp(2.5rem, 7vw, 8rem); padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
+  .head { align-self: start; position: sticky; top: 2rem; }
+  h1 { margin: 0 0 1.2rem; display: grid; line-height: 1; }
+  h1 .bn { font: 400 clamp(4.5rem, 9vw, 7.5rem)/1 var(--bangla); color: var(--c); }
+  h1 .en { font: 500 var(--t2) var(--sans); color: var(--ink-hi); margin-top: .6rem; }
+  .says { font-size: var(--t1); color: var(--ink-hi); margin: 0 0 1.6rem; }
+  .intro { color: var(--dim); }
+  .ll { margin-top: 3rem; }
+  .ll h2 { font: 500 var(--t1) var(--sans); margin: 0 0 .8rem; }
+  .ll ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .9rem; }
+  .ll li { display: grid; gap: .15rem; }
+  .ll .wrong { font-size: var(--t-1); }
+  .list { position: relative; z-index: 1; }
+  @media (max-width: 860px) { .side-page { grid-template-columns: 1fr; padding-top: 1.4rem; } .head { position: static; margin-bottom: 2rem; } }
+</style>

@@ -1,0 +1,642 @@
+{
+"/media/aerd/cover.webp": [
+1419,
+900
+],
+"/media/aerd/mou-01.webp": [
+800,
+640
+],
+"/media/aerd/mou-02.webp": [
+800,
+533
+],
+"/media/aerd/mou-03.webp": [
+1200,
+800
+],
+"/media/avatar.webp": [
+460,
+460
+],
+"/media/certs/robosub-2024.webp": [
+1600,
+1239
+],
+"/media/certs/robosub-2025.webp": [
+1600,
+1235
+],
+"/media/certs/robosub-2026.webp": [
+1600,
+1242
+],
+"/media/den/arete-main.webp": [
+1800,
+1013
+],
+"/media/den/arete-upper.webp": [
+1800,
+1013
+],
+"/media/den/den-layout.webp": [
+1800,
+1473
+],
+"/media/den/radio-lab.webp": [
+1800,
+1013
+],
+"/media/dristy/camera.webp": [
+960,
+720
+],
+"/media/dristy/colour.webp": [
+960,
+720
+],
+"/media/dristy/k210-budget.webp": [
+980,
+220
+],
+"/media/dristy/motion.webp": [
+960,
+720
+],
+"/media/dristy/object.webp": [
+960,
+720
+],
+"/media/dristy/pipeline.webp": [
+980,
+280
+],
+"/media/dristy/qr.webp": [
+960,
+720
+],
+"/media/duburi/auv42.webp": [
+860,
+860
+],
+"/media/duburi/cfd.webp": [
+512,
+269
+],
+"/media/duburi/dropper.webp": [
+1264,
+783
+],
+"/media/duburi/grabber.webp": [
+1264,
+783
+],
+"/media/duburi/logo.webp": [
+1600,
+611
+],
+"/media/duburi/pcb.webp": [
+1415,
+702
+],
+"/media/duburi/pool-test.webp": [
+1452,
+896
+],
+"/media/duburi/robosub25-1.webp": [
+860,
+456
+],
+"/media/duburi/robosub25-2.webp": [
+860,
+456
+],
+"/media/duburi/robosub25-3.webp": [
+860,
+456
+],
+"/media/duburi/software.webp": [
+1326,
+727
+],
+"/media/duburi/torpedo.webp": [
+1157,
+848
+],
+"/media/duburi/v1.webp": [
+1600,
+1067
+],
+"/media/duburi/v2.webp": [
+1600,
+1060
+],
+"/media/duburi/v3.webp": [
+1080,
+1080
+],
+"/media/duburi/v4.webp": [
+1600,
+1600
+],
+"/media/duburi/v41.webp": [
+1080,
+1080
+],
+"/media/duburi/whole-auv.webp": [
+860,
+860
+],
+"/media/e-bhapa/bhapa.webp": [
+687,
+916
+],
+"/media/e-bhapa/e-bhapa-upright.webp": [
+901,
+1600
+],
+"/media/e-bhapa/e-bhapa.webp": [
+1600,
+901
+],
+"/media/fh1m-sprite.webp": [
+616,
+200
+],
+"/media/lab/chip-efficiency.webp": [
+1600,
+144
+],
+"/media/lab/config-table-1.webp": [
+1600,
+870
+],
+"/media/lab/config-table-2.webp": [
+1600,
+870
+],
+"/media/lab/detect-flare.webp": [
+1284,
+1044
+],
+"/media/lab/detect-keyboard.webp": [
+620,
+1106
+],
+"/media/lab/dualcam-fusion.webp": [
+1600,
+1100
+],
+"/media/lab/gil-audit.webp": [
+1600,
+593
+],
+"/media/lab/latency-verdict.webp": [
+1546,
+996
+],
+"/media/lab/line-control-vision.webp": [
+1600,
+110
+],
+"/media/lab/meghdut-tui-1.webp": [
+1600,
+1358
+],
+"/media/lab/meghdut-tui-2.webp": [
+1325,
+1600
+],
+"/media/lab/mission-control.webp": [
+1380,
+1600
+],
+"/media/lab/report-run.webp": [
+1600,
+1010
+],
+"/media/lab/sim-gate-a.webp": [
+1600,
+859
+],
+"/media/lab/sim-gate-b.webp": [
+1600,
+859
+],
+"/media/lab/sim-rover-terrain.webp": [
+1600,
+867
+],
+"/media/lab/sim-targets.webp": [
+1600,
+868
+],
+"/media/lab/ue-operator-form.webp": [
+1600,
+767
+],
+"/media/lab/ue-operator.webp": [
+1600,
+780
+],
+"/media/lab/vehicle-estop.webp": [
+1600,
+900
+],
+"/media/mongla-docs/bondor-dive.webp": [
+1500,
+780
+],
+"/media/mongla-docs/colour-loss.webp": [
+2844,
+734
+],
+"/media/mongla-docs/cores.webp": [
+1480,
+1296
+],
+"/media/mongla-docs/field-of-view.svg": [
+2320,
+940
+],
+"/media/mongla-docs/frame-budget.svg": [
+2320,
+800
+],
+"/media/mongla-docs/hud_murky.webp": [
+1700,
+1518
+],
+"/media/mongla-docs/loop-rate.svg": [
+2320,
+820
+],
+"/media/mongla-docs/mirpur-gate.webp": [
+1700,
+1518
+],
+"/media/mongla-docs/mongla-bow.webp": [
+2000,
+535
+],
+"/media/mongla-docs/mongla-iso.webp": [
+2000,
+953
+],
+"/media/mongla-docs/mongla-plan.webp": [
+2000,
+564
+],
+"/media/mongla-docs/pool-dual-auvs.webp": [
+820,
+820
+],
+"/media/mongla-docs/pool-glide.webp": [
+900,
+600
+],
+"/media/mongla-docs/pool-top.webp": [
+760,
+1139
+],
+"/media/mongla-docs/robosub-deploy.webp": [
+900,
+600
+],
+"/media/mongla-docs/robosub-octagon.webp": [
+1700,
+1518
+],
+"/media/mongla-docs/robosub-tent.webp": [
+760,
+1013
+],
+"/media/mongla-docs/robosub-torpedo.webp": [
+1700,
+1518
+],
+"/media/mongla-docs/team-bd-flag.webp": [
+900,
+1028
+],
+"/media/mongla-docs/water-clear.webp": [
+640,
+480
+],
+"/media/mongla-docs/water-murky.webp": [
+640,
+480
+],
+"/media/mongla/banner.webp": [
+1600,
+688
+],
+"/media/mongla/brain-run.webp": [
+1600,
+954
+],
+"/media/mongla/flow-lab.webp": [
+1600,
+591
+],
+"/media/mongla/fundamentals.webp": [
+1600,
+200
+],
+"/media/mongla/pid-lab.webp": [
+1600,
+879
+],
+"/media/mongla/sim-bins-torpedo.webp": [
+1600,
+789
+],
+"/media/mongla/sim-bluerov-gate.webp": [
+1600,
+789
+],
+"/media/mongla/sim-gate-course.webp": [
+1600,
+789
+],
+"/media/mongla/sim-pool-overview.webp": [
+1600,
+789
+],
+"/media/mongla/sim-slalom.webp": [
+1600,
+789
+],
+"/media/mongla/wire-frame.webp": [
+1600,
+1100
+],
+"/media/notes/e-bhapa-three-minutes.webp": [
+1600,
+566
+],
+"/media/notes/face-2023.webp": [
+480,
+480
+],
+"/media/notes/four-leds-deadband_sweep.webp": [
+1600,
+582
+],
+"/media/notes/four-leds-one_try.webp": [
+1600,
+495
+],
+"/media/notes/green-at-depth-desk-2023-arrow.webp": [
+1280,
+720
+],
+"/media/notes/green-at-depth-detect_2023_rerun.webp": [
+1280,
+720
+],
+"/media/notes/green-at-depth-detect_2m.webp": [
+640,
+360
+],
+"/media/notes/green-at-depth-filmstrip.webp": [
+1280,
+900
+],
+"/media/notes/green-at-depth-iou_vs_depth.webp": [
+1200,
+630
+],
+"/media/notes/half-a-second-error_vs_horizon.webp": [
+1200,
+630
+],
+"/media/notes/half-a-second-live_2024_rerun.webp": [
+1000,
+752
+],
+"/media/notes/half-a-second-replay_2024.webp": [
+1350,
+780
+],
+"/media/notes/half-a-second-run-2024-1.webp": [
+1600,
+881
+],
+"/media/notes/half-a-second-three_seconds.webp": [
+1600,
+560
+],
+"/media/notes/happy-little-trees-four_canvases.webp": [
+1600,
+411
+],
+"/media/notes/happy-little-trees-iris-2023.webp": [
+1600,
+654
+],
+"/media/notes/happy-little-trees-learning_vs_memorising.webp": [
+1200,
+630
+],
+"/media/notes/interview-bottle-2023-shot.webp": [
+1108,
+1600
+],
+"/media/notes/interview-bottle-ap_vs_depth.webp": [
+1200,
+540
+],
+"/media/notes/interview-bottle-download.webp": [
+178,
+284
+],
+"/media/notes/interview-bottle-dry_vs_3m.webp": [
+1280,
+640
+],
+"/media/notes/interview-bottle-training_2023.webp": [
+1200,
+750
+],
+"/media/notes/nvim-2022-07-05.webp": [
+1600,
+900
+],
+"/media/notes/nvim-2022-10-12.webp": [
+1600,
+900
+],
+"/media/notes/p2p-chat-Wireshark_clear.webp": [
+1600,
+869
+],
+"/media/notes/p2p-chat-chatview_sec.webp": [
+1600,
+551
+],
+"/media/notes/p2p-chat-wireshark_sec.webp": [
+1600,
+872
+],
+"/media/notes/pareidolia-coins.webp": [
+1600,
+242
+],
+"/media/notes/pareidolia-rerun.webp": [
+1600,
+1025
+],
+"/media/notes/pareidolia-rotation.webp": [
+1200,
+285
+],
+"/media/notes/pareidolia-stage0.webp": [
+1600,
+204
+],
+"/media/notes/passless-1-register.webp": [
+1600,
+777
+],
+"/media/notes/passless-3-signed-in.webp": [
+1600,
+777
+],
+"/media/notes/passless-ceremony.webp": [
+1600,
+639
+],
+"/media/notes/start-page-2023.webp": [
+1366,
+768
+],
+"/media/notes/start-page-now.webp": [
+1600,
+1445
+],
+"/media/notes/start-page-search.webp": [
+1600,
+777
+],
+"/media/notes/trust-issues-2023.webp": [
+1474,
+1600
+],
+"/media/notes/trust-issues-breakdown.webp": [
+1200,
+630
+],
+"/media/notes/trust-issues-calibrate.webp": [
+1050,
+600
+],
+"/media/notes/trust-issues-thirty.webp": [
+1200,
+630
+],
+"/media/own/den-arete-main.webp": [
+1600,
+900
+],
+"/media/own/den-duo.webp": [
+1200,
+1120
+],
+"/media/own/den-layout.webp": [
+1800,
+1473
+],
+"/media/own/den-night-shift.webp": [
+1600,
+900
+],
+"/media/own/den-radio-lab.webp": [
+1600,
+900
+],
+"/media/own/fh1m-typing.webp": [
+280,
+280
+],
+"/media/own/lab-hero.webp": [
+1075,
+1400
+],
+"/media/own/sprite-0.webp": [
+360,
+360
+],
+"/media/own/sprite-1.webp": [
+360,
+360
+],
+"/media/own/sprite-2.webp": [
+360,
+360
+],
+"/media/own/sprite-3.webp": [
+360,
+360
+],
+"/media/own/zondo-play.webp": [
+1200,
+574
+],
+"/media/poolside.webp": [
+900,
+1600
+],
+"/media/press/bracuexpress-robotics.webp": [
+1600,
+898
+],
+"/media/rupsha/range.svg": [
+2320,
+1120
+],
+"/media/rupsha/rupsha-approach.svg": [
+2320,
+1280
+],
+"/media/rupsha/rupsha-chassis.svg": [
+1760,
+720
+],
+"/media/rupsha/rupsha-failsafe.svg": [
+2320,
+720
+],
+"/media/rupsha/rupsha-split.svg": [
+1760,
+560
+],
+"/media/rupsha/rupsha-states.svg": [
+2320,
+560
+],
+"/media/securechat/chatview-sec.webp": [
+1600,
+551
+],
+"/media/securechat/chatview.webp": [
+1600,
+368
+],
+"/media/securechat/packet-clear.webp": [
+1600,
+881
+],
+"/media/securechat/packet-sec.webp": [
+1600,
+872
+],
+"/media/securechat/wireshark-clear.webp": [
+1600,
+869
+],
+"/media/securechat/wireshark-sec.webp": [
+1600,
+872
+]
+}

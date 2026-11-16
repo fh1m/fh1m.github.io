@@ -9,7 +9,7 @@ const water = mongla.water.events;
 const chapterHref: Record<string, string> = { source: "/notes", sky: "/projects/aerd", water: "/projects/duburi", cat: "/projects/e-bhapa", ground: "/projects/mongol-tori", current: "/water", mongla: "/projects/mongla", dristy: "/projects/dristy", rupsha: "/projects/rupsha", den: "/projects/den", mohona: "/" };
 const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earlier vehicle", RECORDED_WATER_REPLAY: "real footage, replayed", CURRENT_WATER: "in water, this platform", NOT_YET: "not yet" };
 ---
-<Base title="Log" description="The dated record: every project, every repository, and every time a vehicle in this lineage was actually in water." world={{ layer: "all", side: "left", dist: 6 }}>
+<Base title="Log" description="The dated record: every project, every repository, and every time a vehicle in this lineage was actually in water.">
   <main id="main" class="log">
     <header>
       <p class="kick"><span class="bn">লগ</span> <span class="mono">the log · rebuilt {stats.generatedAtLabel}</span></p>
@@ -77,13 +77,13 @@ const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earli
 </script>
 
 <style>
-  .log { position: relative; z-index: 1; width: min(64rem, calc(100% - 2 * var(--gutter))); margin: 4.6rem var(--gutter) 3rem auto; padding: 2rem 2.2rem 2.4rem; background: rgb(3 6 14 / .9); backdrop-filter: blur(12px); border: 1px solid var(--line); }
+  .log { position: relative; z-index: 1; max-width: 64rem; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
   .kick { display: flex; gap: .8rem; align-items: baseline; margin: 0 0 .5rem; }
   .kick .bn { color: var(--blue); font-family: var(--bangla); }
   .kick .mono { color: var(--dim); font-size: var(--t-2); }
   h1 { font: 500 var(--t5) var(--sans); color: var(--ink-hi); margin: 0 0 .6rem; }
   .lede { color: var(--ink); max-width: 62ch; }
-  h2 { font: 400 var(--t-1) var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--dim); margin: 2.4rem 0 .8rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+  h2 { font: 500 var(--t2) var(--sans); color: var(--ink-hi); margin: 3rem 0 1rem; }
   .timeline { list-style: none; margin: .8rem 0 0; padding: 0; position: relative; }
   .timeline::before { content: ""; position: absolute; left: 9.6rem; top: .4rem; bottom: .4rem; width: 1px; background: var(--line-2); }
   .timeline li { display: grid; grid-template-columns: 8.6rem 2rem 1fr; gap: .2rem 0; align-items: baseline; padding: .45rem 0; }

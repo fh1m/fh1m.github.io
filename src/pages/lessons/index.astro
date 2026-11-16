@@ -1,38 +1,44 @@
 ---
 import Base from "../../layouts/Base.astro";
-import Sheet from "../../components/stage/Sheet.astro";
 import { lessons } from "../../data/lessons";
-import { elements } from "../../data/elements";
+import { elements, projects } from "../../data/elements";
+const title = (slug: string) => projects.find((p) => p.slug === slug)?.title ?? slug;
 ---
-<Base bare title="Lessons learned" description="Lessons learned, in the shape NASA's LLIS uses: what I believed, what was true, and the commit that corrected it." world={{ layer: "all", side: "left", dist: 4.6 }}>
-  <Sheet wide title="Lessons learned" meta={`${lessons.length} entries · after NASA's Lessons Learned Information System · each one a real commit`}>
-    <p class="lead">We didn't get here by always being right. We got here by being wrong, and making it right by logic and engineering.</p>
+<Base title="What I got wrong" description="Sixteen things I believed about machines that turned out to be false, what was true instead, and the commit that fixed each one.">
+  <main id="main" class="lessons">
+    <header>
+      <h1>What I got wrong</h1>
+      <p>Sixteen things I believed that turned out to be false. Each one is written the way NASA files a lesson learned: what happened, what we believed, what was true, and what to do next time. Each one links to the commit that fixed it.</p>
+    </header>
     {elements.map((el) => {
       const ll = lessons.filter((l) => l.element === el.id);
       return ll.length > 0 && (
-        <section class="grp">
-          <h2><svg viewBox="0 0 48 48" aria-hidden="true" set:html={el.glyph} />{el.name}</h2>
-          <ul>{ll.map((l) => (
-            <li><a href={`/lessons/${l.slug}`}>
-              <span class="id mono">{l.id} · {l.project} · {l.date}</span>
-              <span class="t">{l.title}</span>
-              <span class="wrong">{l.believed}</span>
-              <span class="ls">{l.lesson}</span>
-            </a></li>
-          ))}</ul>
+        <section style={`--c:${el.colour}`} aria-labelledby={`h-${el.id}`}>
+          <h2 id={`h-${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name}</h2>
+          <ul>
+            {ll.map((l) => (
+              <li>
+                <a href={`/lessons/${l.slug}`}>{l.title}</a>
+                <span class="wrong">{l.believed}</span>
+                <span class="where">{title(l.project)}, {new Date(l.date + (l.date.length === 7 ? "-01" : "")).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</span>
+              </li>
+            ))}
+          </ul>
         </section>
       );
     })}
-  </Sheet>
+  </main>
 </Base>
 <style>
-  .lead { color: var(--ink); margin: 0 0 1.6rem; max-width: 60ch; }
-  .grp h2 { display: flex; align-items: center; gap: .6rem; font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 1.4rem 0 .6rem; }
-  .grp svg { width: 26px; height: 26px; stroke: var(--blue); fill: none; stroke-width: 1.4; }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: .6rem; }
-  li a { display: grid; align-content: start; gap: .4rem; height: 100%; padding: .8rem .9rem; border: 1px solid var(--line); background: rgb(0 0 0 / .35); text-decoration: none; font-size: var(--t-1); transition: border-color .2s; }
-  li a:hover { border-color: var(--blue); }
-  .id { color: var(--faint); font-size: var(--t-2); }
-  .t { color: var(--ink-hi); font-size: var(--t0); }
-  .ls { color: var(--ink); }
+  .lessons { padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 52rem; }
+  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
+  header p { color: var(--dim); max-width: 58ch; margin-bottom: 3rem; }
+  h2 { font: 500 var(--t2) var(--sans); color: var(--c); margin: 0 0 1rem; }
+  .bn { font-family: var(--bangla); font-weight: 400; }
+  section { margin-bottom: 3rem; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
+  li { display: grid; gap: .2rem; }
+  li > a { font-size: var(--t1); text-decoration: none; color: var(--ink-hi); }
+  li > a:hover { text-decoration: underline; text-decoration-color: var(--c); }
+  .where { color: var(--faint); font-size: var(--t-1); }
 </style>

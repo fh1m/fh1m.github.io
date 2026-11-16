@@ -3,22 +3,13 @@ import { ClientRouter } from "astro:transitions";
 import "@fontsource/tiro-bangla/400.css";
 import "../styles/global.css";
 import { person } from "../data/facts";
-import type { WorldState } from "../world/globe";
+import { elements } from "../data/elements";
 
-interface Props { title?: string; description?: string; bodyClass?: string; world?: WorldState; crumbs?: { href: string; label: string }[]; bare?: boolean; chrome?: boolean }
-const { title, description = "Fahim Faisal (fh1m): an engineer's notebook. Autonomy across air, water, earth and silicon, told from the real commits, including the parts that were wrong.", bodyClass = "", world, crumbs = [], bare = false, chrome = true } = Astro.props;
-const fullTitle = title ? `${title} · ${person.name}` : `${person.name} · an engineer's notebook`;
-const nav = [
-  { href: "/air", label: "Air" },
-  { href: "/water", label: "Water" },
-  { href: "/earth", label: "Earth" },
-  { href: "/fire", label: "Fire" },
-  { href: "/lessons", label: "Lessons" },
-  { href: "/notes", label: "Notebook" },
-  { href: "/shoulders", label: "Shoulders" },
-  { href: "/cv", label: "CV" },
-];
+interface Props { title?: string; description?: string; bodyClass?: string; nation?: string; chrome?: boolean }
+const { title, description = "Fahim Faisal, an engineer from Dhaka: machines that have to work alone in water, on land, in the air and on small chips, and the commits that fixed them.", bodyClass = "", nation, chrome = true } = Astro.props;
+const fullTitle = title ? `${title} | Fahim Faisal` : "Fahim Faisal";
 const here = Astro.url.pathname;
+const colour = elements.find((e) => e.id === nation)?.colour;
 ---
 <!doctype html>
 <html lang="en">
@@ -37,87 +28,48 @@ const here = Astro.url.pathname;
     <meta name="twitter:card" content="summary_large_image" />
     <ClientRouter fallback="swap" />
   </head>
-  <body class={bodyClass} data-world={world ? JSON.stringify(world) : undefined}>
+  <body class={bodyClass} style={colour ? `--c:${colour}` : undefined}>
     <a class="skip" href="#main">Skip to content</a>
-    <div class="world" aria-hidden="true" transition:persist="world" transition:animate="none">
-      <canvas id="world"></canvas>
-      <div class="pins"></div>
-    </div>
-    {chrome && <header class="top">
-      <a class="mark" href="/" aria-label={`${person.name}, home`}><span class="mono">fh1m</span><span class="dotmark" aria-hidden="true"></span></a>
-      <nav aria-label="Site">
-        <ul>{nav.map((n) => <li><a href={n.href} aria-current={here.startsWith(n.href) ? "page" : undefined}>{n.label}</a></li>)}</ul>
-      </nav>
-    </header>}
-    {crumbs.length > 0 && (
-      <nav class="descent" aria-label="Where you are">
-        <ol><li><a href="/">Pale blue dot</a></li>{crumbs.map((c) => <li><a href={c.href}>{c.label}</a></li>)}</ol>
-      </nav>
+    {chrome && (
+      <header class="top">
+        <a class="me" href="/">Fahim Faisal</a>
+        <nav aria-label="Site">
+          <ul>
+            {elements.map((e) => <li><a href={`/${e.id}`} style={`--c:${e.colour}`} aria-current={here.startsWith(`/${e.id}`) ? "page" : undefined}><span class="bn" lang="bn">{e.bn}</span> {e.name}</a></li>)}
+            <li><a href="/lessons" aria-current={here.startsWith("/lessons") ? "page" : undefined}>Lessons</a></li>
+            <li><a href="/notes" aria-current={here.startsWith("/notes") ? "page" : undefined}>Notebook</a></li>
+            <li><a href="/shoulders" aria-current={here.startsWith("/shoulders") ? "page" : undefined}>Shoulders</a></li>
+            <li><a href="/cv" aria-current={here.startsWith("/cv") ? "page" : undefined}>CV</a></li>
+          </ul>
+        </nav>
+      </header>
     )}
     <slot />
-    {!bare && <footer class="foot">
-      <p class="mono">
-        <a href={`mailto:${person.email}`}>{person.email}</a> · <a href={person.github}>github.com/fh1m</a>{person.linkedin && <> · <a href={person.linkedin}>LinkedIn</a></>}
-      </p>
-      <p class="mono faint">Written in Dhaka, on a pale blue dot. Every number has a source; every mistake has a commit. <a href="https://github.com/fh1m/fh1m.github.io">Source</a>.</p>
-    </footer>}
-    <script>
-      import "../scripts/world-client.ts";
-    </script>
+    {chrome && (
+      <footer class="foot">
+        <a href={`mailto:${person.email}`}>{person.email}</a>
+        <a href={person.github}>GitHub</a>
+        {person.linkedin && <a href={person.linkedin}>LinkedIn</a>}
+        <a href="/log">The dated record</a>
+      </footer>
+    )}
   </body>
 </html>
 
 <style>
-  .world { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  /* a faint memory of the sunbeam the dot sat in */
-  .world::before { content: ""; position: absolute; inset: -20%; background: linear-gradient(101deg, transparent 52%, rgb(123 140 180 / .05) 55%, rgb(150 165 200 / .085) 56.5%, rgb(123 140 180 / .05) 58%, transparent 61%); pointer-events: none; }
-  #world { width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 1.2s var(--ease); }
-  :global(body.world-on) #world { opacity: 1; }
-  :global(#world.ui) { pointer-events: auto; cursor: grab; }
-  :global(#world.ui:active) { cursor: grabbing; }
-  .pins { position: absolute; inset: 0; pointer-events: none; }
-  .pins :global(.pin), .pins :global(.sat) { position: absolute; left: 0; top: 0; pointer-events: auto; white-space: nowrap; text-decoration: none; opacity: 0; transition: opacity .5s; }
-  .pins :global(.pin) { font: 400 var(--t-2) var(--mono); color: var(--ink-hi); padding: .15rem .45rem .15rem .9rem; margin-top: -.75em; }
-  .pins :global(.pin)::before { content: ""; position: absolute; left: -3.5px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 3px rgb(215 101 93 / .22), 0 0 12px rgb(215 101 93 / .6); }
-  .pins :global(.pin.on) { opacity: 1; }
-  .pins :global(.pin.hidden) { opacity: 0 !important; pointer-events: none; }
-  .pins :global(.pin.gem) { color: transparent; }
-  .pins :global(.pin.gem)::before { background: #c9a77c; width: 4px; height: 4px; margin-top: -2px; left: -2px; box-shadow: 0 0 8px rgb(201 167 124 / .7); }
-  .pins :global(.pin em) { display: none; }
-  .pins :global(.pin.lab-u span) { position: absolute; left: 0; bottom: 1.1rem; }
-  .pins :global(.pin.lab-d span) { position: absolute; left: .4rem; top: 1.1rem; }
-  .pins :global(.pin.lab-l span) { position: absolute; right: 1rem; top: 0; }
-  .pins :global(.pin span) { text-shadow: 0 0 6px #000, 0 0 2px #000; }
-  .pins :global(.pin.gem:hover) { color: var(--sun); z-index: 5; }
-  .pins :global(.pin.gem:hover em) { display: block; font-style: normal; color: var(--ink); max-width: 18rem; white-space: normal; margin-top: .2rem; }
-  .pins :global(.sat) { display: flex; align-items: center; gap: .5rem; margin: -6px 0 0 -6px; font: 500 var(--t-1) var(--sans); color: var(--ink-hi); }
-  .pins :global(.sat i) { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--blue); background: rgb(123 156 224 / .25); box-shadow: 0 0 14px rgb(123 156 224 / .7); transition: transform .3s, background .3s; }
-  .pins :global(.sat span) { padding: .1rem .35rem; background: rgb(0 0 0 / .45); }
-  .pins :global(.sat:hover i), .pins :global(.sat.active i) { transform: scale(1.5); background: var(--blue); }
-  .pins :global(.sat.active span) { border-bottom: 1px solid var(--red); }
-  .pins :global(.sat.behind) { pointer-events: none; }
-  .pins :global(.startip) { position: absolute; left: 0; top: 0; max-width: 360px; padding: .5rem .65rem; font: 400 var(--t-2)/1.5 var(--mono); color: var(--ink); background: rgb(3 6 14 / .92); border: 1px solid var(--line-2); opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 6; }
-  .pins :global(.startip.on) { opacity: 1; }
-  .pins :global(.startip b) { color: var(--ink-hi); font-weight: 400; }
-  .pins :global(.startip .h) { color: var(--blue); }
-  .top { position: fixed; inset: 0 0 auto 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem var(--gutter); background: linear-gradient(rgb(0 0 0 / .9), rgb(0 0 0 / .55) 70%, transparent); }
-  .mark { display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; font-size: var(--t0); color: var(--ink-hi); }
-  .dotmark { width: 4px; height: 4px; border-radius: 50%; background: #a9c3ee; box-shadow: 0 0 6px 1px #7b9ce0; }
-  nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: .2rem 1.3rem; margin: 0; padding: 0; }
-  nav a { font: 400 var(--t-1) var(--sans); color: var(--dim); text-decoration: none; padding: .2rem 0; border-bottom: 1px solid transparent; }
+  .top { position: relative; z-index: 5; display: flex; align-items: baseline; justify-content: space-between; gap: 2rem; padding: 1.4rem var(--gutter) 0; }
+  .me { font: 500 var(--t1) var(--sans); color: var(--ink-hi); text-decoration: none; white-space: nowrap; }
+  nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; margin: 0; padding: 0; }
+  nav a { color: var(--dim); text-decoration: none; }
   nav a:hover { color: var(--ink-hi); }
-  nav a[aria-current="page"] { color: var(--ink-hi); border-bottom-color: var(--red); }
-  .descent { position: relative; z-index: 2; padding: 4.6rem var(--gutter) 0; }
-  .descent ol { list-style: none; display: flex; flex-wrap: wrap; gap: .3rem; margin: 0; padding: 0; font: 400 var(--t-2) var(--mono); color: var(--faint); }
-  .descent li + li::before { content: "↘ "; color: var(--faint); }
-  .descent a { color: var(--dim); text-decoration: none; }
-  .descent a:hover { color: var(--ink-hi); }
-  .descent li:last-child a { color: var(--ink-hi); }
-  .foot { position: relative; z-index: 2; padding: 3rem var(--gutter) 2.6rem; border-top: 1px solid var(--line); background: #000; display: grid; gap: .3rem; }
-  .foot p { margin: 0; max-width: none; }
+  nav a[aria-current="page"] { color: var(--ink-hi); text-decoration: underline; text-decoration-color: var(--c, var(--ink-hi)); text-underline-offset: .35em; }
+  nav .bn { font-family: var(--bangla); color: var(--c, inherit); }
+  .foot { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.6rem; padding: 4rem var(--gutter) 2.4rem; }
+  .foot a { color: var(--dim); }
   @media (max-width: 760px) {
-    .top nav { min-width: 0; overflow-x: auto; scrollbar-width: none; }
-    .top nav ul { flex-wrap: nowrap; gap: .9rem; }
-    .top nav li { flex: none; }
+    .top { flex-direction: column; gap: .6rem; }
+    nav { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+    nav ul { flex-wrap: nowrap; }
+    nav li { flex: none; }
   }
 </style>

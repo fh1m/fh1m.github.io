@@ -1,40 +1,52 @@
 ---
 import Base from "../../layouts/Base.astro";
-import Sheet from "../../components/stage/Sheet.astro";
+import Player from "../../components/album/Player.astro";
 import { getCollection } from "astro:content";
 import { series } from "../../data/series";
 const notes = await getCollection("notes");
-const total = notes.length;
 ---
-<Base bare title="Notebook" description="The long versions: machines, water from first principles, seeing, time, truth and building, most with something to drag." world={{ layer: "all", side: "left", dist: 5 }}>
-  <Sheet wide title="Notebook" meta={`${total} notes · ${series.length} series · most have something to drag`}>
+<Base title="Notebook" description="The long versions: how the machines work, what water does to light and radio, seeing, time, measuring honestly, and building things that run. Most have something to drag.">
+  <main id="main" class="notebook">
+    <header>
+      <h1>Notebook</h1>
+      <p>The long versions. Most of them have something you can drag.</p>
+    </header>
     {series.map((s) => {
       const parts = notes.filter((n) => n.data.series === s.id).sort((a, b) => a.data.part - b.data.part);
       return parts.length > 0 && (
-        <section class="ser" id={s.id}>
-          <h2><span class="bn" lang="bn">{s.bn}</span> {s.title} <span class="mono faint">{parts.length}</span></h2>
-          <ul>{parts.map((n) => (
-            <li><a href={`/notes/${n.id}`}>
-              {n.data.hero ? <img src={n.data.hero} alt="" loading="lazy" /> : <span class="noimg" />}
-              <span class="pn mono">{String(n.data.part).padStart(2, "0")}</span>
-              <span class="t">{n.data.title}</span>
-            </a></li>
-          ))}</ul>
+        <section id={s.id} aria-labelledby={`h-${s.id}`}>
+          <h2 id={`h-${s.id}`}><span class="bn" lang="bn">{s.bn}</span> {s.title}</h2>
+          <ol>
+            {parts.map((n) => (
+              <li>
+                <a class="track" href={`/notes/${n.id}`} data-art={n.data.heroPlot ? "" : (n.data.hero ?? "")}>
+                  <span class="ti">{n.data.title}</span>
+                  <span class="dek">{n.data.dek}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
         </section>
       );
     })}
-  </Sheet>
+    <Player />
+  </main>
 </Base>
+<script>
+  import "../../scripts/album.ts";
+</script>
 <style>
-  .ser { margin-bottom: 1.6rem; scroll-margin-top: 1rem; }
-  h2 { display: flex; align-items: baseline; gap: .6rem; font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 0 0 .6rem; }
-  .bn { font-family: "Tiro Bangla", serif; color: var(--blue); font-weight: 400; }
-  .faint { font-size: var(--t-2); }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .6rem; }
-  a { display: grid; grid-template-columns: auto 1fr; gap: .35rem .5rem; text-decoration: none; }
-  img, .noimg { grid-column: 1 / -1; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: var(--navy); border: 1px solid var(--line); filter: saturate(.75) brightness(.85); transition: filter .25s, border-color .25s; }
-  a:hover img { filter: none; border-color: var(--blue); }
-  .pn { font-size: var(--t-2); color: var(--faint); padding-top: .1rem; }
-  .t { font-size: var(--t-1); color: var(--ink); line-height: 1.35; }
-  a:hover .t { color: var(--ink-hi); }
+  .notebook { position: relative; z-index: 1; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 52rem; }
+  header { position: relative; z-index: 1; }
+  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
+  header p { color: var(--dim); margin-bottom: 3rem; }
+  section { position: relative; z-index: 1; margin-bottom: 3rem; scroll-margin-top: 1rem; }
+  h2 { font: 500 var(--t2) var(--sans); margin: 0 0 .8rem; }
+  .bn { font-family: var(--bangla); font-weight: 400; }
+  ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .9rem; }
+  .track { display: grid; gap: .15rem; text-decoration: none; }
+  .ti { font-size: var(--t1); color: var(--ink-hi); }
+  .dek { color: var(--dim); }
+  .track:hover .ti, .track:focus-visible .ti { text-decoration: underline; }
+  .notebook :global(.player) { display: none; }
 </style>

@@ -1,82 +1,142 @@
 ---
+/**
+ * A track: the one real artefact first (a live bench or the lead photo), then the story in
+ * pictures, the numbers, what I got wrong and how it was corrected, every commit, and the credits.
+ */
 import Base from "../../layouts/Base.astro";
-import Sheet from "../../components/stage/Sheet.astro";
 import Explore from "../../components/note/Explore.astro";
 import { projects, elementById, type Project } from "../../data/elements";
 import { lessons } from "../../data/lessons";
-import { PLACES } from "../../world/globe";
+import { dims, rows } from "../../data/media";
 export const getStaticPaths = () => projects.map((p) => ({ params: { slug: p.slug }, props: { p } }));
 const { p } = Astro.props as { p: Project };
 const el = elementById[p.element];
 const ll = lessons.filter((l) => l.project === p.slug);
-const place = PLACES[p.place ?? "dhaka"];
-const gallery = p.gallery ?? (p.hero ? [[p.hero, p.heroAlt ?? p.title]] : []);
+const lead = p.hero ? { src: p.hero, alt: p.heroAlt ?? "", ...dims(p.hero) } : null;
+const story = rows([...(p.bench && lead ? [[lead.src, lead.alt] as [string, string]] : []), ...(p.gallery ?? [])]);
+const i = el.projects.findIndex((x) => x.slug === p.slug);
+const next = el.projects[i + 1];
 ---
-<Base bare title={p.title} description={p.summary} world={{ layer: p.element, focus: [place.ll[0] + 6, place.ll[1]], dist: 3.0, side: "left", pins: [p.place ?? "dhaka"], ui: false }}>
-  <Sheet trail={[{ href: `/${el.id}`, label: el.name }, { label: place.name.split(" ·")[0] }]} title={p.title} meta={`${p.years} · ${p.role} · ${p.status}`} back={`/${el.id}`}>
+<Base title={p.title} nation={p.element} description={p.line ?? p.summary}>
+  <main id="main" class="track-page">
+    <header class="head">
+      <p class="from"><a href={`/${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name}</a></p>
+      <h1>{p.title}</h1>
+      {p.line && <p class="line">{p.line}</p>}
       <p class="sum">{p.summary}</p>
+    </header>
 
-      {p.figures && (
-        <dl class="figs">{p.figures.map(([n, l]) => <div><dt class="mono">{n}</dt><dd>{l}</dd></div>)}</dl>
+    <div class="artefact">
+      {p.bench ? (
+        <Explore bench={p.bench[0]} title={p.bench[1]} hint={p.bench[2]} />
+      ) : lead && (
+        <figure class:list={["lead", { portrait: lead.portrait }]} style={`max-width:${Math.min(lead.w, lead.portrait ? 560 : 1400)}px`}>
+          <img src={lead.src} alt={lead.alt} width={lead.w} height={lead.h} fetchpriority="high" />
+        </figure>
       )}
+    </div>
 
-      {p.bench && <Explore bench={p.bench[0]} n="live" title={p.bench[1]} hint={p.bench[2]} />}
+    {p.figures && (
+      <ul class="nums" aria-label="Numbers">
+        {p.figures.map(([n, l]) => <li><b>{n}</b> {l}</li>)}
+      </ul>
+    )}
 
-      {gallery.length > 0 && (
-        <ul class="gal" data-n={gallery.length}>{gallery.map(([src, alt], i) => <li class={i === 0 ? "big" : ""}><img src={src} alt={alt} loading={i === 0 ? "eager" : "lazy"} /><span class="mono">{alt}</span></li>)}</ul>
-      )}
+    {story.length > 0 && (
+      <section class="story" aria-label="In pictures">
+        {story.map((row) => (
+          <div class:list={["row", { portraits: row[0].portrait, squares: row[0].square && row.length > 1 }]} style={`--n:${row.length}`}>
+            {row.map((im) => (
+              <figure style={`max-width:${im.portrait ? Math.min(im.w, 460) : im.square ? Math.min(im.w, 620) : Math.min(im.w, 1100)}px`}>
+                <img src={im.src} alt={im.cap} width={im.w} height={im.h} loading="lazy" />
+                <figcaption>{im.cap}</figcaption>
+              </figure>
+            ))}
+          </div>
+        ))}
+      </section>
+    )}
 
-      {p.commitsKey && (
-        <section class="cons">
-          <p class="label">Constellation · every commit, by date · <span class="redk">red = fixes and retractions</span></p>
-          <canvas data-commits={p.commitsKey} aria-label={`Every commit in ${p.repo}, by date`}></canvas>
-          <p class="read mono" aria-live="polite">point at a star</p>
-        </section>
-      )}
+    {ll.length > 0 && (
+      <section class="wrongs" aria-labelledby="w-h">
+        <h2 id="w-h">What I got wrong</h2>
+        {ll.map((l) => (
+          <article>
+            <h3><a href={`/lessons/${l.slug}`}>{l.title}</a></h3>
+            <p><span class="wrong">{l.believed}</span></p>
+            <p>{l.truth}</p>
+            {l.refs.some((r) => r.href.includes("/commit/"))
+              ? <p class="fixed">Corrected in {l.refs.filter((r) => r.href.includes("/commit/")).map((r, k) => <>{k > 0 && ", "}<a class="h" href={r.href}>{r.label}</a></>)}.</p>
+              : <p class="fixed">The fix is in <a href={l.refs[0].href}>{l.refs[0].label}</a>.</p>}
+          </article>
+        ))}
+      </section>
+    )}
 
-      {ll.length > 0 && (
-        <section class="lls">
-          <p class="label">Lessons learned</p>
-          <ul>{ll.map((l) => (
-            <li><a href={`/lessons/${l.slug}`}>
-              <span class="mono faint">{l.id} · {l.date}</span>
-              <span class="t">{l.title}</span>
-              <span class="wrong">{l.believed}</span>
-            </a></li>
-          ))}</ul>
-        </section>
-      )}
+    {p.commitsKey && (
+      <section class="cons" aria-labelledby="c-h">
+        <h2 id="c-h">Every commit</h2>
+        <p class="dim">Each dot is one commit, placed by date. The red ones are fixes and retractions. Point at one to read it.</p>
+        <canvas data-commits={p.commitsKey} aria-label={`Every commit in ${p.repo}, by date`}></canvas>
+        <p class="read" aria-live="polite"></p>
+      </section>
+    )}
 
-      <footer class="links mono">
-        {p.repo && <a href={`https://github.com/${p.repo}`}>github.com/{p.repo} ↗</a>}
-        {p.notes.map((n) => <a href={n.href}>{n.label} →</a>)}
-        {p.private && <span class="faint">private · described, not linked</span>}
-      </footer>
-  </Sheet>
+    <section class="credits" aria-labelledby="cr-h">
+      <h2 id="cr-h">Credits</h2>
+      <dl>
+        <dt>My part</dt><dd>{p.role}</dd>
+        <dt>When</dt><dd>{p.years}</dd>
+        <dt>Where it stands</dt><dd>{p.status}</dd>
+        {p.repo && <><dt>Code</dt><dd><a href={`https://github.com/${p.repo}`}>github.com/{p.repo}</a></dd></>}
+        {p.notes.length > 0 && <><dt>Read more</dt><dd>{p.notes.map((n, k) => <>{k > 0 && ", "}<a href={n.href}>{n.label}</a></>)}</dd></>}
+        {p.private && <><dt>Code</dt><dd>Private for now, so it is described here and not linked.</dd></>}
+      </dl>
+      {next && <p class="next">Next on this side: <a href={`/projects/${next.slug}`}>{next.title}</a></p>}
+    </section>
+  </main>
 </Base>
 <script>
   import "../../scripts/constellation.ts";
 </script>
 <style>
-  :global(.sheet .x) { margin: 0 0 1.4rem; }
-  .sum { margin: 1rem 0 1.2rem; max-width: 62ch; color: var(--ink); }
-  .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1px; margin: 0 0 1.2rem; background: var(--line); border: 1px solid var(--line); }
-  .figs div { background: rgb(3 6 14 / .95); padding: .7rem .8rem; }
-  .figs dt { font-size: var(--t2); color: var(--ink-hi); }
-  .figs dd { margin: .15rem 0 0; font-size: var(--t-2); color: var(--dim); }
-  .gal { list-style: none; margin: 0 0 1.4rem; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
-  .gal li { position: relative; margin: 0; }
-  .gal li.big { grid-column: span 2; grid-row: span 2; }
-  .gal img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--navy); border: 1px solid var(--line); }
-  .gal li.big img { aspect-ratio: auto; }
-  .gal span { position: absolute; left: .4rem; bottom: .35rem; font-size: var(--t-2); color: var(--ink-hi); background: rgb(0 0 0 / .6); padding: .05rem .3rem; }
-  .cons canvas { width: 100%; height: 150px; display: block; background: #000; border: 1px solid var(--line); cursor: crosshair; }
-  .redk { color: var(--red); }
-  .read { margin: .4rem 0 1.2rem; font-size: var(--t-2); color: var(--dim); min-height: 2.8em; max-width: none; }
-  .lls ul { list-style: none; margin: .4rem 0 1.2rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .6rem; }
-  .lls a { display: grid; gap: .3rem; padding: .7rem .8rem; border: 1px solid var(--line); text-decoration: none; font-size: var(--t-1); height: 100%; }
-  .lls a:hover { border-color: var(--blue); }
-  .lls .t { color: var(--ink-hi); }
-  .links { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; font-size: var(--t-1); border-top: 1px solid var(--line); padding-top: 1rem; }
-  @media (max-width: 900px) { .gal { grid-template-columns: 1fr 1fr; } }
+  .track-page { position: relative; z-index: 1; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 84rem; }
+  .head { max-width: 46rem; margin-bottom: 2.4rem; }
+  .from { margin: 0 0 1rem; }
+  .from a { color: var(--c); text-decoration: none; }
+  .bn { font-family: var(--bangla); }
+  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
+  .line { font-size: var(--t2); line-height: 1.35; color: var(--ink-hi); margin: 0 0 1rem; }
+  .sum { color: var(--dim); }
+  .artefact { margin-bottom: 2.4rem; }
+  .artefact :global(.x) { margin: 0; max-width: 62rem; }
+  .lead { margin: 0; }
+  .lead img { width: 100%; height: auto; display: block; }
+  .nums { list-style: none; margin: 0 0 3rem; padding: 0; columns: 2 16rem; column-gap: 3rem; max-width: 46rem; }
+  .nums li { break-inside: avoid; padding: .2rem 0; color: var(--dim); }
+  .nums b { font: 500 var(--t1) var(--mono); color: var(--ink-hi); font-variant-numeric: tabular-nums; margin-right: .35rem; }
+  .story { display: grid; gap: 2.4rem; margin-bottom: 3.6rem; }
+  .row { display: flex; gap: 1.2rem; align-items: flex-start; }
+  .row figure { margin: 0; flex: 1 1 0; min-width: 0; }
+  .row img { width: 100%; height: auto; display: block; }
+  .row.portraits figure { flex: 0 1 calc((100% - (var(--n) - 1) * 1.2rem) / 3); }
+  .row.squares figure { flex: 0 1 calc((100% - 1.2rem) / 2); }
+  figcaption { margin-top: .5rem; color: var(--dim); font-size: var(--t-1); max-width: 60ch; }
+  h2 { font: 500 var(--t2) var(--sans); margin: 0 0 1rem; }
+  .wrongs { max-width: 46rem; margin-bottom: 3.6rem; }
+  .wrongs article { margin-bottom: 2rem; }
+  .wrongs h3 { font: 500 var(--t1) var(--sans); margin: 0 0 .4rem; }
+  .wrongs h3 a { text-decoration: none; }
+  .wrongs p { margin: 0 0 .4rem; }
+  .fixed { color: var(--dim); }
+  .h { font-family: var(--mono); }
+  .cons { max-width: 62rem; margin-bottom: 3.6rem; }
+  .cons canvas { width: 100%; height: 150px; display: block; cursor: crosshair; }
+  .read { min-height: 3em; color: var(--dim); font-size: var(--t-1); }
+  .credits { max-width: 46rem; }
+  dl { display: grid; grid-template-columns: 10rem 1fr; gap: .5rem 1.4rem; margin: 0 0 2rem; }
+  dt { color: var(--dim); }
+  dd { margin: 0; }
+  .next { color: var(--dim); }
+  @media (max-width: 700px) { .row { flex-direction: column; } .row.portraits { flex-direction: row; } dl { grid-template-columns: 1fr; gap: .1rem; } dd { margin-bottom: .6rem; } }
 </style>
