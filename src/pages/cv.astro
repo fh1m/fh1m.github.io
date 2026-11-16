@@ -105,7 +105,10 @@ import stats from "../data/github.json";
     :global(html), :global(body) { background: #fff !important; color: #000 !important; font-size: 9.3pt; line-height: 1.38; }
     :global(.top), :global(.foot), :global(.skip), :global(.world), :global(.descent), .no-print { display: none !important; }
     :global(.grain::after) { display: none; }
-    .cv { padding: 0 1mm; margin: 0; max-width: none; width: auto; background: none; border: 0; backdrop-filter: none; --pink: #1d3d7a; }
+    .cv { padding: 0 1mm !important; margin: 0 !important; max-width: none !important; width: auto !important; background: none !important; border: 0 !important; backdrop-filter: none !important; --pink: #1d3d7a; }
+    :global(html), :global(body), :global(main) { background: #fff !important; }
+    :global(:root) { color-scheme: light !important; }
+    .role, .results .num, .results b, .skills dt, .own b, .pubs b { color: #000 !important; }
     h2 { color: #1d3d7a; }
     h1 { font-size: 22pt; }
     .role { font-size: 12pt; margin-bottom: .3rem; }

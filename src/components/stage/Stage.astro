@@ -119,6 +119,8 @@ const ll = el ? byElement(el.id) : [];
   @media (max-width: 900px) {
     .stage { height: auto; min-height: 100svh; overflow: visible; }
     .panel { position: relative; inset: auto; width: auto; margin: 46svh var(--gutter) 2rem; }
-    .who { position: relative; left: auto; bottom: auto; padding: 5rem var(--gutter) 0; }
+    .who { left: var(--gutter); right: var(--gutter); bottom: 1.4rem; }
+    .who.compact { position: relative; left: auto; right: auto; bottom: auto; padding: 5rem var(--gutter) 0; }
+    .stage:not(:has(.panel)) { height: 100svh; overflow: hidden; }
   }
 </style>

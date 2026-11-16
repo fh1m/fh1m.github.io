@@ -233,7 +233,7 @@ export async function boot(canvas: HTMLCanvasElement, layer: HTMLElement): Promi
     cur.lon += dl * k; cur.lat += (tgt.lat - cur.lat) * k; cur.dist += (tgt.dist - cur.dist) * k; cur.side += (tgt.side - cur.side) * k; cur.sats += (tgt.sats - cur.sats) * k;
     for (const key in lay) { const kk = key as keyof typeof lay; lay[kk] += (layT[kk] - lay[kk]) * k; }
     e.set(THREE.MathUtils.degToRad(cur.lat), THREE.MathUtils.degToRad(-cur.lon), 0, "XYZ"); q.setFromEuler(e); globe.quaternion.copy(q);
-    cam.position.set(0, 0, cur.dist); cam.lookAt(0, 0, 0);
+    cam.position.set(0, 0, cur.dist * Math.max(1, 0.95 / cam.aspect)); cam.lookAt(0, 0, 0); // portrait screens: pull back so the globe fits the width
     const w = innerWidth; if (w > 900) cam.setViewOffset(w, innerHeight, -w * cur.side, 0, w, innerHeight); else cam.clearViewOffset();
     coastMat.opacity = lay.water; riverMat.opacity = lay.rivers; landMat.opacity = lay.earth; atmoMat.uniforms.uOn.value = lay.air;
     cityMat.uniforms.uOn.value = lay.fire; gratMat.opacity = lay.grat; windMat.opacity = lay.wind;

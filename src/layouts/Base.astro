@@ -115,5 +115,9 @@ const here = Astro.url.pathname;
   .descent li:last-child a { color: var(--ink-hi); }
   .foot { position: relative; z-index: 2; padding: 3rem var(--gutter) 2.6rem; border-top: 1px solid var(--line); background: #000; display: grid; gap: .3rem; }
   .foot p { margin: 0; max-width: none; }
-  @media (max-width: 760px) { nav ul { gap: .1rem .8rem; } }
+  @media (max-width: 760px) {
+    .top nav { min-width: 0; overflow-x: auto; scrollbar-width: none; }
+    .top nav ul { flex-wrap: nowrap; gap: .9rem; }
+    .top nav li { flex: none; }
+  }
 </style>
