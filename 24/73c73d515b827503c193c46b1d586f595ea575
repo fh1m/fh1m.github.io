@@ -1,0 +1,84 @@
+public/fonts/OBEL-OFL.txt
+  h_f1b9066eb9899c 1-93
+public/fonts/ZED-OFL.txt
+  h_f1b9066eb9899c 1-110
+public/world/earth.json
+  h_f1b9066eb9899c 1
+scripts/mine-commits.mjs
+  h_f1b9066eb9899c 1,3-6,8-10,12-20,22-34,36
+src/benches/delay.ts
+  h_f1b9066eb9899c 32
+src/benches/ebhapa.ts
+  h_f1b9066eb9899c 69,74,77
+src/benches/hull.ts
+  h_f1b9066eb9899c 35,45,50,53,55
+src/benches/ik-arm.ts
+  h_f1b9066eb9899c 35
+src/benches/query.ts
+  h_f1b9066eb9899c 39
+src/benches/recorder.ts
+  h_f1b9066eb9899c 22
+src/benches/robosub.ts
+  h_f1b9066eb9899c 11-16,29,46,49-50,61,64-65
+src/benches/ui.ts
+  h_f1b9066eb9899c 72-73
+src/components/stage/Sheet.astro
+  h_f1b9066eb9899c 1-29
+src/components/stage/Stage.astro
+  h_f1b9066eb9899c 1-124
+src/data/commits.json
+  h_f1b9066eb9899c 1
+src/data/elements.ts
+  h_f1b9066eb9899c 1-85
+src/data/lessons.ts
+  h_f1b9066eb9899c 1-189
+src/explore/kit.ts
+  h_f1b9066eb9899c 10-11
+src/explore/snell.ts
+  h_f1b9066eb9899c 25
+src/layouts/Base.astro
+  h_f1b9066eb9899c 2,6,8-10,12-18,32,38,40,42-45,47,49,52-56,58-66,71-118
+src/pages/[element].astro
+  h_f1b9066eb9899c 1-13
+src/pages/cv.astro
+  h_f1b9066eb9899c 6,47,78-83,86,89,91-95,99,102-103,106,108-109
+src/pages/index.astro
+  h_f1b9066eb9899c 3,5-6,9
+src/pages/lessons/[slug].astro
+  h_f1b9066eb9899c 1-45
+src/pages/lessons/index.astro
+  h_f1b9066eb9899c 1-38
+src/pages/log.astro
+  h_f1b9066eb9899c 9,12,17,21,27,80-94,96-113
+src/pages/notes/[...slug].astro
+  h_f1b9066eb9899c 20,64-76,78-83,85-89,91-92,94-96,99
+src/pages/notes/index.astro
+  h_f1b9066eb9899c 3,7,9-26,29-39
+src/pages/projects/[slug].astro
+  h_f1b9066eb9899c 1-82
+src/pages/shoulders.astro
+  h_f1b9066eb9899c 1-52
+src/pages/world/commits.json.ts
+  h_f1b9066eb9899c 1-3
+src/scripts/constellation.ts
+  h_f1b9066eb9899c 1-34
+src/scripts/intro.ts
+  h_f1b9066eb9899c 1-38
+src/scripts/world-client.ts
+  h_f1b9066eb9899c 1-31
+src/styles/global.css
+  h_f1b9066eb9899c 2-4,6-10,14-36,38-39,41-46,54-77,80,83,85-88,90,93-114,116-125,129-142,144-160,162,165,167-171,173,175,177-181
+src/world/globe.ts
+  h_f1b9066eb9899c 2-7,11-31,33-39,41-44,46-52,54-55,58-92,94-96,98-107,109-118,120-183,185-195,199-207,209-218,220,222-251,253-260,262-267
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "2473c73d515b827503c193c46b1d586f595ea575",
+  "prompts": {},
+  "humans": {
+    "h_f1b9066eb9899c": {
+      "author": "fh1m <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
