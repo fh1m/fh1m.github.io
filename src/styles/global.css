@@ -5,6 +5,7 @@
 @font-face { font-family: "Zed Sans"; src: url("/fonts/zed-sans-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: "Zed Sans"; src: url("/fonts/zed-sans-medium.woff2") format("woff2"); font-weight: 500 700; font-style: normal; font-display: swap; }
 @font-face { font-family: "Zed Sans"; src: url("/fonts/zed-sans-italic.woff2") format("woff2"); font-weight: 400 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "Nunito"; src: url("/fonts/nunito-var.woff2") format("woff2"); font-weight: 200 1000; font-style: normal; font-display: swap; }
 @font-face { font-family: "Obel Mono"; src: url("/fonts/obelmono.woff2") format("woff2"); font-weight: 300 800; font-style: normal; font-display: swap; }
 @font-face { font-family: "Obel Mono"; src: url("/fonts/obelmono-italic.woff2") format("woff2"); font-weight: 300 800; font-style: italic; font-display: swap; }
 
@@ -33,6 +34,7 @@
   --me: var(--red);
 
   --sans: "Zed Sans", ui-sans-serif, system-ui, sans-serif;
+  --story: "Nunito", ui-rounded, system-ui, sans-serif; /* narration: the opening, the planet, the creator window */
   --mono: "Obel Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --serif: var(--sans);
   --display: var(--sans);

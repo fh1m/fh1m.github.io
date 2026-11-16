@@ -1,110 +1,173 @@
 /**
- * The world: a tiny planet in space, and Zero driving on it. Step 1: planet, robot, driving, sound.
+ * The world: a tiny planet that stays still in space, and ZERO-6, which changes form for each medium.
+ * Motion is timed and eased (cinematic flights, squash-and-stretch transformations), light sources glow,
+ * and the music changes with where you are.
  */
 import * as THREE from "three";
-import { R, WATER, ZONES, buildPlanet, groundR, height, zoneOf, type ZoneId } from "./planet";
-import { buildZero } from "./zero";
-import { createInput } from "./input";
-import { createSound } from "./audio";
+import { R, WATER, buildPlanet, zoneOf, type ZoneId } from "./planet";
+import { buildForms, flat, type Form } from "./forms";
+import { buildProps, stand, STATIONS } from "./props";
+import { createSound, type Sound } from "./audio";
+import { glowSprite } from "./fx";
 
-export function start(canvas: HTMLCanvasElement, ui: { zone: HTMLElement; stick: HTMLElement | null; sound: HTMLButtonElement | null }) {
+export interface World { go: (z: ZoneId | null) => void; fallIn: () => void; onZone: (cb: (z: ZoneId | null) => void) => void; sound: Sound }
+
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const easeOutBack = (t: number) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+
+export function start(canvas: HTMLCanvasElement): World {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#0b1233");
-  const cam = new THREE.PerspectiveCamera(55, 1, 0.1, 400);
+  const scene = new THREE.Scene(); scene.background = new THREE.Color("#0b1233");
+  const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 3000);
 
-  // Stars: a few hundred points far away, and a couple of flat planets in the distance
-  const sp: number[] = [];
-  for (let i = 0; i < 900; i++) { const v = new THREE.Vector3().randomDirection().multiplyScalar(160 + Math.random() * 60); sp.push(v.x, v.y, v.z); }
-  scene.add(new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(sp, 3)), new THREE.PointsMaterial({ color: "#ffffff", size: 0.9, sizeAttenuation: true })));
-  const moon = new THREE.Mesh(new THREE.IcosahedronGeometry(7, 2), new THREE.MeshLambertMaterial({ color: "#f3d36b", flatShading: true })); moon.position.set(-90, 50, -120); scene.add(moon);
-  const far = new THREE.Mesh(new THREE.IcosahedronGeometry(4, 1), new THREE.MeshLambertMaterial({ color: "#ff6fa5", flatShading: true })); far.position.set(110, -30, -90); scene.add(far);
+  // Space: two layers of stars (parallax), a distant sun, a moon
+  for (const [n, r, size] of [[900, 500, 1.5], [400, 900, 2.6]] as [number, number, number][]) {
+    const sp: number[] = []; for (let i = 0; i < n; i++) { const v = new THREE.Vector3().randomDirection().multiplyScalar(r + Math.random() * 200); sp.push(v.x, v.y, v.z); }
+    scene.add(new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.Float32BufferAttribute(sp, 3)), new THREE.PointsMaterial({ color: "#ffffff", size, sizeAttenuation: true, transparent: true, opacity: 0.85 })));
+  }
+  const sunFar = new THREE.Group(); sunFar.position.set(-520, 300, -700); sunFar.add(glowSprite("#ffe7a3", 260, 0.75), glowSprite("#fff8e6", 60, 1)); scene.add(sunFar);
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(4.2, 24, 16), flat("#f3d36b")); scene.add(moon);
 
-  // Light: a warm sun and a cool space fill, Kurzgesagt-ish
-  const sun = new THREE.DirectionalLight("#fff1d6", 2.4); sun.position.set(40, 60, 30); sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12, near: 1, far: 150 });
-  scene.add(sun, sun.target);
-  scene.add(new THREE.HemisphereLight("#b9d4ff", "#4a3a8b", 1.5));
-  // a soft atmosphere rim around the planet
-  const atmo = new THREE.Mesh(new THREE.SphereGeometry(R + 3.2, 48, 32), new THREE.ShaderMaterial({
+  const sun = new THREE.DirectionalLight("#fff1d6", 2.2); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 200 });
+  scene.add(sun, sun.target, new THREE.HemisphereLight("#bcd6ff", "#5b3d9c", 1.35));
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(R + 3.4, 64, 48), new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, side: THREE.BackSide, blending: THREE.AdditiveBlending,
     vertexShader: "varying vec3 vN; varying vec3 vV; void main(){ vN = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }",
-    fragmentShader: "varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1. - abs(dot(vN, vV)), 2.2); gl_FragColor = vec4(0.45, 0.65, 1.0, f * 0.55); }",
-  }));
-  scene.add(atmo);
+    fragmentShader: "varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1. - abs(dot(vN, vV)), 2.4); gl_FragColor = vec4(0.47, 0.68, 1.0, f * 0.6); }",
+  })));
 
   const planet = buildPlanet(); scene.add(planet.group);
   planet.group.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).receiveShadow = true; });
-
-  const zero = buildZero(); scene.add(zero.root);
-  const input = createInput(ui.stick);
+  const props = buildProps(); scene.add(props.group);
+  const forms = buildForms();
+  for (const f of Object.values(forms)) {
+    f.group.visible = false; scene.add(f.group);
+    f.beacon.add(glowSprite("#ff4f8b", 0.9, 0.8)); f.eye.add(glowSprite("#7ff3ff", 0.6, 0.7));
+  }
   const sound = createSound();
-  if (ui.sound) { ui.sound.setAttribute("aria-pressed", String(sound.on())); ui.sound.addEventListener("click", () => ui.sound!.setAttribute("aria-pressed", String(sound.toggle()))); }
 
-  // State on the sphere: orientation q (local up = +Y), speed along local forward (-Z)
-  const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), ZONES[0].c.clone().applyAxisAngle(new THREE.Vector3(1, 0, 0), -0.12).normalize());
-  let speed = 0;
-  const up = new THREE.Vector3(), fwd = new THREE.Vector3(), right = new THREE.Vector3(), dir = new THREE.Vector3(), tmpQ = new THREE.Quaternion();
-  const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
-  let zoneNow: ZoneId | "" = "";
+  // sparks for the transformation
+  const sparks = Array.from({ length: 28 }, () => { const s = glowSprite("#ff9ec2", 0.35, 0); scene.add(s); return { s, v: new THREE.Vector3(), life: 0 }; });
+  const burst = (at: THREE.Vector3, up: THREE.Vector3) => sparks.forEach((p) => { p.s.position.copy(at).addScaledVector(up, 1); p.v.randomDirection().multiplyScalar(3 + Math.random() * 4).addScaledVector(up, 3); p.life = 1; });
 
-  const resize = () => { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < h ? 70 : 55; cam.updateProjectionMatrix(); };
+  // Camera: a state (dir from the look point, distance, look point) and timed, eased flights between states
+  const OVERVIEW = 70;
+  const cur = { dir: new THREE.Vector3(0.3, 0.45, 1).normalize(), dist: 1400, look: new THREE.Vector3() };
+  let flight: { from: typeof cur; to: typeof cur; t: number; dur: number } | null = null;
+  const fly = (to: typeof cur, dur = 2.0) => { flight = { from: { dir: cur.dir.clone(), dist: cur.dist, look: cur.look.clone() }, to, t: 0, dur: reduce ? 0.01 : dur }; };
+  let zone: ZoneId | null = null, form: Form | null = null, swap: { from: Form; to: Form; t: number } | null = null, idle = 0;
+  const listeners: ((z: ZoneId | null) => void)[] = [];
+
+  function framing(z: ZoneId) {
+    const d = STATIONS[z].dir();
+    const side = new THREE.Vector3().crossVectors(d, Math.abs(d.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0)).normalize();
+    return { dir: d.clone().multiplyScalar(0.82).addScaledVector(side, 0.58).normalize(), dist: 12.5, look: d.clone().multiplyScalar(R + 1.3) };
+  }
+  function go(z: ZoneId | null) {
+    if (z === zone) return;
+    zone = z; idle = 0; sound.whoosh(); sound.scene(z ?? "space");
+    if (!z) fly({ dir: cur.dir.clone().setY(0.4).normalize(), dist: OVERVIEW, look: new THREE.Vector3() });
+    else {
+      fly(framing(z));
+      const next = forms[z], st = STATIONS[z];
+      stand(next.group, st.dir(), st.lift, st.heading, st.onWater ? WATER : undefined);
+      if (form && form !== next) swap = { from: form, to: next, t: 0 };
+      else { form = next; form.group.visible = true; swap = { from: next, to: next, t: 0.5 }; }
+    }
+    listeners.forEach((f) => f(z));
+  }
+
+  // Drag to look around; click a zone to go there
+  let drag: { x: number; y: number } | null = null, moved = 0;
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  canvas.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY }; moved = 0; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", (e) => {
+    if (drag) {
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); drag = { x: e.clientX, y: e.clientY };
+      if (flight) return;
+      const up = zone ? cur.look.clone().normalize() : new THREE.Vector3(0, 1, 0);
+      const right = new THREE.Vector3().crossVectors(up, cur.dir).normalize();
+      cur.dir.applyAxisAngle(up, -dx * 0.004).applyAxisAngle(right, -dy * 0.004).normalize();
+      if (zone && cur.dir.dot(up) < 0.25) cur.dir.addScaledVector(up, 0.25 - cur.dir.dot(up)).normalize(); // never under the ground
+      idle = 0; return;
+    }
+    ndc.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, cam);
+    canvas.style.cursor = !zone && ray.intersectObject(planet.group, true).length ? "pointer" : "grab";
+  });
+  canvas.addEventListener("pointerup", () => { drag = null; });
+  canvas.addEventListener("click", (e) => {
+    if (moved > 6) return;
+    ndc.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, cam);
+    const hit = ray.intersectObject(planet.group, true)[0];
+    if (hit) { const z = zoneOf(hit.point.clone().normalize()); if (z.d > 0.45) go(z.id); }
+  });
+
+  const resize = () => { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < h ? 60 : 42; cam.updateProjectionMatrix(); };
   addEventListener("resize", resize); resize();
 
-  let last = performance.now(), running = true, first = true;
-  function frame(now: number) {
+  let last = performance.now(), running = true;
+  const tmp = new THREE.Vector3();
+  function tick(now: number) {
     if (!running) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000;
+    idle += dt;
 
-    up.set(0, 1, 0).applyQuaternion(q); fwd.set(0, 0, -1).applyQuaternion(q); right.set(1, 0, 0).applyQuaternion(q);
-    const inWater = groundR(up) <= WATER + 0.06 && R + height(up) < WATER;
-    const top = (input.boost ? 13 : 8.5) * (inWater ? 0.6 : 1);
-    speed += (input.y * top - speed) * Math.min(1, dt * (input.y ? 2.2 : 1.6));
-    const turn = -input.x * 1.9 * Math.min(1, 0.35 + Math.abs(speed) / 6) * (speed < -0.1 ? -1 : 1);
-    q.premultiply(tmpQ.setFromAxisAngle(up, turn * dt));
-    right.set(1, 0, 0).applyQuaternion(q);
-    q.premultiply(tmpQ.setFromAxisAngle(right, -speed * dt / R));
-    q.normalize();
+    if (flight) {
+      flight.t = Math.min(1, flight.t + dt / flight.dur); const k = easeInOut(flight.t);
+      cur.dir.copy(flight.from.dir).lerp(flight.to.dir, k).normalize();
+      // distance on a log scale so the long fall from space doesn't rush the last metres
+      cur.dist = Math.exp(Math.log(flight.from.dist) + (Math.log(flight.to.dist) - Math.log(flight.from.dist)) * k);
+      // the look point travels over the surface (never through the planet), and the camera arcs up mid-flight
+      const la = flight.from.look.length(), lb = flight.to.look.length();
+      if (la > 1 && lb > 1) {
+        const qa = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), flight.from.look.clone().normalize());
+        const qb = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), flight.to.look.clone().normalize());
+        cur.look.set(0, 1, 0).applyQuaternion(qa.slerp(qb, k)).multiplyScalar(la + (lb - la) * k);
+        const span = flight.from.look.clone().normalize().angleTo(flight.to.look.clone().normalize());
+        cur.dist += Math.sin(Math.PI * k) * span * 14; // higher arc for longer trips
+        cur.dir.lerp(cur.look.clone().normalize(), Math.sin(Math.PI * k) * 0.6).normalize();
+      } else cur.look.copy(flight.from.look).lerp(flight.to.look, k);
+      if (flight.t >= 1) flight = null;
+    } else if (!zone && idle > 3 && !reduce) cur.dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), dt * 0.04);
 
-    up.set(0, 1, 0).applyQuaternion(q); fwd.set(0, 0, -1).applyQuaternion(q);
-    const r = groundR(up);
-    zero.root.position.copy(up).multiplyScalar(r + (inWater ? 0.12 * Math.sin(t * 2.2) - 0.25 : 0));
-    // tilt to the slope: sample the ground ahead and to the side
-    const ahead = dir.copy(up).addScaledVector(fwd, 0.06).normalize(), hA = groundR(ahead) - r;
-    const side = new THREE.Vector3().copy(up).addScaledVector(right.set(1, 0, 0).applyQuaternion(q), 0.05).normalize(), hS = groundR(side) - r;
-    zero.root.quaternion.copy(q);
-    zero.body.rotation.z = THREE.MathUtils.lerp(zero.body.rotation.z, Math.atan2(-hS, 1) * 0.9 + (inWater ? 0.05 * Math.sin(t * 1.7) : 0), 0.15);
-    zero.root.rotateX(Math.atan2(hA, 1.2) * 0.9);
-    zero.update(dt, speed, t);
+    const up = tmp.set(0, 1, 0).lerp(cur.look.clone().normalize(), Math.min(1, cur.look.length() / (R + 1.3))).normalize();
+    cam.position.copy(cur.look).addScaledVector(cur.dir, cur.dist); cam.up.copy(up); cam.lookAt(cur.look);
+    sun.position.copy(cam.position).add(new THREE.Vector3(30, 55, 25)); sun.target.position.copy(cur.look);
+    moon.position.set(Math.cos(t * 0.015) * 62, 20, Math.sin(t * 0.015) * 62);
 
-    // Chase camera, following the curvature
-    const want = camPos.copy(zero.root.position).addScaledVector(up, 7.5).addScaledVector(fwd, -12.5);
-    if (first) cam.position.copy(want); else cam.position.lerp(want, 1 - Math.pow(0.002, dt));
-    cam.up.copy(up);
-    camLook.copy(zero.root.position).addScaledVector(up, 0.6).addScaledVector(fwd, 4.5);
-    cam.lookAt(camLook);
-    first = false;
-
-    // Light follows so shadows stay crisp around Zero
-    // The sun travels with you: always morning wherever Zero is (Kurzgesagt never lets a scene go dark)
-    sun.target.position.copy(zero.root.position);
-    sun.position.copy(zero.root.position).addScaledVector(up, 45).addScaledVector(right.set(1, 0, 0).applyQuaternion(q), 22).addScaledVector(fwd, 12);
-
-    planet.water.rotation.y += dt * 0.01;
-    const z = zoneOf(up); const zid = z.d > 0.55 ? z.id : "";
-    if (zid !== zoneNow) { zoneNow = zid; const Z = ZONES.find((x) => x.id === zid); ui.zone.textContent = Z ? Z.name : ""; ui.zone.style.color = Z?.colour ?? ""; ui.zone.classList.toggle("on", !!Z); if (Z) sound.blip(Z.id === "air" ? 990 : Z.id === "water" ? 660 : Z.id === "earth" ? 520 : 780); }
-    sound.setSpeed(speed, input.boost);
+    // the transformation: squash, spin away, sparks, pop in with an overshoot
+    if (swap) {
+      swap.t = Math.min(1, swap.t + dt / 1.1);
+      const { from, to } = swap;
+      if (swap.t < 0.5) {
+        const k = swap.t / 0.5; from.group.scale.set(1 + k * 0.35, Math.max(0.01, 1 - k), 1 + k * 0.35); from.group.rotateY(dt * 10 * k);
+      } else {
+        if (from.group.visible && from !== to) { from.group.visible = false; from.group.scale.setScalar(1); burst(to.group.position, to.group.position.clone().normalize()); sound.chime(); }
+        if (!to.group.visible || form !== to) { to.group.visible = true; form = to; }
+        const k = easeOutBack((swap.t - 0.5) / 0.5); to.group.scale.set(Math.max(0.01, k), Math.max(0.01, k * (1 + 0.15 * Math.sin(swap.t * 20) * (1 - swap.t))), Math.max(0.01, k));
+      }
+      if (swap.t >= 1) { to.group.scale.setScalar(1); swap = null; }
+    }
+    for (const p of sparks) if (p.life > 0) { p.life -= dt * 1.4; p.s.position.addScaledVector(p.v, dt); p.v.multiplyScalar(0.94); (p.s.material as THREE.SpriteMaterial).opacity = Math.max(0, p.life); }
+    if (form) form.update(t, dt);
+    for (const f of Object.values(forms)) if (f.group.visible) (f.beacon.material as THREE.MeshBasicMaterial).color.setHex(Math.sin(t * 4) > 0.2 ? 0xff4f8b : 0x5a1d33);
+    props.update(t);
 
     renderer.render(scene, cam);
-    requestAnimationFrame(frame);
+    requestAnimationFrame(tick);
   }
-  requestAnimationFrame(frame);
-  document.addEventListener("visibilitychange", () => { running = !document.hidden; if (running) { last = performance.now(); requestAnimationFrame(frame); } });
-  if (reduce) speed = 0;
-  return { stop: () => { running = false; renderer.dispose(); } };
+  requestAnimationFrame(tick);
+  document.addEventListener("visibilitychange", () => { running = !document.hidden; if (running) { last = performance.now(); requestAnimationFrame(tick); } });
+
+  return {
+    go, sound,
+    fallIn: () => { cur.dist = 1400; idle = 0; fly({ dir: new THREE.Vector3(0.3, 0.45, 1).normalize(), dist: OVERVIEW, look: new THREE.Vector3() }, 4.2); },
+    onZone: (cb) => listeners.push(cb),
+  };
 }

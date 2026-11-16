@@ -1,71 +1,120 @@
 ---
 /**
- * Home is a tiny planet. Zero, a robot I built, has to learn all four elements.
- * The game loads after the intro; "skip the game" goes straight to everything.
+ * Home: Voyager's last photograph, a fall into the dot, and a tiny planet where ZERO-6
+ * learns the four elements. The world loads while the opening plays.
  */
 import Base from "../layouts/Base.astro";
+import Opening from "../components/game/Opening.astro";
+import { ZONE_INFO } from "../game/zones";
+const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "4" };
 ---
-<Base chrome={false} bodyClass="game" description="A tiny planet, four elements and ZERO-6, a robot that has to learn all of them. Drive it around, or skip the game and see everything I've built.">
+<Base chrome={false} bodyClass="game" description="Voyager's last photograph, a tiny planet, and ZERO-6, a robot that has to learn air, water, earth and fire. Or skip the game and see everything I've built.">
   <main id="main" class="game-shell">
-    <canvas id="world" aria-label="A tiny planet with four zones. Drive ZERO-6 with the arrow keys or WASD."></canvas>
+    <canvas id="world" aria-label="A tiny planet with four zones: air, water, earth and fire. Choose a zone to send ZERO-6 there."></canvas>
 
-    <section class="intro" id="intro" aria-labelledby="intro-h">
-      <p class="els" aria-hidden="true"><span style="--c:#4f8fe0">Water.</span> <span style="--c:#79b35f">Earth.</span> <span style="--c:#e5533d">Fire.</span> <span style="--c:#eaa63b">Air.</span></p>
-      <h1 id="intro-h">Long ago, the four nations lived together in harmony.<br />Then a guy from Dhaka built a robot and asked it to work in all four.</h1>
-      <p class="sub">This is ZERO-6. Everyone calls it Zero, after the number of times it worked first try.</p>
-      <button class="go" id="go" type="button">Drive Zero</button>
-      <p class="keys">Arrow keys or WASD to drive, Shift to hurry. On a phone, use the stick.</p>
-    </section>
+    <div class="title" id="title" aria-live="polite">
+      <p class="els"><span style="--c:#4f8fe0">Water.</span> <span style="--c:#79b35f">Earth.</span> <span style="--c:#e5533d">Fire.</span> <span style="--c:#eaa63b">Air.</span></p>
+      <p class="line">Long ago, the four nations lived together in harmony. Then a guy from Dhaka built a robot and asked it to work in all four.</p>
+      <p class="meet">This is ZERO-6. Everyone calls it Zero.</p>
+    </div>
+
+    <nav class="zones" id="zones" aria-label="Zones">
+      {ZONE_INFO.map((z) => <button type="button" data-zone={z.id} style={`--c:${z.colour}`} aria-keyshortcuts={keys[z.id]}><span class="n">{z.name}</span><span class="bn" lang="bn">{z.bn}</span></button>)}
+      <button type="button" data-zone="" class="all" aria-keyshortcuts="0">The whole planet</button>
+    </nav>
+
+    {ZONE_INFO.map((z) => (
+      <aside class="plate" data-plate={z.id} style={`--c:${z.colour}`} aria-labelledby={`plate-${z.id}`}>
+        <p class="kicker"><span class="bn" lang="bn">{z.bn}</span> {z.name}</p>
+        <h2 id={`plate-${z.id}`}>{z.form}</h2>
+        <p class="pline">{z.line}</p>
+        <dl>{z.specs.map(([k, v]) => <><dt>{k}</dt><dd>{v}</dd></>)}</dl>
+        <p class="real">{z.real} <a href={z.source.href}>{z.source.label}</a></p>
+      </aside>
+    ))}
 
     <div class="hud">
-      <p class="zone" id="zone" aria-live="polite"></p>
-      <button class="snd" id="snd" type="button" aria-pressed="true" aria-label="Sound">Sound</button>
+      <button class="snd" id="snd" type="button" aria-pressed="true">Sound</button>
       <a class="skip-game" href="/everything">Skip the game, show me everything</a>
     </div>
-    <div class="stick" id="stick" aria-hidden="true"><div class="knob"></div></div>
+
+    <Opening />
     <noscript><p class="nojs">The planet needs JavaScript. <a href="/everything">Here is everything without it.</a></p></noscript>
   </main>
 </Base>
 <script>
-  const go = document.getElementById("go");
-  const intro = document.getElementById("intro")!;
-  let started = false;
-  const begin = async () => {
-    if (started) return; started = true;
-    intro.classList.add("gone");
-    const { start } = await import("../game/main");
-    start(document.getElementById("world") as HTMLCanvasElement, {
-      zone: document.getElementById("zone")!,
-      stick: matchMedia("(pointer: coarse)").matches ? document.getElementById("stick") : null,
-      sound: document.getElementById("snd") as HTMLButtonElement,
-    });
+  import { createSound } from "../game/audio";
+  const sfx = createSound(); sfx.scene("space");
+  const worldP = import("../game/main").then((m) => m.start(document.getElementById("world") as HTMLCanvasElement));
+  const opening = document.getElementById("opening")!;
+  const beats = [...opening.querySelectorAll<HTMLElement>(".beat")];
+  const title = document.getElementById("title")!, zonesEl = document.getElementById("zones")!;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let i = -1, timer = 0, done = false;
+
+  const show = (n: number) => {
+    i = n; opening.dataset.beat = String(n);
+    if (n === 3) sfx.shutter(); else if (n > 0) sfx.pluck(520 + n * 40);
+    beats.forEach((b, k) => b.classList.toggle("on", k === n));
+    clearTimeout(timer); timer = window.setTimeout(next, n === 4 ? 6500 : 5200);
   };
-  go?.addEventListener("click", begin);
-  addEventListener("keydown", (e) => { if (!started && (e.key === "Enter" || e.key === " " || e.key.startsWith("Arrow") || /^[wasd]$/i.test(e.key))) begin(); });
+  const finish = async () => {
+    if (done) return; done = true; clearTimeout(timer);
+    opening.classList.add("gone"); setTimeout(() => opening.remove(), 1300);
+    const world = await worldP; world.fallIn();
+    title.classList.add("on");
+    setTimeout(() => { title.classList.remove("on"); zonesEl.classList.add("on"); }, reduce ? 300 : 7000);
+    const buttons = [...zonesEl.querySelectorAll<HTMLButtonElement>("button")];
+    const go = (z: string) => world.go((z || null) as never);
+    buttons.forEach((b) => b.addEventListener("click", () => go(b.dataset.zone ?? "")));
+    const plates = [...document.querySelectorAll<HTMLElement>(".plate")];
+    world.onZone((z) => { buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.zone || null) === z))); title.classList.remove("on"); plates.forEach((p) => p.classList.toggle("on", p.dataset.plate === z)); });
+    addEventListener("keydown", (e) => { const k = "01234".indexOf(e.key); if (k >= 0) go(["", "air", "water", "earth", "fire"][k]); });
+    const snd = document.getElementById("snd")!;
+    snd.setAttribute("aria-pressed", String(world.sound.on()));
+    snd.addEventListener("click", () => snd.setAttribute("aria-pressed", String(world.sound.toggle())));
+  };
+  const next = () => (i < beats.length - 1 ? show(i + 1) : finish());
+  document.getElementById("op-next")?.addEventListener("click", next);
+  document.getElementById("op-skip")?.addEventListener("click", finish);
+  opening.addEventListener("click", (e) => { if (!(e.target as HTMLElement).closest("button")) next(); });
+  addEventListener("keydown", (e) => { if (done) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); next(); } if (e.key === "Escape") finish(); });
+  if (sessionStorage.getItem("seen-opening")) finish(); else { sessionStorage.setItem("seen-opening", "1"); show(0); }
 </script>
 <style>
   :global(body.game) { overflow: hidden; background: #0b1233; }
   .game-shell { position: fixed; inset: 0; }
-  #world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  .intro { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: 1.2rem; padding: 2rem; text-align: center; background: radial-gradient(circle at 50% 45%, #18205a 0%, #0b1233 70%); transition: opacity .8s ease, visibility .8s; }
-  .intro.gone { opacity: 0; visibility: hidden; }
-  .els { margin: 0; font: 500 var(--t3) var(--sans); display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+  #world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .game-shell::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgb(5 8 30 / .55) 100%); }
+  .title { position: absolute; z-index: 3; left: clamp(1.4rem, 5vw, 4rem); bottom: 7.5rem; width: min(30rem, 86vw); opacity: 0; transform: translateY(10px); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; font-family: var(--story); }
+  .title:global(.on) { opacity: 1; transform: none; }
+  .els { margin: 0 0 .7rem; font: 800 var(--t3) var(--story); display: flex; gap: .9rem; flex-wrap: wrap; letter-spacing: .01em; }
   .els span { color: var(--c); }
-  .intro h1 { font: 500 var(--t3)/1.3 var(--sans); max-width: 34ch; margin: .4rem 0 0; color: #fff; }
-  .sub { color: #c9d3ff; max-width: 46ch; margin: 0; }
-  .go { margin-top: .6rem; font: 500 var(--t1) var(--sans); color: #0b1233; background: #ffd15c; border: 0; border-radius: 999px; padding: .75rem 1.6rem; cursor: pointer; box-shadow: 0 6px 0 #c9971f; transition: transform .1s, box-shadow .1s; }
-  .go:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9971f; }
-  .keys { color: #8f9bd0; font-size: var(--t-1); margin: 0; }
-  .hud { position: absolute; z-index: 2; inset: 1rem 1.2rem auto; display: flex; align-items: center; gap: 1rem; pointer-events: none; }
-  .hud > * { pointer-events: auto; }
-  .zone { margin: 0 auto 0 0; font: 500 var(--t2) var(--sans); color: #fff; opacity: 0; transition: opacity .4s; text-shadow: 0 2px 0 rgb(0 0 0 / .25); }
-  .zone:global(.on) { opacity: 1; }
-  .snd { font: 500 var(--t-1) var(--sans); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: 999px; padding: .45rem .9rem; cursor: pointer; }
+  .line { font: 600 var(--t1)/1.5 var(--story); color: #fff; margin: 0 0 .6rem; text-shadow: 0 2px 14px #0b1233; }
+  .meet { font: 500 var(--t0) var(--story); color: #c9d3ff; margin: 0; }
+  .zones { position: absolute; z-index: 3; left: 50%; bottom: 1.6rem; transform: translate(-50%, 20px); display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; opacity: 0; transition: opacity .8s ease, transform .8s ease; pointer-events: none; }
+  .zones:global(.on) { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .zones button { display: grid; justify-items: center; gap: .05rem; min-width: 5.6rem; padding: .55rem .9rem .5rem; border: 0; border-radius: 1rem; background: rgb(255 255 255 / .1); color: #fff; cursor: pointer; font: 700 var(--t0) var(--story); transition: background .25s, transform .25s cubic-bezier(.2,.8,.3,1.3); backdrop-filter: blur(6px); }
+  .zones button .bn { font: 400 var(--t-2) var(--bangla); color: var(--c); opacity: .85; }
+  .zones button:hover { background: rgb(255 255 255 / .18); transform: translateY(-2px); }
+  .zones button[aria-pressed="true"] { background: var(--c); color: #0b1233; }
+  .zones button[aria-pressed="true"] .bn { color: #0b1233; }
+  .zones .all { align-self: stretch; color: #c9d3ff; font-size: var(--t-1); }
+  .hud { position: absolute; z-index: 4; top: 1rem; right: 1.2rem; display: flex; gap: .6rem; }
+  .snd { font: 700 var(--t-1) var(--story); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: 999px; padding: .45rem .9rem; cursor: pointer; }
   .snd[aria-pressed="false"] { text-decoration: line-through; opacity: .7; }
-  .skip-game { font: 500 var(--t-1) var(--sans); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .9rem; text-decoration: none; }
-  .stick { display: none; position: absolute; z-index: 2; left: 1.4rem; bottom: 1.6rem; width: 120px; height: 120px; border-radius: 50%; background: rgb(255 255 255 / .12); touch-action: none; }
-  .knob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: rgb(255 255 255 / .55); }
-  @media (pointer: coarse) { .stick { display: block; } }
-  .nojs { position: absolute; inset: auto 1rem 1rem; z-index: 4; color: #fff; }
-  @media (max-width: 700px) { .hud { flex-wrap: wrap; } .skip-game { order: 3; } }
+  .skip-game { font: 700 var(--t-1) var(--story); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .9rem; text-decoration: none; }
+  .plate { position: absolute; z-index: 3; right: clamp(1rem, 3vw, 2.4rem); top: 50%; width: min(24rem, 88vw); transform: translate(24px, -50%); opacity: 0; pointer-events: none; padding: 1.2rem 1.3rem 1.1rem; border-radius: 1.2rem; background: rgb(9 14 44 / .78); backdrop-filter: blur(10px); color: #e9edff; font-family: var(--story); transition: opacity .6s ease .5s, transform .6s cubic-bezier(.2,.8,.3,1) .5s; }
+  .plate:global(.on) { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+  .plate .kicker { margin: 0 0 .2rem; font: 800 var(--t-1) var(--story); color: var(--c); }
+  .plate .bn { font-family: var(--bangla); font-weight: 400; }
+  .plate h2 { font: 800 var(--t3)/1.15 var(--story); color: #fff; margin: 0 0 .6rem; }
+  .pline { font: 500 var(--t0)/1.5 var(--story); color: #d5dcff; margin: 0 0 .9rem; }
+  .plate dl { display: grid; grid-template-columns: auto 1fr; gap: .3rem .9rem; margin: 0 0 .9rem; padding: .7rem .8rem; border-radius: .7rem; background: rgb(255 255 255 / .06); }
+  .plate dt { font: 600 var(--t-2) var(--story); color: #9aa6d8; }
+  .plate dd { margin: 0; font: 400 var(--t-1) var(--mono); color: #fff; font-variant-numeric: tabular-nums; }
+  .real { font: 500 var(--t-2)/1.5 var(--story); color: #9aa6d8; margin: 0; }
+  .real a { color: #fff; }
+  @media (max-width: 760px) { .plate { top: auto; bottom: 6.5rem; transform: translate(0, 20px); max-height: 46svh; overflow: auto; } .plate:global(.on) { transform: none; } }
+  .nojs { position: absolute; inset: auto 1rem 1rem; z-index: 12; color: #fff; }
 </style>

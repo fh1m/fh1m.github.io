@@ -4,6 +4,8 @@
  * sits on what you see.
  */
 import * as THREE from "three";
+import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { toonRamp } from "./forms";
 
 export const R = 20;                 // planet radius
 export const WATER = R - 0.55;       // water level (radius)
@@ -44,7 +46,7 @@ export function zoneOf(dir: THREE.Vector3): { id: ZoneId; d: number } {
 /** Height above R for a unit direction. */
 export function height(dir: THREE.Vector3) {
   const x = dir.x, y = dir.y, z = dir.z;
-  let h = 0.55 * noise(x * 2.3 + 11, y * 2.3, z * 2.3) + 0.22 * noise(x * 5.1, y * 5.1 + 7, z * 5.1);
+  let h = 0.38 * noise(x * 2.1 + 11, y * 2.1, z * 2.1) + 0.1 * noise(x * 4.6, y * 4.6 + 7, z * 4.6); // calm, readable shapes
   const a = dir.dot(ZONES[0].c), w = dir.dot(ZONES[1].c), e = dir.dot(ZONES[2].c), f = dir.dot(ZONES[3].c);
   h += 1.1 * sstep(0.78, 0.9, a) - 0.25 * sstep(0.9, 0.97, a) * 0;            // the sky plateau, flat on top
   if (a > 0.9) h = 1.1 + 0.05 * noise(x * 9, y * 9, z * 9);
@@ -65,31 +67,27 @@ const COL = {
 };
 
 export function buildPlanet() {
-  const geo = new THREE.IcosahedronGeometry(1, 28).toNonIndexed();
+  let geo: THREE.BufferGeometry = new THREE.IcosahedronGeometry(1, 40);
+  geo.deleteAttribute("normal"); geo.deleteAttribute("uv");
+  geo = mergeVertices(geo);
   const pos = geo.getAttribute("position") as THREE.BufferAttribute;
   const colours = new Float32Array(pos.count * 3);
   const v = new THREE.Vector3(), c = new THREE.Color();
-  // displace
-  for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).normalize(); const r = R + height(v); pos.setXYZ(i, v.x * r, v.y * r, v.z * r); }
-  // colour per face (flat shading look)
-  const a = new THREE.Vector3(), b = new THREE.Vector3(), d = new THREE.Vector3();
-  for (let i = 0; i < pos.count; i += 3) {
-    a.fromBufferAttribute(pos, i); b.fromBufferAttribute(pos, i + 1); d.fromBufferAttribute(pos, i + 2);
-    const m = a.clone().add(b).add(d).divideScalar(3); const r = m.length(); const dir = m.normalize();
-    const z = zoneOf(dir); const hh = r - R;
-    if (r < WATER + 0.12) c.copy(hh < -1.2 ? COL.seabed : COL.sand);
-    else if (z.id === "air" && z.d > 0.78) c.copy(z.d > 0.9 ? COL.skyTop : COL.sky);
-    else if (z.id === "earth" && z.d > 0.5) c.copy(hh > 1.3 ? COL.rock : COL.moss);
-    else if (z.id === "fire" && z.d > 0.55) c.copy(noise(dir.x * 30, dir.y * 30, dir.z * 30) > 0 ? COL.silicon : COL.siliconHi);
-    else c.copy(noise(dir.x * 8, dir.y * 8, dir.z * 8) > 0 ? COL.grass : COL.grass2);
-    for (let k = 0; k < 3; k++) colours.set([c.r, c.g, c.b], (i + k) * 3);
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).normalize(); const r = R + height(v);
+    const z = zoneOf(v), hh = r - R;
+    if (r < WATER + 0.1) c.copy(hh < -1.1 ? COL.seabed : COL.sand);
+    else if (z.id === "air" && z.d > 0.8) c.copy(z.d > 0.9 ? COL.skyTop : COL.sky);
+    else if (z.id === "earth" && z.d > 0.52) c.copy(hh > 1.25 ? COL.rock : COL.moss);
+    else if (z.id === "fire" && z.d > 0.56) c.copy(noise(v.x * 26, v.y * 26, v.z * 26) > 0 ? COL.silicon : COL.siliconHi);
+    else c.copy(noise(v.x * 6, v.y * 6, v.z * 6) > 0.1 ? COL.grass : COL.grass2);
+    colours.set([c.r, c.g, c.b], i * 3);
+    pos.setXYZ(i, v.x * r, v.y * r, v.z * r);
   }
   geo.setAttribute("color", new THREE.BufferAttribute(colours, 3));
   geo.computeVertexNormals();
-  const ground = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }));
-
-  const water = new THREE.Mesh(new THREE.IcosahedronGeometry(WATER, 12), new THREE.MeshPhongMaterial({ color: "#3d8fe6", flatShading: true, transparent: true, opacity: 0.82, shininess: 80, specular: "#bfe0ff" }));
-
+  const ground = new THREE.Mesh(geo, new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonRamp() }));
+  const water = new THREE.Mesh(new THREE.SphereGeometry(WATER, 96, 64), new THREE.MeshToonMaterial({ color: "#3f8fe8", gradientMap: toonRamp(), transparent: true, opacity: 0.86 }));
   const group = new THREE.Group(); group.add(ground, water);
   return { group, water };
 }
