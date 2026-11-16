@@ -14,6 +14,7 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
 ---
 <Base chrome={false} bodyClass="game" description="Voyager's last photograph, a tiny planet, and Bunnu, my cat, flying one machine through air, water, earth and fire. Or skip the game and see everything I've built.">
   <main id="main" class="game-shell">
+    <img class="poster-img" src="/world/poster.webp" alt="The planet from orbit: a sandy airfield cap under clouds at the top, green land with a brown patch of earth, a blue sea along one side, and small landmarks around the rim. Every place on it can be opened from the buttons below." width="1600" height="1000" />
     <canvas id="world" aria-label="A tiny planet with four zones: air, water, earth and fire. Choose a zone to send Bunnu there, or click anything on the planet."></canvas>
 
     <div class="title" id="title" aria-live="polite">
@@ -67,8 +68,12 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
 <script>
   import { createSound } from "../game/audio";
   import { MISSIONS } from "../game/missions";
+  import { startPoster, wantsPoster } from "../game/poster";
   const sfx = createSound(); sfx.scene("space");
-  const worldP = import("../game/main").then((m) => m.start(document.getElementById("world") as HTMLCanvasElement));
+  // the 3D planet, or (reduced motion, low-end, no WebGL2, ?poster) a still of it with the same UI on top
+  const poster = wantsPoster();
+  if (poster) document.getElementById("main")!.classList.add("poster");
+  const worldP = poster ? Promise.resolve(startPoster()) : import("../game/main").then((m) => m.start(document.getElementById("world") as HTMLCanvasElement));
   const opening = document.getElementById("opening")!;
   const beats = [...opening.querySelectorAll<HTMLElement>(".beat")];
   const title = document.getElementById("title")!, zonesEl = document.getElementById("zones")!;
@@ -115,6 +120,7 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
     markDone();
     const ORDER: Record<string, number[]> = { air: [0, 2, 1], water: [1, 2, 0], earth: [2, 0, 1], fire: [0, 2, 1] };
     function run(zone: string) {
+      greeted = true; clearTimeout(greet);
       const m = MISSIONS.find((x) => x.zone === zone)!;
       plates.forEach((p) => p.classList.remove("on")); panels.forEach((p) => p.classList.remove("on"));
       world.setMode("idle"); speak(m.setup);
@@ -137,8 +143,9 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
       }
     }
     document.querySelectorAll<HTMLButtonElement>("[data-mission]").forEach((b) => b.addEventListener("click", () => run(b.dataset.mission!)));
-    world.onZone((z) => { world.setMode("idle"); if (z) { bw.classList.remove("on"); } });
-    setTimeout(() => { speak("Hi. I'm Bunnu. He built all of this; I supervised. Pick a world. I'd start with air, that's where he started."); acts.replaceChildren(el("button", { type: "button", className: "primary", textContent: "Take me to air", onclick: () => { world.go("air" as never); } })); }, reduce ? 400 : 7600);
+    world.onZone((z) => { world.setMode("idle"); if (z) { greeted = true; bw.classList.remove("on"); } });
+    let greeted = false;
+    const greet = window.setTimeout(() => { if (greeted) return; speak("Hi. I'm Bunnu. He built all of this; I supervised. Pick a world. I'd start with air, that's where he started."); acts.replaceChildren(el("button", { type: "button", className: "primary", textContent: "Take me to air", onclick: () => { world.go("air" as never); } })); }, reduce ? 400 : 7600);
 
     // the time machine
     const tmRange = document.getElementById("tm-year") as HTMLInputElement | null, tmAge = document.getElementById("tm-age")!;
@@ -201,6 +208,9 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
   .real { font: 500 var(--t-2)/1.5 var(--story); color: #9aa6d8; margin: 0; }
   .real a { color: #fff; }
   @media (max-width: 760px) { .plate { top: auto; bottom: 6.5rem; transform: translate(0, 20px); max-height: 46svh; overflow: auto; } .plate:global(.on) { transform: none; } }
+  .poster-img { display: none; }
+  .poster .poster-img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .poster #world { display: none; }
   .mission-row { display: flex; align-items: center; gap: .6rem; margin: .9rem 0 0; }
   .start { font: 800 var(--t-1) var(--story); color: #0b1233; background: var(--c); border: 0; border-radius: 999px; padding: .55rem 1.1rem; cursor: pointer; box-shadow: 0 4px 0 rgb(0 0 0 / .25); transition: transform .12s; }
   .start:active { transform: translateY(3px); box-shadow: 0 1px 0 rgb(0 0 0 / .25); }
