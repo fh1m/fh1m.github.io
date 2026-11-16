@@ -1,45 +1,53 @@
 ---
-title: "Why radar doesn't work underwater, and what that forces"
-dek: "Salt water eats radio in centimetres. No radio means no GPS, no radar and no link home once submerged. Every design choice downstream is a consequence."
-date: "2026-08"
+title: "No radio below the surface"
+dek: "Salt water eats radio within centimetres. No GPS, no radar, no link home, no joystick. Almost every design decision in an underwater vehicle is a consequence of this one fact."
+date: "2026-11"
 series: water
 part: 1
 kind: essay
 hero: /media/mongla-docs/pool-glide.webp
 heroAlt: "An underwater vehicle gliding over a pool floor, seen from above"
 sources:
-  - { label: "Skin depth (δ ≈ 503·√(ρ/f) m), any EM textbook; seawater ρ ≈ 0.25 Ω·m", href: "https://en.wikipedia.org/wiki/Skin_effect" }
-  - { label: "The Mongla site: the medium", href: "https://fh1m.github.io/mongla_ws/" }
+  - { label: "Debye relaxation of water (Kaatze 1989): εs 78.4, ε∞ 5.2, τ 8.27 ps at 25 °C", href: "https://doi.org/10.1021/je00056a039" }
+  - { label: "Skin depth, the textbook form δ ≈ 503·√(ρ/f)", href: "https://en.wikipedia.org/wiki/Skin_effect" }
+  - { label: "The Mongla site: everything down here fights you", href: "https://fh1m.github.io/mongla_ws/" }
 ---
 import Fig from "../../components/note/Fig.astro";
-import Bars from "../../components/note/Bars.astro";
+import Explore from "../../components/note/Explore.astro";
 import Pull from "../../components/note/Pull.astro";
 
-Underwater there's no radio, no GPS, and no second chance to explain yourself. This one physical fact writes most of an underwater vehicle's architecture for you.
+Start with the thing you lose. On land, a robot that doesn't know where it is asks the sky: four satellites, a few nanoseconds of timing, and it knows its position to a few metres. If it gets confused, someone on a laptop can see its telemetry and take the controls.
 
-Seawater conducts. A radio wave entering a conductor induces currents that eat its energy, and it decays exponentially with depth. The distance over which it falls to about 37 % is the *skin depth*, and it shrinks with frequency.
+Put the same robot one hand's width under the sea and every one of those options disappears. Not because the electronics fail. Because the water is a conductor.
 
-<Bars title="skin depth in seawater (σ ≈ 4 S/m), by frequency" unit=" m" log rows={[
-  { label: "ELF, 100 Hz", v: 25.15, tone: "medium" },
-  { label: "VLF, 10 kHz", v: 2.515, tone: "medium" },
-  { label: "AM band, 1 MHz", v: 0.2515, tone: "estimate" },
-  { label: "FM band, 100 MHz", v: 0.02515, tone: "failure" },
-  { label: "GPS L1, 1.575 GHz", v: 0.00634, tone: "failure" },
-  { label: "Wi-Fi, 2.4 GHz", v: 0.00513, tone: "failure" },
-]} src="Computed from δ ≈ 503·√(ρ/f) with ρ = 0.25 Ω·m. Log scale. GPS loses most of itself in the first six millimetres." />
+## Why a conductor eats radio
 
-That's why submarines talk at very low frequencies through kilometre-long antennas, and why a student vehicle the size of a suitcase gets nothing at all. GPS is off the table a hand's width under the surface. So is radar, so is a telemetry link, so is a human with a joystick.
+A radio wave is an electric field and a magnetic field chasing each other through space. In a vacuum nothing resists them. In salt water the electric field pushes on dissolved ions, the ions move, moving charge is a current, and the current turns the wave's energy into heat. The wave doesn't bounce off: it's absorbed, exponentially, a fixed fraction per metre.
+
+How big a fraction depends on two things: how well the water conducts, and how fast the field is wiggling. Faster wiggles do more damage per metre. Drag the frequency and the water type below and watch where the signal dies.
+
+<Explore id="radio" n="fig 1" title="How far radio gets into water" hint="drag the numbers in the sentence" caption="A plane wave in a lossy dielectric, using a Debye model of water. It ignores the reflection at the surface and the antennas, and both only make things worse. The receiver threshold assumes a signal that arrives at the surface as strong as GPS does." />
+
+The numbers it produces aren't close calls. GPS at 1.575 GHz in seawater is gone within about five centimetres: the water takes roughly 8 dB every centimetre, and a good receiver only has 38.5 dB to spare. Even the very low frequencies navies use to reach submarines, tens of kilohertz from antennas kilometres long, only reach a few tens of metres down. A suitcase-sized student vehicle gets nothing at all.
+
+Fresh water is kinder (a pool conducts hundreds of times less than the sea), which is why a vehicle tethered in a pool can feel like it has a link. Switch the explorable to the pool and you'll see why that feeling doesn't survive the trip to open water.
 
 ## What it forces
 
-If you can't get a position fix from the sky, you estimate it from the inside: dead reckoning on an IMU, corrected by whatever you can measure locally. Depth from pressure. Velocity from a [camera pointed at the floor](/notes/turning-a-camera-into-a-sensor). Heading from the attitude estimator. If you can't stream telemetry home, the vehicle has to be right on its own, and has to log enough to explain itself afterwards.
+Take away the sky, the link and the human, and the design writes itself:
 
-<Fig src="/media/mongla-docs/pool-top.webp" alt="An underwater vehicle in a pool seen from above, a tether trailing" caption="From the surface, everything looks reachable. A few millimetres down, the radio disagrees." />
+- **Position has to come from the inside.** An IMU integrates acceleration into velocity and velocity into position, and it drifts, because integrating noise accumulates it. So everything local that can be measured gets fused in to pull it back: depth from pressure, [velocity from a camera pointed at the floor](/notes/turning-a-camera-into-a-sensor), heading from the attitude estimator, and occasional fixes from recognising something.
+- **The vehicle has to be right on its own.** There's no one to notice it's confused, so it must notice itself, and say so in its logs.
+- **The reflexes can't depend on the thinking.** If the computer that runs the neural network stalls, the loop that holds depth must not. That's why [Mongla](/notes/mongla) keeps its 500 Hz control loop on a separate board.
 
-Sound travels well underwater, which is why sonar and acoustic modems exist. But sound is slow (about 1.5 km/s) and its bandwidth is narrow. It's a way to whisper, not a way to steer.
+<Fig src="/media/mongla-docs/pool-top.webp" alt="An underwater vehicle in a pool seen from above, with a tether trailing to the deck" caption="From the deck everything looks reachable. A few millimetres down, the radio disagrees." />
 
-<Fig src="/media/lab/sonar-ping360.webp" alt="A scanning sonar polar view and its intensity heatmap" caption="A scanning sonar: seeing with sound where light and radio give up." contain />
+## What does get through
+
+Sound. Water carries it beautifully: about 1,500 m/s, four times faster than in air, over kilometres. That's why acoustic modems and sonar exist. But sound is slow next to light and its bandwidth is narrow, so it's a way to whisper a few bytes, not a way to steer. And blue-green light travels tens of metres in clear water, which is why the next part of this series is about what water does to light.
 
 <Pull>A vehicle either understood what it was looking at, or it didn't, and it won't tell you which.</Pull>
 
-That's why the interesting engineering isn't the happy path. It's what the vehicle does when it *can't* do something. On a well-built stack the answer is never a silent workaround that keeps the demo running. It's a loud refusal and a written reason, because nobody is going to be on the radio to ask.
+So the interesting engineering isn't the happy path. It's what the vehicle does when it *can't* do something, with nobody on the radio to ask. On a well-built stack the answer is never a silent workaround that keeps the demo running. It's a loud refusal and a written reason.
+
+Next: [Green, at depth](/notes/green-at-depth), where the water stops being a wall for radio and becomes a filter for light.

@@ -119,6 +119,7 @@ const bnDigit = (n: number) => String(n).split("").map((d) => "০১২৩৪�
   :global(body.world-ready) #world { opacity: 1; }
   .hero::before { content: ""; position: absolute; inset: 0; z-index: -2; background: radial-gradient(60% 50% at 70% 40%, #2a0617 0%, transparent 70%), radial-gradient(50% 40% at 20% 85%, #00242b 0%, transparent 70%), #000; }
   .hero-copy { position: relative; z-index: 2; pointer-events: none; }
+  .hero-copy::before { content: ""; position: absolute; inset: -12% -18% -12% -30%; z-index: -1; background: radial-gradient(closest-side, rgb(0 0 0 / .78), rgb(0 0 0 / .45) 60%, transparent); pointer-events: none; }
   .hero-copy a, .hero-copy p { pointer-events: auto; }
   .kick { display: flex; gap: 0.8rem; align-items: baseline; margin-bottom: 1.4rem; }
   .kick .pixel { color: var(--pink); font-size: 1.1rem; }

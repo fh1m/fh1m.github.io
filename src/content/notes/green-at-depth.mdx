@@ -15,6 +15,7 @@ sources:
 import Fig from "../../components/note/Fig.astro";
 import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
+import Explore from "../../components/note/Explore.astro";
 
 November 2023. I had just joined an underwater robotics team, and the vehicle had to follow green arrows. So I wrote forty lines of OpenCV that asked every pixel one question: *is your hue between 50 and 70?*
 
@@ -35,7 +36,11 @@ I = J · e^(−k·d)  +  B · (1 − e^(−k·d))
 
 `J` is the object's real colour, `B` the veiling light, `d` the metres of water between lens and object, `k` a per-channel attenuation. I used pure-water absorption from Pope & Fry (1997), scaled by four to stand in for a real pool. That scale is a knob, not a measurement, and the note says so wherever the number appears.
 
-You can sink the card yourself in the [water arena](/#water). The bench there runs the same model and the same 2023 threshold, live.
+Sink it yourself. The card below goes through the same model, and the 2023 threshold judges it live. The dots on the curve are not the model: they're **real**, the mean red-to-green ratio over 119 frames of the team's own 2025 footage, per venue.
+
+<Explore id="colour" n="fig 1" title="What water does to colour" hint="drag the depth" caption="Beer–Lambert per channel with veiling light, k = pure-water absorption ×4. Venue dots are measured (mongla_ws <code>tools/studies/colour_loss.py</code>, 119 frames); where a dot lands on the model curve is an inference, as if the camera had done nothing to the colour, and is labelled so." />
+
+Read the venues against the curve and something odd shows up: the final-run footage comes back almost colour-neutral. That doesn't mean the water there was kinder. It means the camera, or its white balance, was set differently. Two venues, two answers, from the same pipeline, which is why a colour number has to be measured per venue instead of quoted once.
 
 ## Sinking the card
 

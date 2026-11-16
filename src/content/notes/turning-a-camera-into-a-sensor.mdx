@@ -1,67 +1,65 @@
 ---
-title: "Turning a camera into a velocity sensor"
-dek: "No DVL, no GPS. A downward camera and the floor can tell you how fast you're moving, if you trust the geometry more than the number."
-date: "2026-09"
+title: "The floor is a speedometer"
+dek: "No DVL, no GPS. A downward camera can measure speed over ground if you know one number. Getting there took three instrument bugs, all making the same mistake."
+date: "2026-11"
 series: water
-part: 4
+part: 5
 kind: essay
 repo: mongla_ws
 hero: /media/mongla/flow-lab.webp
-heroAlt: "The interactive velocity-from-the-floor panel on the Mongla site"
+heroAlt: "The Mongla site's optical-flow explainer: floor dots and height and speed sliders"
 sources:
-  - { label: "The Mongla site: a camera pointed at the floor", href: "https://fh1m.github.io/mongla_ws/" }
+  - { label: "measured-bars.md §13: the bottom camera as a DVL", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/measured-bars.md" }
+  - { label: "Raw slides: flow_runs_2026-09-07.json", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/perception/flow_runs_2026-09-07.json" }
+  - { label: "Ferrera et al. (2019), real-time monocular VO in turbid water", href: "https://doi.org/10.3390/s19030687" }
 ---
 import Fig from "../../components/note/Fig.astro";
-import Bars from "../../components/note/Bars.astro";
+import Explore from "../../components/note/Explore.astro";
 import Pull from "../../components/note/Pull.astro";
 
-A Doppler velocity log is the obvious way to measure an underwater vehicle's speed over the ground. It's also expensive, and we didn't have one. So the question became: what do we already have that can measure motion?
+A Doppler velocity log bounces sound off the seabed and reads your speed over ground from the echo's frequency shift. It's the instrument underwater navigation is built on, and it costs more than everything else on a student vehicle put together. Mongla doesn't have one.
 
-The downward camera. If you know the height above the floor and the camera's focal length, then optical flow (how far the floor's texture slides between two frames) *is* a velocity:
+What it does have is a camera pointed at the floor. When the vehicle moves, the floor slides across the image. The question is how to turn pixels per second into metres per second.
 
-<figure class="wide">
-<svg viewBox="0 0 900 220" role="img" aria-labelledby="flow-t">
-  <title id="flow-t">A camera at height h looks down at the floor. A floor feature moving distance d appears to move p pixels. Speed equals pixel motion times height divided by focal length in pixels, per frame interval.</title>
-  <style>{`.t{font:14px var(--mono);fill:var(--dim)}.m{font:16px var(--mono);fill:var(--chalk)}`}</style>
-  <rect x="120" y="20" width="60" height="30" rx="3" fill="none" stroke="var(--chalk)" />
-  <line x1="150" y1="50" x2="60" y2="190" stroke="var(--measured)" stroke-dasharray="4 4" />
-  <line x1="150" y1="50" x2="240" y2="190" stroke="var(--measured)" stroke-dasharray="4 4" />
-  <line x1="20" y1="190" x2="300" y2="190" stroke="var(--dim)" />
-  <line x1="150" y1="50" x2="150" y2="190" stroke="var(--estimate)" /><text x="158" y="128" class="t">h</text>
-  <circle cx="110" cy="190" r="5" fill="var(--failure)" /><circle cx="180" cy="190" r="5" fill="none" stroke="var(--failure)" />
-  <text x="120" y="212" class="t">d</text>
-  <text x="380" y="90" class="m">v ≈ (p / f) · h / Δt</text>
-  <text x="380" y="124" class="t">p  pixels the floor moved      f  focal length, px</text>
-  <text x="380" y="148" class="t">h  height above the floor      Δt frame interval</text>
-  <text x="380" y="182" class="t">Get h wrong by 20 % and every speed is wrong by 20 %, forever.</text>
-</svg>
-<figcaption>The whole sensor is one ratio. The trap is that every term in it can lie plausibly.</figcaption>
-</figure>
+## One ratio
 
-The geometry is simple. Height is the term that ruins you: twice as high, half the pixel motion for the same speed. Get it wrong and every velocity, and every metre of dead reckoning built on it, is wrong by the same factor in the same direction.
+A floor feature directly below the camera, at height *h*, moving at speed *v*, slides across the sensor at <code>v · f / h</code> pixels per second, where *f* is the focal length in pixels. Turn it around and pixel motion is a speed, as long as you know *h*.
 
-## The verification that actually worked
+That's the whole sensor. Notice what it hides: *h* appears as a ratio, so an error in height becomes the same percentage error in every speed, in the same direction, forever. Drag the numbers and watch the dead-reckoning drift that a small height error buys:
 
-Three real 30 cm slides on a bench rig, downward camera at 0.72 m, focal length 513.94 px. The honest column is the last one: the height each measurement *implies*, recovered from the slide it got wrong.
+<Explore id="floor" n="fig 1" title="A camera pointed at the floor" hint="drag the numbers" caption="f = 513.94 px, the downward camera at the flow resolution. The slides at the bottom are the real bench runs from the raw file, all four of them." />
 
-| slide | measured | error | implied height |
+## Checking it against a tape
+
+On 7 September 2026 the downward camera went on a bench rig at 0.72 m above the floor (by tape), and was slid 30 cm by hand along each axis.
+
+| slide | measured | error | height it implies |
 |---|---:|---:|---:|
-| lateral 30 cm | 30.13 cm | +0.13 | 0.72 m |
-| forward 30 cm | 31.09 cm | +1.09 | 0.69 m |
-| back 30 cm | 31.04 cm | +1.04 | 0.70 m |
-| tape says | — | — | **0.72 m** |
+| lateral | 30.13 cm | +0.13 | 0.72 m |
+| forward | 31.09 cm | +1.09 | 0.69 m |
+| back | 31.04 cm | +1.04 | 0.70 m |
+| **tape** | — | — | **0.72 m** |
 
-<Bars title="height implied by each slide, against the tape" unit=" m" max={0.8} rows={[
-  { label: "tape measure", v: 0.72, tone: "dim" },
-  { label: "lateral slide", v: 0.72, tone: "measured" },
-  { label: "forward slide", v: 0.69, tone: "measured" },
-  { label: "back slide", v: 0.70, tone: "measured" },
-]} src="The scale chain closes on itself. That's the only reason to believe the speed at all." />
+Worst error 1.09 cm on 30 cm, 3.6 %. The raw file holds a fourth run, a deliberately diagonal slide that read 42.53 cm at −171.8°: not a 30 cm test, but a check that the angle comes out right, and it did. The strongest result is the last column: each slide recovers the tape's height to within 3 cm, so the scale chain closes on itself.
 
-Worst error: 1.09 cm on 30 cm, about 3.6 %. That's several times worse than even a cheap DVL's quoted ~1 %, and the same order as published monocular visual odometry in turbid water. It was measured in air, on a hand slide whose own precision is about ±1 cm, so it's an upper bound on the error, not a measurement of it. The page says so.
+For scale: a commercial DVL's bottom track is quoted at 0.5–1 %, and published monocular visual odometry in real turbid water at 0.89–1.88 %. This was in air, on a hand slide whose own precision is about ±1 cm, so it's an upper bound on the sensor's error, not a measurement of it.
 
-<Pull>A number with no bar can't be wrong, so it never gets checked. It just gets quoted, and eventually shipped.</Pull>
+## Three bugs, one mistake
 
-What makes this trustworthy isn't that the estimator agreed with another estimator; that only measures agreement. It's that the truth was known: a tape on the floor, a slide of fixed length. Construct the case where you already know the answer, then see if the machine finds it.
+Before those numbers, the capture tool reported a correct sensor as *short* three times in a row. The live trace showed the slide tracked correctly each time; the capture threw the measurement away.
 
-<Fig src="/media/mongla-docs/pool-glide.webp" alt="An underwater vehicle gliding over tiled pool floor" caption="A tiled pool floor is a gift to optical flow: texture everywhere, and a known geometry. A sandy lake bed is not." />
+1. **The end-of-move check lived inside `if v.ok:`.** A move ends with the rig stopping, a stopped rig produces refusals, so the stillness that defines the end was exactly when the check was skipped. Traced 29.89 cm, logged nothing.
+2. **The capture started at first motion**, dropping the slow start and stop. Traced 30.3 and 30.5 cm; scored 19.6, 26.3 and 21.6.
+3. **Stillness was judged on instantaneous velocity**, and a refused interval read as zero speed, so a burst of refusals mid-slide looked like stopping. Traced 24.9 and 30.0 cm; scored 12.1 and 8.5.
+
+<Pull>All three were the same mistake in different clothes: treating "I could not measure" as "it did not move."</Pull>
+
+The fix that ended it wasn't a better heuristic. It was a button. The operator knows when they stopped, and no window short enough to be responsive can tell a slow hand from a still rig.
+
+## What it still isn't
+
+Every number above was taken in air. Through water the focal length changes (measured: 741 px against 513.94 in air, a ratio of 1.44; see [the flat port](/notes/one-lens-two-fields-of-view) for why water changes it at all), and the rectified water path has produced no measured velocity yet. The project calls it verified as arithmetic, not as a sensor, and keeps that line in the ledger until a slide runs through it.
+
+<Fig src="/media/mongla-docs/pool-glide.webp" alt="An underwater vehicle over a tiled pool floor" caption="A tiled pool floor is a gift to optical flow: texture everywhere. A sandy lake bed isn't." />
+
+Next in the series, from the other end of the problem: [why radio can't help](/notes/why-radar-doesnt-work-underwater) closes the loop on why this camera had to become a sensor at all. Or move on to [Time](/notes#time), where every one of these measurements turns out to arrive late.

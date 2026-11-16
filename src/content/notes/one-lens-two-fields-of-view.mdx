@@ -1,0 +1,55 @@
+---
+title: "One lens, two fields of view"
+dek: "A camera calibrated in air sees less of the world in water, and the loss isn't even uniform. On Mongla it made a gate 4 m away read as 5.15 m."
+date: "2026-11"
+series: water
+part: 3
+kind: essay
+repo: mongla_ws
+hero: /media/mongla-docs/water-clear.webp
+heroAlt: "A simulated gate in clear water"
+sources:
+  - { label: "Calibration matrices: mongla_ws src/mongla_vision/config/calibration", href: "https://github.com/fh1m/mongla_ws/tree/main/src/mongla_vision/config/calibration" }
+  - { label: "ROADMAP A1: one in-water focal length for every pixel", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/ROADMAP.md" }
+  - { label: "Treibitz, Schechner & Singh (2012), flat refractive geometry", href: "https://doi.org/10.1109/TPAMI.2011.105" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Explore from "../../components/note/Explore.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+Every camera datasheet gives a field of view, and every one of them means *in air*. Put the same camera behind a flat window and lower it into a pool, and the number quietly stops being true. The image is still sharp, still centred, still 640 pixels wide. It just contains less world.
+
+Nothing warns you. That's what makes it worth a whole note.
+
+## Rays bend at the glass
+
+Light changes speed when it crosses from water into the air inside the housing, and a ray that crosses at an angle bends. Snell's law says how much: <code>n<sub>water</sub> · sin θ<sub>water</sub> = sin θ<sub>air</sub></code>, with n about 1.333 for water.
+
+The sensor still accepts rays out to its own half-angle θ<sub>air</sub>. Run that backwards and the widest ray it can catch *from the water* comes in at a smaller angle. The cone doesn't move or blur; it shrinks. Drag the index from 1.000 (the lab) towards 1.333 (the pool) and watch it happen to Mongla's two real cameras:
+
+<Explore id="snell" n="fig 1" title="The cone a flat port leaves you" hint="drag the numbers" caption="Air field of view computed from each camera's real calibration matrix. Water field of view by Snell's law. The ranging numbers below the diagram are the measured ones from Mongla's roadmap entry A1." src="Calibration: <code>pi_forward_1280x720.json</code> (fx 851.2, 73.9° wide) and <code>pi_downward_1280x720.json</code> (fx 1027.9, 63.8° wide)." />
+
+For the downward camera that's 63.8° in air and 46.7° in water: about 27 % of the course a search pattern *believes* it's sweeping simply isn't in the picture. Note the honest tier: 46.7° is computed from the air calibration, not measured in water. No Mongla camera has been calibrated underwater yet.
+
+## It's worse than a smaller cone
+
+If refraction only shrank the field of view, you could fix it with one number: compute an in-water focal length and use it everywhere. Mongla's mission language did exactly that, and it was wrong in a more interesting way.
+
+Snell's law is non-linear. Near the centre of the image, a ray barely bends. Near the edge it bends a lot. So a flat port has no single focal length: on the forward camera at 640 px the effective focal is about 567 px at the centre and about 634 px at the edge. Any constant is wrong somewhere, and the error depends on where in the frame the target sits.
+
+<Stats items={[
+  { v: "5.15 m", l: "what one shared in-water focal read for a 1.5 m gate really 4.0 m away, on axis: +29 %", tone: "failure" },
+  { v: "3.33 m", l: "the same gate, 2.2 m off axis: −17 %", tone: "failure" },
+  { v: "4.40 m", l: "a per-camera focal alone, on axis: still +10 %", tone: "estimate" },
+]} src="mongla_ws ROADMAP A1, measured on the forward camera." />
+
+<Pull>A number measured in air is not a number about the vehicle. It's a number about the lab.</Pull>
+
+The fix wasn't a better constant. It was to stop using a constant: every pixel now goes through the same flat-port rectifier the lock and pose nodes already used, which bends each ray back individually before it becomes a bearing. One truth, read by everyone, instead of two copies that drift apart.
+
+<Fig src="/media/mongla-docs/field-of-view.svg" alt="Two cones from one lens: 63.8 degrees in air, 46.7 degrees in water through a flat port" caption="The Mongla site's version of the same picture." />
+
+## Why it took a while to notice
+
+Because every check that's easy to run is run in air. A camera calibrated on a desk, a tape measure, a known target: all of it agrees perfectly, because none of it involves the water. The error only exists in the one place you can't conveniently test. That's a recurring shape in this series. [The next part](/notes/interview-bottle) has another.

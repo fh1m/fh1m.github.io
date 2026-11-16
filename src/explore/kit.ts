@@ -7,8 +7,8 @@
  * Colours carry one meaning everywhere (see DESIGN.md).
  */
 export const C = {
-  chalk: "#f2f0e8", dim: "#a3a8ae", faint: "#6f757c", line: "#1d242a", grid: "#10161b",
-  me: "#ff3d8b", medium: "#2ee6d6", measured: "#b8f34a", failure: "#ff5c4d", estimate: "#ffb020",
+  chalk: "#f4f1ea", dim: "#b4b8c4", faint: "#7d8292", line: "#1c1f2a", grid: "#0f121a",
+  me: "#ff2e7e", medium: "#00e1ff", measured: "#c6ff3d", failure: "#ff4d5e", estimate: "#ffd23f",
 } as const;
 
 const NS = "http://www.w3.org/2000/svg";

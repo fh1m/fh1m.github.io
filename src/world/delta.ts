@@ -128,8 +128,8 @@ export async function start(canvas: HTMLCanvasElement, bus: EventTarget, _n: num
   });
 
   // Camera: an oblique look down the river; drag to swing.
-  let yaw = -0.35, pitch = 0.62, dist = 46, targetYaw = yaw, targetPitch = pitch;
-  const look = new THREE.Vector3(-1, 0, -9);
+  let yaw = -0.5, pitch = 0.78, dist = 54, targetYaw = yaw, targetPitch = pitch;
+  const look = new THREE.Vector3(1, 0, -6);
   const place = () => {
     cam.position.set(look.x + Math.sin(yaw) * Math.cos(pitch) * dist, look.y + Math.sin(pitch) * dist, look.z + Math.cos(yaw) * Math.cos(pitch) * dist);
     cam.lookAt(look);
@@ -153,7 +153,7 @@ export async function start(canvas: HTMLCanvasElement, bus: EventTarget, _n: num
     const hit = ray.intersectObjects(pickables, false)[0];
     return hit ? (hit.object.userData.port as number) : -1;
   };
-  canvas.addEventListener("pointerdown", (e) => { dragging = true; moved = 0; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = "grabbing"; });
+  canvas.addEventListener("pointerdown", (e) => { dragging = true; moved = 0; lastX = e.clientX; lastY = e.clientY; try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic or stale pointer */ } canvas.style.cursor = "grabbing"; });
   canvas.addEventListener("pointerup", (e) => {
     dragging = false; canvas.style.cursor = "grab";
     if (moved < 6) { const n = pick(e); if (n >= 0) bus.dispatchEvent(new CustomEvent("port", { detail: n })); }
@@ -177,7 +177,7 @@ export async function start(canvas: HTMLCanvasElement, bus: EventTarget, _n: num
   const frame = (now: number) => {
     const t = Math.max(0, (now - t0) / 1000);
     yaw += (targetYaw - yaw) * 0.08; pitch += (targetPitch - pitch) * 0.08;
-    if (!dragging && !reduce) targetYaw += 0.0006;
+    if (!dragging && !reduce && hovered < 0 && highlighted < 0) targetYaw += 0.0006; // hold still while a port is pointed at
     place();
     (terrain.material as THREE.ShaderMaterial).uniforms.uTime.value = t;
     riverMat.uniforms.uTime.value = reduce ? 0 : t;
