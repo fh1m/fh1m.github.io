@@ -65,7 +65,7 @@ export function buildLandmarks() {
   const am = new THREE.Mesh(new THREE.ExtrudeGeometry(ash, { depth: 0.12, bevelEnabled: false }), flat("#39d353")); am.position.set(-0.65, 0, 0); arrow.add(am);
   arrow.add(at(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.6, 6), flat("#9a958a")), 0, -0.6, 0.06));
   add(arrow, near("water", 6.5, 3.5), -0.1, 0.9);
-  anim.push((t) => { am.material instanceof THREE.MeshToonMaterial && am.material.color.setHSL(0.36, 0.65, 0.42 + 0.06 * Math.sin(t * 1.5)); });
+  anim.push((t) => { am.material instanceof THREE.MeshStandardMaterial && am.material.color.setHSL(0.36, 0.65, 0.42 + 0.06 * Math.sin(t * 1.5)); });
   // interview-bottle: a bottle floating, being graded
   const bottle = tag(new THREE.Group(), "interview-bottle", 2023);
   bottle.add(at(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.8, 12), flat("#bfe6ff", { transparent: true, opacity: 0.75 })), 0, 0, 0));

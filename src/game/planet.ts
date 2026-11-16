@@ -5,7 +5,6 @@
  */
 import * as THREE from "three";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { toonRamp } from "./forms";
 
 export const R = 20;                 // planet radius
 export const WATER = R - 0.55;       // water level (radius)
@@ -84,12 +83,33 @@ export function buildPlanet() {
     colours.set([c.r, c.g, c.b], i * 3);
     pos.setXYZ(i, v.x * r, v.y * r, v.z * r);
   }
-  geo.setAttribute("color", new THREE.BufferAttribute(colours, 3));
   geo.computeVertexNormals();
-  const ground = new THREE.Mesh(geo, new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonRamp() }));
-  const water = new THREE.Mesh(new THREE.SphereGeometry(WATER, 96, 64), new THREE.MeshToonMaterial({ color: "#3f8fe8", gradientMap: toonRamp(), transparent: true, opacity: 0.86 }));
+  // baked ambient occlusion: faces that turn away from the sky (cliff walls, valley sides) see less of it
+  const nrm = geo.getAttribute("normal") as THREE.BufferAttribute, n = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i).normalize(); n.fromBufferAttribute(nrm, i);
+    const sky = Math.max(0, n.dot(v)), ao = 0.62 + 0.38 * sky * sky;
+    colours[i * 3] *= ao; colours[i * 3 + 1] *= ao; colours[i * 3 + 2] *= ao;
+  }
+  geo.setAttribute("color", new THREE.BufferAttribute(colours, 3));
+  const ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0 }));
+  // the sea: glossy, slightly see-through, with a slow swell displaced in the vertex shader
+  const time = { value: 0 };
+  const seaMat = new THREE.MeshStandardMaterial({ color: "#2f7fd6", roughness: 0.16, metalness: 0.08, transparent: true, opacity: 0.88 });
+  seaMat.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = time;
+    sh.vertexShader = "uniform float uTime;\n" + sh.vertexShader
+      .replace("#include <begin_vertex>", `#include <begin_vertex>
+        vec3 d = normalize(position);
+        float w = sin(d.x * 38.0 + uTime * 1.3) * cos(d.z * 34.0 - uTime * 1.1) + 0.5 * sin(d.y * 52.0 + uTime * 1.9);
+        transformed += normal * w * 0.05;`)
+      .replace("#include <beginnormal_vertex>", `#include <beginnormal_vertex>
+        vec3 dn = normalize(position);
+        objectNormal = normalize(objectNormal + 0.12 * vec3(cos(dn.x * 38.0 + uTime * 1.3), 0.0, -sin(dn.z * 34.0 - uTime * 1.1)));`);
+  };
+  const water = new THREE.Mesh(new THREE.SphereGeometry(WATER, 160, 110), seaMat);
   const group = new THREE.Group(); group.add(ground, water);
-  return { group, water };
+  return { group, water, tick: (t: number) => { time.value = t; } };
 }
 
 /** Put an object on the surface at `dir`, with its +Y along the local up. */

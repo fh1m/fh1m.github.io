@@ -35,6 +35,7 @@ export function start(canvas: HTMLCanvasElement): World {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene(); scene.background = new THREE.Color("#000");
   const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 3000);
@@ -58,8 +59,10 @@ export function start(canvas: HTMLCanvasElement): World {
   scene.add(sun, sun.target, new THREE.HemisphereLight("#bcd6ff", "#5b3d9c", 1.35));
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(R + 3.4, 64, 48), new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, side: THREE.BackSide, blending: THREE.AdditiveBlending,
-    vertexShader: "varying vec3 vN; varying vec3 vV; void main(){ vN = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }",
-    fragmentShader: "varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1. - abs(dot(vN, vV)), 2.4); gl_FragColor = vec4(0.47, 0.68, 1.0, f * 0.6); }",
+    uniforms: { uSun: { value: new THREE.Vector3(-520, 300, -700).normalize() } },
+    vertexShader: "varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ vN = normalize(normalMatrix*normal); vW = normalize((modelMatrix*vec4(normal,0.)).xyz); vec4 mv = modelViewMatrix*vec4(position,1.); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }",
+    // a rim that is brighter on the sunlit side and warms toward the terminator, like scattered light
+    fragmentShader: "uniform vec3 uSun; varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ float f = pow(1. - abs(dot(vN, vV)), 2.6); float lit = clamp(dot(-vW, uSun) * .5 + .55, 0., 1.); vec3 c = mix(vec3(1.0, .62, .38), vec3(.42, .66, 1.0), lit); gl_FragColor = vec4(c, f * (.18 + .62 * lit)); }",
   })));
 
   const planet = buildPlanet(); scene.add(planet.group);
@@ -80,7 +83,7 @@ export function start(canvas: HTMLCanvasElement): World {
 
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
   // Camera: a state (dir from the look point, distance, look point) and timed, eased flights between states
-  const OVERVIEW = 70;
+  const OVERVIEW = 80;
   const cur = { dir: new THREE.Vector3(0.3, 0.45, 1).normalize(), dist: 1400, look: new THREE.Vector3() };
   let flight: { from: typeof cur; to: typeof cur; t: number; dur: number } | null = null;
   const fly = (to: typeof cur, dur = 2.0) => { flight = { from: { dir: cur.dir.clone(), dist: cur.dist, look: cur.look.clone() }, to, t: 0, dur: reduce ? 0.01 : dur }; };
@@ -109,7 +112,7 @@ export function start(canvas: HTMLCanvasElement): World {
     const dist = far ? 16 : THREE.MathUtils.clamp(sphere.radius * 3.4, 5, 22); // frame what the thing actually is
     const look = far ? p : sphere.center;
     fly({ dir: far ? n.clone().addScaledVector(side, 0.8).normalize() : n.clone().multiplyScalar(0.8).addScaledVector(side, 0.6).normalize(), dist, look }, 1.8);
-    sound.whoosh(); sound.pluck(784); idle = 0;
+    sound.whoosh(); sound.pluck(784); idle = 0; shiftFor(true);
     objListeners.forEach((f) => f(id));
   }
 
@@ -118,11 +121,13 @@ export function start(canvas: HTMLCanvasElement): World {
   function framing(z: ZoneId) {
     const d = STATIONS[z].dir();
     const side = new THREE.Vector3().crossVectors(d, Math.abs(d.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0)).normalize();
-    return { dir: d.clone().multiplyScalar(0.82).addScaledVector(side, 0.58).normalize(), dist: 12.5, look: d.clone().multiplyScalar(R + 1.3) };
+    // the rocket stands tall, so the air zone looks higher and from further back
+    const lift = z === "air" ? 2.8 : 1.3, dist = z === "air" ? 16 : 12.5;
+    return { dir: d.clone().multiplyScalar(0.82).addScaledVector(side, 0.58).normalize(), dist, look: d.clone().multiplyScalar(R + lift) };
   }
   function go(z: ZoneId | null) {
     if (z === zone) { if (z) fly(framing(z)); else fly({ dir: cur.dir.clone().setY(0.4).normalize(), dist: OVERVIEW, look: new THREE.Vector3() }); listeners.forEach((f) => f(z)); return; }
-    zone = z; idle = 0; sound.whoosh(); sound.scene(z ?? "space");
+    zone = z; idle = 0; sound.whoosh(); sound.scene(z ?? "space"); shiftFor(!!z);
     if (!z) fly({ dir: cur.dir.clone().setY(0.4).normalize(), dist: OVERVIEW, look: new THREE.Vector3() });
     else {
       fly(framing(z));
@@ -162,7 +167,14 @@ export function start(canvas: HTMLCanvasElement): World {
     if (hit) { const z = zoneOf(hit.point.clone().normalize()); if (z.d > 0.45) go(z.id); }
   });
 
-  const resize = () => { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < h ? 60 : 42; cam.updateProjectionMatrix(); };
+  // with a plate open on the right (wide screens), shift the view so the subject sits in the free space on the left
+  let shifted = false;
+  const resize = () => {
+    const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < h ? 60 : 42;
+    if (shifted && w > 900) cam.setViewOffset(w, h, w * 0.16, 0, w, h); else cam.clearViewOffset();
+    cam.updateProjectionMatrix();
+  };
+  const shiftFor = (on: boolean) => { if (on !== shifted) { shifted = on; resize(); } };
   addEventListener("resize", resize); resize();
 
   let last = performance.now(), running = true;
@@ -170,6 +182,7 @@ export function start(canvas: HTMLCanvasElement): World {
   function tick(now: number) {
     if (!running) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000;
+    if (!reduce) planet.tick(t);
     idle += dt;
 
     if (flight) {

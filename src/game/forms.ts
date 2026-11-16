@@ -12,14 +12,8 @@ import { glowSprite } from "./fx";
 
 /** Place a mesh at x, y, z and return it (three.js makes `position` read-only, so Object.assign cannot). */
 export const at = <T extends THREE.Object3D>(o: T, x: number, y: number, z: number) => { o.position.set(x, y, z); return o; };
-/** Kurzgesagt-like two-tone shading: a hard step between lit and shadow, shadows tinted by the violet sky light. */
-let ramp: THREE.DataTexture | null = null;
-export function toonRamp() {
-  if (ramp) return ramp;
-  ramp = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]), 3, 1, THREE.RGBAFormat);
-  ramp.minFilter = ramp.magFilter = THREE.NearestFilter; ramp.needsUpdate = true; return ramp;
-}
-export const flat = (color: string, extra: THREE.MeshToonMaterialParameters = {}) => new THREE.MeshToonMaterial({ color, gradientMap: toonRamp(), ...extra });
+/** The shared surface: physically based, rough and non-metal, so colours stay flat but take real light and shadow. */
+export const flat = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.72, metalness: 0.04, ...extra });
 const glow = (color: string) => new THREE.MeshBasicMaterial({ color });
 const RED = "#d23a32", HULL = "#3a404d", CREAM = "#e8e2d4", DARK = "#22262f", PINK = "#ff4f8b";
 
