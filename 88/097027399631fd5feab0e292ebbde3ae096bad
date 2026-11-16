@@ -1,0 +1,22 @@
+src/components/stage/Stage.astro
+  h_f1b9066eb9899c 122-124
+src/layouts/Base.astro
+  h_f1b9066eb9899c 118-122
+src/pages/cv.astro
+  h_f1b9066eb9899c 108-111
+src/world/globe.ts
+  h_f1b9066eb9899c 236
+tests/smoke.spec.ts
+  h_f1b9066eb9899c 11,13,16-32,36-72,75,79-81,87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "88097027399631fd5feab0e292ebbde3ae096bad",
+  "prompts": {},
+  "humans": {
+    "h_f1b9066eb9899c": {
+      "author": "fh1m <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
