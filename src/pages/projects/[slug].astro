@@ -13,130 +13,146 @@ const { p } = Astro.props as { p: Project };
 const el = elementById[p.element];
 const ll = lessons.filter((l) => l.project === p.slug);
 const lead = p.hero ? { src: p.hero, alt: p.heroAlt ?? "", ...dims(p.hero) } : null;
-const story = rows([...(p.bench && lead ? [[lead.src, lead.alt] as [string, string]] : []), ...(p.gallery ?? [])]);
+// the lead photo is the cover; without a bench, the first gallery picture is the artefact; nothing repeats
+const g0 = !p.bench && p.gallery?.[0] ? { src: p.gallery[0][0], alt: p.gallery[0][1], ...dims(p.gallery[0][0]) } : null;
+const stageImg = p.bench ? null : g0 ?? lead;
+const story = rows((p.gallery ?? []).slice(g0 ? 1 : 0));
 const i = el.projects.findIndex((x) => x.slug === p.slug);
 const next = el.projects[i + 1];
 ---
-<Base title={p.title} nation={p.element} description={p.line ?? p.summary}>
+<Base title={p.title} nation={p.element} description={p.line ?? p.summary} chrome={false}>
   <main id="main" class="track-page">
-    <header class="head">
-      <p class="from"><a href={`/${el.id}`}><span class="bn" lang="bn">{el.bn}</span> {el.name}</a></p>
-      <h1>{p.title}</h1>
-      {p.line && <p class="line">{p.line}</p>}
-      <p class="sum">{p.summary}</p>
+    <nav class="bar" aria-label="Where you are">
+      <a href="/" class="pill">Back to the planet</a>
+      <a href={`/${el.id}`} class="crumb"><span class="bn" lang="bn">{el.bn}</span> {el.name}</a>
+    </nav>
+
+    <header class="screen cover">
+      {lead && <img class="cover-img" src={lead.src} alt="" aria-hidden="true" fetchpriority="high" />}
+      <div class="cover-text">
+        <p class="kicker">{p.years}</p>
+        <h1>{p.title}</h1>
+        {p.line && <p class="line">{p.line}</p>}
+        <p class="sum">{p.summary}</p>
+      </div>
     </header>
 
-    <div class="artefact">
-      {p.bench ? (
-        <Explore bench={p.bench[0]} title={p.bench[1]} hint={p.bench[2]} />
-      ) : lead && (
-        <figure class:list={["lead", { portrait: lead.portrait }]} style={`max-width:${Math.min(lead.w, lead.portrait ? 560 : 1400)}px`}>
-          <img src={lead.src} alt={lead.alt} width={lead.w} height={lead.h} fetchpriority="high" />
-        </figure>
-      )}
-    </div>
+    <section class="screen split" aria-label="The artefact">
+      <div class="col-text">
+        <h2>What it is</h2>
+        <p class="txt">{p.role}</p>
+        {p.figures && <ul class="nums" aria-label="Numbers">{p.figures.map(([n, l]) => <li><b>{n}</b><span>{l}</span></li>)}</ul>}
+      </div>
+      <div class="col-stage">
+        {p.bench ? <Explore bench={p.bench[0]} title={p.bench[1]} hint={p.bench[2]} /> : stageImg && (
+          <figure class="lead"><img src={stageImg.src} alt={stageImg.alt} width={stageImg.w} height={stageImg.h} /><figcaption>{stageImg.alt}</figcaption></figure>
+        )}
+      </div>
+    </section>
 
-    {p.figures && (
-      <ul class="nums" aria-label="Numbers">
-        {p.figures.map(([n, l]) => <li><b>{n}</b> {l}</li>)}
-      </ul>
-    )}
-
-    {story.length > 0 && (
-      <section class="story" aria-label="In pictures">
-        {story.map((row) => (
-          <div class:list={["row", { portraits: row[0].portrait, squares: row[0].square && row.length > 1 }]} style={`--n:${row.length}`}>
-            {row.map((im) => (
-              <figure style={`max-width:${im.portrait ? Math.min(im.w, 460) : im.square ? Math.min(im.w, 620) : Math.min(im.w, 1100)}px`}>
-                <img src={im.src} alt={im.cap} width={im.w} height={im.h} loading="lazy" />
-                <figcaption>{im.cap}</figcaption>
-              </figure>
-            ))}
-          </div>
-        ))}
+    {story.map((row) => (
+      <section class="screen pics" aria-label="In pictures">
+        <div class:list={["pic-row", { many: row.length > 1 }]}>
+          {row.map((im) => (
+            <figure><img src={im.src} alt={im.cap} width={im.w} height={im.h} loading="lazy" style={`max-width:${im.w}px`} /><figcaption>{im.cap}</figcaption></figure>
+          ))}
+        </div>
       </section>
-    )}
+    ))}
 
-    {ll.length > 0 && (
-      <section class="wrongs" aria-labelledby="w-h">
-        <h2 id="w-h">What I got wrong</h2>
-        {ll.map((l) => (
-          <article>
-            <h3><a href={`/lessons/${l.slug}`}>{l.title}</a></h3>
-            <p><span class="wrong">{l.believed}</span></p>
-            <p>{l.truth}</p>
-            {l.refs.some((r) => r.href.includes("/commit/"))
-              ? <p class="fixed">Corrected in {l.refs.filter((r) => r.href.includes("/commit/")).map((r, k) => <>{k > 0 && ", "}<a class="h" href={r.href}>{r.label}</a></>)}.</p>
-              : <p class="fixed">The fix is in <a href={l.refs[0].href}>{l.refs[0].label}</a>.</p>}
-          </article>
-        ))}
+    {ll.map((l) => (
+      <section class="screen statement" aria-label={`What I got wrong: ${l.title}`}>
+        <div class="st">
+          <h2>{l.title}</h2>
+          <p class="believed"><span class="wrong">{l.believed}</span></p>
+          <p class="txt">{l.truth}</p>
+          {l.refs.some((r) => r.href.includes("/commit/"))
+            ? <p class="fixed">Corrected in {l.refs.filter((r) => r.href.includes("/commit/")).map((r, k) => <>{k > 0 && ", "}<a class="h" href={r.href}>{r.label}</a></>)}. <a href={`/lessons/${l.slug}`}>The full lesson</a></p>
+            : <p class="fixed">The fix is in <a href={l.refs[0].href}>{l.refs[0].label}</a>. <a href={`/lessons/${l.slug}`}>The full lesson</a></p>}
+        </div>
       </section>
-    )}
+    ))}
 
     {p.commitsKey && (
-      <section class="cons" aria-labelledby="c-h">
-        <h2 id="c-h">Every commit</h2>
-        <p class="dim">Each dot is one commit, placed by date. The red ones are fixes and retractions. Point at one to read it.</p>
-        <canvas data-commits={p.commitsKey} aria-label={`Every commit in ${p.repo}, by date`}></canvas>
-        <p class="read" aria-live="polite"></p>
+      <section class="screen cons" aria-labelledby="c-h">
+        <div class="st wide">
+          <h2 id="c-h">Every commit</h2>
+          <p class="txt">Each dot is one commit, placed by date. The red ones are fixes and retractions. Point at one to read it.</p>
+          <canvas data-commits={p.commitsKey} aria-label={`Every commit in ${p.repo}, by date`}></canvas>
+          <p class="read" aria-live="polite"></p>
+        </div>
       </section>
     )}
 
-    <section class="credits" aria-labelledby="cr-h">
-      <h2 id="cr-h">Credits</h2>
-      <dl>
-        <dt>My part</dt><dd>{p.role}</dd>
-        <dt>When</dt><dd>{p.years}</dd>
-        <dt>Where it stands</dt><dd>{p.status}</dd>
-        {p.repo && <><dt>Code</dt><dd><a href={`https://github.com/${p.repo}`}>github.com/{p.repo}</a></dd></>}
-        {p.notes.length > 0 && <><dt>Read more</dt><dd>{p.notes.map((n, k) => <>{k > 0 && ", "}<a href={n.href}>{n.label}</a></>)}</dd></>}
-        {p.private && <><dt>Code</dt><dd>Private for now, so it is described here and not linked.</dd></>}
-      </dl>
-      {next && <p class="next">Next on this side: <a href={`/projects/${next.slug}`}>{next.title}</a></p>}
-    </section>
+    <footer class="screen end" aria-labelledby="cr-h">
+      <div>
+        <h2 id="cr-h">Credits</h2>
+        <dl>
+          <dt>My part</dt><dd>{p.role}</dd>
+          <dt>When</dt><dd>{p.years}</dd>
+          <dt>Where it stands</dt><dd>{p.status}</dd>
+          {p.repo && <><dt>Code</dt><dd><a href={`https://github.com/${p.repo}`}>github.com/{p.repo}</a></dd></>}
+          {p.private && <><dt>Code</dt><dd>Private for now, so it is described here and not linked.</dd></>}
+        </dl>
+      </div>
+      <div>
+        {p.notes.length > 0 && <><h2>Read more</h2><ul class="more">{p.notes.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></>}
+        {next && <p><a class="pill" href={`/projects/${next.slug}`}>Next: {next.title}</a></p>}
+      </div>
+    </footer>
   </main>
 </Base>
 <script>
   import "../../scripts/constellation.ts";
 </script>
 <style>
-  .track-page { position: relative; z-index: 1; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; max-width: 84rem; }
-  .head { max-width: 46rem; margin-bottom: 2.4rem; }
-  .from { margin: 0 0 1rem; }
-  .from a { color: var(--c); text-decoration: none; }
-  .bn { font-family: var(--bangla); }
-  h1 { font: 500 var(--t5)/1.05 var(--sans); margin: 0 0 1rem; }
-  .line { font-size: var(--t2); line-height: 1.35; color: var(--ink-hi); margin: 0 0 1rem; }
-  .sum { color: var(--dim); }
-  .artefact { margin-bottom: 2.4rem; }
-  .artefact :global(.x) { margin: 0; max-width: 62rem; }
-  .lead { margin: 0; }
-  .lead img { width: 100%; height: auto; display: block; }
-  .nums { list-style: none; margin: 0 0 3rem; padding: 0; columns: 2 16rem; column-gap: 3rem; max-width: 46rem; }
-  .nums li { break-inside: avoid; padding: .2rem 0; color: var(--dim); }
-  .nums b { font: 500 var(--t1) var(--mono); color: var(--ink-hi); font-variant-numeric: tabular-nums; margin-right: .35rem; }
-  .story { display: grid; gap: 2.4rem; margin-bottom: 3.6rem; }
-  .row { display: flex; gap: 1.2rem; align-items: flex-start; }
-  .row figure { margin: 0; flex: 1 1 0; min-width: 0; }
-  .row img { width: 100%; height: auto; display: block; }
-  .row.portraits figure { flex: 0 1 calc((100% - (var(--n) - 1) * 1.2rem) / 3); }
-  .row.squares figure { flex: 0 1 calc((100% - 1.2rem) / 2); }
-  figcaption { margin-top: .5rem; color: var(--dim); font-size: var(--t-1); max-width: 60ch; }
-  h2 { font: 500 var(--t2) var(--sans); margin: 0 0 1rem; }
-  .wrongs { max-width: 46rem; margin-bottom: 3.6rem; }
-  .wrongs article { margin-bottom: 2rem; }
-  .wrongs h3 { font: 500 var(--t1) var(--sans); margin: 0 0 .4rem; }
-  .wrongs h3 a { text-decoration: none; }
-  .wrongs p { margin: 0 0 .4rem; }
-  .fixed { color: var(--dim); }
+  .track-page { position: relative; z-index: 1; font-family: var(--story); }
+  .bar { position: fixed; z-index: 20; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 1rem; padding: .7rem var(--gutter); background: #0b1233; border-bottom: 1px solid rgb(255 255 255 / .06); }
+  .pill { display: inline-block; font: 700 var(--t-1) var(--story); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .95rem; text-decoration: none; white-space: nowrap; }
+  .crumb { font: 600 var(--t-1) var(--story); color: #c9d3ff; text-decoration: none; }
+  .bn { font-family: var(--bangla); color: var(--c); }
+  .screen { position: relative; min-height: 100svh; padding: 12svh var(--gutter); display: grid; align-content: center; border-top: 1px solid rgb(255 255 255 / .06); }
+  .cover { border: 0; align-content: end; overflow: hidden; }
+  .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; }
+  .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 30%, #0b1233 92%); }
+  .cover-text { position: relative; z-index: 1; max-width: 70rem; padding-bottom: 4svh; }
+  .kicker { font: 700 var(--t-1) var(--story); color: var(--c); margin: 0 0 .8rem; }
+  h1 { font: 900 clamp(2.8rem, 8vw, 6.4rem)/1 var(--story); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.02em; }
+  .line { font: 700 clamp(1.2rem, 2.2vw, 1.8rem)/1.35 var(--story); color: #fff; margin: 0 0 1rem; max-width: 36ch; }
+  .sum { font: 500 clamp(1.05rem, 1.4vw, 1.25rem)/1.6 var(--story); color: #c9d3ff; max-width: 56ch; margin: 0; }
+  h2 { font: 900 clamp(1.7rem, 3.2vw, 2.7rem)/1.1 var(--story); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.01em; }
+  .txt { font: 500 clamp(1.05rem, 1.3vw, 1.25rem)/1.7 var(--story); color: #dfe4ff; max-width: 52ch; }
+  .split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 4vw; align-items: center; }
+  .col-stage :global(.x) { margin: 0; }
+  .lead { margin: 0; } .lead figcaption { margin-top: .6rem; font: 500 var(--t-1)/1.5 var(--story); color: #aab4e6; } .lead img { width: 100%; height: auto; max-height: 76svh; object-fit: contain; display: block; border-radius: .8rem; }
+  .nums { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 1.4rem 2rem; }
+  .nums li { display: grid; gap: .2rem; }
+  .nums b { font: 500 clamp(1.4rem, 2.4vw, 2rem)/1.1 var(--mono); color: var(--c); font-variant-numeric: tabular-nums; }
+  .nums span { font: 500 var(--t-1)/1.45 var(--story); color: #aab4e6; }
+  .pics { justify-items: center; }
+  .pic-row { display: flex; gap: 2rem; align-items: center; justify-content: center; width: 100%; }
+  .pic-row figure { margin: 0; display: grid; gap: .8rem; justify-items: center; min-width: 0; flex: 0 1 auto; }
+  .pic-row img { width: auto; height: auto; max-width: 100%; max-height: 74svh; border-radius: .8rem; display: block; }
+  .pic-row.many img { max-height: 64svh; }
+  .pic-row figcaption { font: 500 var(--t-1)/1.5 var(--story); color: #aab4e6; max-width: 56ch; text-align: center; }
+  .statement { justify-items: center; }
+  .st { max-width: 52rem; }
+  .st.wide { max-width: none; width: 100%; }
+  .believed { font: 800 clamp(1.3rem, 2.4vw, 2rem)/1.35 var(--story); margin: 0 0 1.2rem; }
+  .wrong { color: #aab4e6; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 3px; }
+  .fixed { font: 500 var(--t-1)/1.6 var(--story); color: #aab4e6; } .fixed a { color: #fff; margin-right: .6rem; }
   .h { font-family: var(--mono); }
-  .cons { max-width: 62rem; margin-bottom: 3.6rem; }
-  .cons canvas { width: 100%; height: 150px; display: block; cursor: crosshair; }
-  .read { min-height: 3em; color: var(--dim); font-size: var(--t-1); }
-  .credits { max-width: 46rem; }
-  dl { display: grid; grid-template-columns: 10rem 1fr; gap: .5rem 1.4rem; margin: 0 0 2rem; }
-  dt { color: var(--dim); }
-  dd { margin: 0; }
-  .next { color: var(--dim); }
-  @media (max-width: 700px) { .row { flex-direction: column; } .row.portraits { flex-direction: row; } dl { grid-template-columns: 1fr; gap: .1rem; } dd { margin-bottom: .6rem; } }
+  .cons canvas { width: 100%; height: 220px; display: block; cursor: crosshair; }
+  .read { min-height: 3em; color: #aab4e6; font-size: var(--t-1); }
+  .end { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 4vw; min-height: 80svh; }
+  dl { display: grid; grid-template-columns: 10rem 1fr; gap: .7rem 1.4rem; margin: 0; font: 500 var(--t0)/1.55 var(--story); }
+  dt { color: #9aa6d8; } dd { margin: 0; color: #dfe4ff; } dd a, .more a { color: #fff; }
+  .more { padding-left: 1.1rem; margin: 0 0 2rem; display: grid; gap: .4rem; font: 500 var(--t0)/1.5 var(--story); }
+  @media (max-width: 900px) {
+    .split, .end { grid-template-columns: 1fr; }
+    .pic-row { flex-direction: column; }
+    dl { grid-template-columns: 1fr; gap: .1rem; } dd { margin-bottom: .6rem; }
+    .screen { min-height: auto; padding: 10svh var(--gutter); }
+    .cover { min-height: 90svh; }
+  }
 </style>

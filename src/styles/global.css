@@ -12,6 +12,7 @@
 :root {
   --black: #0b1233;            /* the planet's space: the whole site lives in it */
   --ink: #e6eaff;
+  --chalk: #eef1ff;            /* labels and lines in diagrams */
   --ink-hi: #ffffff;
   --dim: #aab4e6;
   --faint: #8691c4;

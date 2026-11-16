@@ -24,7 +24,7 @@ const label = `${title}. ` + rows.map((r) => `${r.label}: ${fmt(r.v)}${unit}`).j
         <g>
           <text x={LW - 12} y={y + 15} text-anchor="end" class="bl">{r.label}</text>
           <rect x={LW} y={y + 3} width={w} height={H - 14} rx="2" fill={colour[r.tone ?? "measured"]} opacity="0.88" />
-          <text x={LW + w + 8} y={y + 15} class="bv">{fmt(r.v)}{unit}{r.note && <tspan class="bn"> {r.note}</tspan>}</text>
+          <text x={LW + w + 8} y={y + 15} class="bv">{fmt(r.v)}{unit}{r.note && <tspan class="bnote"> {r.note}</tspan>}</text>
         </g>
       );
     })}
@@ -36,5 +36,5 @@ const label = `${title}. ` + rows.map((r) => `${r.label}: ${fmt(r.v)}${unit}`).j
   .bt { font: 400 13px var(--mono); fill: var(--dim); }
   .bl { font: 400 13px var(--mono); fill: var(--chalk); }
   .bv { font: 400 13px var(--mono); fill: var(--chalk); font-variant-numeric: tabular-nums; }
-  .bn { fill: var(--faint); }
+  .bnote { fill: var(--faint); }
 </style>
