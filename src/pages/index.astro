@@ -57,7 +57,7 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
         </ul>
       </details>
       <button class="snd" id="snd" type="button" aria-pressed="true">Sound</button>
-      <a class="skip-game" href="/everything">Skip the game, show me everything</a>
+      <a class="skip-game" href="/everything"><span class="long">Skip the game, show me everything</span><span class="short">All the work</span></a>
     </div>
 
     <Opening />
@@ -207,7 +207,18 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
   .plate dd { margin: 0; font: 400 var(--t-1) var(--mono); color: #fff; font-variant-numeric: tabular-nums; }
   .real { font: 500 var(--t-2)/1.5 var(--sans); color: #8c8c8c; margin: 0; }
   .real a { color: #fff; }
-  @media (max-width: 760px) { .plate { top: auto; bottom: 6.5rem; transform: translate(0, 20px); max-height: 46svh; overflow: auto; } .plate:global(.on) { transform: none; } }
+  @media (max-width: 760px) {
+    .plate { top: auto; bottom: 4.6rem; left: .6rem; right: .6rem; width: auto; transform: translate(0, 20px); max-height: 52svh; overflow: auto; }
+    .plate:global(.on) { transform: none; }
+    .zones { left: .6rem; right: .6rem; bottom: .6rem; transform: translateY(20px); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .3rem; }
+    .zones:global(.on) { transform: none; }
+    .zones button { min-width: 0; padding: .5rem .2rem .4rem; font-size: var(--t-1); }
+    .zones .all { font-size: var(--t-2); line-height: 1.15; }
+    .guide { top: 3.6rem; bottom: auto; font-size: var(--t-1); }
+    .hud { left: .6rem; right: .6rem; top: .6rem; justify-content: flex-end; gap: .4rem; }
+    .skip-game { white-space: nowrap; }
+    .title { bottom: 5.4rem; }
+  }
   .poster-img { display: none; }
   .poster .poster-img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .poster #world { display: none; }
@@ -245,5 +256,7 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
   .places ul { position: absolute; right: 0; top: 2.6rem; list-style: none; margin: 0; padding: .4rem; display: grid; gap: .2rem; min-width: 12rem; border-radius: 8px; background: rgb(9 14 44 / .92); backdrop-filter: blur(10px); }
   .places ul button { width: 100%; text-align: left; font: 500 var(--t-1) var(--sans); color: #fff; background: none; border: 0; border-radius: .6rem; padding: .45rem .7rem; cursor: pointer; }
   .places ul button:hover { background: rgb(255 255 255 / .12); }
+  .skip-game .short { display: none; }
+  @media (max-width: 520px) { .skip-game .long { display: none; } .skip-game .short { display: inline; } }
   .nojs { position: absolute; inset: auto 1rem 1rem; z-index: 12; color: #fff; }
 </style>
