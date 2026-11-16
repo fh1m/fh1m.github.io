@@ -14,7 +14,6 @@ export interface Lesson {
   lesson: string;
   recommendation: string;
   refs: { label: string; href: string }[];
-  voice?: { line: string; who: string };   // a line from someone, only where the work earns it
 }
 
 const C = (h: string) => ({ label: h, href: `https://github.com/fh1m/mongla_ws/commit/${h}` });
@@ -49,7 +48,6 @@ export const lessons: Lesson[] = [
     lesson: "The standard recipe recovered 12 % of the problem. Read the driver's own sequence counter before trusting the recipe.",
     recommendation: "Keep only the newest frame; never let a slow stage queue behind a fast one.",
     refs: [C("50d69a8"), { label: "the frame-age note", href: "/notes/the-frame-age-problem" }],
-    voice: { line: "Yesterday is history, tomorrow is a mystery, but today is a gift. That is why it is called the present.", who: "Oogway, Kung Fu Panda" },
   },
   {
     id: "LL-04", slug: "clahe-five-times-retracted", element: "water", project: "mongla", date: "2026-09-05",
@@ -110,7 +108,6 @@ export const lessons: Lesson[] = [
     lesson: "When a correction makes things worse, check its sign before its size.",
     recommendation: "Re-derive every gain when the sensor that feeds it changes.",
     refs: [C("07824b4"), C("355e1e3")],
-    voice: { line: "Sometimes science is more art than science.", who: "Rick Sanchez" },
   },
   {
     id: "LL-10", slug: "zero-is-not-unset", element: "water", project: "mongla", date: "2026-09-07",
@@ -151,7 +148,6 @@ export const lessons: Lesson[] = [
     lesson: "State has to live somewhere. And units are part of the gain.",
     recommendation: "Keep filter state outside the loop; write dt in seconds; clamp the integral.",
     refs: [{ label: "gist v1 (2024-09-12)", href: "https://gist.github.com/fh1m/e3a64a4dc321eee82a6d761142e63ba2" }, { label: "gist V2 (2024-09-13)", href: "https://gist.github.com/fh1m/139d52f53c70b3b8b7f45b944ee0ea1c" }],
-    voice: { line: "If you only do what you can do, you will never be more than you are now.", who: "Shifu, Kung Fu Panda 3" },
   },
   {
     id: "LL-14", slug: "uint8-and-the-polite-crawl", element: "earth", project: "e-bhapa", date: "2024-02",
@@ -162,7 +158,6 @@ export const lessons: Lesson[] = [
     lesson: "Read the library's types. The compiler won't argue for you.",
     recommendation: "Simulate the sketch as written, quirks included, before believing the demo.",
     refs: [{ label: "fh1m/E-Bhapa", href: "https://github.com/fh1m/E-Bhapa" }],
-    voice: { line: "We don't make mistakes, just happy accidents.", who: "Bob Ross" },
   },
   {
     id: "LL-15", slug: "nothing-is-field", element: "earth", project: "rupsha", date: "2026-10-23",

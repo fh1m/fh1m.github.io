@@ -1,5 +1,5 @@
 /**
- * Shoulders, beliefs, and taste. Quotes are short and attributed; where a line is a paraphrase
+ * Shoulders and beliefs. Quotes are short and attributed; where a line is a paraphrase
  * of an idea rather than a verbatim quote, `paraphrase: true` says so. No portraits (rights unclear).
  * Beliefs are fh1m's own lines, each pointing at the work or record it came from.
  */
@@ -17,9 +17,6 @@ export const voices: Voice[] = [
   { name: "Chris Lattner", line: "Work backwards from the speed of light of the hardware.", source: "on Mojo", paraphrase: true, changed: "Optimise until the sensor is the limit: authority 1.000 at the 99th percentile on both cameras." },
   { name: "Paul Graham", line: "Live in the future, then build what's missing.", source: "How to Get Startup Ideas, 2012", href: "https://paulgraham.com/startupideas.html", changed: "Tools built because the shop didn't sell them: a start page, a WebAuthn login, a K210 firmware." },
   { name: "Tim Urban", line: "The chef reasons from first principles; the cook follows the recipe.", source: "The Cook and the Chef, 2015", href: "https://waitbutwhy.com/2015/11/the-cook-and-the-chef-musks-secret-sauce.html", paraphrase: true, changed: "Underwater-vision advice gets measured on our own footage before it's believed. Most of it didn't survive." },
-  { name: "Rick Rubin", line: "The audience comes last.", source: "The Creative Act, 2023", changed: "Build the thing to be right, not to be impressive. The impressive version can wait for the right one." },
-  { name: "Kanye West", line: "The world can be saved through design, and everything needs to actually be architected.", source: "Harvard Graduate School of Design, 2013", changed: "Architecture first: the board/Pi split was a design decision before it was a line of code." },
-  { name: "Bob Ross", line: "We don't make mistakes, just happy accidents.", source: "The Joy of Painting", changed: "A decision tree takes that literally and paints every accident. Pruning is the palette knife." },
 ];
 
 /** Engineering beliefs, in fh1m's own words, each with the record it came from. */
@@ -34,12 +31,4 @@ export const beliefs: { line: string; from: string }[] = [
   { line: "Treating \"I could not measure\" as \"it did not move\" is the same mistake in every disguise.", from: "measured-bars.md §13" },
   { line: "Freshness over throughput. An old correct answer is a wrong answer for a moving vehicle.", from: "camera-latency.md" },
   { line: "When you can't pick a threshold, run both and let the consumer choose.", from: "the bumblebee doctrine" },
-];
-
-/** What I watch, and the engineering line each one smuggled in. Quotes are the famous ones. */
-export const taste: { show: string; line: string; who: string; why: string }[] = [
-  { show: "Kung Fu Panda", line: "There is no secret ingredient.", who: "Mr. Ping", why: "The machine isn't magic. Look at the actual value." },
-  { show: "Avatar: The Last Airbender", line: "If you just keep moving, you will come to a better place.", who: "Iroh", why: "The version of Mongla that dives is built on the one that doesn't, yet." },
-  { show: "Rick and Morty", line: "Sometimes science is more art than science.", who: "Rick", why: "Choosing which experiment to run is the art. Running it honestly is the science." },
-  { show: "Brooklyn Nine-Nine", line: "Every time someone steps up and says who they are, the world becomes a better, more interesting place.", who: "Captain Holt", why: "Say who built what. The board and its firmware are Rakibul's." },
 ];

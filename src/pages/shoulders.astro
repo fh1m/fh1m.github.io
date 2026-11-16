@@ -1,6 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
-import { voices, beliefs, taste } from "../data/influences";
+import { voices, beliefs } from "../data/influences";
 const home = [
   { name: "Jagadish Chandra Bose", where: "born in Mymensingh, 1858", did: "Worked with millimetre waves in 1895, a radio receiver before radio had a name." },
   { name: "Satyendra Nath Bose", where: "Dhaka University, 1924", did: "Bose statistics. Every boson carries his name." },
@@ -8,7 +8,7 @@ const home = [
   { name: "Jamilur Reza Choudhury", where: "born in Sylhet, 1943", did: "Chaired the expert panels for the Jamuna and Padma bridges, and ran BUET's computer centre." },
 ];
 ---
-<Base title="Shoulders" description="The people whose ideas changed a decision in my work, the beliefs the work taught me, and the shows that smuggled engineering in.">
+<Base title="Shoulders" description="The people whose ideas changed a decision in my work, the beliefs the work taught me.">
   <main id="main" class="shoulders">
     <h1>Shoulders</h1>
     <p class="lede">People whose ideas changed a decision in my work. The quote is theirs; what it changed is mine.</p>
@@ -33,10 +33,6 @@ const home = [
       {beliefs.map((b) => <li><p>{b.line}</p><p class="src">From {b.from}</p></li>)}
     </ul>
 
-    <h2>What I watch</h2>
-    <ul class="voices">
-      {taste.map((t) => <li><p class="q">“{t.line}”</p><p class="who">{t.who}, {t.show}</p><p class="ch">{t.why}</p></li>)}
-    </ul>
   </main>
 </Base>
 <style>

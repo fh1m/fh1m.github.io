@@ -1,26 +1,25 @@
 ---
 /**
- * Home: Voyager's last photograph, a fall into the dot, and a tiny planet where Bunnu, my cat,
- * learns the four elements. The world loads while the opening plays.
+ * Home: Voyager's last photograph, a fall into the dot, and a tiny planet holding the machines I
+ * built for air, water, land and silicon. Bunnu is the guide; the world loads while the opening plays.
  */
 import Base from "../layouts/Base.astro";
 import Opening from "../components/game/Opening.astro";
 import Panels from "../components/game/Panels.astro";
-import BunnuWindow from "../components/game/BunnuWindow.astro";
 import { ZONE_INFO } from "../game/zones";
 import { projects } from "../data/elements";
 const bySlug = Object.fromEntries(projects.map((p) => [p.slug, p]));
 const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "4" };
 ---
-<Base chrome={false} bodyClass="game" description="Voyager's last photograph, a tiny planet, and Bunnu, my cat, flying one machine through air, water, earth and fire. Or skip the game and see everything I've built.">
+<Base chrome={false} bodyClass="game" description="Fahim Faisal's robotics work as a small planet: rockets, underwater vehicles, rovers and edge AI, each with the failure that taught something and the commit that fixed it.">
   <main id="main" class="game-shell">
     <img class="poster-img" src="/world/poster.webp" alt="The planet from orbit: a sandy airfield cap under clouds at the top, green land with a brown patch of earth, a blue sea along one side, and small landmarks around the rim. Every place on it can be opened from the buttons below." width="1600" height="1000" />
     <canvas id="world" aria-label="A tiny planet with four zones: air, water, earth and fire. Choose a zone to send Bunnu there, or click anything on the planet."></canvas>
 
     <div class="title" id="title" aria-live="polite">
-      <p class="els"><span style="--c:#4f8fe0">Water.</span> <span style="--c:#79b35f">Earth.</span> <span style="--c:#e5533d">Fire.</span> <span style="--c:#eaa63b">Air.</span></p>
-      <p class="line">Long ago, the four nations lived together in harmony. Then a guy from Dhaka built one machine for all four, and his cat started flying it.</p>
-      <p class="meet">This is Bunnu. My mother named her. She's been the only one in the room since 2021, for most of what you'll see here.</p>
+      <p class="els"><span style="--c:#eaa63b">Air.</span> <span style="--c:#4f8fe0">Water.</span> <span style="--c:#79b35f">Earth.</span> <span style="--c:#e5533d">Silicon.</span></p>
+      <p class="line">Four places a machine can fail. These are the machines I built for each, what broke, and what fixed it.</p>
+      <p class="meet">Bunnu is your guide. She watched all of it get built, and she'll tell you why it was built that way.</p>
     </div>
 
     <nav class="zones" id="zones" aria-label="Zones">
@@ -35,14 +34,14 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
         <p class="pline">{z.line}</p>
         <dl>{z.specs.map(([k, v]) => <><dt>{k}</dt><dd>{v}</dd></>)}</dl>
         <p class="real">{z.real} <a href={z.source.href}>{z.source.label}</a></p>
-        <p class="mission-row"><button type="button" class="start" data-mission={z.id}>Start the mission</button>{z.id === "air" && <span class="here">Start here</span>}</p>
+        <div class="mission" data-mission-box={z.id}><p class="mission-row"><button type="button" class="start" data-mission={z.id}>Try the mission</button>{z.id === "air" && <span class="here">Start here, it's where the work started</span>}</p></div>
         <p class="things-h">Things here</p>
         <ul class="things">{z.objects.map((o) => <li><button type="button" data-focus={o}>{bySlug[o].title}</button></li>)}</ul>
       </aside>
     ))}
 
     <Panels />
-    <BunnuWindow />
+    <p class="guide" id="guide" aria-live="polite"><span class="who">Bunnu</span> <span id="guide-say"></span></p>
     <p class="tip" id="tip" aria-hidden="true"></p>
 
     <div class="hud">
@@ -106,57 +105,58 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
     document.querySelectorAll<HTMLButtonElement>("[data-focus]").forEach((b) => b.addEventListener("click", () => world.focus(b.dataset.focus!)));
     panels.forEach((p) => p.querySelector(".close")!.addEventListener("click", closePanel));
     addEventListener("keydown", (e) => { if (e.key === "Escape") closePanel(); });
-    // Bunnu, and the missions
-    const bw = document.getElementById("bunnu")!, say = document.getElementById("bunnu-say")!, acts = document.getElementById("bunnu-acts")!;
-    let typing = 0;
+    // Bunnu narrates (a caption, not a chat); missions run inside the zone's own plate
+    const guide = document.getElementById("guide")!, gsay = document.getElementById("guide-say")!;
+    let hideGuide = 0;
     const speak = (text: string) => {
-      clearInterval(typing); bw.classList.add("on");
-      if (reduce) { say.textContent = text; return; }
-      let i = 0; say.textContent = ""; typing = window.setInterval(() => { say.textContent = text.slice(0, ++i); if (i >= text.length) clearInterval(typing); }, 16);
+      gsay.textContent = text; guide.classList.remove("on"); void guide.offsetWidth; guide.classList.add("on");
+      clearTimeout(hideGuide); hideGuide = window.setTimeout(() => guide.classList.remove("on"), Math.max(6000, text.split(" ").length * 420));
     };
     const el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Partial<HTMLElementTagNameMap[K]> & { className?: string } = {}, kids: (Node | string)[] = []) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
     const finished = new Set<string>(JSON.parse(localStorage.getItem("missions-done") ?? "[]"));
     const markDone = () => buttons.forEach((b) => { if (finished.has(b.dataset.zone ?? "")) b.dataset.done = "1"; });
     markDone();
     const ORDER: Record<string, number[]> = { air: [0, 2, 1], water: [1, 2, 0], earth: [2, 0, 1], fire: [0, 2, 1] };
+    const boxes = new Map([...document.querySelectorAll<HTMLElement>("[data-mission-box]")].map((b) => [b.dataset.missionBox!, b]));
+    const initial = new Map([...boxes].map(([k, b]) => [k, b.innerHTML]));
+    const endMission = () => { world.setMode("idle"); plates.forEach((p) => p.classList.remove("in-mission")); boxes.forEach((b, k) => { b.innerHTML = initial.get(k)!; b.querySelector<HTMLButtonElement>("[data-mission]")!.onclick = () => run(k); }); };
     function run(zone: string) {
       greeted = true; clearTimeout(greet);
-      const m = MISSIONS.find((x) => x.zone === zone)!;
-      plates.forEach((p) => p.classList.remove("on")); panels.forEach((p) => p.classList.remove("on"));
+      const m = MISSIONS.find((x) => x.zone === zone)!, box = boxes.get(zone)!, plate = box.closest(".plate")!;
+      panels.forEach((p) => p.classList.remove("on")); plate.classList.add("in-mission");
       world.setMode("idle"); speak(m.setup);
-      acts.replaceChildren(el("button", { type: "button", className: "primary", textContent: "Go", onclick: fail }));
+      box.replaceChildren(el("h3", { textContent: m.title }), el("p", { className: "m-text", textContent: m.setup }), el("p", { className: "mission-row" }, [el("button", { type: "button", className: "start", textContent: "Run it", onclick: fail })]));
       function fail() {
         world.setMode("fail"); speak(m.fail);
-        acts.replaceChildren(...ORDER[zone].map((k) => { const h = m.hypotheses[k]; const b = el("button", { type: "button", textContent: h.text }); b.onclick = () => pick(h, b); return b; }));
+        const list = el("ol", { className: "hyps" }, ORDER[zone].map((k) => { const h = m.hypotheses[k]; const b = el("button", { type: "button", textContent: h.text }); b.onclick = () => pick(h, b); return el("li", {}, [b]); }));
+        box.replaceChildren(el("h3", { textContent: m.title }), el("p", { className: "m-text obs", textContent: m.fail }), el("p", { className: "m-q", textContent: "What would you check first?" }), list);
       }
       function pick(h: (typeof m.hypotheses)[number], b: HTMLButtonElement) {
-        if (b.classList.contains("struck") || b.disabled) return;
-        if (!h.right) { b.classList.add("struck"); b.setAttribute("aria-disabled", "true"); world.setMode("wrong"); speak(h.reply); setTimeout(() => world.setMode("fail"), 2600); return; }
-        world.setMode("fixed"); speak(h.reply);
+        if (b.getAttribute("aria-disabled") === "true") return;
+        b.setAttribute("aria-disabled", "true");
+        if (!h.right) { b.classList.add("struck"); b.after(el("p", { className: "reply", textContent: h.reply })); world.setMode("wrong"); speak(h.reply); setTimeout(() => world.setMode("fail"), 2600); return; }
+        world.setMode("fixed"); speak(m.bunnu);
         finished.add(zone); localStorage.setItem("missions-done", JSON.stringify([...finished])); markDone();
-        const kids: Node[] = [el("p", { className: "fix", textContent: m.fix })];
+        const kids: Node[] = [el("h3", { textContent: m.title }), el("p", { className: "m-text obs", textContent: h.reply }), el("p", { className: "m-text", textContent: m.fix })];
         if (m.numbers) kids.push(el("p", { className: "nums", textContent: m.numbers }));
-        if (m.voice) kids.push(el("blockquote", {}, [`“${m.voice.line}”`, el("span", { textContent: m.voice.who })]));
-        kids.push(el("p", { className: "row" }, [el("a", { className: "btn primary", href: m.report, textContent: "Read the after-action report" }), el("a", { className: "btn", href: m.ref.href, textContent: m.ref.label }), el("button", { type: "button", textContent: "Back to the planet", onclick: () => { world.setMode("idle"); bw.classList.remove("on"); world.go(null); } })]));
-        acts.replaceChildren(...kids);
-        setTimeout(() => { if (say.textContent === h.reply) speak(m.bunnu); }, 4200);
+        kids.push(el("p", { className: "mission-row" }, [el("a", { className: "start", href: m.report, textContent: "Read the after-action report" }), el("a", { className: "ghost", href: m.ref.href, textContent: m.ref.label }), el("button", { type: "button", className: "ghost", textContent: "Done", onclick: endMission })]));
+        box.replaceChildren(...kids);
       }
     }
-    document.querySelectorAll<HTMLButtonElement>("[data-mission]").forEach((b) => b.addEventListener("click", () => run(b.dataset.mission!)));
-    world.onZone((z) => { world.setMode("idle"); if (z) { greeted = true; bw.classList.remove("on"); } });
+    document.querySelectorAll<HTMLButtonElement>("[data-mission]").forEach((b) => (b.onclick = () => run(b.dataset.mission!)));
+    world.onZone((z) => { endMission(); if (z) greeted = true; });
     let greeted = false;
-    const greet = window.setTimeout(() => { if (greeted) return; speak("Hi. I'm Bunnu. He built all of this; I supervised. Pick a world. I'd start with air, that's where he started."); acts.replaceChildren(el("button", { type: "button", className: "primary", textContent: "Take me to air", onclick: () => { world.go("air" as never); } })); }, reduce ? 400 : 7600);
+    const greet = window.setTimeout(() => { if (!greeted) speak("Pick a place below, or click anything on the planet. Air is where the work started, in 2024."); }, reduce ? 400 : 7600);
 
     // the time machine
     const tmRange = document.getElementById("tm-year") as HTMLInputElement | null, tmAge = document.getElementById("tm-age")!;
     const tmYears = [...document.querySelectorAll<HTMLElement>(".tm-year")];
-    const words = ["", "one", "two", "three", "four", "five"];
     const setTM = () => {
       if (!tmRange) return;
       const i = +tmRange.value, el = tmYears[i], y = el.dataset.y === "now" ? null : +el.dataset.y!;
       tmYears.forEach((t, k) => (t.hidden = k !== i)); world.setYear(y);
       const back = y === null ? 0 : 2026 - y;
-      tmAge.textContent = back === 0 ? "The universe is about 13,787,000,000 years old. Everything is where it should be." : `The universe is now ${(13_787_000_000 - back).toLocaleString("en-US")} years old. You made it ${words[back] ?? back} year${back > 1 ? "s" : ""} younger. It didn't notice. Bunnu did.`;
+      tmAge.textContent = back === 0 ? "Now: everything built so far is on the planet." : `${y}: anything built after this is gone from the planet.`;
     };
     tmRange?.addEventListener("input", setTM); setTM();
     world.onObject((id) => { if (id !== "timemachine" && tmRange && tmRange.value !== tmRange.max) { tmRange.value = tmRange.max; setTM(); } });
@@ -212,7 +212,23 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
   .poster .poster-img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .poster #world { display: none; }
   .mission-row { display: flex; align-items: center; gap: .6rem; margin: .9rem 0 0; }
-  .start { font: 800 var(--t-1) var(--story); color: #0b1233; background: var(--c); border: 0; border-radius: 999px; padding: .55rem 1.1rem; cursor: pointer; box-shadow: 0 4px 0 rgb(0 0 0 / .25); transition: transform .12s; }
+  .mission :global(.start), .mission :global(.ghost) { display: inline-block; font: 800 var(--t-1) var(--story); color: #0b1233; background: var(--c); border: 0; border-radius: 999px; padding: .55rem 1.1rem; cursor: pointer; text-decoration: none; box-shadow: 0 4px 0 rgb(0 0 0 / .25); transition: transform .12s; }
+  .mission :global(.ghost) { background: rgb(255 255 255 / .1); color: #fff; box-shadow: none; }
+  .mission :global(.mission-row) { flex-wrap: wrap; }
+  .mission :global(h3) { font: 900 var(--t1) var(--story); color: #fff; margin: 1rem 0 .4rem; }
+  .mission :global(.m-text) { font: 500 var(--t-1)/1.6 var(--story); color: #dfe4ff; margin: 0 0 .6rem; }
+  .mission :global(.obs) { color: #fff; font-weight: 700; }
+  .mission :global(.m-q) { font: 800 var(--t-1) var(--story); color: var(--c); margin: .8rem 0 .5rem; }
+  .mission :global(.hyps) { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+  .mission :global(.hyps button) { width: 100%; text-align: left; font: 600 var(--t-1)/1.45 var(--story); color: #fff; background: rgb(255 255 255 / .07); border: 1px solid rgb(255 255 255 / .12); border-radius: .7rem; padding: .6rem .8rem; cursor: pointer; }
+  .mission :global(.hyps button:hover:not([aria-disabled="true"])) { border-color: var(--c); }
+  .mission :global(.hyps button.struck) { color: #9aa6d8; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 2px; cursor: default; }
+  .mission :global(.reply) { font: 500 var(--t-2)/1.5 var(--story); color: #c9d3ff; margin: .35rem .2rem 0; }
+  .mission :global(.nums) { font: 400 var(--t-2)/1.6 var(--mono); color: #8dff6a; margin: 0 0 .6rem; }
+  .plate:global(.in-mission) .pline, .plate:global(.in-mission) dl, .plate:global(.in-mission) .real, .plate:global(.in-mission) .things-h, .plate:global(.in-mission) .things { display: none; }
+  .guide { position: absolute; z-index: 6; left: 50%; bottom: 5.6rem; width: min(44rem, 90vw); transform: translate(-50%, 8px); margin: 0; text-align: center; font: 700 clamp(1rem, 1.4vw, 1.2rem)/1.5 var(--story); color: #fff; text-shadow: 0 2px 10px rgb(0 0 0 / .8), 0 0 2px rgb(0 0 0 / .9); opacity: 0; transition: opacity .6s ease, transform .6s ease; pointer-events: none; }
+  .guide.on { opacity: 1; transform: translate(-50%, 0); }
+  .guide .who { color: #ff9ec2; font-weight: 900; margin-right: .3rem; }
   .start:active { transform: translateY(3px); box-shadow: 0 1px 0 rgb(0 0 0 / .25); }
   .here { font: 700 var(--t-2) var(--story); color: var(--c); }
   .zones button[data-done]::after { content: ""; position: absolute; top: .35rem; right: .45rem; width: .45rem; height: .45rem; border-radius: 50%; background: #8dff6a; box-shadow: 0 0 6px #8dff6a; }

@@ -19,7 +19,6 @@ const proj = projects.find((p) => p.slug === l.project);
       <dt>Next time</dt><dd>{l.recommendation}</dd>
       <dt>Evidence</dt><dd>{l.refs.map((r, k) => <>{k > 0 && ", "}<a class:list={{ h: r.href.includes("/commit/") }} href={r.href}>{r.label}</a></>)}</dd>
     </dl>
-    {l.voice && <blockquote><p>“{l.voice.line}”</p><footer>{l.voice.who}</footer></blockquote>}
     <nav class="pn" aria-label="More lessons">
       {prev ? <a href={`/lessons/${prev.slug}`}>Previous: {prev.title}</a> : <span />}
       {next && <a href={`/lessons/${next.slug}`}>Next: {next.title}</a>}

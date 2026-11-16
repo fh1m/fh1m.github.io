@@ -26,15 +26,15 @@ const heritage = [
   { id: "heritage-jrc", bn: "জামিলুর রেজা চৌধুরী", name: "Jamilur Reza Choudhury", line: "Born in Sylhet, 1943. He chaired the expert panel for the Jamuna bridge and led the international panel for the Padma bridge, which opened in 2022." },
 ];
 
-// the time machine: years, the chapter(s) that start then, and what Bunnu remembers
-const years: { y: number | "now"; ch: string[]; bunnu: string }[] = [
-  { y: 2021, ch: ["source"], bunnu: "I arrived. So did his first bug with a victim who wasn't him. I was more interesting." },
-  { y: 2022, ch: ["source"], bunnu: "He photographed his editor as it grew, the way people photograph plants. I sat on the keyboard so it would grow faster." },
-  { y: 2023, ch: ["sky", "water"], bunnu: "Rockets in February, water in September. His green arrow detector worked beautifully, on his desk." },
-  { y: 2024, ch: ["cat", "current"], bunnu: "He built a robot in one night and named it after a different cat. I've made my feelings known." },
-  { y: 2025, ch: ["ground"], bunnu: "The rover's arm learned to type. I've been typing for years. Nobody gave me a medal." },
-  { y: 2026, ch: ["mongla", "dristy", "rupsha"], bunnu: "Thirteen hundred commits and zero dives. He says that's the honest number. I say it's dinner time." },
-  { y: "now", ch: ["mohona"], bunnu: "Next is the first dive. I'm not going. Someone has to keep the chair warm." },
+// the time machine: years, the chapter(s) that start then, and what changed in how I worked
+const years: { y: number | "now"; ch: string[]; guide: string }[] = [
+  { y: 2021, ch: ["source"], guide: "The first code other people depended on. A bug with someone else on the receiving end is a different kind of bug." },
+  { y: 2022, ch: ["source"], guide: "He kept a record of how his tools changed, not only his code. The habit of writing things down started here." },
+  { y: 2023, ch: ["sky", "water"], guide: "Rockets in February, water in September. The green-arrow detector worked on his desk and failed in water: the first time a test environment lied to him." },
+  { y: 2024, ch: ["cat", "current"], guide: "E-Bhapa, built in one night. Its real lesson arrived two years later, on re-reading: the compiler won't argue for you." },
+  { y: 2025, ch: ["ground"], guide: "The rover's arm learned to type for the University Rover Challenge, and RoboSub was graded on a curve set by water." },
+  { y: 2026, ch: ["mongla", "dristy", "rupsha"], guide: "Mongla: over thirteen hundred commits and zero dives. The zero stays on the front page because it's the honest number." },
+  { y: "now", ch: ["mohona"], guide: "Next is the first dive. Every number on this planet gets measured again in real water." },
 ];
 const chapterById = Object.fromEntries(chapters.map((c) => [c.id, c]));
 const strip = (h: string) => h.replace(/<[^>]+>/g, "");
@@ -140,7 +140,7 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
       {y.ch.map((id) => { const c = chapterById[id]; return c && (
         <div class="tm-ch"><p class="tm-when"><span class="bn" lang="bn">{c.bn}</span> {c.when}</p><h3>{c.title}</h3><p>{strip(c.body[y.y === 2022 ? 1 : 0] ?? c.body[0])}</p><p class="tm-lesson">{c.lesson}</p></div>
       ); })}
-      <p class="bunnu-says"><span class="who">Bunnu</span> {y.bunnu}</p>
+      <p class="bunnu-says"><span class="who">Bunnu</span> {y.guide}</p>
     </div>
   ))}
   <p class="links"><a href="/log">The dated record</a></p>

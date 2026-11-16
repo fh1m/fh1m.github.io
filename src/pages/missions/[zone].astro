@@ -48,8 +48,7 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
         <section class="two"><div><h2>Keep doing</h2><p>{lesson.lesson}</p></div><div><h2>Do differently</h2><p>{lesson.recommendation}</p></div></section>
       </article>
       <aside class="aar-margin">
-        <div class="note bunnu"><p class="who">Bunnu</p><p>{m.bunnu}</p></div>
-        {m.voice && <blockquote class="note"><p>“{m.voice.line}”</p><footer>{m.voice.who}</footer></blockquote>}
+        <div class="note bunnu"><p class="who">Bunnu, on what he kept</p><p>{m.bunnu}</p></div>
         {photo && <figure class="note photo"><img src={photo.src} alt={photo.cap} width={photo.w} height={photo.h} loading="lazy" /><figcaption>{photo.cap}</figcaption></figure>}
         <div class="note"><p class="who">Where this lives</p><p><a href={`/projects/${project.slug}`}>{project.title}</a>. {project.line}</p><p><a href={`/lessons/${lesson.slug}`}>The lesson, in NASA's format</a></p></div>
       </aside>
