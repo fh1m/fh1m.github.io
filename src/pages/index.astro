@@ -1,48 +1,71 @@
 ---
 /**
- * Home is an album. The cover is the Pale Blue Dot; the tracklist is the work, one side per nation.
+ * Home is a tiny planet. Zero, a robot I built, has to learn all four elements.
+ * The game loads after the intro; "skip the game" goes straight to everything.
  */
 import Base from "../layouts/Base.astro";
-import Tracklist from "../components/album/Tracklist.astro";
-import Player from "../components/album/Player.astro";
-import Cover from "../components/album/Cover.astro";
-import { elements } from "../data/elements";
 ---
-<Base chrome={false} bodyClass="album">
-  <main id="main" class="album">
-    <header class="cover">
-      <Cover src="/world/cover.webp" alt="The Pale Blue Dot: Earth as one pale pixel in a band of sunlight, photographed by Voyager 1 in 1990" caption="Voyager 1, 14 February 1990, about six billion kilometres out. That pixel is Earth." w={720} h={720} />
-      <h1>Fahim Faisal</h1>
-      <p class="sub">That pixel is home. I build machines that have to work on it without anyone holding their hand, and most of them were wrong before they were right.</p>
-      <nav class="more" aria-label="More">
-        <a href="/lessons">What I got wrong</a>
-        <a href="/notes">Notebook</a>
-        <a href="/shoulders">Shoulders</a>
-        <a href="/cv">CV</a>
-        <a href="https://github.com/fh1m">GitHub</a>
-      </nav>
-    </header>
-    <div class="list">
-      <Tracklist sides={elements} />
-      <Player />
+<Base chrome={false} bodyClass="game" description="A tiny planet, four elements and ZERO-6, a robot that has to learn all of them. Drive it around, or skip the game and see everything I've built.">
+  <main id="main" class="game-shell">
+    <canvas id="world" aria-label="A tiny planet with four zones. Drive ZERO-6 with the arrow keys or WASD."></canvas>
+
+    <section class="intro" id="intro" aria-labelledby="intro-h">
+      <p class="els" aria-hidden="true"><span style="--c:#4f8fe0">Water.</span> <span style="--c:#79b35f">Earth.</span> <span style="--c:#e5533d">Fire.</span> <span style="--c:#eaa63b">Air.</span></p>
+      <h1 id="intro-h">Long ago, the four nations lived together in harmony.<br />Then a guy from Dhaka built a robot and asked it to work in all four.</h1>
+      <p class="sub">This is ZERO-6. Everyone calls it Zero, after the number of times it worked first try.</p>
+      <button class="go" id="go" type="button">Drive Zero</button>
+      <p class="keys">Arrow keys or WASD to drive, Shift to hurry. On a phone, use the stick.</p>
+    </section>
+
+    <div class="hud">
+      <p class="zone" id="zone" aria-live="polite"></p>
+      <button class="snd" id="snd" type="button" aria-pressed="true" aria-label="Sound">Sound</button>
+      <a class="skip-game" href="/everything">Skip the game, show me everything</a>
     </div>
+    <div class="stick" id="stick" aria-hidden="true"><div class="knob"></div></div>
+    <noscript><p class="nojs">The planet needs JavaScript. <a href="/everything">Here is everything without it.</a></p></noscript>
   </main>
 </Base>
 <script>
-  import "../scripts/album.ts";
+  const go = document.getElementById("go");
+  const intro = document.getElementById("intro")!;
+  let started = false;
+  const begin = async () => {
+    if (started) return; started = true;
+    intro.classList.add("gone");
+    const { start } = await import("../game/main");
+    start(document.getElementById("world") as HTMLCanvasElement, {
+      zone: document.getElementById("zone")!,
+      stick: matchMedia("(pointer: coarse)").matches ? document.getElementById("stick") : null,
+      sound: document.getElementById("snd") as HTMLButtonElement,
+    });
+  };
+  go?.addEventListener("click", begin);
+  addEventListener("keydown", (e) => { if (!started && (e.key === "Enter" || e.key === " " || e.key.startsWith("Arrow") || /^[wasd]$/i.test(e.key))) begin(); });
 </script>
 <style>
-  .album { position: relative; z-index: 1; min-height: 100svh; display: grid; grid-template-columns: minmax(16rem, 26rem) minmax(0, 44rem); column-gap: clamp(2.5rem, 7vw, 8rem); padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
-  .cover { align-self: start; position: sticky; top: 3rem; }
-  h1 { font: 500 var(--t3)/1.1 var(--sans); margin: 1.4rem 0 .6rem; }
-  .sub { color: var(--ink); margin: 0 0 .8rem; }
-  .sub { margin-bottom: 1.4rem; }
-  .more { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; }
-  .more a { color: var(--dim); }
-  .list { position: relative; z-index: 1; }
-  @media (max-width: 860px) {
-    .album { grid-template-columns: 1fr; padding-top: 1.6rem; }
-    .cover { position: static; margin-bottom: 2.4rem; }
-    .cover :global(.cover-art) { max-width: 22rem; }
-  }
+  :global(body.game) { overflow: hidden; background: #0b1233; }
+  .game-shell { position: fixed; inset: 0; }
+  #world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .intro { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: 1.2rem; padding: 2rem; text-align: center; background: radial-gradient(circle at 50% 45%, #18205a 0%, #0b1233 70%); transition: opacity .8s ease, visibility .8s; }
+  .intro.gone { opacity: 0; visibility: hidden; }
+  .els { margin: 0; font: 500 var(--t3) var(--sans); display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+  .els span { color: var(--c); }
+  .intro h1 { font: 500 var(--t3)/1.3 var(--sans); max-width: 34ch; margin: .4rem 0 0; color: #fff; }
+  .sub { color: #c9d3ff; max-width: 46ch; margin: 0; }
+  .go { margin-top: .6rem; font: 500 var(--t1) var(--sans); color: #0b1233; background: #ffd15c; border: 0; border-radius: 999px; padding: .75rem 1.6rem; cursor: pointer; box-shadow: 0 6px 0 #c9971f; transition: transform .1s, box-shadow .1s; }
+  .go:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9971f; }
+  .keys { color: #8f9bd0; font-size: var(--t-1); margin: 0; }
+  .hud { position: absolute; z-index: 2; inset: 1rem 1.2rem auto; display: flex; align-items: center; gap: 1rem; pointer-events: none; }
+  .hud > * { pointer-events: auto; }
+  .zone { margin: 0 auto 0 0; font: 500 var(--t2) var(--sans); color: #fff; opacity: 0; transition: opacity .4s; text-shadow: 0 2px 0 rgb(0 0 0 / .25); }
+  .zone:global(.on) { opacity: 1; }
+  .snd { font: 500 var(--t-1) var(--sans); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: 999px; padding: .45rem .9rem; cursor: pointer; }
+  .snd[aria-pressed="false"] { text-decoration: line-through; opacity: .7; }
+  .skip-game { font: 500 var(--t-1) var(--sans); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .9rem; text-decoration: none; }
+  .stick { display: none; position: absolute; z-index: 2; left: 1.4rem; bottom: 1.6rem; width: 120px; height: 120px; border-radius: 50%; background: rgb(255 255 255 / .12); touch-action: none; }
+  .knob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: rgb(255 255 255 / .55); }
+  @media (pointer: coarse) { .stick { display: block; } }
+  .nojs { position: absolute; inset: auto 1rem 1rem; z-index: 4; color: #fff; }
+  @media (max-width: 700px) { .hud { flex-wrap: wrap; } .skip-game { order: 3; } }
 </style>

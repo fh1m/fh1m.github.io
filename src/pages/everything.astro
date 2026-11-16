@@ -1,0 +1,48 @@
+---
+/**
+ * Home is an album. The cover is the Pale Blue Dot; the tracklist is the work, one side per nation.
+ */
+import Base from "../layouts/Base.astro";
+import Tracklist from "../components/album/Tracklist.astro";
+import Player from "../components/album/Player.astro";
+import Cover from "../components/album/Cover.astro";
+import { elements } from "../data/elements";
+---
+<Base chrome={false} bodyClass="album" title="Everything">
+  <main id="main" class="album">
+    <header class="cover">
+      <Cover src="/world/cover.webp" alt="The Pale Blue Dot: Earth as one pale pixel in a band of sunlight, photographed by Voyager 1 in 1990" caption="Voyager 1, 14 February 1990, about six billion kilometres out. That pixel is Earth." w={720} h={720} />
+      <h1>Fahim Faisal</h1>
+      <p class="sub">That pixel is home. I build machines that have to work on it without anyone holding their hand, and most of them were wrong before they were right.</p>
+      <nav class="more" aria-label="More">
+        <a href="/lessons">What I got wrong</a>
+        <a href="/notes">Notebook</a>
+        <a href="/shoulders">Shoulders</a>
+        <a href="/cv">CV</a>
+        <a href="https://github.com/fh1m">GitHub</a>
+      </nav>
+    </header>
+    <div class="list">
+      <Tracklist sides={elements} />
+      <Player />
+    </div>
+  </main>
+</Base>
+<script>
+  import "../scripts/album.ts";
+</script>
+<style>
+  .album { position: relative; z-index: 1; min-height: 100svh; display: grid; grid-template-columns: minmax(16rem, 26rem) minmax(0, 44rem); column-gap: clamp(2.5rem, 7vw, 8rem); padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
+  .cover { align-self: start; position: sticky; top: 3rem; }
+  h1 { font: 500 var(--t3)/1.1 var(--sans); margin: 1.4rem 0 .6rem; }
+  .sub { color: var(--ink); margin: 0 0 .8rem; }
+  .sub { margin-bottom: 1.4rem; }
+  .more { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; }
+  .more a { color: var(--dim); }
+  .list { position: relative; z-index: 1; }
+  @media (max-width: 860px) {
+    .album { grid-template-columns: 1fr; padding-top: 1.6rem; }
+    .cover { position: static; margin-bottom: 2.4rem; }
+    .cover :global(.cover-art) { max-width: 22rem; }
+  }
+</style>
