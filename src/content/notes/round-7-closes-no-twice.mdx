@@ -1,0 +1,52 @@
+---
+title: "Round 7 closes NO, twice"
+dek: "A fine-tune that won on every checkpoint was being scored by the wrong instrument. Retracting it once wasn't enough. The second retraction is the one that holds."
+date: "2026-09"
+arena: noise
+kind: essay
+repo: mongla_ws
+hero: /media/mongla/ledger.webp
+heroAlt: "The measurement ledger strip: one column per entry, coloured by whether it stands or was taken back"
+sources:
+  - { label: "mongla_ws: measured-bars.md", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/measured-bars.md" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+
+The first version looked like a win. A checkpoint at 2,000 training steps flipped the [canary column](/notes/the-canary-that-was-already-dead) from 12 inliers to a passing score.
+
+Sweeping every checkpoint, instead of reporting the best one, killed it. The canary read 15, 10, 11, 10, 10, 8 across steps 2,000 to 12,000, against a stock value of 11. It degraded steadily with training. The good number was a lucky draw, and alone it would have been the most flattering and most wrong number in the project.
+
+<Bars title="canary inliers by fine-tune checkpoint (stock = 11)" rows={[
+  { label: "stock weights", v: 11, tone: "dim" },
+  { label: "step 2,000", v: 15, tone: "estimate", note: "← the 'win'" },
+  { label: "step 4,000", v: 10, tone: "failure" },
+  { label: "step 6,000", v: 11, tone: "failure" },
+  { label: "step 8,000", v: 10, tone: "failure" },
+  { label: "step 10,000", v: 10, tone: "failure" },
+  { label: "step 12,000", v: 8, tone: "failure" },
+]} />
+
+## The furniture in the data
+
+The cause was the training set. **2,440 of its 4,036 frames (60 %)** were the output of an earlier detector: footage with bounding boxes, class names and confidences already burned into the pixels. Hard edges and crisp letters are the easiest features in any frame, and they don't exist at inference time. The descriptor spent its capacity learning the furniture.
+
+Widened to 336 held-out pairs, median inliers read 19.0 on the untrained venue and 18.5 on the trained ones: near-identical. That's the signature of a data problem, not overfitting. Overfitting reads better on trained venues and worse on held-out ones.
+
+## Take two
+
+A clean retrain at 320 × 240 then looked like the win instead: all eight checkpoints at or above stock on the evaluation metric. Run through the actual shipped ONNX path, the same weights gave **2,052 total inliers against stock's 2,237**: an 8.3 % loss, with the same 19 of 20 passing columns either way.
+
+<Bars title="total inliers, through the shipped path" rows={[
+  { label: "stock weights", v: 2237, tone: "measured" },
+  { label: "round 7 retrain", v: 2052, tone: "failure" },
+]} src="No improvement. Round 7 closes NO, for real this time, and stock weights stay." />
+
+The instrument was the defect. The fine-tune scorer had its own keypoint extraction (top-k on the heatmap, nearest-neighbour matching), not the shipped path's NMS, bilinear sampling and reliability weighting. A different algorithm wearing the same name. The tell was visible from the first run: the scorer's *stock* arm reported `[210, 133, 222, 41]` where the recorded table, made by the shipped path, reads `[189, 65, 134, 24]`. Two numbers for one unchanged model.
+
+<Pull>A control arm that can't reproduce its own recorded number is not a control arm.</Pull>
+
+I noticed the mismatch, blamed post-processing, and kept using that scorer for two training runs and four checkpoint sweeps. The check costs one command. Not running it cost weeks.
+
+<Fig src="/media/mongla/ledger.webp" alt="A strip of 126 columns, one per ledger entry, coloured by whether each stands, was taken back, or measured an idea whose answer was no" caption="The ledger: 126 entries, 18 that take an earlier result back in their own title. This is one of them, twice." wide />

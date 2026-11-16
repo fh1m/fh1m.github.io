@@ -1,0 +1,44 @@
+---
+title: "From 'worked once' to 'works every time'"
+dek: "The gap between a demo and a competition run is the gap between a capability existing and a capability being reachable, and between a test passing and a test that can fail."
+date: "2026-06"
+arena: workshop
+kind: essay
+repo: mongla_ws
+hero: /media/lab/vehicle-estop.webp
+heroAlt: "A hand on the vehicle's emergency stop during a run"
+sources:
+  - { label: "mongla_ws (commit 74d7d42)", href: "https://github.com/fh1m/mongla_ws" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+
+A demo needs the thing to work once, in front of people, under conditions you chose. A competition run needs it to work the first time, under conditions the pool chose. Almost everything I've learned about reliability lives in that gap.
+
+The first half of the gap is [reachability](/notes/a-capability-is-only-real): a module written, reviewed, merged and never reached. The fix is a decision made at write time. A module is either imported by something that runs, or it carries a written reason naming the consumer it's waiting for. There's no third state.
+
+## Injection-verify your guards
+
+The second half is tests that can't fail.
+
+<Pull>A test that has never failed against a real defect is not a guard. It's decoration.</Pull>
+
+So the guards get broken on purpose. Introduce the defect the test claims to catch, watch it go red, restore it. If it doesn't fail when the thing it protects is broken, it was never protecting anything. The best example in the project is a thruster-health check that passed for months:
+
+<Bars title="ESC telemetry frames reading exactly zero, with no motors attached" rows={[
+  { label: "frames received", v: 958, tone: "dim" },
+  { label: "frames reading 0", v: 958, tone: "failure" },
+]} src="The check counted messages arriving. Messages arrive whether or not a motor exists. A gate that can't fail isn't a gate." />
+
+## The abort path is a feature
+
+Reliability also means the boring path works: stop, surface, disarm, kill. The emergency stop isn't an accessory; it's the one capability you must be able to prove on demand, because it's the one you'll need when everything else has already gone wrong.
+
+<Fig src="/media/lab/vehicle-estop.webp" alt="A hand pressing the vehicle's emergency stop during a bench run" caption="Mid-run: the moment the abort path proves it works." />
+
+Stopping cleanly turned out to be its own saga: twice "verified on hardware", twice wrong. That one is in [killing a process tree](/notes/the-tree-the-launcher-would-not-forward-signals-to).
+
+<Fig src="/media/lab/gil-audit.webp" alt="A table ranking each pipeline stage by how long it holds Python's global lock" caption="Reliability as an audit, not a feeling: every hot-path stage ranked by how long it freezes Python, so the next stall is found before the symptom." wide contain />
+
+Reliability isn't a feeling you get from green checkmarks. It's what's left after you've tried, on purpose, to make each check lie to you.

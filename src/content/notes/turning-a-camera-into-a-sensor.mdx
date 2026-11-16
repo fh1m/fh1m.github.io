@@ -1,0 +1,66 @@
+---
+title: "Turning a camera into a velocity sensor"
+dek: "No DVL, no GPS. A downward camera and the floor can tell you how fast you're moving, if you trust the geometry more than the number."
+date: "2026-09"
+arena: mongla
+kind: essay
+repo: mongla_ws
+hero: /media/mongla/flow-lab.webp
+heroAlt: "The interactive velocity-from-the-floor panel on the Mongla site"
+sources:
+  - { label: "The Mongla site: a camera pointed at the floor", href: "https://fh1m.github.io/mongla_ws/" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+
+A Doppler velocity log is the obvious way to measure an underwater vehicle's speed over the ground. It's also expensive, and we didn't have one. So the question became: what do we already have that can measure motion?
+
+The downward camera. If you know the height above the floor and the camera's focal length, then optical flow (how far the floor's texture slides between two frames) *is* a velocity:
+
+<figure class="wide">
+<svg viewBox="0 0 900 220" role="img" aria-labelledby="flow-t">
+  <title id="flow-t">A camera at height h looks down at the floor. A floor feature moving distance d appears to move p pixels. Speed equals pixel motion times height divided by focal length in pixels, per frame interval.</title>
+  <style>{`.t{font:14px var(--mono);fill:var(--dim)}.m{font:16px var(--mono);fill:var(--chalk)}`}</style>
+  <rect x="120" y="20" width="60" height="30" rx="3" fill="none" stroke="var(--chalk)" />
+  <line x1="150" y1="50" x2="60" y2="190" stroke="var(--measured)" stroke-dasharray="4 4" />
+  <line x1="150" y1="50" x2="240" y2="190" stroke="var(--measured)" stroke-dasharray="4 4" />
+  <line x1="20" y1="190" x2="300" y2="190" stroke="var(--dim)" />
+  <line x1="150" y1="50" x2="150" y2="190" stroke="var(--estimate)" /><text x="158" y="128" class="t">h</text>
+  <circle cx="110" cy="190" r="5" fill="var(--failure)" /><circle cx="180" cy="190" r="5" fill="none" stroke="var(--failure)" />
+  <text x="120" y="212" class="t">d</text>
+  <text x="380" y="90" class="m">v ≈ (p / f) · h / Δt</text>
+  <text x="380" y="124" class="t">p  pixels the floor moved      f  focal length, px</text>
+  <text x="380" y="148" class="t">h  height above the floor      Δt frame interval</text>
+  <text x="380" y="182" class="t">Get h wrong by 20 % and every speed is wrong by 20 %, forever.</text>
+</svg>
+<figcaption>The whole sensor is one ratio. The trap is that every term in it can lie plausibly.</figcaption>
+</figure>
+
+The geometry is simple. Height is the term that ruins you: twice as high, half the pixel motion for the same speed. Get it wrong and every velocity, and every metre of dead reckoning built on it, is wrong by the same factor in the same direction.
+
+## The verification that actually worked
+
+Three real 30 cm slides on a bench rig, downward camera at 0.72 m, focal length 513.94 px. The honest column is the last one: the height each measurement *implies*, recovered from the slide it got wrong.
+
+| slide | measured | error | implied height |
+|---|---:|---:|---:|
+| lateral 30 cm | 30.13 cm | +0.13 | 0.72 m |
+| forward 30 cm | 31.09 cm | +1.09 | 0.69 m |
+| back 30 cm | 31.04 cm | +1.04 | 0.70 m |
+| tape says | — | — | **0.72 m** |
+
+<Bars title="height implied by each slide, against the tape" unit=" m" max={0.8} rows={[
+  { label: "tape measure", v: 0.72, tone: "dim" },
+  { label: "lateral slide", v: 0.72, tone: "measured" },
+  { label: "forward slide", v: 0.69, tone: "measured" },
+  { label: "back slide", v: 0.70, tone: "measured" },
+]} src="The scale chain closes on itself. That's the only reason to believe the speed at all." />
+
+Worst error: 1.09 cm on 30 cm, about 3.6 %. That's several times worse than even a cheap DVL's quoted ~1 %, and the same order as published monocular visual odometry in turbid water. It was measured in air, on a hand slide whose own precision is about ±1 cm, so it's an upper bound on the error, not a measurement of it. The page says so.
+
+<Pull>A number with no bar can't be wrong, so it never gets checked. It just gets quoted, and eventually shipped.</Pull>
+
+What makes this trustworthy isn't that the estimator agreed with another estimator; that only measures agreement. It's that the truth was known: a tape on the floor, a slide of fixed length. Construct the case where you already know the answer, then see if the machine finds it.
+
+<Fig src="/media/mongla-docs/pool-glide.webp" alt="An underwater vehicle gliding over tiled pool floor" caption="A tiled pool floor is a gift to optical flow: texture everywhere, and a known geometry. A sandy lake bed is not." />

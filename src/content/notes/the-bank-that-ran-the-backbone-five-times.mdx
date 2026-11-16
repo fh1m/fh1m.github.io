@@ -1,0 +1,58 @@
+---
+title: "The bank that ran the backbone five times"
+dek: "A per-lookup cost that barely moved with top_k was the tell. Something else was the real cost, and it was worth more than the optimisation I went looking for."
+date: "2026-09"
+arena: sight
+kind: essay
+repo: mongla_ws
+hero: /media/mongla-docs/robosub-torpedo.webp
+heroAlt: "The torpedo board underwater, its openings boxed by the detector"
+sources:
+  - { label: "mongla_ws", href: "https://github.com/fh1m/mongla_ws" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+
+The number that should have moved didn't. A recognition lookup cost 42.3 ms at `top_k = 1024`, 36.3 ms at 512, 13.3 ms at 256. Halving the keypoints from 1024 to 512 cut the multiply-accumulates in the matcher by about three quarters, and the time by 14 %.
+
+<Bars title="ms per lookup, against keypoints kept" unit=" ms" rows={[
+  { label: "top_k = 1024", v: 42.3, tone: "dim" },
+  { label: "top_k = 512", v: 36.3, tone: "estimate" },
+  { label: "top_k = 256", v: 13.3, tone: "measured" },
+]} src="When a cost refuses to scale with the thing that should dominate it, something fixed is the cost." />
+
+<Pull>The profiling number that looked boring was the whole finding.</Pull>
+
+## Five passes over the same pixels
+
+`Anchor.locate()` detects features internally. That's fine for one reference photograph. But `CheckpointBank.locate()` asks several references about the *same* frame, and each of them called the full detector on identical pixels. A four-wide shortlist ran the neural backbone four times on one image, plus once more for the signature path: **five backbone passes per lookup, four of them recomputing something already in memory.**
+
+<figure class="wide">
+<svg viewBox="0 0 900 220" role="img" aria-labelledby="bank-t">
+  <title id="bank-t">Before: one camera frame fed into the detector five times, once per reference and once for the signature. After: the frame goes through the detector once and the features are handed to all references.</title>
+  <style>{`.b{fill:none;stroke:#2c333a}.d{fill:#1a0c0b;stroke:var(--failure)}.g{fill:#0e1a08;stroke:var(--measured)}.t{font:12px var(--mono);fill:var(--dim)}`}</style>
+  <text x="20" y="20" class="t">before</text>
+  <rect class="b" x="20" y="40" width="80" height="140" rx="3" /><text x="34" y="114" class="t">frame</text>
+  {[0,1,2,3,4].map((i) => <g><line x1="100" y1="110" x2="160" y2={50 + i * 30} stroke="var(--failure)" /><rect class="d" x="160" y={38 + i * 30} width="110" height="24" rx="3" /><text x="170" y={55 + i * 30} class="t">backbone #{i + 1}</text></g>)}
+  <text x="480" y="20" class="t">after</text>
+  <rect class="b" x="480" y="40" width="80" height="140" rx="3" /><text x="494" y="114" class="t">frame</text>
+  <line x1="560" y1="110" x2="600" y2="110" stroke="var(--measured)" />
+  <rect class="g" x="600" y="96" width="110" height="28" rx="3" /><text x="614" y="115" class="t">backbone ×1</text>
+  {[0,1,2,3].map((i) => <g><line x1="710" y1="110" x2="770" y2={55 + i * 36} stroke="var(--measured)" /><rect class="b" x="770" y={43 + i * 36} width="100" height="24" rx="3" /><text x="782" y={60 + i * 36} class="t">ref {i + 1}</text></g>)}
+</svg>
+<figcaption>Detect once, hand the features to every reference. The arithmetic is identical; it just stops being repeated.</figcaption>
+</figure>
+
+## The fix is smaller than the bug
+
+`Anchor.locate_features(k1, d1)` now accepts features that were already extracted. The bank detects once and passes them to every reference. At the shipping width, the lookup went from **169.1 ms to 94.4 ms**, 1.8 times faster, at zero accuracy cost, because nothing was approximated.
+
+<Bars title="one bank lookup at the shipping width" unit=" ms" rows={[
+  { label: "five backbone passes", v: 169.1, tone: "failure" },
+  { label: "one pass, shared", v: 94.4, tone: "measured" },
+]} />
+
+It also overturned an earlier conclusion. A previous section had said the Hailo-8 saves a fixed ~31.7 ms regardless of bank size, assuming detection happens once per lookup. It didn't: it happened *k + 1* times, so the chip's saving actually scaled with the shortlist width. Removing the redundancy on CPU alone recovered 75 ms; what's left is what moves onto the accelerator next.
+
+<Fig src="/media/mongla-docs/mirpur-gate.webp" alt="A gate in hazy turquoise water at Mirpur, boxed by the detector" caption="The kind of frame the bank exists for: real Mirpur footage, where one reference photograph isn't enough. Why a bank at all is in <a href='/notes/the-anchor-that-learned-to-look-twice'>the anchor essay</a>." />

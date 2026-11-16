@@ -1,0 +1,44 @@
+---
+title: "Why radar doesn't work underwater, and what that forces"
+dek: "Salt water eats radio in centimetres. No radio means no GPS, no radar and no link home once submerged. Every design choice downstream is a consequence."
+date: "2026-08"
+arena: water
+kind: essay
+hero: /media/mongla-docs/pool-glide.webp
+heroAlt: "An underwater vehicle gliding over a pool floor, seen from above"
+sources:
+  - { label: "Skin depth (δ ≈ 503·√(ρ/f) m), any EM textbook; seawater ρ ≈ 0.25 Ω·m", href: "https://en.wikipedia.org/wiki/Skin_effect" }
+  - { label: "The Mongla site: the medium", href: "https://fh1m.github.io/mongla_ws/" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+
+Underwater there's no radio, no GPS, and no second chance to explain yourself. This one physical fact writes most of an underwater vehicle's architecture for you.
+
+Seawater conducts. A radio wave entering a conductor induces currents that eat its energy, and it decays exponentially with depth. The distance over which it falls to about 37 % is the *skin depth*, and it shrinks with frequency.
+
+<Bars title="skin depth in seawater (σ ≈ 4 S/m), by frequency" unit=" m" log rows={[
+  { label: "ELF, 100 Hz", v: 25.15, tone: "medium" },
+  { label: "VLF, 10 kHz", v: 2.515, tone: "medium" },
+  { label: "AM band, 1 MHz", v: 0.2515, tone: "estimate" },
+  { label: "FM band, 100 MHz", v: 0.02515, tone: "failure" },
+  { label: "GPS L1, 1.575 GHz", v: 0.00634, tone: "failure" },
+  { label: "Wi-Fi, 2.4 GHz", v: 0.00513, tone: "failure" },
+]} src="Computed from δ ≈ 503·√(ρ/f) with ρ = 0.25 Ω·m. Log scale. GPS loses most of itself in the first six millimetres." />
+
+That's why submarines talk at very low frequencies through kilometre-long antennas, and why a student vehicle the size of a suitcase gets nothing at all. GPS is off the table a hand's width under the surface. So is radar, so is a telemetry link, so is a human with a joystick.
+
+## What it forces
+
+If you can't get a position fix from the sky, you estimate it from the inside: dead reckoning on an IMU, corrected by whatever you can measure locally. Depth from pressure. Velocity from a [camera pointed at the floor](/notes/turning-a-camera-into-a-sensor). Heading from the attitude estimator. If you can't stream telemetry home, the vehicle has to be right on its own, and has to log enough to explain itself afterwards.
+
+<Fig src="/media/mongla-docs/pool-top.webp" alt="An underwater vehicle in a pool seen from above, a tether trailing" caption="From the surface, everything looks reachable. A few millimetres down, the radio disagrees." />
+
+Sound travels well underwater, which is why sonar and acoustic modems exist. But sound is slow (about 1.5 km/s) and its bandwidth is narrow. It's a way to whisper, not a way to steer.
+
+<Fig src="/media/lab/sonar-ping360.webp" alt="A scanning sonar polar view and its intensity heatmap" caption="A scanning sonar: seeing with sound where light and radio give up." contain />
+
+<Pull>A vehicle either understood what it was looking at, or it didn't, and it won't tell you which.</Pull>
+
+That's why the interesting engineering isn't the happy path. It's what the vehicle does when it *can't* do something. On a well-built stack the answer is never a silent workaround that keeps the demo running. It's a loud refusal and a written reason, because nobody is going to be on the radio to ask.

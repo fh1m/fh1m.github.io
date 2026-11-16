@@ -1,0 +1,69 @@
+---
+title: "The engine room"
+dek: "Four measurements from inside Mongla's perception path: the reflex split, zero wasted decodes, a lock nobody may hold, and the moment the sensor became the limit."
+date: "2026-09"
+arena: mongla
+kind: essay
+repo: mongla_ws
+hero: /media/lab/gil-audit.webp
+heroAlt: "A table ranking each perception stage by how long it holds Python's global lock"
+sources:
+  - { label: "mongla_ws (tools/gil_audit.py)", href: "https://github.com/fh1m/mongla_ws" }
+  - { label: "The Shift: the architecture from first principles", href: "https://fh1m.github.io/mongla_ws/the-shift.html" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Stats from "../../components/note/Stats.astro";
+import Pull from "../../components/note/Pull.astro";
+
+The [Mongla](/notes/mongla) note is the tour. This is the engine room: four places where the architecture was measured rather than argued.
+
+## 1 · Control costs vision nothing
+
+The board runs a 500 Hz loop on one ESP32 core: sensors, control, motor commands. The Pi does nothing but see. The split isn't tidiness; it's that a controller must never be late, and a neural net sometimes is.
+
+<Fig src="/media/mongla-docs/cores.webp" alt="The board's timetable: core 1 runs sensors, control and DShot at 500 Hz; core 0 runs MAVLink at 100 Hz, display at 30 Hz, radio and SD at 20 Hz" caption="Two cores that never share a desk. Nothing a human might wait on is allowed onto core 1." wide contain />
+
+The payoff is a reading off the running system: control-loop jitter unchanged under full vision load. When vision spikes, control doesn't.
+
+## 2 · Zero wasted decodes
+
+The Hailo-8 has a scarce budget. So the camera only decodes a frame when the inference worker is idle, and the chip never spends compute on a frame already superseded. The instrumentation says so every ten seconds.
+
+<Stats items={[
+  { v: "778", l: "inferences in the window" },
+  { v: "11.5 ms", l: "mean frame age at inference start" },
+  { v: "19.2 ms", l: "worst frame age" },
+  { v: "0", l: "frames decoded and never inferred", tone: "measured" },
+]} />
+
+## 3 · Nothing in the hot path holds the lock
+
+Python has one global lock. On a vehicle, a stage that holds it while working freezes everything else. So every stage was audited by *hold × rate*: the fraction of wall time the process is frozen.
+
+<Bars title="duty of each hot-path stage" unit=" %" rows={[
+  { label: "hailo run_async", v: 78.3, tone: "measured", note: "frees the lock (was: held)" },
+  { label: "cv2.imdecode", v: 32.0, tone: "measured", note: "frees" },
+  { label: "letterbox", v: 2.0, tone: "measured", note: "frees" },
+  { label: "pyserial (board link)", v: 0.1, tone: "measured", note: "frees" },
+  { label: "cv_bridge", v: 0.1, tone: "estimate", note: "holds; viewer only" },
+]} src="The only holder left is off the mission path." />
+
+Cumulatively that session took the vision pipeline from about 28 ms to 18 ms, removed about 6.5 ms of control-loop poll wait, and took detections from 36.5 Hz to 77 Hz at roughly 30 % less CPU.
+
+<Pull>A parameter that's read, logged and then ignored is worse than one that's unsupported. Every log says it worked.</Pull>
+
+## 4 · The sensor is the limit
+
+The goal of optimising a pipeline isn't "fast". It's to make the software vanish as a source of delay, so what's left is the camera.
+
+| | forward | downward |
+|---|---:|---:|
+| rate | 73.4 Hz | 27.6 Hz |
+| pipeline age, median / p99 | 21.86 / 29.58 ms | 46.94 / 52.44 ms |
+| frame interval, median | 12.01 ms | 32.01 ms |
+| authority at p99 | **1.000** | **1.000** |
+
+Authority 1.000 at p99 means that 99 % of the time, the controller acts on the freshest frame the sensor could possibly have provided. There is no software latency left to remove.
+
+<Fig src="/media/lab/latency-verdict.webp" alt="The latency verdict table for both cameras: sensor is the limit" caption="Verified on live hardware, both cameras. The verdict you want: the sensor is the limit." wide contain />

@@ -1,0 +1,54 @@
+---
+title: "Tracking without detection"
+dek: "Detectors blink. A lock has to survive the gap between two sightings without inventing a target that isn't there."
+date: "2026-04"
+arena: delay
+kind: essay
+repo: mongla_ws
+hero: /media/mongla/brain-run.webp
+heroAlt: "Three panels: what the vehicle sees, what it believes, what it does"
+sources:
+  - { label: "mongla_ws: detection-continuity.md", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/perception/detection-continuity.md" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Chart from "../../components/note/Chart.astro";
+import Pull from "../../components/note/Pull.astro";
+
+Real detectors don't fire every frame. Underwater, against murk and sun caustics, they drop out for stretches. If the controller only acts when the detector fires, the vehicle stutters and loses its target.
+
+We counted the gaps. Not guessed: counted, at native frame rate, over 300 consecutive frames × 3 windows × 5 clips. **71 real gaps.**
+
+<Chart title="Distribution of the 71 real detection gaps" data={[
+  { label: "p50", value: 0.155 },
+  { label: "p90", value: 0.651 },
+  { label: "p99", value: 2.418, tone: "estimate" },
+  { label: "max", value: 4.0, tone: "failure" },
+]} unit=" s" caption="Most gaps are flicker. A few are long. The long ones decide the run." />
+
+## A ladder, not a timeout
+
+So you build a *lock ladder*: a small state machine that coasts a target through detection gaps, one rung at a time, each rung's timeout sized against the real distribution of gaps rather than a guessed constant.
+
+<Chart title="Share of the 71 real gaps each rung's timeout covers" data={[
+  { label: "fresh-zero 0.20 s", value: 56.3 },
+  { label: "coast 0.80 s", value: 91.5 },
+  { label: "lost-grace 1.00 s", value: 91.5 },
+  { label: "predict 1.50 s", value: 94.4 },
+  { label: "track buffer 5.00 s", value: 100, tone: "measured" },
+]} unit=" %" max={110} caption="The coast timeout sits just above the p90, which is exactly its job: routine flicker. Nothing in the archive outlives the track buffer." wide />
+
+One clip held its target through a gap of **175 frames** with no detection at all. The vehicle still knew where the target was, because an anchor matched image structure instead of asking the network again.
+
+<Fig src="/media/mongla/brain-run.webp" alt="Three panels: the forward camera with a bins box, a belief map with landmarks and an uncertainty circle, and the current verb's commands and budget" caption="What it sees, what it believes, what it does. The belief circle grows while the vehicle is blind: the map draws how sure it is, not just where it thinks the target is." wide contain />
+
+## Asymmetric failure sets the gates
+
+The rungs are honest about confidence. The ladder ends in a refusal, LOST, not in a confident invention.
+
+<Pull>A rung that names the wrong prop confidently is worse than one that reports LOST, because LOST is honest.</Pull>
+
+The failure modes are asymmetric. A missed re-acquisition costs a second. A false one costs the run. You'd rather lose the target and know it than weld two objects into one identity and have every downstream consumer believe the target teleported. Robustness here isn't a bigger model. It's refusing to lie during the gap.
+
+The ladder's limits have their own note: [179 identity switches](/notes/179-identity-switches), and why the state-of-the-art fix costs more than this vehicle can pay.
+
+<Fig src="/media/mongla-docs/hud_murky.webp" alt="The operator display on simulated murky water, fewer detections, the gate still held" caption="Murky water: detections thin out. This is where the ladder earns its rungs." />

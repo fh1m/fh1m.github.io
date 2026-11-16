@@ -1,0 +1,47 @@
+---
+title: "A capability is only real if the path to it is"
+dek: "The most expensive defect I keep meeting: a feature that's written, reviewed and tested, and never runs, because nothing that runs calls it."
+date: "2026-08"
+arena: workshop
+kind: essay
+repo: mongla_ws
+hero: /media/lab/config-table-1.webp
+heroAlt: "A table of subsystems that configure themselves from one editable file"
+sources:
+  - { label: "Capability map: every claim with its evidence", href: "https://fh1m.github.io/mongla_ws/capability-map.html" }
+  - { label: "mongla_ws (commit 28833da)", href: "https://github.com/fh1m/mongla_ws" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+
+Loop closure was implemented. It had code, it had tests, it had a launch file. And it did nothing on the vehicle, because it was wired into a launch file that the documented bring-up command doesn't include. The capability existed. The path to it didn't.
+
+<figure class="wide">
+<svg viewBox="0 0 900 220" role="img" aria-labelledby="rc-t">
+  <title id="rc-t">The documented bring-up command launches the main launch file, which starts perception, control and estimation. Loop closure lives in a second launch file that nothing launches. It has code and tests, and no incoming edge.</title>
+  <style>{`.t{font:13px var(--mono);fill:var(--chalk)}.d{font:12px var(--mono);fill:var(--dim)}`}</style>
+  <rect x="30" y="90" width="160" height="40" rx="4" fill="none" stroke="var(--measured)" /><text x="46" y="115" class="t">mongla bringup</text>
+  <line x1="190" y1="110" x2="270" y2="110" stroke="var(--measured)" />
+  <rect x="270" y="90" width="150" height="40" rx="4" fill="none" stroke="var(--measured)" /><text x="290" y="115" class="t">main.launch</text>
+  {["perception", "control", "estimation"].map((n, i) => <g><line x1="420" y1="110" x2="500" y2={50 + i * 60} stroke="var(--measured)" /><rect x="500" y={32 + i * 60} width="150" height="36" rx="4" fill="none" stroke="var(--measured)" /><text x="516" y={55 + i * 60} class="t">{n}</text></g>)}
+  <rect x="700" y="150" width="170" height="40" rx="4" fill="none" stroke="var(--failure)" stroke-dasharray="5 4" /><text x="714" y="175" class="t">loop closure</text>
+  <text x="700" y="140" class="d">code ✓ tests ✓ caller ✗</text>
+</svg>
+<figcaption>Reachability is a graph property. A node with no incoming edge from anything that runs is decoration, however good its tests are.</figcaption>
+</figure>
+
+This is the oldest and most expensive defect in the codebase, and it has a family: a lock ladder in no launch file, a hold time held at zero, a bank storing a position nothing ever passed, a device path read and then ignored. Every one looked finished. Correct code, passing tests, nothing on the vehicle.
+
+<Pull>A capability is only real if the path to it is.</Pull>
+
+## The fix is a decision, not more code
+
+The instinct is to add the missing switch: declare it in the second launch file too. That's how you get two places that must be kept in step, which is the same bug with a longer fuse. Instead the node configures itself from a single deck-editable file, the same pattern the course priors already use: module constants as defaults, an explicitly set parameter still winning, and a test that fails if the capability ever reappears in a launch file.
+
+<Fig src="/media/lab/config-table-2.webp" alt="A table listing loop closure and the sensor roster, declared in one place" caption="Declared once, read by whoever runs. One truth, no copies to drift." wide contain />
+
+And it degrades loudly. A malformed config falls back to defaults *and says so*, because silently ignoring an operator's edit means someone stands on the pool deck waiting for a change that never loaded.
+
+<Fig src="/media/lab/report-run.webp" alt="A tabulated, scored run: every number with the conditions that produced it" caption="The ledger habit applied to runs: what was asked, what ran, and the conditions." wide contain />
+
+The point isn't the loop closure. It's that reachability is a property you design in at write time, because that's the only moment anyone knows whether a consumer exists. The same idea at the scale of a whole team is [the next essay](/notes/from-worked-once-to-works-every-time).

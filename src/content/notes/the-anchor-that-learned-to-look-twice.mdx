@@ -1,0 +1,48 @@
+---
+title: "The anchor that learned to take a second photograph"
+dek: "A recognition reference frozen once looked like it was hitting the descriptor's ceiling on murky footage. It was the cost of never re-photographing the thing you're trying to recognise."
+date: "2026-09"
+arena: sight
+kind: essay
+repo: mongla_ws
+hero: /media/mongla-docs/robosub-torpedo.webp
+heroAlt: "The torpedo board underwater with its openings detected"
+sources:
+  - { label: "mongla_ws", href: "https://github.com/fh1m/mongla_ws" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+
+The guard read, almost apologetically, `not self._anchor.has_reference`. The anchor took its reference image once, the first time it saw the target, and never refreshed it. Measured against archive clips, inliers against that one frozen photo told the whole story.
+
+<Bars title="inliers against one frozen reference, seconds after it was taken" rows={[
+  { label: "mirpur_torpedo · +1 s", v: 189, tone: "measured" },
+  { label: "mirpur_torpedo · +8 s", v: 24, tone: "estimate" },
+  { label: "mirpur_torpedo_1 · +1 s", v: 69, tone: "measured" },
+  { label: "mirpur_torpedo_1 · +8 s", v: 12, tone: "failure", note: "under the 15 bar" },
+]} src="Every clip's minimum was its own +8 s column. The murkier clip crossed the failure line entirely." />
+
+Run the same frames against a *fresh* reference and they score what the +1 s column scored. Nothing about the descriptor changed. What changed was refusing to take a second photograph.
+
+## Composing, not replacing
+
+The fix, `CheckpointBank`, holds up to five references over one backend instead of one photo forever. It composes `Anchor` rather than replacing it, so the ROI scaling, the homography, the pose estimate and the below-bar refusal all stay code that had already been measured on real footage. The bank adds only what one frozen photo structurally can't: which reference answered, which to discard, and when the evidence says it's time for a new one.
+
+<Pull>A table of inlier counts says a match is good. It never says good at what.</Pull>
+
+## Three defects no table showed
+
+Shipping the bank surfaced three more defects, found by a tool that draws what the system actually believes (the matched quadrilateral, the surviving correspondences, the warped annotations, the identity verdict and its reason) on real footage. Looking at it for a few minutes found them.
+
+The sharpest: on close-range frames with the target filling the screen, the system refused every one at 7–8 inliers. A confidence floor of 0.60 was rejecting candidate views that the detector itself only scores at a median of 0.49 on this footage.
+
+<Bars title="detector recall on the same stack, by venue" unit=" %" rows={[
+  { label: "venue A", v: 29.2, tone: "failure" },
+  { label: "venue B", v: 72.7, tone: "measured" },
+  { label: "venue C", v: 68.3, tone: "measured" },
+]} src="One constant can't be right in all three. The floor dropped to 0.25." />
+
+A fixed floor was the wrong shape of rule. It came down to 0.25, and the checks that actually discriminate (geometric agreement, eviction by yield, a 40-inlier recognition bar) were left to do the job the threshold had been standing in for.
+
+<Fig src="/media/mongla-docs/hud_murky.webp" alt="The operator display on murky water with the gate detected" caption="What the operator sees. The visual check exists because a screen of boxes catches things a column of numbers hides." />

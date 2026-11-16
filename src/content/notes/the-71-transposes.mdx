@@ -1,0 +1,69 @@
+---
+title: "The 71 transposes that were one operation"
+dek: "A feature matcher refused to compile for a neural accelerator. It turned out to be a single idea wearing 71 masks, and proving the fix was exact mattered more than the 23× speed-up."
+date: "2026-09"
+arena: sight
+kind: essay
+repo: mongla_ws
+hero: /media/lab/chip-efficiency.webp
+heroAlt: "Terminal readout of the Hailo-8 inference path: inferences, frame ages, zero wasted decodes"
+sources:
+  - { label: "XFeat (Potje et al., CVPR 2024)", href: "https://arxiv.org/abs/2404.19174" }
+  - { label: "torch.nn.functional.pixel_unshuffle", href: "https://pytorch.org/docs/stable/generated/torch.nn.functional.pixel_unshuffle.html" }
+  - { label: "mongla_ws (commits 908559e · 194c063 · 42466c8)", href: "https://github.com/fh1m/mongla_ws" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Term from "../../components/note/Term.astro";
+import Pull from "../../components/note/Pull.astro";
+
+XFeat is a lightweight, state-of-the-art feature matcher. The Hailo-8 is a neural accelerator that does 26 TOPS and nothing else well. Getting the first onto the second should have been a compile step. Instead the compiler died.
+
+<Term title="the Hailo dataflow compiler on stock XFeat, summarised" lines={[
+  "UnsupportedShuffleLayerError",
+  "  Transpose   × 71   (5-D)",
+  "  Slice       × 72   (5-D)",
+  "  Unsqueeze   × 70   (5-D)",
+]} />
+
+The tempting move is to fight 213 operations. The useful move was noticing they aren't 213 problems, or even 71. They're **one**: a helper called `_unfold2d(x, ws=8)`, written with `Tensor.unfold`, which PyTorch traces as a pile of five-dimensional slicing. That operation has a name, *space-to-depth*: fold each 8 × 8 patch of pixels into 64 channels. PyTorch already has it as `pixel_unshuffle`, and the chip supports that natively. One substitution, and the graph parses.
+
+<figure class="wide">
+<svg viewBox="0 0 900 230" role="img" aria-labelledby="s2d-t">
+  <title id="s2d-t">Space-to-depth: an 8 by 8 patch of a single-channel image becomes one pixel with 64 channels. The image shrinks 8 times in each direction and gains 64 times the channels; no values change.</title>
+  <style>{`.c{fill:#0b1a10;stroke:var(--measured);stroke-width:.6}.h{fill:var(--measured);opacity:.75}.t{font:13px var(--mono);fill:var(--dim)}`}</style>
+  {Array.from({ length: 64 }, (_, i) => <rect class={i % 9 === 0 ? "h" : "c"} x={40 + (i % 8) * 18} y={30 + Math.floor(i / 8) * 18} width="16" height="16" />)}
+  <text x="40" y="204" class="t">8 × 8 patch, 1 channel</text>
+  <path d="M220 100 H 360" stroke="var(--dim)" stroke-width="1.5" marker-end="url(#ar)" />
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--dim)" /></marker></defs>
+  <text x="230" y="90" class="t">pixel_unshuffle(8)</text>
+  {Array.from({ length: 64 }, (_, i) => <rect class={i % 9 === 0 ? "h" : "c"} x={400 + i * 7.4} y={92} width="6.4" height="16" />)}
+  <text x="400" y="140" class="t">1 pixel, 64 channels. Same numbers, new address.</text>
+</svg>
+<figcaption>What 213 unsupported operations were actually doing: moving numbers, not changing them. That's why an exact substitute could exist.</figcaption>
+</figure>
+
+## The proof, not the claim
+
+This is the part I care about. A graph that compiles but computes something *slightly* different is the worst kind of bug. It surfaces months later as a worse match rate, gets blamed on quantisation, and you never find it. So the export tool refuses to write the model until it has run `torch.equal` on random input and checked the whole network against the stock graph.
+
+<Term title="the export check, summarised: both resolutions, all three heads" lines={[
+  "unfold2d vs pixel_unshuffle  torch.equal: True",
+  "full network vs stock        max |Δ| = 0.000e+00",
+  "→ writing HEF",
+]} />
+
+<Pull>A HEF that compiles is not a result.</Pull>
+
+## The honest part
+
+Then the number: 701 FPS on the chip, 23 times the Pi's CPU. I couldn't find an XFeat-on-Hailo-8 figure published anywhere else. And immediately, the caveat that makes it true: **only the backbone moved.** Keypoint decoding, non-maximum suppression and the matcher still run in numpy on the CPU, and the matching is the expensive half.
+
+<Bars title="XFeat backbone, frames per second" rows={[
+  { label: "Raspberry Pi 5 CPU", v: 30, tone: "dim", note: "(701 / 23)" },
+  { label: "Hailo-8, INT8", v: 701, tone: "measured" },
+]} src="The CPU bar is derived from the reported 23× ratio, not separately quoted. The backbone is the cheap half of matching." />
+
+So the real win isn't the speed. It's that the bottleneck moved from the detector to the matcher, which changes what to optimise next. A speed-up you can't spend isn't a speed-up; knowing exactly where the new wall is, is.
+
+The shipped settings came from the same discipline. On real murky footage `top_k = 1024` beat `2048`, because the similarity matrix grows with the square of the keypoint count, and at a fixed budget four references at 1024 beat one at 2048. Breadth of the reference bank beats keypoint density at equal cost. Chosen, not inherited. What happened when that bank was profiled is [the next essay](/notes/the-bank-that-ran-the-backbone-five-times).

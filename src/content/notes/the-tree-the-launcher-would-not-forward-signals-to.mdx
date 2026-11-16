@@ -1,0 +1,65 @@
+---
+title: "Killing a process tree the launcher wouldn't forward signals to"
+dek: "Stopping the vehicle's software looked solved twice, on real hardware, and was wrong both times. A real test, not another hardware run, found the actual bug."
+date: "2026-09"
+arena: workshop
+kind: essay
+repo: mongla_ws
+hero: /media/lab/meghdut-tui-2.webp
+heroAlt: "A terminal UI streaming live link bytes"
+sources:
+  - { label: "ros2 launch and signal handling", href: "https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Launch-Main.html" }
+  - { label: "signal(7)", href: "https://man7.org/linux/man-pages/man7/signal.7.html" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Term from "../../components/note/Term.astro";
+import Pull from "../../components/note/Pull.astro";
+
+Killing `ros2 launch` orphaned every node it had started. Those orphans kept holding the Hailo-8, which surfaced an hour later, often in a completely different tool, with no obvious link back to the stop that had supposedly already happened.
+
+<Term title="an hour later, in another tool (summarised)" lines={[
+  "HAILO_OUT_OF_PHYSICAL_DEVICES",
+]} />
+
+## Two fixes, both measured, both wrong
+
+The first attempt reset the inherited SIGINT-ignore state and signalled the launcher directly. It didn't exit within 20 seconds, so the escalation sent SIGTERM, which `ros2 launch` doesn't forward to its children. They orphaned anyway.
+
+The second tried `setsid` plus a process-group signal. `os.setsid()` failed in that execution context, the wrapper died immediately, and the stored PID pointed at a process that had never existed. The stop function returned success, having signalled nothing. It printed neither "stopped" nor a failure. It lied by omission.
+
+Both shared one broken assumption: that some process in the chain would pass the signal on. The fix drops that assumption. `kill_tree` walks every descendant and signals each one directly (INT, then TERM, then KILL), because `ros2 launch` starts each node as its own child, so the live process tree *is* the accurate node list and nobody needs to relay anything.
+
+<Pull>Verified on hardware and correct are not the same claim.</Pull>
+
+## The fourth defect
+
+A real test found something the hardware couldn't. `kill_tree` re-walked the process list at every escalation step, which looks equivalent to walking once. It isn't.
+
+<figure class="wide">
+<svg viewBox="0 0 900 240" role="img" aria-labelledby="pt-t">
+  <title id="pt-t">Step one: the launcher has two child nodes and receives SIGINT. Step two: the launcher exits; its children are re-parented to init, so a fresh walk from the launcher finds nothing. A child that ignored SIGINT is never signalled again. The fix snapshots the whole tree before sending any signal.</title>
+  <style>{`.t{font:13px var(--mono);fill:var(--chalk)}.d{font:12px var(--mono);fill:var(--dim)}`}</style>
+  <text x="20" y="24" class="d">1 · SIGINT to the tree</text>
+  <rect x="60" y="40" width="130" height="34" rx="4" fill="none" stroke="var(--chalk)" /><text x="76" y="62" class="t">ros2 launch</text>
+  <line x1="125" y1="74" x2="80" y2="130" stroke="var(--dim)" /><line x1="125" y1="74" x2="170" y2="130" stroke="var(--dim)" />
+  <rect x="30" y="130" width="100" height="34" rx="4" fill="none" stroke="var(--measured)" /><text x="44" y="152" class="t">node A ✓</text>
+  <rect x="140" y="130" width="120" height="34" rx="4" fill="none" stroke="var(--failure)" /><text x="150" y="152" class="t">node B: ignores</text>
+  <text x="330" y="24" class="d">2 · parent exits; re-walk from it finds nothing</text>
+  <rect x="370" y="40" width="130" height="34" rx="4" fill="none" stroke="#2c333a" stroke-dasharray="4 4" /><text x="386" y="62" class="d">(gone)</text>
+  <rect x="380" y="130" width="60" height="34" rx="4" fill="none" stroke="var(--dim)" /><text x="394" y="152" class="t">init</text>
+  <line x1="440" y1="147" x2="480" y2="147" stroke="var(--dim)" />
+  <rect x="480" y="130" width="120" height="34" rx="4" fill="none" stroke="var(--failure)" /><text x="490" y="152" class="t">node B lives</text>
+  <text x="660" y="24" class="d">3 · fix: snapshot first</text>
+  <text x="660" y="62" class="t">pids = walk(tree)</text>
+  <text x="660" y="90" class="t">for sig in INT, TERM, KILL:</text>
+  <text x="660" y="118" class="t">  signal(pids, sig)</text>
+  <text x="660" y="190" class="d">orphans can't hide from a list</text>
+</svg>
+<figcaption>The instant a parent exits, its children are re-parented to init. A second walk can never find them again.</figcaption>
+</figure>
+
+Any child that ignored SIGINT simply outlived its parent and was never signalled a second time. On real hardware this stayed invisible, because ROS 2 nodes happen to die on the first SIGINT, so the defect had zero opportunities to matter. Until a test deliberately spawned children that ignore SIGINT, which is exactly the condition the tool exists for. The fix snapshots the whole tree *before* anything is asked to die.
+
+<Fig src="/media/lab/meghdut-tui-2.webp" alt="A terminal UI showing live MAVLink bytes in both directions" caption="The link the stack holds open. If a stop leaves it holding the hardware, the next start fails somewhere else entirely." wide contain />
+
+Hardware runs test the cases the hardware happens to produce. Tests can produce the case you're afraid of.

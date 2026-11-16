@@ -1,0 +1,52 @@
+---
+title: "The frame-age problem"
+dek: "A perception pipeline that looks healthy can be acting on a frame that's 400 ms old. Freshness is a feature you have to build."
+date: "2026-07"
+arena: delay
+kind: essay
+repo: mongla_ws
+hero: /media/lab/latency-verdict.webp
+heroAlt: "A table of photon-to-command latency for two cameras, verdict: sensor is the limit"
+sources:
+  - { label: "Carmack, Latency Mitigation Strategies", href: "https://danluu.com/latency-mitigation/" }
+  - { label: "mongla_ws: measured-bars.md", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/measured-bars.md" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Chart from "../../components/note/Chart.astro";
+import Pull from "../../components/note/Pull.astro";
+
+When a camera feeds a queue, the consumer reads the oldest frame in the queue. Under load, that frame can be hundreds of milliseconds stale, and nothing in the system looks broken. The detector runs. The boxes appear. The counters tick up. The vehicle is just steering by the past.
+
+<Chart title="Mean age of the frame the detector acts on" data={[
+  { label: "queue", value: 396, tone: "failure" },
+  { label: "mailbox (newest only)", value: 16.9, tone: "measured" },
+]} unit=" ms" caption="Same camera, same detector. 23× fresher, entirely from which frame you choose to believe." />
+
+We measured it. A naive queue served frames **396 ms** stale on average. A *mailbox*, which keeps only the newest frame and drops the rest, served them **16.9 ms** stale.
+
+## Freshness over throughput
+
+For a moving vehicle, an old correct answer is a wrong answer. Throughput is a benchmark number. Freshness is what keeps the control loop honest. The mailbox throws away work on purpose, and that's the right trade.
+
+<Pull by="John Carmack">The speed of light sucks.</Pull>
+
+The lesson generalises beyond cameras. Any time a slow stage sits behind a fast one, ask what happens to the backlog. If the answer is *it queues*, you've built a time machine pointed the wrong way.
+
+## Then make the software disappear
+
+The goal of optimising a pipeline isn't "fast". It's to make the software vanish as a source of delay, so that what's left is the camera itself. Verified on live hardware, on both cameras, the verdict is the one you want.
+
+<Fig src="/media/lab/latency-verdict.webp" alt="Latency table: forward 73.4 Hz, pipeline age 21.86 / 29.58 ms; downward 27.6 Hz, 46.94 / 52.44 ms; authority at p99 1.000 for both; verdict: sensor is the limit" caption="Photon to command, both cameras. <b>Authority at p99 is 1.000</b>: at the 99th percentile, the freshest frame the sensor could provide is the frame the controller acts on." wide contain />
+
+| | forward | downward |
+|---|---:|---:|
+| rate | 73.4 Hz | 27.6 Hz |
+| pipeline age, median / p99 | 21.86 / 29.58 ms | 46.94 / 52.44 ms |
+| interval, median | 12.01 ms | 32.01 ms |
+| authority at p99 | 1.000 | 1.000 |
+
+There's no software latency left to remove. In both cameras the bottleneck is the hardware, not the code.
+
+The camera on [Dristy](/notes/dristy) obeys the same rule at a tenth of the scale: a mailbox, not a queue. You can feel the cost of reacting late in the [delay arena](/#delay).
+
+<Fig src="/media/lab/chip-efficiency.webp" alt="A readout of the accelerator path's efficiency counters" caption="Decode on demand, not on arrival: the camera only decodes a frame when the inference worker is idle, so the chip never spends compute on a frame that's already been superseded. Mean frame age at inference start: 11.5 ms; decoded-but-never-inferred: 0." wide contain />

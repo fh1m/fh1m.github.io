@@ -1,0 +1,48 @@
+---
+title: "179 identity switches, and why the state-of-the-art fix costs too much"
+dek: "A diagnostic reported 'id switches: 0' for months. It was a clean-looking zero from a tool measuring nothing, and the real number explained why a bigger tracker wasn't the answer."
+date: "2026-09"
+arena: delay
+kind: essay
+repo: mongla_ws
+hero: /media/lab/dualcam-fusion.webp
+heroAlt: "Two camera views with detections and IDs"
+sources:
+  - { label: "ByteTrack (Zhang et al., 2022)", href: "https://arxiv.org/abs/2110.06864" }
+  - { label: "OC-SORT (Cao et al., 2023)", href: "https://arxiv.org/abs/2203.14360" }
+  - { label: "BoT-SORT (Aharon et al., 2022)", href: "https://arxiv.org/abs/2206.14651" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Chart from "../../components/note/Chart.astro";
+import Pull from "../../components/note/Pull.astro";
+
+`continuity.py` reported *id switches: 0*. A clean result. Wrong for a boring reason: it was scoring the detections topic, which carries no identity field at all. Zero wasn't a measurement. It was the absence of one, dressed as a number.
+
+A second tool made the same mistake more loudly. It read `d.tracking_id`, a field the ROS detection message doesn't have, and raised `AttributeError` on the first track of every run. Because that code only ran when tracks existed, the crash stayed invisible in every quiet run, and every piece of documentation kept asserting the field was there.
+
+## The real number
+
+Scored correctly, on the tracks topic, with the field that actually carries identity:
+
+<Chart title="Identity switches, as reported and as measured" data={[
+  { label: "reported", value: 0, tone: "estimate" },
+  { label: "measured", value: 179, tone: "failure" },
+]} caption="<b>179 identity switches in 253 seconds. One person, in one room.</b>" />
+
+That's the number the project had been building on for however long *0* went unquestioned.
+
+<Pull>A zero from a tool that measures nothing looks exactly like a zero from a tool that works.</Pull>
+
+## Why the obvious fix doesn't apply
+
+A motion tracker can't close this gap, by definition. ByteTrack and OC-SORT, the trackers actually in play here, associate detections by box overlap plus a Kalman prediction. Across a real occlusion, the prediction decays and the overlap vanishes, so a target that returns can't be matched to the track it left. That's not a bug in either tracker. It's the boundary of what motion alone can say.
+
+<Fig src="/media/lab/dualcam-fusion.webp" alt="Forward and downward camera views with detections, IDs and a fused heading" caption="Identity on screen: each detection carries an ID. Whether it's the same ID after a gap is a separate, harder question." wide contain />
+
+## The state of the art names the fix, and the price
+
+BoT-SORT closes exactly this gap by fusing motion with appearance (a re-identification network) and camera-motion compensation, so identity holds across a break. Naming it is easy. It also names a cost this platform can't pay today: appearance re-identification at this vehicle's frame rates is compute the perception budget doesn't have free.
+
+<Fig src="/media/mongla/brain-run.webp" alt="Three panels: what the vehicle sees, what it believes on a landmark map, and what it does" caption="The vehicle keeps a belief about each target, with an uncertainty that grows while it's blind. Holding <i>which</i> target it is across a gap is the expensive part." wide contain />
+
+So the honest status isn't *fixed*, and it isn't *ignored*. It's a priced, deferred trade: the 179-switch number stays in the README as the reason the next perception cycle should spend its budget on identity, not on a faster detector.

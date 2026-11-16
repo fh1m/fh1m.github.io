@@ -1,0 +1,52 @@
+---
+title: "One fix anywhere, or many fixes everywhere"
+dek: "Characterising when a localisation fix should fire turned into retracting my own conclusion from the previous commit, and finding a square-root law hiding in the retraction."
+date: "2026-09"
+arena: noise
+kind: essay
+repo: mongla_ws
+hero: /media/mongla-docs/water-clear.webp
+heroAlt: "A simulated gate in clear water"
+sources:
+  - { label: "mongla_ws: measured-bars.md", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/measured-bars.md" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+
+The question was supposed to be simple: does *when* a landmark fix arrives matter for a known localisation defect? With optical flow healthy, the answer was clean. A 2-second resection window at t = 0, t = 20 or t = 55 s all landed in the same 0.20–0.28 m band.
+
+That falls straight out of the defect's mechanism. If dead-reckoning error isn't growing between fixes, a late fix is worth exactly what an early one is. Timing wasn't the variable. Count was.
+
+## The table that mattered
+
+<Bars title="final position error, by how long the vehicle kept sighting a landmark" unit=" m" rows={[
+  { label: "no fixes", v: 0.99, tone: "failure", note: "(0.383 × 2.6)" },
+  { label: "0.5 s · 1 fix", v: 0.383, tone: "estimate", note: "2.6× better" },
+  { label: "5 s · 10 fixes", v: 0.293, tone: "estimate", note: "3.4×" },
+  { label: "20 s · 40 fixes", v: 0.139, tone: "measured", note: "7.1×" },
+  { label: "continuous · 120 fixes", v: 0.055, tone: "measured", note: "17.9×" },
+]} src="The no-fix bar is derived from the reported 2.6× ratio, not separately quoted." />
+
+That's close to a square-root law: error falling roughly as 1/√N.
+
+<figure class="wide">
+<svg viewBox="0 0 900 260" role="img" aria-labelledby="sq-t">
+  <title id="sq-t">Measured error at 1, 10, 40 and 120 fixes plotted on log-log axes, against a reference line of slope minus one half. The points track the line.</title>
+  <style>{`.t{font:12px var(--mono);fill:var(--dim)}`}</style>
+  <line x1="80" y1="220" x2="860" y2="220" stroke="#2c333a" /><line x1="80" y1="20" x2="80" y2="220" stroke="#2c333a" />
+  {[[1,0.383],[10,0.293],[40,0.139],[120,0.055]].map(([n, e]) => { const x = 80 + (Math.log10(n) / Math.log10(120)) * 760; const y = 220 - ((Math.log10(e) - Math.log10(0.03)) / (Math.log10(0.5) - Math.log10(0.03))) * 200; return <g><circle cx={x} cy={y} r="6" fill="var(--measured)" /><text x={x + 10} y={y - 8} class="t">{n} · {e} m</text></g>; })}
+  {(() => { const y = (e: number) => 220 - ((Math.log10(e) - Math.log10(0.03)) / (Math.log10(0.5) - Math.log10(0.03))) * 200; return <line x1="80" y1={y(0.383)} x2="840" y2={y(0.383 / Math.sqrt(120))} stroke="var(--estimate)" stroke-dasharray="5 5" />; })()}
+  <text x="600" y="60" class="t">dashed: 0.383 / √N</text>
+  <text x="80" y="244" class="t">fixes (log)</text><text x="12" y="20" class="t">error (log)</text>
+</svg>
+<figcaption>The four measurements against a pure 1/√N line from the first one. Averaging, not correcting.</figcaption>
+</figure>
+
+One resection anywhere captures much of the benefit, and every fix after that averages the estimate down rather than correcting a particular moment. For mission design that's a reframe: it doesn't matter *where* the vehicle sights a recognisable landmark. It matters that it keeps sighting one for *longer*.
+
+<Pull>The previous commit said the opposite, in my own words: "a fix early is worth far more than a fix often." That claim is retracted here.</Pull>
+
+It was an inference, not a measurement, and the measurement disagreed. The retraction is the content of this entry, not a footnote to it. Two commits from the same author, about the same defect, on consecutive days: one wrong, one measured. Nothing in the codebase changed between them except which claim was allowed to keep standing.
+
+<Fig src="/media/mongla/ledger.webp" alt="The ledger strip: 126 columns coloured by status" caption="This entry is one of the coloured columns: an earlier result, taken back in its own title." wide />

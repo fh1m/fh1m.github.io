@@ -1,0 +1,59 @@
+---
+title: "Nobody had asked what the camera's own loops were doing"
+dek: "Every measurement this stack makes is computed on pixels, and every camera has automatic loops silently editing those pixels first. Reading the camera's own settings answered a question nobody had asked."
+date: "2026-09"
+arena: sight
+kind: essay
+repo: mongla_ws
+hero: /media/lab/detect-flare.webp
+heroAlt: "A flare detected in murky water at 0.95 confidence"
+sources:
+  - { label: "V4L2 camera controls", href: "https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/ext-ctrls-camera.html" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Chart from "../../components/note/Chart.astro";
+import Pull from "../../components/note/Pull.astro";
+
+Detector confidence, feature inlier counts, a turbidity proxy, the recognition bank's references: every number this stack produces is computed on pixels. Until this pass, nobody had asked what the camera's own automatic control loops were doing to those pixels before any of them arrived.
+
+Read live off the running vehicle:
+
+```
+white_balance_automatic=1
+auto_exposure=3                 # aperture priority, not manual
+exposure_dynamic_framerate=1
+```
+
+Nothing in the vision stack touches white balance at all. And dynamic frame rate silently lets the camera drop its own rate in dim water. That matters specifically because every rung of the [lock ladder](/notes/tracking-without-detection) is sized in *seconds*. Halve the frame rate and you've halved how many detections fit inside the same coast window, without anyone changing a threshold.
+
+## The number that justified the question
+
+Measured on a static scene, with the camera perfectly still:
+
+<Chart title="Luma drift on a static scene, peak to peak" data={[
+  { label: "auto exposure", value: 2.42, tone: "failure" },
+  { label: "fixed exposure", value: 0.16, tone: "measured" },
+]} caption="Auto-exposure injected <b>15.5× more</b> brightness drift than fixed exposure, with nothing moving." />
+
+Every descriptor-based measurement is derived from intensity. A reference image that never physically moved was still changing its appearance frame to frame, from a noise source none of the existing analysis accounted for.
+
+<Fig src="/media/lab/detect-flare.webp" alt="A flare caught in murky water at 0.95 confidence" caption="A flare at 0.95 in murky water. The confidence is computed on pixels the camera has already edited." wide contain />
+
+## It answered a different question too
+
+R/B, the red-to-blue ratio used as a colour proxy, came back at **exactly 1.0000, with zero variance**, in both arms. The forward camera is delivering a monochrome signal. Automatic white balance is moot on it: there's nothing to balance.
+
+That's consistent with a separate finding that this camera needs a colour hardware variant. It also means the white-balance half of the original question can't be settled on current hardware. Not disproven. Unfalsifiable, on this camera, today.
+
+<Pull>Not disproven. Unfalsifiable, on this camera, today. Those are different results, and the difference is worth writing down.</Pull>
+
+## Two honest limits
+
+The 15.5× comes from a static indoor scene, the easy case. A moving vehicle in changing water gives an auto-exposure loop far more to chase, and that harder version is still unmeasured.
+
+<Chart title="Mean luma in the two arms" data={[
+  { label: "auto", value: 119.27 },
+  { label: "fixed (stale setting)", value: 59.55, tone: "estimate" },
+]} max={255} caption="The fixed arm was under-exposed: manual mode had inherited a stale exposure time of 157 instead of a computed one." />
+
+And the fixed-exposure arm was under-exposed: manual mode inherited a stale setting rather than a correct one. So the fix that ships has to actively *set* the right exposure, not merely switch a loop off. The function that computes that value, `blur_capped_exposure()`, had been sitting in the codebase, unused, the whole time. Another [capability without a path](/notes/a-capability-is-only-real).

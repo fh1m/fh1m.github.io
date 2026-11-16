@@ -1,0 +1,61 @@
+---
+title: "What thirty minutes of sitting still taught us about the IMU"
+dek: "A vehicle at rest is the only condition outside water where the true state is known exactly. Using that properly meant verifying the rest itself, not trusting the clock."
+date: "2026-09"
+arena: noise
+kind: essay
+repo: mongla_ws
+hero: /media/mongla-docs/cores.webp
+heroAlt: "The control board's two cores and their task rates"
+sources:
+  - { label: "IEEE Std 952, Allan variance for gyros", href: "https://standards.ieee.org/ieee/952/1189/" }
+  - { label: "mongla_ws", href: "https://github.com/fh1m/mongla_ws" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+Underwater, truth is never directly available. That's the whole reason the estimation stack exists. But there's exactly one condition where it is: a vehicle sitting still on a bench, where the true velocity, angular rate and position are known by definition. That measurement had never been taken on this hardware, so it became the first one.
+
+<Stats items={[
+  { v: "89,813", l: "samples" },
+  { v: "1,797.0 s", l: "of sitting still" },
+  { v: "49.98 Hz", l: "measured sample rate" },
+  { v: "9.7271 ± 0.0053", l: "|accel| in m/s², the whole run: nothing bumped the bench", tone: "measured" },
+]} />
+
+Rest was *verified*, not assumed. If someone had leaned on the desk, |accel| would have said so, and what follows would be desk statistics instead of sensor statistics.
+
+## The headline
+
+<Bars title="gyro: bias against per-sample noise (log)" unit=" °/s" log rows={[
+  { label: "worst gyro bias", v: 0.0004, tone: "measured" },
+  { label: "per-sample noise floor", v: 0.09, tone: "estimate" },
+]} src="Three orders of magnitude apart. Residual yaw drift over the same window: 0.1° per hour." />
+
+Every gyro bias came back under 0.0004 °/s. That has a direct architectural consequence: the board already estimates and removes its own gyro bias before the message ever reaches the Pi, so the localisation filter must *not* try to estimate that bias a second time. Double-correcting a bias that's already near zero only adds noise.
+
+<Pull>The cheapest experiment in robotics is leaving the robot alone and writing everything down.</Pull>
+
+## Allan deviation asks a different question
+
+A standard deviation says how much one sample scatters around the mean. Allan deviation says how *long* you can average the sensor before slow bias drift starts to win over noise reduction. That's the number a filter's process-noise model should be tuned against.
+
+<figure class="wide">
+<svg viewBox="0 0 900 250" role="img" aria-labelledby="av-t">
+  <title id="av-t">Schematic Allan deviation curve on log-log axes: falling at slope minus one half while white noise dominates, reaching a minimum, then rising as bias instability and drift take over. The measured minimum for these gyros lies between 660 and 860 seconds of averaging.</title>
+  <style>{`.t{font:12px var(--mono);fill:var(--dim)}`}</style>
+  <line x1="70" y1="210" x2="860" y2="210" stroke="#2c333a" /><line x1="70" y1="20" x2="70" y2="210" stroke="#2c333a" />
+  <path d="M80 40 L 560 170 Q 640 192 720 172 L 850 120" fill="none" stroke="var(--chalk)" stroke-width="1.6" />
+  <rect x="610" y="20" width="70" height="190" fill="var(--measured)" opacity="0.12" />
+  <text x="560" y="40" class="t">measured minimum: 660–860 s</text>
+  <text x="120" y="80" class="t">noise averages away</text><text x="740" y="110" class="t">drift wins</text>
+  <text x="70" y="236" class="t">averaging time τ (log)</text><text x="6" y="16" class="t">σ(τ) (log)</text>
+</svg>
+<figcaption><b>Schematic</b> shape, not plotted data. The shaded band is the measured part: these gyros kept improving out to 660–860 s of averaging, longer than any mission leg this vehicle runs.</figcaption>
+</figure>
+
+Two numbers that looked like findings and weren't were logged specifically so they don't get "discovered" again later. The accel-x mean of −0.8718 m/s² is gravity on a tilted board mount, not a bias, and it's already accounted for elsewhere.
+
+<Fig src="/media/mongla-docs/cores.webp" alt="The control board's two cores: core 1 running sensors, control and motors at 500 Hz; core 0 running MAVLink, display and radio" caption="Where the bias is already removed: on the board, before the Pi ever sees a sample." wide contain />

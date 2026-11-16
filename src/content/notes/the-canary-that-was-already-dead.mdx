@@ -1,0 +1,45 @@
+---
+title: "The canary that was already dead"
+dek: "Quantising a model to INT8 always costs something. The question isn't whether it costs some; it's whether it pushes a passing case under the bar."
+date: "2026-08"
+arena: noise
+kind: essay
+repo: mongla_ws
+hero: /media/mongla-docs/mirpur-gate.webp
+heroAlt: "Murky turquoise pool footage with a gate detected"
+sources:
+  - { label: "mongla_ws: measured-bars.md", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/measured-bars.md" }
+  - { label: "MAGSAC++ (Barath et al., 2020)", href: "https://arxiv.org/abs/1912.05909" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Bars from "../../components/note/Bars.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+The plan named a canary: one test column, `torpedo_1`, which INT8 must not push below 15 inliers. It sounded sensible. It was also wrong, and following it would have killed a working feature.
+
+The test itself was set up honestly. Re-run the murky-water clip table with the chip as the backbone and *everything else identical*: same post-processing, same MAGSAC, same 15-inlier trust bar, same protocol. The only variable was float32 on the CPU against INT8 on the Hailo. Every clip scored exactly what it scored before: 4/4, 3/4, 4/4, 4/4, 4/4.
+
+<Stats items={[
+  { v: "−7.7 %", l: "median inliers lost to INT8 across 20 columns", tone: "estimate" },
+  { v: "5 of 20", l: "columns that read higher on INT8, up to +40 %: MAGSAC's own scatter" },
+  { v: "0", l: "passing columns pushed under the bar", tone: "measured" },
+]} />
+
+## Read the tell
+
+Nineteen of twenty columns cleared 15 inliers on CPU. The same nineteen cleared it on the chip. And the canary, `torpedo_1`, read 12 on INT8, which looked like a quantisation failure until you read the CPU column next to it.
+
+<Bars title="torpedo_1 inliers, against the 15-inlier trust bar" rows={[
+  { label: "trust bar", v: 15, tone: "dim" },
+  { label: "float32, CPU", v: 13, tone: "failure" },
+  { label: "INT8, Hailo-8", v: 12, tone: "failure" },
+]} src="Both under the bar. The canary was dead before quantisation touched it." />
+
+<Pull>Reporting the wrong quantity is what lets a defect survive three attempts.</Pull>
+
+Calling its 12 an INT8 failure would have condemned a working path on a case that was already below the line. The real question was never *did INT8 cost inliers* (it always does, a little) but *did it push any passing column under the bar*. None did.
+
+<Fig src="/media/mongla-docs/robosub-torpedo.webp" alt="The torpedo board underwater with the detector boxing it and its openings" caption="The torpedo board in real RoboSub footage: the kind of clip the columns are made of." />
+
+Measure the effect you actually care about, through the code path that ships, or you're measuring the harness. The scatter that made five columns *improve* on INT8 is the same scatter that would have made a dead canary look like a casualty.

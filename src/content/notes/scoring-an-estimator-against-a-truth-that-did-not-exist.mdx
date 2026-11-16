@@ -1,0 +1,63 @@
+---
+title: "Scoring an estimator against a truth that didn't exist yet"
+dek: "Twenty-one tests, every one a unit test, because until a physics plant existed there was no ground truth to measure drift against. Building the truth was the actual work."
+date: "2026-09"
+arena: noise
+kind: essay
+repo: mongla_ws
+hero: /media/mongla/sim-bluerov-gate.webp
+heroAlt: "A simulated vehicle approaching a gate in a simulated pool"
+sources:
+  - { label: "Fossen, Handbook of Marine Craft Hydrodynamics and Motion Control", href: "https://www.fossen.biz/wiley/" }
+  - { label: "mongla_ws", href: "https://github.com/fh1m/mongla_ws" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+The localisation filter had 21 tests, and every one checked a *property*, not a trajectory: the exponential/log round-trip, covariance symmetry, positive-definiteness, the sign of one update. None of them drove the filter along a path and asked how far it had drifted from where it actually was.
+
+Because there was no *actually*. Comparing two estimators only tells you whether they agree with each other. It can't rank them. You need a case where the true position is known by construction.
+
+## Build the truth
+
+A Fossen-model plant (the standard rigid-body-plus-hydrodynamics model for marine vehicles) produces exact position, attitude and velocity every tick. So the harness can synthesise IMU readings, optical-flow velocity, depth and heading at their real measured rates, and score the filter's drift against ground truth instead of its own previous output.
+
+<Fig src="/media/mongla/sim-bluerov-gate.webp" alt="A simulated vehicle near a gate in the simulator" caption="Simulation's real job here isn't pretty water. It's a world where the answer is known, so an estimate can be wrong in a measurable way." wide />
+
+## The frame seam that cost −1,988 degrees
+
+One convention had to be pinned rather than assumed. The filter's world is NED (north-east-down, z pointing down) with an FRD body frame (forward-right-down). The plant is x-forward, y-starboard, z-down. Same convention, nothing to remap. That's worth saying out loud, because a frame seam is exactly what produced a **−1,988° yaw runaway** the first time the thrust allocator met the plant with an unpinned assumption about which frame it was reading.
+
+<figure class="wide">
+<svg viewBox="0 0 900 200" role="img" aria-labelledby="ned-t">
+  <title id="ned-t">Two coordinate frames side by side. World NED: x north, y east, z down. Body FRD: x forward, y right, z down. Both are right-handed with z pointing down.</title>
+  <style>{`.t{font:13px var(--mono);fill:var(--dim)}`}</style>
+  <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor" /></marker></defs>
+  <g color="var(--measured)"><line x1="120" y1="100" x2="220" y2="100" stroke="currentColor" marker-end="url(#a3)" /><text x="226" y="104" class="t">x north</text></g>
+  <g color="var(--medium)"><line x1="120" y1="100" x2="60" y2="50" stroke="currentColor" marker-end="url(#a3)" /><text x="20" y="40" class="t">y east</text></g>
+  <g color="var(--estimate)"><line x1="120" y1="100" x2="120" y2="180" stroke="currentColor" marker-end="url(#a3)" /><text x="128" y="190" class="t">z down</text></g>
+  <text x="40" y="20" class="t">world · NED</text>
+  <g color="var(--measured)"><line x1="600" y1="100" x2="700" y2="100" stroke="currentColor" marker-end="url(#a3)" /><text x="706" y="104" class="t">x forward</text></g>
+  <g color="var(--medium)"><line x1="600" y1="100" x2="540" y2="50" stroke="currentColor" marker-end="url(#a3)" /><text x="490" y="40" class="t">y right</text></g>
+  <g color="var(--estimate)"><line x1="600" y1="100" x2="600" y2="180" stroke="currentColor" marker-end="url(#a3)" /><text x="608" y="190" class="t">z down</text></g>
+  <text x="520" y="20" class="t">body · FRD</text>
+</svg>
+<figcaption>Both right-handed, both z-down. Pinned in a test, so the next −1,988° comes from somewhere new.</figcaption>
+</figure>
+
+## The first numbers that mean what they say
+
+Sixty seconds of a yawing trajectory with full aiding:
+
+<Stats items={[
+  { v: "0.013 m", l: "position RMS error" },
+  { v: "0.31°", l: "yaw RMS error" },
+  { v: "0.002 m", l: "depth RMS error" },
+]} src="Against simulated ground truth. In simulation, which is exactly where the claim stops." />
+
+They're not impressive in isolation; simulation is generous. They matter because they're the first numbers in the project's history that mean what they appear to mean: an estimate compared to a truth, on a path complex enough that agreement wasn't guaranteed by construction.
+
+<Pull>Two estimators agreeing proves they agree.</Pull>
+
+The next thing the plant measured overturned my own previous commit: [one fix anywhere, or many fixes everywhere](/notes/a-tighter-measurement).

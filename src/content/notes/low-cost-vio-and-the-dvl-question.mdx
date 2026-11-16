@@ -1,0 +1,47 @@
+---
+title: "Low-cost VIO and the DVL question"
+dek: "When you can't buy the sensor, you have to earn its measurement from the ones you have. Fusing depth, flow and heading, honestly, including the time each one describes."
+date: "2026-05"
+arena: noise
+kind: essay
+repo: mongla_ws
+hero: /media/mongla-docs/pool-glide.webp
+heroAlt: "The vehicle gliding in a sunlit pool"
+sources:
+  - { label: "Barrau & Bonnabel, the invariant EKF as a stable observer (2014)", href: "https://arxiv.org/abs/1410.1465" }
+  - { label: "Hartley et al., contact-aided invariant EKF (2019)", href: "https://arxiv.org/abs/1904.09251" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Chart from "../../components/note/Chart.astro";
+import Pull from "../../components/note/Pull.astro";
+
+A right-invariant extended Kalman filter is the spine of the localisation stack. It predicts on the board's IMU and corrects with everything cheap we can measure: depth from pressure, velocity from [optical flow](/notes/turning-a-camera-into-a-sensor), heading, and occasional fixes from recognised props. *Invariant* means the filter's error is defined on the geometry of rotations itself, so its behaviour doesn't depend on which way the vehicle happens to be pointing. That's what makes it stable when the estimate is badly wrong, which is exactly when you need it.
+
+## Every measurement is about the past
+
+The subtle part is time. Every sensor reports at its own rate, with its own delay.
+
+<Chart log title="How often each signal updates, as measured on the stack" data={[
+  { label: "control", value: 500 },
+  { label: "telemetry", value: 100 },
+  { label: "detection", value: 53.9 },
+  { label: "camera", value: 30.18 },
+]} unit=" Hz" caption="Log scale. Four clocks that never agree. The vehicle has no present tense: it has a stack of pasts, and it steers on all of them." />
+
+A detection describes where the vehicle *was* when the shutter opened, not where it is now. Apply it on arrival and you pull the estimate backwards in time, on purpose, at speed. So the filter keeps a short buffer of its own recent states. When a measurement arrives carrying the instant it describes, the filter winds back to that instant, applies the correction *there*, and replays every motion input since.
+
+<Fig src="/media/mongla-docs/cores.webp" alt="The board's timetable: core 1 at 500 Hz, core 0 at 100, 30 and 20 Hz" caption="The board stamps its own messages on its own clock. That's what makes the rewind possible at all: a message that says 'the prop was here, at this instant' is a measurement; one that just says 'the prop is here' is a rumour." contain />
+
+This bug hides from every bench test. Hold the vehicle still and both answers agree exactly, because latency multiplied by zero speed is zero. It only appears when you're moving, turning and being corrected at the same time, which is the condition you can't create indoors.
+
+<Pull>An absent prediction must never be read as a permissive one.</Pull>
+
+## Fusion is where optimism hides
+
+A prior should stop helping exactly when it stops being one. A gate should weaken exactly when the prior stops being worth trusting. Get either backwards and the vehicle steers confidently at nothing.
+
+## So do we need the expensive sensor?
+
+The DVL question isn't answered by a spec sheet. It's answered by whether the cheap estimate clears the bar the mission needs, measured in water. Until then, the honest state is written down, not assumed: the flow velocity is good to 1.09 cm over 30 cm on the bench, and the board can't yet accept it as a measurement. Both facts are on the roadmap, in the same row.
+
+<Fig src="/media/mongla/flow-lab.webp" alt="The floor-speed widget: pixel motion, height, reported speed and error" caption="The cheap sensor's whole weakness in one slider: get the height wrong by 20 % and the velocity is wrong by 20 %, forever." wide contain />
