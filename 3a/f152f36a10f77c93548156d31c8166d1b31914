@@ -1,0 +1,70 @@
+.github/workflows/deploy.yml
+  h_f1b9066eb9899c 1-49
+package-lock.json
+  h_f1b9066eb9899c 11-12,845-862
+package.json
+  h_f1b9066eb9899c 16-17
+playwright.config.ts
+  h_f1b9066eb9899c 1-10
+public/favicon.svg
+  h_f1b9066eb9899c 1
+scripts/cv-pdf.mjs
+  h_f1b9066eb9899c 1-26
+scripts/serve-dist.mjs
+  h_f1b9066eb9899c 1-24
+src/benches/delay.ts
+  h_f1b9066eb9899c 32
+src/benches/ebhapa.ts
+  h_f1b9066eb9899c 69,74,77
+src/benches/hull.ts
+  h_f1b9066eb9899c 35
+src/benches/ik-arm.ts
+  h_f1b9066eb9899c 35
+src/benches/query.ts
+  h_f1b9066eb9899c 39
+src/benches/recorder.ts
+  h_f1b9066eb9899c 22
+src/benches/robosub.ts
+  h_f1b9066eb9899c 11-16,29,46,49-50,61,64-65
+src/benches/ui.ts
+  h_f1b9066eb9899c 72-73
+src/data/facts.ts
+  h_f1b9066eb9899c 51,63,113
+src/data/influences.ts
+  h_f1b9066eb9899c 1-45
+src/data/story.ts
+  h_f1b9066eb9899c 27,93,162,187,221
+src/explore/kit.ts
+  h_f1b9066eb9899c 10-11
+src/explore/snell.ts
+  h_f1b9066eb9899c 25
+src/layouts/Base.astro
+  h_f1b9066eb9899c 2-6,14-15,17-20,36,39,43,48,55-64,70-82,84-85
+src/pages/404.astro
+  h_f1b9066eb9899c 1-24
+src/pages/cv.astro
+  h_f1b9066eb9899c 1-121
+src/pages/index.astro
+  h_f1b9066eb9899c 4,7,10-14,18-34,37-39,43-56,59-77,79-85,88,90-103,107-109,111,117-121,126-170,174-178,180-181,183-184,189,193-329,331-332,334-344
+src/pages/log.astro
+  h_f1b9066eb9899c 1-120
+src/scripts/home-client.ts
+  h_f1b9066eb9899c 2-5,8,12,18-21,26-32,34-47,49-58,60-64,66,69,71,74-81,83-91
+src/styles/global.css
+  h_f1b9066eb9899c 1-5,10-30,32,35,37-40,47-48,50-52,54,56-57,60-61,64-65,69,74-78,86-93,96-111,113-114,116-117,119-123,126-132,142-147,152-159,161
+src/world/assembly.ts
+  h_f1b9066eb9899c 2-5,9,11-19,21,23-39,41-72,75,77-78,80-91,94-102,105,107-109,111-119,126-127,129-131,133-134,136,138-143,146-150,152-153
+tests/smoke.spec.ts
+  h_f1b9066eb9899c 1-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "3af152f36a10f77c93548156d31c8166d1b31914",
+  "prompts": {},
+  "humans": {
+    "h_f1b9066eb9899c": {
+      "author": "fh1m <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
