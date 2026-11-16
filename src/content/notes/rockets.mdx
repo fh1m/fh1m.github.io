@@ -16,6 +16,7 @@ sources:
 import Fig from "../../components/note/Fig.astro";
 import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
+import Explore from "../../components/note/Explore.astro";
 
 Before the AUV there was a rocket. In February 2023 I joined Amateur Experimental Rocketry Dhaka (AERD), founded in 2022 and backed by AIUB's research centre. I started where a machine has the fewest places to hide: something that has to leave the ground and come back in a recoverable number of pieces.
 
@@ -23,7 +24,6 @@ My jobs were attitude, guidance, navigation and control, trajectory prediction, 
 
 <Gallery items={[
   { src: "/media/aerd/cover.webp", alt: "The AERD team standing outdoors with a large white weather balloon", caption: "AERD, with the balloon." },
-  { src: "/media/aerd/dailystar-engine.webp", alt: "The Daily Star's image of the team and the hybrid engine test", caption: "The engine test, as The Daily Star ran it." },
 ]} credit="Photos: AERD; press image: The Daily Star." />
 
 ## What I built
@@ -47,7 +47,9 @@ A thrust-vector gimbal holds a rocket upright by tilting the engine under it, li
 - **D** pushes back against how fast the tilt is changing. It's the brake. It also amplifies sensor noise, which is why nobody turns it up to eleven.
 - **I** remembers the error that's still there. Only I beats a steady wind, and only I winds up and takes over if you let it.
 
-You can tune the gimbal yourself in [the air arena](/#air): press *P only*, then *add D*, then *add I*, and watch the three classic failures go by in order. It's a toy plant with honest shapes, not our rocket's numbers.
+Tune it yourself: press *P only*, then *add D*, then *add I*, and watch the three classic failures go by in order.
+
+<Explore bench="gimbal" n="fig 1" title="A thrust-vector gimbal against the wind" hint="drag the gains" caption="A toy plant with honest shapes: one axis, actuator saturation, a gusting wind from 1 s. The numbers are illustrative, not the rocket's." />
 
 <Fig src="/media/lab/meghdut-tui-1.webp" alt="A terminal flight UI: MAVLink receive and transmit panels, orientation, and a safety panel" caption="Later, for drones: a terminal UI over MAVLink with a safety panel that never lets you forget the props. The same habit, on a different airframe." wide contain />
 

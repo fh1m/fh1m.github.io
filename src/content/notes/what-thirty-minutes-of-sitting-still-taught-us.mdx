@@ -16,6 +16,7 @@ import Fig from "../../components/note/Fig.astro";
 import Bars from "../../components/note/Bars.astro";
 import Pull from "../../components/note/Pull.astro";
 import Stats from "../../components/note/Stats.astro";
+import Explore from "../../components/note/Explore.astro";
 
 Underwater, truth is never directly available. That's the whole reason the estimation stack exists. But there's exactly one condition where it is: a vehicle sitting still on a bench, where the true velocity, angular rate and position are known by definition. That measurement had never been taken on this hardware, so it became the first one.
 
@@ -27,6 +28,14 @@ Underwater, truth is never directly available. That's the whole reason the estim
 ]} />
 
 Rest was *verified*, not assumed. If someone had leaned on the desk, |accel| would have said so, and what follows would be desk statistics instead of sensor statistics.
+
+## Twenty seconds you can inspect
+
+The thirty-minute recording isn't in the repository, but a shorter one is: twenty seconds of the same kind of board, sitting still, published as a test fixture. Here are its real samples. Pick a window and the statistics are computed from them, live.
+
+<Explore id="imu" n="fig 1" title="A board at rest, twenty real seconds" hint="drag the two handles" caption="1,000 rows from <code>board_still_2026-09-15.json</code>, accelerometer in the sensor's own axes. A different, shorter recording than the thirty-minute run below; the same idea." />
+
+Notice the tilt it reports. The board isn't level on its mount, so a little of gravity shows up on x and y. That looks exactly like a bias until you check the magnitude, which stays put. Logging that explicitly is what stops it being "discovered" again next month.
 
 ## The headline
 

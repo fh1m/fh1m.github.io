@@ -144,7 +144,7 @@ output { font: 500 0.8rem var(--mono); color: var(--chalk); }
 .x-handle.x-active { cursor: grabbing; }
 .x-handle:focus-visible circle:last-child { stroke-width: 4; }
 .x-btns { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.9rem 0 0; }
-.x-btns button[aria-pressed="true"], .btns button[aria-pressed="true"] { border-color: var(--me); color: var(--me); }
+.x-btns button[aria-pressed="true"], .btns button[aria-pressed="true"] { background: var(--accent, var(--pink)); border-color: var(--accent, var(--pink)); color: #000; }
 .x-glow { filter: drop-shadow(0 0 4px currentColor); }
 /* Words in prose that name a diagram element carry its colour */
 .k-me { color: var(--me); } .k-medium { color: var(--medium); } .k-measured { color: var(--measured); } .k-failure { color: var(--failure); } .k-estimate { color: var(--estimate); }

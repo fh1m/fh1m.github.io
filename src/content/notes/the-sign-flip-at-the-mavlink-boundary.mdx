@@ -15,10 +15,19 @@ sources:
 import Fig from "../../components/note/Fig.astro";
 import Bars from "../../components/note/Bars.astro";
 import Pull from "../../components/note/Pull.astro";
+import Explore from "../../components/note/Explore.astro";
 
 The largest unresolved warning in the project's own documentation read: *the depth loop has never run closed.* Every mission primitive closes it implicitly, even a plain forward move. And an in-air test proves nothing, because at roughly zero metres the target and the measurement already agree by default.
 
 The only real test was a dynamics plant with actual feedback: the first time the depth-control firmware ever ran against anything but open air.
+
+## What crosses the cable
+
+The boundary in question is one USB-C cable between the Pi, which thinks, and the control board, which acts. Everything the Pi says crosses it as MAVLink 2 frames, and the frame for the most ordinary thing the vehicle is ever asked to do is small enough to read byte by byte. There's no thrust in it: no motor, no angle, no depth. It says what the Pi wants; how the hull achieves it is the board's business.
+
+<Explore id="wire" n="fig 1" title="move_forward, as it leaves the Pi" hint="drag the seconds and the gain" caption="One COMMAND_LONG frame, packed the way pymavlink packs it: little-endian, trailing zeros truncated, an X.25 checksum seeded with the message's own crc_extra. At 3 s and gain 40 it reproduces Mongla's published frame exactly: 44 bytes, CRC 0x1EFD." />
+
+That's the good news about a boundary like this: it's narrow enough to be inspected. The bad news is below.
 
 ## Two correct conventions, read together, wrong
 

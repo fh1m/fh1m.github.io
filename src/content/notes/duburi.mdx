@@ -19,13 +19,14 @@ import Fig from "../../components/note/Fig.astro";
 import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
 import Stats from "../../components/note/Stats.astro";
+import Explore from "../../components/note/Explore.astro";
 
-BRACU Duburi was founded at BRAC University in 2017: Bangladesh's autonomous underwater vehicle team. I joined its vision sub-team in October 2023, and a month later had written forty lines of OpenCV that [found green](/notes/green-at-depth). I left in 2026 as engineering team lead, with three RoboSub participation certificates in a folder and a much lower opinion of colour thresholds.
+BRACU Duburi was founded at BRAC University in 2017: Bangladesh's autonomous underwater vehicle team. I joined its vision sub-team in September 2023, and two months later had written forty lines of OpenCV that [found green](/notes/green-at-depth). I left in 2026 as engineering team lead, with three RoboSub participation certificates in a folder and a much lower opinion of colour thresholds.
 
 <Gallery items={[
   { src: "/media/duburi/v1.webp", alt: "An early Duburi vehicle: an open frame with a clear tube and exposed electronics", caption: "An early generation." },
   { src: "/media/duburi/v2.webp", alt: "A later Duburi vehicle on the pool edge with a black frame", caption: "A later one, on the pool edge." },
-  { src: "/media/duburi/auv42.webp", alt: "A render of Duburi 4.2: a dark frame with an octagonal pressure hull and eight thrusters", caption: "Duburi 4.2, the current line." },
+  { src: "/media/duburi/auv42.webp", alt: "A render of Duburi 4.2: a dark frame with an octagonal pressure hull", caption: "Duburi 4.2, the current line." },
 ]} credit="Vehicle images from bracuduburi.com." />
 
 ## Rebuilt, not patched
@@ -61,10 +62,12 @@ The research side of this became a paper with the team: *Color is Also Class Evi
 ]} src="Placings and points read from RoboNation's published score sheets; press linked in the sources." />
 
 <Gallery items={[
-  { src: "/media/duburi/winning.webp", alt: "The team holding an award cheque and the flag of Bangladesh outdoors", caption: "The award moment, 2025." },
+  { src: "/media/certs/robosub-2024.webp", alt: "RoboSub 2024 certificate of participation, 27th RoboSub, Irvine", caption: "27th RoboSub, August 2024, Irvine." },
+  { src: "/media/certs/robosub-2025.webp", alt: "RoboSub 2025 certificate of participation, 28th RoboSub", caption: "28th RoboSub, August 2025." },
   { src: "/media/certs/robosub-2026.webp", alt: "RoboSub 2026 certificate of participation for Muhammad Fahim Faisal, BRACU Duburi", caption: "29th RoboSub, July 2026, Irvine, California." },
-  { src: "/media/press/tbs-robosub-2026.webp", alt: "The Business Standard article image: a Duburi vehicle on a dock", caption: "The Business Standard, 2026." },
 ]} />
+
+<Explore id="robosub" n="fig 1" title="Where the points came from" hint="pick a year, point at a bar" caption="RoboNation's published score sheets, read round by round by a script in mongla_ws, never typed in." />
 
 Same placing both years, 53 % more points on the best round. I led the 2025 vision sub-team and the 2026 engineering. Both years we finished short of the finals wild-card line. That gap, and a 20 Hz control loop steering a box we weren't allowed inside, are what [Mongla](/notes/mongla) was built to answer.
 

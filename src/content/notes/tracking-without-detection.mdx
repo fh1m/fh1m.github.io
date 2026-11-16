@@ -1,55 +1,65 @@
 ---
 title: "Tracking without detection"
-dek: "Detectors blink. A lock has to survive the gap between two sightings without inventing a target that isn't there."
-date: "2026-04"
+dek: "Underwater, detectors blink. Sizing the lock that survives the blink needed the first real measurement of how long a blink lasts, and turned up a tracker that had been emitting nothing at all."
+date: "2026-11"
 series: time
 part: 4
 kind: essay
 repo: mongla_ws
-hero: /media/mongla/brain-run.webp
-heroAlt: "Three panels: what the vehicle sees, what it believes, what it does"
+hero: /media/lab/detect-flare.webp
+heroAlt: "A flare detected in hazy water"
 sources:
-  - { label: "mongla_ws: detection-continuity.md", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/perception/detection-continuity.md" }
+  - { label: "detection-continuity.md: never losing the lock", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/perception/detection-continuity.md" }
+  - { label: "OC-SORT (Cao et al., 2023)", href: "https://arxiv.org/abs/2203.14360" }
+  - { label: "EMAP: ego-motion-aware prediction (2024)", href: "https://arxiv.org/abs/2404.03110" }
 ---
 import Fig from "../../components/note/Fig.astro";
-import Chart from "../../components/note/Chart.astro";
+import Explore from "../../components/note/Explore.astro";
 import Pull from "../../components/note/Pull.astro";
+import Bars from "../../components/note/Bars.astro";
 
-Real detectors don't fire every frame. Underwater, against murk and sun caustics, they drop out for stretches. If the controller only acts when the detector fires, the vehicle stutters and loses its target.
+A detector doesn't fire every frame. Underwater, against murk, motion blur and sunlight dancing on the floor, it drops out for stretches, then finds the target again. If the controller only acts when the detector fires, the vehicle stutters, and on a bad stretch it gives up on a target that never left.
 
-We counted the gaps. Not guessed: counted, at native frame rate, over 300 consecutive frames × 3 windows × 5 clips. **71 real gaps.**
+So you build a *lock ladder*: a few rungs that keep the target alive through a gap, each less certain than the last, ending in an honest LOST. The question is how long each rung should hold. Six constants guarded Mongla's lock, and every one had been sized from the detection *rate* and from each other. None had been sized from how long a real gap lasts, because nobody had ever measured one.
 
-<Chart title="Distribution of the 71 real detection gaps" data={[
-  { label: "p50", value: 0.155 },
-  { label: "p90", value: 0.651 },
-  { label: "p99", value: 2.418, tone: "estimate" },
-  { label: "max", value: 4.0, tone: "failure" },
-]} unit=" s" caption="Most gaps are flicker. A few are long. The long ones decide the run." />
+## Measuring a blink
 
-## A ladder, not a timeout
+The ruler is small: pure functions over observations, no ROS, no camera, no model, so a live topic, a recording and an offline replay are all scored the same way. Run over the team's real RoboSub 2025 footage, it found **71 gaps**. One detail decides whether the numbers can be trusted: a gap is measured from the *last sighting*, not the first missing frame, because that's what the control loop compares against. Measuring from the first miss under-reports every gap by a frame, in the direction that flatters you.
 
-So you build a *lock ladder*: a small state machine that coasts a target through detection gaps, one rung at a time, each rung's timeout sized against the real distribution of gaps rather than a guessed constant.
+<Explore id="gaps" n="fig 1" title="How long the detector goes blind, and how long the ladder holds" hint="drag the coast time" caption="The 71 real gaps: p50 0.155 s, p90 0.651 s, p99 2.418 s, max 4.00 s. Between the measured percentiles the curve is interpolated in log-time, and the diagram says so." />
 
-<Chart title="Share of the 71 real gaps each rung's timeout covers" data={[
-  { label: "fresh-zero 0.20 s", value: 56.3 },
-  { label: "coast 0.80 s", value: 91.5 },
-  { label: "lost-grace 1.00 s", value: 91.5 },
-  { label: "predict 1.50 s", value: 94.4 },
-  { label: "track buffer 5.00 s", value: 100, tone: "measured" },
-]} unit=" %" max={110} caption="The coast timeout sits just above the p90, which is exactly its job: routine flicker. Nothing in the archive outlives the track buffer." wide />
+<Bars title="share of the 71 real gaps each rung covers" unit=" %" rows={[
+  { label: "fresh-zero ramp · 0.20 s", v: 56.3, tone: "estimate" },
+  { label: "coast · 0.80 s", v: 91.5, tone: "measured" },
+  { label: "lost grace · 1.00 s", v: 91.5, tone: "measured" },
+  { label: "Kalman predict · 1.50 s", v: 94.4, tone: "measured" },
+  { label: "track buffer · 5.00 s", v: 100, tone: "medium" },
+]} src="The coast rung sits just above the p90, which is what it's for: routine flicker." />
 
-One clip held its target through a gap of **175 frames** with no detection at all. The vehicle still knew where the target was, because an anchor matched image structure instead of asking the network again.
+## The tracker that emitted nothing
 
-<Fig src="/media/mongla/brain-run.webp" alt="Three panels: the forward camera with a bins box, a belief map with landmarks and an uncertainty circle, and the current verb's commands and budget" caption="What it sees, what it believes, what it does. The belief circle grows while the vehicle is blind: the map draws how sure it is, not just where it thinks the target is." wide contain />
+Sizing the ladder surfaced something worse than a wrong constant. The tracker only *starts* a track for detections above a confidence threshold, and the shipped value was 0.6, inherited from pedestrian benchmarks where scores run high. Real underwater scores on the gate approach:
 
-## Asymmetric failure sets the gates
+<Bars title="detector confidence on the real gate approach (319 detections)" rows={[
+  { label: "p10", v: 0.167, tone: "dim" },
+  { label: "p50", v: 0.258, tone: "estimate" },
+  { label: "p90", v: 0.439, tone: "estimate" },
+  { label: "max", v: 0.640, tone: "measured" },
+  { label: "tracker's threshold", v: 0.6, tone: "failure" },
+]} src="0.6 % of real detections reached 0.6. So no track was ever started, and every node still looked healthy, publishing an empty list." />
 
-The rungs are honest about confidence. The ladder ends in a refusal, LOST, not in a confident invention.
+No track, so the coast, the smoother and the lock all had nothing to work with. Nothing raised anything, because a tracker with no tracks still publishes an empty array on time. The fix was structural: the gate is now clamped to the detector's own live threshold, so a detection the detector chose to publish is always allowed to start a track. End to end on the same cached detections, mission-aborting losses longer than a second went from **six to one**, and `/tracks` went from silent to 51.95 Hz.
 
-<Pull>A rung that names the wrong prop confidently is worse than one that reports LOST, because LOST is honest.</Pull>
+<Pull>A missed re-acquisition costs a second. A false one costs the run.</Pull>
 
-The failure modes are asymmetric. A missed re-acquisition costs a second. A false one costs the run. You'd rather lose the target and know it than weld two objects into one identity and have every downstream consumer believe the target teleported. Robustness here isn't a bigger model. It's refusing to lie during the gap.
+## The dead zone
 
-The ladder's limits have their own note: [179 identity switches](/notes/179-identity-switches), and why the state-of-the-art fix costs more than this vehicle can pay.
+The ladder's own code had a quieter defect. An expired Kalman filter could only be revived inside the smoothing call, and the loop skipped that call for expired filters. So once a filter expired while the tracker still held the id, a returning target was suppressed forever. At the shipped settings that was a 70-frame dead zone, on an approach with 53 gaps in 57 seconds.
 
-<Fig src="/media/mongla-docs/hud_murky.webp" alt="The operator display on simulated murky water, fewer detections, the gate still held" caption="Murky water: detections thin out. This is where the ladder earns its rungs." />
+The test suite couldn't see it, because the one test that could had *reimplemented* the node's loop. It tested a copy, and the copy didn't have the bug. Now the loop is a single function imported by both.
+
+That asymmetry (a lost target is honest, a wrong target is fatal) is why the ladder ends in LOST rather than a confident guess. When identity itself breaks across a gap, that's a different measurement with a different price: [179 identity switches](/notes/179-identity-switches).
+
+<Fig src="/media/lab/detect-flare.webp" alt="A flare boxed in hazy water" caption="A flare, found. The frame either side of it may have nothing in it at all." contain />
+
+Next: [late measurements](/notes/low-cost-vio-and-the-dvl-question), for when the detection arrives, but describes a moment that's already gone.

@@ -1,53 +1,65 @@
 ---
 title: "The frame-age problem"
-dek: "A perception pipeline that looks healthy can be acting on a frame that's 400 ms old. Freshness is a feature you have to build."
-date: "2026-07"
+dek: "A camera queue isn't a backlog of recent frames you can skip through. It's a fossil record of the moment your program stalled, and the standard fix recovers 12 % of it."
+date: "2026-11"
 series: time
 part: 3
 kind: essay
 repo: mongla_ws
 hero: /media/lab/latency-verdict.webp
-heroAlt: "A table of photon-to-command latency for two cameras, verdict: sensor is the limit"
+heroAlt: "A latency table for both cameras ending in the verdict: sensor is the limit"
+heroPlot: false
 sources:
+  - { label: "camera-latency.md: the V4L2 finding, four policies, measured", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/perception/camera-latency.md" }
+  - { label: "V4L2 buffer queue (VIDIOC_QBUF / DQBUF)", href: "https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-qbuf.html" }
   - { label: "Carmack, Latency Mitigation Strategies", href: "https://danluu.com/latency-mitigation/" }
-  - { label: "mongla_ws: measured-bars.md", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/measured-bars.md" }
 ---
 import Fig from "../../components/note/Fig.astro";
-import Chart from "../../components/note/Chart.astro";
+import Explore from "../../components/note/Explore.astro";
 import Pull from "../../components/note/Pull.astro";
+import Bars from "../../components/note/Bars.astro";
 
-When a camera feeds a queue, the consumer reads the oldest frame in the queue. Under load, that frame can be hundreds of milliseconds stale, and nothing in the system looks broken. The detector runs. The boxes appear. The counters tick up. The vehicle is just steering by the past.
+A detector that looks healthy can be steering by the past. The boxes appear, the counters tick up, every node reports green, and the frame it's looking at is a third of a second old. For a vehicle moving at half a metre per second, that's a target that moved 17 cm while you weren't watching.
 
-<Chart title="Mean age of the frame the detector acts on" data={[
-  { label: "queue", value: 396, tone: "failure" },
-  { label: "mailbox (newest only)", value: 16.9, tone: "measured" },
-]} unit=" ms" caption="Same camera, same detector. 23× fresher, entirely from which frame you choose to believe." />
+This note is about where that third of a second comes from. The answer turned out to invert the advice in essentially every reference on the problem.
 
-We measured it. A naive queue served frames **396 ms** stale on average. A *mailbox*, which keeps only the newest frame and drops the rest, served them **16.9 ms** stale.
+## What everybody assumes
+
+Linux cameras speak V4L2. The driver owns a small ring of buffers; the camera fills them, your program takes one, reads it, and gives it back. If your program is slow, the buffers fill up. The usual mental picture is a queue of *recent* frames: if you fall behind, drain the queue and take the last one, and you're caught up.
+
+That picture is wrong in one specific way. Stall a reader for 400 ms at 60 fps and read the driver's own sequence counter off what's waiting:
+
+<Explore id="fossil" n="fig 1" title="What a full camera queue actually holds" hint="drag the stall and pick a policy" caption="The driver owns four buffers. While the reader stalls, the camera fills the free ones and then has nowhere to put anything, so every later frame is dropped before it exists. Measured on two cameras from different vendors, so it's the V4L2/UVC contract, not one driver." />
+
+The queue holds frames **+1 to +4**: the four frames from the *start* of the stall, aged 396, 380, 364 and 344 ms. Frames +5 to +24 were never captured at all. The kernel had no free buffer, so the driver dropped them on the floor.
+
+<Pull>The queue is not a backlog of recent frames. It is a fossil record of the moment the consumer stalled.</Pull>
+
+## Four policies, one stall
+
+Same camera, same 400 ms stall, ten repetitions each:
+
+<Bars title="age of the frame acted on after a 400 ms stall" unit=" ms" rows={[
+  { label: "A · plain read() (what shipped)", v: 396.1, tone: "failure" },
+  { label: "B · drain, take the last (the standard recipe)", v: 348.1, tone: "failure" },
+  { label: "C · drain, then wait for a new frame", v: 12.0, tone: "estimate", note: "but blocks 28 ms" },
+  { label: "D · keep-up thread (what ships now)", v: 16.9, tone: "measured", note: "blocks 0 ms" },
+]} src="mongla_ws camera-latency.md §2. B is the advice in the OpenCV issue threads and 'bufferless VideoCapture' gists; it hands you the least-old fossil." />
+
+**B** recovers 12 % of the staleness, because draining a fossil record gets you the least-old fossil. **C** gets a fresh frame but makes the caller wait for it. **D** is a small thread whose only job is to dequeue and immediately requeue, so the driver *always* has a free buffer, never drops a frame, and the newest one is always about one frame old. Under a busy consumer (25 ms of work per tick, the shape of an inference) it holds 22.4 ms median and 31.95 ms at the 95th percentile, at the camera's full 62.5 Hz with zero sequence gaps.
 
 ## Freshness over throughput
 
-For a moving vehicle, an old correct answer is a wrong answer. Throughput is a benchmark number. Freshness is what keeps the control loop honest. The mailbox throws away work on purpose, and that's the right trade.
+For a moving vehicle, an old correct answer is a wrong answer. Throughput is a benchmark number; freshness is what keeps a control loop honest. The keep-up thread throws work away on purpose, and that's the right trade.
 
 <Pull by="John Carmack">The speed of light sucks.</Pull>
 
-The lesson generalises beyond cameras. Any time a slow stage sits behind a fast one, ask what happens to the backlog. If the answer is *it queues*, you've built a time machine pointed the wrong way.
+Push it to the end and the goal stops being "fast". It's to make the software vanish as a source of delay, so that what's left is the camera itself. On Mongla's live hardware, both cameras, that's where it ended:
 
-## Then make the software disappear
+<Fig src="/media/lab/latency-verdict.webp" alt="Latency table: forward camera 73.4 Hz, downward 27.6 Hz, authority at p99 of 1.000, verdict sensor is the limit" caption="Authority at the 99th percentile: <b>1.000</b> for both cameras. The freshest frame the sensor could provide is the frame the controller acts on." wide contain />
 
-The goal of optimising a pipeline isn't "fast". It's to make the software vanish as a source of delay, so that what's left is the camera itself. Verified on live hardware, on both cameras, the verdict is the one you want.
+<Fig src="/media/mongla-docs/frame-budget.svg" alt="One frame from photon to thrust over 40 ms: exposure and transfer, Hailo-8 inference, the ROS graph, the detection existing at 18.0 ms, the 500 Hz board ticking underneath" caption="One frame, photon to thrust, every span measured. The board underneath ticks every 2 ms regardless." wide />
 
-<Fig src="/media/lab/latency-verdict.webp" alt="Latency table: forward 73.4 Hz, pipeline age 21.86 / 29.58 ms; downward 27.6 Hz, 46.94 / 52.44 ms; authority at p99 1.000 for both; verdict: sensor is the limit" caption="Photon to command, both cameras. <b>Authority at p99 is 1.000</b>: at the 99th percentile, the freshest frame the sensor could provide is the frame the controller acts on." wide contain />
+The lesson generalises past cameras: any time a slow stage sits behind a fast one, ask what happens to the backlog. If the answer is *it queues*, you've built a time machine pointed the wrong way. [Dristy](/notes/dristy) has the same rule printed on its README, and the 2024 version of me met the problem without a name for it, [narrating a bottle](/notes/half-a-second) half a second late.
 
-| | forward | downward |
-|---|---:|---:|
-| rate | 73.4 Hz | 27.6 Hz |
-| pipeline age, median / p99 | 21.86 / 29.58 ms | 46.94 / 52.44 ms |
-| interval, median | 12.01 ms | 32.01 ms |
-| authority at p99 | 1.000 | 1.000 |
-
-There's no software latency left to remove. In both cameras the bottleneck is the hardware, not the code.
-
-The camera on [Dristy](/notes/dristy) obeys the same rule at a tenth of the scale: a mailbox, not a queue. You can feel the cost of reacting late in the [delay arena](/#delay).
-
-<Fig src="/media/lab/chip-efficiency.webp" alt="A readout of the accelerator path's efficiency counters" caption="Decode on demand, not on arrival: the camera only decodes a frame when the inference worker is idle, so the chip never spends compute on a frame that's already been superseded. Mean frame age at inference start: 11.5 ms; decoded-but-never-inferred: 0." wide contain />
+Next: [tracking without detection](/notes/tracking-without-detection), for when the newest frame has nothing in it at all.
