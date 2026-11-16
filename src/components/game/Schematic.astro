@@ -1,0 +1,105 @@
+---
+/**
+ * Engraved, animated engineering drawings for the after-action reports. Line art on navy,
+ * labelled with the real parts and numbers. Motion is slow and respects reduced motion.
+ */
+interface Props { zone: "air" | "water" | "earth" | "fire" }
+const { zone } = Astro.props;
+---
+<figure class="schem" data-zone={zone}>
+  {zone === "air" && (
+    <svg viewBox="0 0 640 360" role="img" aria-label="A rocket on a two-axis gimbal: two SG90 servos tilt the nozzle; an MPU6050 measures the tilt.">
+      <g class="ln">
+        <path d="M300 40 L340 40 L350 70 L350 230 L290 230 L290 70 Z" />
+        <path d="M300 40 Q320 10 340 40" />
+        <line x1="290" y1="150" x2="350" y2="150" />
+        <rect x="305" y="160" width="30" height="20" class="hot" />
+        <g class="nozzle"><path d="M305 236 L335 236 L345 282 L295 282 Z" /><path class="flame" d="M302 286 Q320 340 338 286" /></g>
+        <circle cx="320" cy="234" r="5" class="hot" />
+        <rect x="370" y="210" width="44" height="26" /><line x1="370" y1="223" x2="340" y2="240" />
+        <rect x="226" y="210" width="44" height="26" /><line x1="270" y1="223" x2="300" y2="240" />
+      </g>
+      <g class="lbl">
+        <text x="420" y="227">SG90 servo (pin 10)</text>
+        <text x="40" y="227">SG90 servo (pin 9)</text>
+        <text x="360" y="175">MPU6050: accel + gyro</text>
+        <text x="360" y="300">nozzle on a 2-axis gimbal</text>
+        <text x="40" y="60">estimate = 0.96 (estimate + gyro·dt)</text>
+        <text x="40" y="80">               + 0.04 accel</text>
+        <text x="40" y="110" class="red">bug: estimate declared fresh each call</text>
+        <text x="40" y="130" class="red">     so 'estimate' on the right is garbage</text>
+      </g>
+    </svg>
+  )}
+  {zone === "water" && (
+    <svg viewBox="0 0 640 360" role="img" aria-label="A camera queue with four buffers keeps the oldest frames; a mailbox keeps only the newest.">
+      <g class="lbl"><text x="40" y="40">camera → driver queue (4 buffers) → detector</text><text x="40" y="200">camera → mailbox (1 slot, always the newest) → detector</text></g>
+      <g class="ln">
+        {[0, 1, 2, 3].map((i) => <rect x={60 + i * 70} y="70" width="60" height="60" />)}
+        <rect x="380" y="70" width="90" height="60" class="hot" />
+        <rect x="60" y="230" width="60" height="60" class="good" />
+        <rect x="380" y="230" width="90" height="60" class="hot" />
+        <line x1="120" y1="260" x2="380" y2="260" /><line x1="340" y1="100" x2="380" y2="100" />
+      </g>
+      <g class="lbl">
+        {[0, 1, 2, 3].map((i) => <text x={72 + i * 70} y="106">#{36 + i}</text>)}
+        <text x="388" y="106">detector</text><text x="70" y="266" class="good">#54</text><text x="388" y="266">detector</text>
+        <text x="40" y="160" class="red">full queue: newest frames are dropped, oldest kept</text>
+        <text x="40" y="178" class="red">396.1 ms old as shipped, 348.1 ms after draining</text>
+        <text x="40" y="320" class="good">16.9 ms old with a keep-up thread</text>
+      </g>
+      <g class="frames">{[0, 1, 2].map((i) => <rect class="fr" x="20" y="236" width="28" height="48" style={`animation-delay:${i * 0.8}s`} />)}</g>
+    </svg>
+  )}
+  {zone === "earth" && (
+    <svg viewBox="0 0 640 360" role="img" aria-label="An unsigned byte holds 0 to 255; minus 255 wraps around to 1.">
+      <g class="ln"><circle cx="200" cy="190" r="120" /><circle cx="200" cy="190" r="4" class="hot" /></g>
+      <g class="lbl">
+        <text x="190" y="62">0</text><text x="326" y="194">64</text><text x="186" y="330">128</text><text x="50" y="194">192</text><text x="232" y="74">255</text>
+        <text x="380" y="80">setSpeed(−255)  // "full reverse"</text>
+        <text x="380" y="110">uint8_t speed = −255;</text>
+        <text x="380" y="140" class="red">speed == 1  // a polite crawl</text>
+        <text x="380" y="200">−255 mod 256 = 1</text>
+        <text x="380" y="260" class="good">fix: signed speed,</text><text x="380" y="280" class="good">plus a direction pin</text>
+      </g>
+      <g class="needle"><line x1="200" y1="190" x2="200" y2="82" class="hot" /></g>
+    </svg>
+  )}
+  {zone === "fire" && (
+    <svg viewBox="0 0 640 360" role="img" aria-label="An old process holds the accelerator; the new detector fails to load its model and every health check stays green.">
+      <g class="ln"><rect x="250" y="130" width="140" height="100" class="hot" /><rect x="40" y="60" width="150" height="60" /><rect x="40" y="240" width="150" height="60" /><rect x="450" y="150" width="150" height="60" />
+        <line x1="190" y1="90" x2="250" y2="150" /><line x1="190" y1="270" x2="250" y2="210" class="cut" /><line x1="390" y1="180" x2="450" y2="180" class="cut" /></g>
+      <g class="lbl">
+        <text x="270" y="175">/dev/hailo0</text><text x="270" y="195">Hailo-8</text>
+        <text x="52" y="86">old process</text><text x="52" y="106">still holds it</text>
+        <text x="52" y="266">new detector</text><text x="52" y="286" class="red">load: FATAL, returned</text>
+        <text x="462" y="176">detections</text><text x="462" y="196" class="red">0 per second</text>
+      </g>
+      <g class="leds">{["camera 30 Hz", "topics up", "params answer", "QoS matches"].map((t, i) => <><circle class="led" cx={470} cy={260 + i * 22} r="6" /><text class="lbl-t" x={484} y={265 + i * 22}>{t}</text></>)}</g>
+    </svg>
+  )}
+</figure>
+<style>
+  .schem { margin: 0 0 1.4rem; padding: 1rem; border-radius: 1rem; background: #0e1640; }
+  svg { width: 100%; height: auto; display: block; }
+  .ln :global(*) , .ln { fill: none; stroke: #cfd8ff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ln :global(.hot) { stroke: #ffd15c; }
+  .ln :global(.good), .good { stroke: #8dff6a; }
+  .ln :global(.cut) { stroke: #e5533d; stroke-dasharray: 6 6; }
+  .lbl :global(text), .lbl-t { fill: #cfd8ff; font: 600 13px var(--mono); }
+  .lbl :global(.red) { fill: #ff8f80; }
+  .lbl :global(.good) { fill: #8dff6a; stroke: none; }
+  .ln { stroke-dasharray: 1400; animation: draw 3.2s ease forwards; }
+  @keyframes draw { from { stroke-dashoffset: 1400; } to { stroke-dashoffset: 0; } }
+  .nozzle { transform-origin: 320px 234px; animation: wob 2.4s ease-in-out infinite; }
+  @keyframes wob { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+  .flame { stroke: #ffb347 !important; }
+  .fr { fill: #4f8fe0; animation: slide 2.4s linear infinite; }
+  @keyframes slide { from { transform: translateX(0); opacity: 1; } 80% { opacity: 1; } to { transform: translateX(40px); opacity: 0; } }
+  .needle line { stroke: #ffd15c; stroke-width: 3; stroke-linecap: round; }
+  .needle { transform-origin: 200px 190px; animation: wrap 4s ease-in-out infinite; }
+  @keyframes wrap { 0%, 15% { transform: rotate(0deg); } 50%, 65% { transform: rotate(-358deg); } 100% { transform: rotate(-358deg); } }
+  .led { fill: #8dff6a; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .5; } }
+  @media (prefers-reduced-motion: reduce) { .ln, .nozzle, .fr, .needle, .led { animation: none; } .ln { stroke-dasharray: none; } }
+</style>

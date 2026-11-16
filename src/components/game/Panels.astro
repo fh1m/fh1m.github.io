@@ -1,0 +1,190 @@
+---
+/**
+ * Every panel the planet can open, rendered on the server so all of it is in the page
+ * (and readable without WebGL). Projects, heritage, the library, the graveyard and its
+ * headstones, the CV office, Voyager, and the time machine.
+ */
+import { getCollection } from "astro:content";
+import { ZONE_INFO } from "../../game/zones";
+import { projects } from "../../data/elements";
+import { lessons } from "../../data/lessons";
+import { series } from "../../data/series";
+import { results, person } from "../../data/facts";
+import { chapters } from "../../data/story";
+import { dims } from "../../data/media";
+
+const notes = await getCollection("notes");
+const bySlug = Object.fromEntries(projects.map((p) => [p.slug, p]));
+const zoneOf = Object.fromEntries(ZONE_INFO.flatMap((z) => z.objects.map((o) => [o, z])));
+const projectObjs = ZONE_INFO.flatMap((z) => z.objects);
+const lessonsFor = (slug: string) => lessons.filter((l) => l.project === slug);
+
+const heritage = [
+  { id: "heritage-jcbose", bn: "জগদীশ চন্দ্র বসু", name: "Jagadish Chandra Bose", line: "Born in Mymensingh, 1858. In 1895 he was making and catching millimetre waves: a radio receiver before radio had a name." },
+  { id: "heritage-snbose", bn: "সত্যেন্দ্রনাথ বসু", name: "Satyendra Nath Bose", line: "At Dhaka University in 1924 he worked out the statistics of light. Every boson in the universe carries his name." },
+  { id: "heritage-frkhan", bn: "ফজলুর রহমান খান", name: "Fazlur Rahman Khan", line: "Born in Dhaka, 1929. The tube structure: how a skyscraper stands up to the wind, with far less steel. The X-braced tube is his." },
+  { id: "heritage-jrc", bn: "জামিলুর রেজা চৌধুরী", name: "Jamilur Reza Choudhury", line: "Born in Sylhet, 1943. He chaired the expert panel for the Jamuna bridge and led the international panel for the Padma bridge, which opened in 2022." },
+];
+
+// the time machine: years, the chapter(s) that start then, and what Bunnu remembers
+const years: { y: number | "now"; ch: string[]; bunnu: string }[] = [
+  { y: 2021, ch: ["source"], bunnu: "I arrived. So did his first bug with a victim who wasn't him. I was more interesting." },
+  { y: 2022, ch: ["source"], bunnu: "He photographed his editor as it grew, the way people photograph plants. I sat on the keyboard so it would grow faster." },
+  { y: 2023, ch: ["sky", "water"], bunnu: "Rockets in February, water in September. His green arrow detector worked beautifully, on his desk." },
+  { y: 2024, ch: ["cat", "current"], bunnu: "He built a robot in one night and named it after a different cat. I've made my feelings known." },
+  { y: 2025, ch: ["ground"], bunnu: "The rover's arm learned to type. I've been typing for years. Nobody gave me a medal." },
+  { y: 2026, ch: ["mongla", "dristy", "rupsha"], bunnu: "Thirteen hundred commits and zero dives. He says that's the honest number. I say it's dinner time." },
+  { y: "now", ch: ["mohona"], bunnu: "Next is the first dive. I'm not going. Someone has to keep the chair warm." },
+];
+const chapterById = Object.fromEntries(chapters.map((c) => [c.id, c]));
+const strip = (h: string) => h.replace(/<[^>]+>/g, "");
+---
+{projectObjs.map((slug) => {
+  const p = bySlug[slug]; const z = zoneOf[slug]; const d = p.hero ? dims(p.hero) : null; const ll = lessonsFor(slug);
+  return (
+    <aside class="objpanel" data-obj={slug} style={`--c:${z.colour}`} aria-labelledby={`obj-${slug}`}>
+      <button class="close" type="button" aria-label="Close">Close</button>
+      <p class="kicker"><span class="bn" lang="bn">{z.bn}</span> {z.name}, {p.years}</p>
+      <h2 id={`obj-${slug}`}>{p.title}</h2>
+      {p.hero && d && <img src={p.hero} alt={p.heroAlt ?? ""} width={d.w} height={d.h} loading="lazy" style={`max-width:min(100%, ${d.w}px)`} />}
+      {p.line && <p class="pline">{p.line}</p>}
+      <p class="sum">{p.summary}</p>
+      {p.figures && <dl>{p.figures.slice(0, 4).map(([n, l]) => <><dt>{l}</dt><dd>{n}</dd></>)}</dl>}
+      {ll.length > 0 && <div class="sub"><p class="sub-h">What I got wrong here</p><ul>{ll.map((l) => <li><a href={`/lessons/${l.slug}`}>{l.title}</a></li>)}</ul></div>}
+      {p.notes.length > 0 && <div class="sub"><p class="sub-h">Deep dives</p><ul>{p.notes.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></div>}
+      <p class="links"><a href={`/projects/${p.slug}`}>The whole story</a>{p.repo && <a href={`https://github.com/${p.repo}`}>Code on GitHub</a>}{p.private && <span>Private for now</span>}</p>
+    </aside>
+  );
+})}
+
+{heritage.map((h) => (
+  <aside class="objpanel heritage" data-obj={h.id} style="--c:#e9c46a" aria-labelledby={`obj-${h.id}`}>
+    <button class="close" type="button" aria-label="Close">Close</button>
+    <p class="kicker">The delta</p>
+    <h2 id={`obj-${h.id}`}>{h.name}</h2>
+    <p class="bnname" lang="bn">{h.bn}</p>
+    <p class="pline">{h.line}</p>
+    <p class="sum">Bangladesh is a delta, so this is where they stand. None of this planet happens without people like them having been here first.</p>
+    <p class="links"><a href="/shoulders">Shoulders</a></p>
+  </aside>
+))}
+
+<aside class="objpanel wide" data-obj="library" style="--c:#bba6ff" aria-labelledby="obj-library">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <p class="kicker">The library</p>
+  <h2 id="obj-library">The notebook</h2>
+  <p class="pline">The long versions. {notes.length} of them, on six shelves. Most have something you can drag.</p>
+  {series.map((s) => {
+    const parts = notes.filter((n) => n.data.series === s.id).sort((a, b) => a.data.part - b.data.part);
+    return parts.length > 0 && <div class="sub"><p class="sub-h"><span class="bn" lang="bn">{s.bn}</span> {s.title}</p><ul>{parts.map((n) => <li><a href={`/notes/${n.id}`}>{n.data.title}</a></li>)}</ul></div>;
+  })}
+  <p class="links"><a href="/notes">The whole notebook</a></p>
+</aside>
+
+<aside class="objpanel wide" data-obj="graveyard" style="--c:#a7a39a" aria-labelledby="obj-graveyard">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <p class="kicker">Between water and fire</p>
+  <h2 id="obj-graveyard">Here lie my wrong ideas</h2>
+  <p class="pline">{lessons.length} things I believed that turned out to be false. Each one was killed by a commit, and each one is written up the way NASA files a lesson learned.</p>
+  <ul class="graves">{lessons.map((l) => <li><a href={`/lessons/${l.slug}`}><span class="rip">{l.id}</span> {l.title}</a></li>)}</ul>
+  <p class="links"><a href="/lessons">All of them, in full</a></p>
+</aside>
+
+{lessons.map((l) => {
+  const commits = l.refs.filter((r) => r.href.includes("/commit/"));
+  return (
+    <aside class="objpanel" data-obj={`lesson-${l.slug}`} style="--c:#a7a39a" aria-labelledby={`obj-lesson-${l.slug}`}>
+      <button class="close" type="button" aria-label="Close">Close</button>
+      <p class="kicker">Here lies {l.id}, {l.date}</p>
+      <h2 id={`obj-lesson-${l.slug}`}>{l.title}</h2>
+      <p class="believed"><span class="wrong">{l.believed}</span></p>
+      <p class="sum">{l.truth}</p>
+      <p class="pline">{l.lesson}</p>
+      {commits.length > 0 && <p class="sum">Killed by {commits.map((c, i) => <>{i > 0 && ", "}<a class="h" href={c.href}>{c.label}</a></>)}.</p>}
+      <p class="links"><a href={`/lessons/${l.slug}`}>The full report</a></p>
+    </aside>
+  );
+})}
+
+<aside class="objpanel" data-obj="cv" style="--c:#79b35f" aria-labelledby="obj-cv">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <p class="kicker">The office</p>
+  <h2 id="obj-cv">{person.fullName}</h2>
+  <p class="pline">The short, serious version, for people with a hiring spreadsheet open.</p>
+  <ul class="results">{results.map((r) => <li><span class="yr">{r.year}</span> <b>{r.event}</b>: {r.result}</li>)}</ul>
+  <p class="links"><a href="/cv/fahim-faisal-cv.pdf" download>Download the PDF</a><a href="/cv">Read it here</a></p>
+</aside>
+
+<aside class="objpanel" data-obj="voyager" style="--c:#c9d3ff" aria-labelledby="obj-voyager">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <p class="kicker">In orbit</p>
+  <h2 id="obj-voyager">Voyager 1</h2>
+  <p class="pline">Still going. It took the picture this all started from, then switched its cameras off for good.</p>
+  <p class="sum">Everything on this planet stands on somebody's shoulders: Sagan, who asked for that picture; Feynman, who said not to fool yourself; and four people in the delta, much closer to home.</p>
+  <p class="links"><a href="/shoulders">Shoulders</a><a href="https://science.nasa.gov/mission/voyager/voyager-1s-pale-blue-dot/">The picture, at NASA</a></p>
+</aside>
+
+<aside class="objpanel wide tm" data-obj="timemachine" style="--c:#8dff6a" aria-labelledby="obj-tm">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <p class="kicker">The garage</p>
+  <h2 id="obj-tm">The time machine</h2>
+  <p class="pline">Drag through the years. The planet rebuilds itself the way it actually happened.</p>
+  <div class="tm-controls">
+    <input type="range" id="tm-year" min="0" max={years.length - 1} step="1" value={years.length - 1} aria-label="Year" list="tm-ticks" />
+    <datalist id="tm-ticks">{years.map((_, i) => <option value={i} />)}</datalist>
+    <p class="tm-years" aria-hidden="true">{years.map((y) => <span>{y.y === "now" ? "Now" : y.y}</span>)}</p>
+  </div>
+  <p class="tm-age" id="tm-age" aria-live="polite"></p>
+  {years.map((y, i) => (
+    <div class="tm-year" data-i={i} data-y={y.y} hidden={i !== years.length - 1}>
+      {y.ch.map((id) => { const c = chapterById[id]; return c && (
+        <div class="tm-ch"><p class="tm-when"><span class="bn" lang="bn">{c.bn}</span> {c.when}</p><h3>{c.title}</h3><p>{strip(c.body[y.y === 2022 ? 1 : 0] ?? c.body[0])}</p><p class="tm-lesson">{c.lesson}</p></div>
+      ); })}
+      <p class="bunnu-says"><span class="who">Bunnu</span> {y.bunnu}</p>
+    </div>
+  ))}
+  <p class="links"><a href="/log">The dated record</a></p>
+</aside>
+
+<style>
+  .objpanel { position: absolute; z-index: 5; right: clamp(1rem, 3vw, 2.4rem); top: 50%; width: min(26rem, 90vw); max-height: 82svh; overflow-y: auto; transform: translate(24px, -50%); opacity: 0; visibility: hidden; padding: 1.2rem 1.3rem 1.2rem; border-radius: 1.2rem; background: rgb(9 14 44 / .86); backdrop-filter: blur(10px); color: #e9edff; font-family: var(--story); transition: opacity .5s ease .35s, transform .5s cubic-bezier(.2,.8,.3,1) .35s, visibility 0s linear .9s; scrollbar-width: thin; }
+  .objpanel:global(.on) { opacity: 1; visibility: visible; transform: translate(0, -50%); transition-delay: .35s, .35s, 0s; }
+  .objpanel .kicker { margin: 0 0 .2rem; font: 800 var(--t-1) var(--story); color: var(--c); }
+  .objpanel .bn { font-family: var(--bangla); font-weight: 400; }
+  .objpanel h2 { font: 800 var(--t3)/1.15 var(--story); color: #fff; margin: 0 0 .7rem; padding-right: 4rem; }
+  .objpanel img { display: block; height: auto; max-height: 15rem; width: auto; object-fit: contain; border-radius: .6rem; margin: 0 0 .8rem; }
+  .objpanel .sum { font: 400 var(--t-1)/1.55 var(--story); color: #b9c3f2; margin: 0 0 .8rem; }
+  .objpanel dl { display: grid; grid-template-columns: 1fr auto; gap: .25rem .9rem; margin: 0 0 .9rem; padding: .7rem .8rem; border-radius: .7rem; background: rgb(255 255 255 / .06); }
+  .objpanel dt { font: 600 var(--t-2) var(--story); color: #9aa6d8; }
+  .objpanel dd { margin: 0; font: 400 var(--t-1) var(--mono); color: #fff; text-align: right; font-variant-numeric: tabular-nums; }
+  .objpanel .links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; }
+  .objpanel .links a, .objpanel .links span { font: 700 var(--t-1) var(--story); padding: .45rem .9rem; border-radius: 999px; background: #fff; color: #0b1233; text-decoration: none; }
+  .objpanel .links a + a { background: rgb(255 255 255 / .12); color: #fff; }
+  .objpanel .links span { background: rgb(255 255 255 / .12); color: #c9d3ff; }
+  .close { position: absolute; top: .9rem; right: .9rem; font: 700 var(--t-2) var(--story); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: 999px; padding: .35rem .75rem; cursor: pointer; }
+  @media (max-width: 760px) { .objpanel { top: auto; bottom: 1rem; left: 1rem; right: 1rem; width: auto; max-height: 64svh; transform: translateY(20px); } .objpanel:global(.on) { transform: none; } }
+  .objpanel.wide { width: min(32rem, 92vw); }
+  .objpanel .sub { margin: 0 0 .8rem; }
+  .objpanel .sub-h { margin: 0 0 .3rem; font: 800 var(--t-2) var(--story); color: #9aa6d8; }
+  .objpanel .sub ul, .graves, .results { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }
+  .objpanel .sub a, .graves a { font: 600 var(--t-1)/1.4 var(--story); color: #fff; }
+  .graves .rip { font: 400 var(--t-2) var(--mono); color: #9aa6d8; margin-right: .3rem; }
+  .results li { font: 500 var(--t-1)/1.45 var(--story); color: #d5dcff; }
+  .results .yr { font: 400 var(--t-2) var(--mono); color: #9aa6d8; margin-right: .3rem; }
+  .results b { color: #fff; }
+  .bnname { font: 400 var(--t1) var(--bangla); color: var(--c); margin: -.3rem 0 .6rem; }
+  .believed { margin: 0 0 .5rem; }
+  .objpanel .wrong { color: #b9c3f2; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 2px; }
+  .objpanel .h { font-family: var(--mono); color: #fff; }
+  .tm-controls { margin: 0 0 .6rem; }
+  .tm-controls input { width: 100%; accent-color: var(--c); }
+  .tm-years { display: flex; justify-content: space-between; margin: .2rem 0 0; font: 600 var(--t-2) var(--story); color: #9aa6d8; }
+  .tm-age { font: 600 var(--t-1)/1.5 var(--story); color: var(--c); margin: 0 0 .8rem; min-height: 3em; }
+  .tm-ch { margin: 0 0 .8rem; }
+  .tm-when { margin: 0; font: 700 var(--t-2) var(--story); color: #9aa6d8; }
+  .tm-ch h3 { margin: .1rem 0 .3rem; font: 800 var(--t1) var(--story); color: #fff; }
+  .tm-ch p { font: 400 var(--t-1)/1.55 var(--story); color: #c9d3ff; margin: 0 0 .3rem; }
+  .tm-lesson { font-style: italic; color: #fff !important; }
+  .bunnu-says { margin: .4rem 0 .9rem; padding: .7rem .8rem; border-radius: .7rem; background: rgb(255 255 255 / .07); font: 600 var(--t-1)/1.5 var(--story); color: #fff; }
+  .bunnu-says .who { display: block; font: 800 var(--t-2) var(--story); color: #ff9ec2; margin-bottom: .1rem; }
+</style>

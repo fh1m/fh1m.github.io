@@ -1,0 +1,92 @@
+---
+/**
+ * After-action reports, one per mission: the report in the main column (what was planned, what
+ * happened, why, what fixed it, what to keep and what to change), and a notebook margin
+ * (Bunnu's note, the line from someone who said it first, a real picture).
+ */
+import Base from "../../layouts/Base.astro";
+import Schematic from "../../components/game/Schematic.astro";
+import { MISSIONS, type Mission } from "../../game/missions";
+import { ZONE_INFO } from "../../game/zones";
+import { lessons } from "../../data/lessons";
+import { projects } from "../../data/elements";
+import { dims } from "../../data/media";
+
+const LINK: Record<string, { lesson: string; project: string; photo?: [string, string] }> = {
+  air: { lesson: "a-filter-with-no-memory", project: "gimbal" },
+  water: { lesson: "a-mailbox-not-a-queue", project: "mongla", photo: ["/media/lab/latency-verdict.webp", "Measured on live hardware, both cameras: the verdict is the one you want."] },
+  earth: { lesson: "uint8-and-the-polite-crawl", project: "e-bhapa", photo: ["/media/e-bhapa/e-bhapa-upright.webp", "E-Bhapa: one ultrasonic sensor and a lot of confidence."] },
+  fire: { lesson: "a-detector-with-no-model", project: "mongla", photo: ["/media/mongla-docs/cores.webp", "Mongla's compute, core by core."] },
+};
+export const getStaticPaths = () => MISSIONS.map((m) => ({ params: { zone: m.zone }, props: { m } }));
+const { m } = Astro.props as { m: Mission };
+const z = ZONE_INFO.find((x) => x.id === m.zone)!;
+const L = LINK[m.zone];
+const lesson = lessons.find((l) => l.slug === L.lesson)!;
+const project = projects.find((p) => p.slug === L.project)!;
+const photo = L.photo ? { src: L.photo[0], cap: L.photo[1], ...dims(L.photo[0]) } : null;
+const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
+---
+<Base title={`After-action report: ${m.title}`} description={lesson.lesson} bodyClass="planet-page" chrome={false}>
+  <main id="main" class="aar" style={`--c:${z.colour}`}>
+    <nav class="top"><a href="/">Back to the planet</a><a href={`/missions/${next.zone}`}>Next report: {next.title}</a></nav>
+    <header>
+      <p class="kick"><span class="bn" lang="bn">{z.bn}</span> {z.name}, mission {i + 1} of 4, after-action report</p>
+      <h1>{m.title}</h1>
+      <p class="dek">{lesson.lesson}</p>
+    </header>
+    <div class="aar-grid">
+      <article class="report">
+        <Schematic zone={m.zone} />
+        <section><h2>The mission</h2><p>{((s) => s.charAt(0).toUpperCase() + s.slice(1))(m.setup.replace(/^Mission \w+: /, ""))}</p></section>
+        <section><h2>What happened</h2><p>{lesson.driving}</p><p class="obs">{m.fail}</p></section>
+        <section><h2>What I believed</h2><p class="wrong">{lesson.believed}</p>
+          <ul class="tried">{m.hypotheses.filter((h) => !h.right).map((h) => <li><span class="wrong">{h.text}</span> <span class="why">{h.reply}</span></li>)}</ul>
+        </section>
+        <section><h2>What was true</h2><p>{lesson.truth}</p></section>
+        <section><h2>The fix</h2><p>{m.fix}</p>{m.numbers && <p class="nums">{m.numbers}</p>}<p class="ev">Evidence: {lesson.refs.map((r, k) => <>{k > 0 && ", "}<a href={r.href} class:list={{ h: r.href.includes("/commit/") }}>{r.label}</a></>)}</p></section>
+        <section class="two"><div><h2>Keep doing</h2><p>{lesson.lesson}</p></div><div><h2>Do differently</h2><p>{lesson.recommendation}</p></div></section>
+      </article>
+      <aside class="aar-margin">
+        <div class="note bunnu"><p class="who">Bunnu</p><p>{m.bunnu}</p></div>
+        {m.voice && <blockquote class="note"><p>“{m.voice.line}”</p><footer>{m.voice.who}</footer></blockquote>}
+        {photo && <figure class="note photo"><img src={photo.src} alt={photo.cap} width={photo.w} height={photo.h} loading="lazy" /><figcaption>{photo.cap}</figcaption></figure>}
+        <div class="note"><p class="who">Where this lives</p><p><a href={`/projects/${project.slug}`}>{project.title}</a>. {project.line}</p><p><a href={`/lessons/${lesson.slug}`}>The lesson, in NASA's format</a></p></div>
+      </aside>
+    </div>
+  </main>
+</Base>
+<style>
+  :global(body.planet-page) { background: #0b1233; color: #e9edff; }
+  .aar { max-width: 76rem; margin: 0 auto; padding: 1.4rem clamp(1.2rem, 4vw, 3rem) 4rem; font-family: var(--story); }
+  .top { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 2.4rem; }
+  .top a { font: 700 var(--t-1) var(--story); color: #0b1233; background: #fff; border-radius: 999px; padding: .45rem .95rem; text-decoration: none; }
+  .top a + a { background: rgb(255 255 255 / .12); color: #fff; }
+  .kick { margin: 0 0 .5rem; font: 800 var(--t-1) var(--story); color: var(--c); }
+  .bn { font-family: var(--bangla); font-weight: 400; }
+  h1 { font: 900 clamp(2.2rem, 5vw, 3.6rem)/1.05 var(--story); color: #fff; margin: 0 0 .8rem; letter-spacing: -.01em; }
+  .dek { font: 600 var(--t2)/1.4 var(--story); color: #c9d3ff; max-width: 40ch; margin: 0 0 2.4rem; }
+  .aar-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem); gap: 2.4rem; align-items: start; }
+  .report section { margin: 0 0 1.8rem; max-width: 62ch; }
+  h2 { font: 800 var(--t1) var(--story); color: var(--c); margin: 0 0 .4rem; }
+  .report p { font: 500 var(--t0)/1.65 var(--story); color: #dfe4ff; margin: 0 0 .6rem; }
+  .obs { color: #fff !important; font-weight: 700 !important; }
+  .wrong { color: #aab4e6; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 2px; }
+  .tried { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .5rem; }
+  .tried li { font: 500 var(--t-1)/1.5 var(--story); }
+  .why { display: block; color: #c9d3ff; }
+  .nums { font: 400 var(--t-1)/1.6 var(--mono) !important; color: #8dff6a !important; }
+  .ev a, .note a { color: #fff; }
+  .h { font-family: var(--mono); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; max-width: none !important; }
+  .aar-margin { display: grid; gap: 1rem; position: sticky; top: 1.4rem; }
+  .note { margin: 0; padding: .9rem 1rem; border-radius: 1rem; background: rgb(255 255 255 / .06); font: 500 var(--t-1)/1.55 var(--story); color: #dfe4ff; }
+  .note p { margin: 0 0 .4rem; }
+  .note .who { font: 800 var(--t-2) var(--story); color: #ff9ec2; margin-bottom: .2rem; }
+  .bunnu { background: #fff; color: #18205a; transform: rotate(-1.2deg); }
+  blockquote.note p { font-style: italic; color: #fff; }
+  blockquote.note footer { font: 700 var(--t-2) var(--story); color: #9aa6d8; }
+  .photo img { width: 100%; height: auto; border-radius: .6rem; display: block; }
+  .photo figcaption { margin-top: .5rem; font: 500 var(--t-2)/1.5 var(--story); color: #9aa6d8; }
+  @media (max-width: 860px) { .aar-grid { grid-template-columns: 1fr; } .aar-margin { position: static; } .two { grid-template-columns: 1fr; } }
+</style>

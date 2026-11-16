@@ -1,10 +1,10 @@
 /**
- * ZERO-6's four forms. One core travels between them (sensor turret, cyan eye, pink beacon,
- * the stencil), so it is always recognisably the same robot in different gear:
+ * The machine's four forms, all piloted by Bunnu. One core travels between them (sensor turret, cyan eye,
+ * pink beacon, her name stencilled on the hull), so it is always recognisably the same machine:
  *   air   a rocket-drone on a thrust-vector gimbal (the 2024 TVC work)
  *   water a red sub with five thrusters (Mongla's current build has five)
  *   earth a rover with a two-link typing arm (Mongol-Tori, E-Bhapa)
- *   fire  a tiny chip-bot that runs along the traces of its own silicon
+ *   fire  a tiny chip-bot that runs along the traces of its own silicon (Bunnu shrinks with it)
  */
 import * as THREE from "three";
 import type { ZoneId } from "./planet";
@@ -29,13 +29,16 @@ function stencil() {
   const c = document.createElement("canvas"); c.width = 256; c.height = 64;
   const g = c.getContext("2d")!;
   g.fillStyle = HULL; g.fillRect(0, 0, 256, 64);
-  g.fillStyle = CREAM; g.font = "bold 40px 'Obel Mono', monospace"; g.textBaseline = "middle"; g.textAlign = "center"; g.fillText("ZERO-6", 128, 34);
-  g.fillStyle = HULL; for (const x of [62, 98, 134, 170, 206]) g.fillRect(x, 14, 3, 40); // stencil bridges
+  g.fillStyle = CREAM; g.font = "bold 40px 'Obel Mono', monospace"; g.textBaseline = "middle"; g.textAlign = "center"; g.fillText("BUNNU", 128, 34);
+  g.fillStyle = HULL; for (const x of [74, 110, 146, 182]) g.fillRect(x, 14, 3, 40); // stencil bridges, like a pilot's name on a canopy rail
   stencilTex = new THREE.CanvasTexture(c); stencilTex.colorSpace = THREE.SRGBColorSpace; return stencilTex;
 }
 const plate = (w: number, h: number) => new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: stencil() }));
 
-/** The core: what makes every form Zero. */
+/** Mission state shared by each form: which mode, and for how long. */
+function modeState() { const st = { mode: "idle" as Mode, since: 0 }; return { st, setMode: (m: Mode) => { st.mode = m; st.since = 0; } }; }
+
+/** The core: what makes every form the same machine. */
 function core() {
   const g = new THREE.Group();
   g.add(new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.42, 0.55), flat(CREAM)));
@@ -46,7 +49,8 @@ function core() {
   return { g, eye, beacon };
 }
 
-export interface Form { id: ZoneId; group: THREE.Group; update: (t: number, dt: number) => void; beacon: THREE.Mesh; eye: THREE.Mesh }
+export type Mode = "idle" | "fail" | "wrong" | "fixed";
+export interface Form { id: ZoneId; group: THREE.Group; update: (t: number, dt: number) => void; setMode: (m: Mode) => void; beacon: THREE.Mesh; eye: THREE.Mesh; /** where Bunnu sits, and how big she is there */ seat: THREE.Object3D; seatScale: number }
 
 function air(): Form {
   const group = new THREE.Group();
@@ -63,12 +67,19 @@ function air(): Form {
   const flame = new THREE.Mesh(new THREE.ConeGeometry(0.26, 1.3, 8), new THREE.MeshBasicMaterial({ color: "#ffb347", transparent: true, opacity: 0.9 })); flame.rotation.x = Math.PI; flame.position.y = -1.05; gimbal.add(flame);
   const core2 = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.8, 8), glow("#fff3c4")); core2.rotation.x = Math.PI; core2.position.y = -0.8; gimbal.add(core2);
   const exhaust = glowSprite("#ffb347", 2.4, 0.8); exhaust.position.y = -1.0; gimbal.add(exhaust);
+  const seat = new THREE.Object3D(); seat.position.set(0, 3.2, 0.05); craft.add(seat);
+  const { st, setMode } = modeState();
   return {
-    id: "air", group, beacon: c.beacon, eye: c.eye,
-    update(t) {
-      craft.position.y = 1.4 + Math.sin(t * 1.6) * 0.25;
-      gimbal.rotation.x = Math.sin(t * 2.3) * 0.12; gimbal.rotation.z = Math.cos(t * 1.9) * 0.1;
-      craft.rotation.z = -gimbal.rotation.z * 0.25; craft.rotation.x = -gimbal.rotation.x * 0.25; // the body leans against its own thrust
+    id: "air", group, beacon: c.beacon, eye: c.eye, seat, seatScale: 0.9, setMode,
+    update(t, dt) {
+      st.since += dt;
+      // fail: the wobble grows (no memory in the estimator); wrong: more gain, faster wobble; fixed: small corrections
+      const amp = st.mode === "fail" ? Math.min(0.9, 0.12 + st.since * 0.12) : st.mode === "wrong" ? 0.55 : st.mode === "fixed" ? 0.025 : 0.12;
+      const w = st.mode === "wrong" ? 6.5 : st.mode === "fail" ? 3.4 : 2.3;
+      craft.position.y = 1.4 + Math.sin(t * 1.6) * (st.mode === "fixed" ? 0.08 : 0.25);
+      gimbal.rotation.x = Math.sin(t * w) * amp; gimbal.rotation.z = Math.cos(t * w * 0.83) * amp * 0.8;
+      const lean = st.mode === "idle" || st.mode === "fixed" ? 0.25 : 0.9; // a bad loop leans into its own mistake
+      craft.rotation.z = -gimbal.rotation.z * lean; craft.rotation.x = -gimbal.rotation.x * lean;
       flame.scale.y = 0.85 + Math.random() * 0.3; (flame.material as THREE.MeshBasicMaterial).opacity = 0.75 + Math.random() * 0.2;
     },
   };
@@ -93,10 +104,18 @@ function water(): Form {
   thruster(-0.78, 1.0, 0, 0, 0); thruster(0.78, 1.0, 0, 0, 0);
   thruster(0, 0.5, -0.9, 0, Math.PI / 2);
   const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), glow("#fff7d0")); lamp.position.set(0, 0.7, -1.5); sub.add(lamp); lamp.add(glowSprite("#fff7d0", 1.4, 0.8));
+  const seat = new THREE.Object3D(); seat.position.set(0, 1.42, 0.5); sub.add(seat);
+  const { st, setMode } = modeState();
   return {
-    id: "water", group, beacon: c.beacon, eye: c.eye,
+    id: "water", group, beacon: c.beacon, eye: c.eye, seat, seatScale: 0.95, setMode,
     update(t, dt) {
+      st.since += dt;
       sub.position.y = -0.2 + Math.sin(t * 1.1) * 0.12; sub.rotation.z = Math.sin(t * 0.9) * 0.05; sub.rotation.x = Math.sin(t * 0.7) * 0.03;
+      // fail: steering at where the gate was, a third of a second late, so it hunts from side to side
+      const hunt = st.mode === "fail" || st.mode === "wrong" ? 1 : 0;
+      sub.position.x = Math.sin(t * (st.mode === "wrong" ? 2.6 : 2.2)) * 0.9 * hunt;
+      sub.rotation.y = Math.sin(t * 2.2 - 0.8) * 0.35 * hunt;
+      if (st.mode === "fixed") sub.position.z = -Math.min(1.5, st.since * 0.6); // straight through
       for (const p of props) p.rotation.y += dt * 14;
     },
   };
@@ -121,11 +140,19 @@ function earth(): Form {
   const elbow = new THREE.Group(); elbow.position.y = 1.0; upper.add(elbow);
   const f = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.85, 0.12), flat(HULL)); f.position.y = 0.42; elbow.add(f);
   const tip = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.18, 6), flat(PINK)); tip.position.y = 0.92; elbow.add(tip);
+  const seat = new THREE.Object3D(); seat.position.set(-0.4, 1.02, 0.3); body.add(seat);
+  const { st, setMode } = modeState();
   return {
-    id: "earth", group, beacon: c.beacon, eye: c.eye,
-    update(t) {
+    id: "earth", group, beacon: c.beacon, eye: c.eye, seat, seatScale: 1, setMode,
+    update(t, dt) {
+      st.since += dt;
       upper.rotation.x = -0.6 + Math.sin(t * 1.3) * 0.25; elbow.rotation.x = 1.3 + Math.sin(t * 1.3 + 1) * 0.35;
       body.position.y = 0.02 * Math.sin(t * 3);
+      // fail: −255 became 1, so it creeps forward into the wall and bumps, again and again
+      const stuck = st.mode === "fail" || st.mode === "wrong";
+      if (stuck || st.mode === "fixed") group.children.forEach((ch) => { if (ch !== body) ch.rotation.x = -t * (stuck ? 8 : 3); }); // spinning in place, then actually going
+      body.position.z = stuck ? -0.15 - Math.abs(Math.sin(t * 5)) * 0.08 : 0;
+      if (st.mode === "fixed") group.rotation.y += Math.sin(st.since * 1.5) * 0.01;
     },
   };
 }
@@ -141,10 +168,16 @@ function fire(): Form {
     const s = ((u % 4) + 4) % 4, k = s % 1, L = 2.2;
     return s < 1 ? new THREE.Vector3(-L + 2 * L * k, 0, -L) : s < 2 ? new THREE.Vector3(L, 0, -L + 2 * L * k) : s < 3 ? new THREE.Vector3(L - 2 * L * k, 0, L) : new THREE.Vector3(-L, 0, L - 2 * L * k);
   };
+  const seat = new THREE.Object3D(); seat.position.set(0, 0.78, 0.1); bot.add(seat);
+  const { st, setMode } = modeState();
+  let u = 0;
   return {
-    id: "fire", group, beacon: c.beacon, eye: c.eye,
-    update(t) {
-      const u = t * 0.6; const p = path(u), n = path(u + 0.01);
+    id: "fire", group, beacon: c.beacon, eye: c.eye, seat, seatScale: 0.45, setMode,
+    update(t, dt) {
+      st.since += dt;
+      // fail: everything says healthy and nothing moves
+      if (!(st.mode === "fail" || st.mode === "wrong")) u += dt * (st.mode === "fixed" ? 1.0 : 0.6);
+      const p = path(u), n = path(u + 0.01);
       bot.position.copy(p).setY(0.12 + Math.abs(Math.sin(t * 8)) * 0.05); bot.lookAt(n.x, bot.position.y, n.z); bot.rotateY(Math.PI);
       trail.forEach((s, i) => s.position.copy(path(u - (i + 1) * 0.035)).setY(0.04));
     },
