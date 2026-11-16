@@ -1,0 +1,55 @@
+---
+title: "Before the water, a rocket"
+dek: "Guidance, navigation and control for amateur rocketry, a thrust-vector gimbal, and the first hybrid rocket engine tested in Bangladesh."
+date: "2025-02"
+arena: air
+kind: story
+hero: /media/aerd/cover.webp
+heroAlt: "The AERD team outdoors in front of a weather balloon"
+sources:
+  - { label: "The Daily Star: first hybrid rocket engine in Bangladesh tested", href: "https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016" }
+  - { label: "Dhaka Tribune: AIUB and AERD launch first weather balloon", href: "https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon" }
+  - { label: "Amateur Experimental Rocketry Dhaka", href: "https://www.facebook.com/profile.php?id=61550725171921" }
+  - { label: "RocketPy", href: "https://github.com/RocketPy-Team/RocketPy" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+
+Before the AUV there was a rocket. In February 2023 I joined Amateur Experimental Rocketry Dhaka (AERD), founded in 2022 and backed by AIUB's research centre. I started where a machine has the fewest places to hide: something that has to leave the ground and come back in a recoverable number of pieces.
+
+My jobs were attitude, guidance, navigation and control, trajectory prediction, the parachute, and procurement. Procurement isn't glamorous, but it decides which design you actually get to build.
+
+<Gallery items={[
+  { src: "/media/aerd/cover.webp", alt: "The AERD team standing outdoors with a large white weather balloon", caption: "AERD, with the balloon." },
+  { src: "/media/aerd/dailystar-engine.webp", alt: "The Daily Star's image of the team and the hybrid engine test", caption: "The engine test, as The Daily Star ran it." },
+]} credit="Photos: AERD; press image: The Daily Star." />
+
+## What I built
+
+- **A ROS 2 (Humble) data-acquisition stack**, so a test produced data instead of anecdotes.
+- **Flight controllers** (Pixhawk, Betaflight), and V1 of an in-house flight computer for a monocopter UAV, which I led.
+- **A visual SLAM stack for GPS-denied navigation.** Like underwater, there are times there's nothing overhead you can trust.
+- **Trajectory prediction with RocketPy, checked against real flight-test data.** A simulation you never compare to a flight is a wish.
+
+The engine fired at AIUB's research facility: the first hybrid rocket engine tested in Bangladesh, covered by The Daily Star and others. In 2023 AIUB and AERD also launched their first weather balloon. I was one member of the team behind both, and I'd rather be precise about that than impressive.
+
+<Fig src="/media/aerd/mou-02.webp" alt="AIUB and AERD representatives at a table signing an agreement" caption="The AIUB and AERD agreement: a student team turning into a research programme." wide />
+
+## The gimbal
+
+From September 2024, at BRAC University's LASSET lab, I worked controls and trajectory for the university's rocketry sub-team. I built an in-house PID controller for a thrust-vector-control gimbal, a 2-axis controller, and a GUI to track and monitor it. The demo went to the Research Excellence Awards Initiative as a funding submission.
+
+A thrust-vector gimbal holds a rocket upright by tilting the engine under it, like balancing a broom on a fingertip. Everything you need to know about PID is in that broom.
+
+- **P** pushes in proportion to the tilt. Alone, it overshoots and rings: when the rocket is finally upright, it's still rotating.
+- **D** pushes back against how fast the tilt is changing. It's the brake. It also amplifies sensor noise, which is why nobody turns it up to eleven.
+- **I** remembers the error that's still there. Only I beats a steady wind, and only I winds up and takes over if you let it.
+
+You can tune the gimbal yourself in [the air arena](/#air): press *P only*, then *add D*, then *add I*, and watch the three classic failures go by in order. It's a toy plant with honest shapes, not our rocket's numbers.
+
+<Fig src="/media/lab/meghdut-tui-1.webp" alt="A terminal flight UI: MAVLink receive and transmit panels, orientation, and a safety panel" caption="Later, for drones: a terminal UI over MAVLink with a safety panel that never lets you forget the props. The same habit, on a different airframe." wide contain />
+
+<Pull>A controller isn't clever. It's patient, many times a second.</Pull>
+
+The question rockets asked is the one water asked next: how does a machine control itself when it can't ask anyone for help? Underwater, the answer arrived with a 500 Hz board and [a lot more humility](/notes/mongla).

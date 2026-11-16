@@ -1,0 +1,159 @@
+---
+import Base from "../layouts/Base.astro";
+import RangeMap from "../components/RangeMap.astro";
+import Margin from "../components/Margin.astro";
+import { arenas } from "../data/arenas";
+import { person } from "../data/facts";
+import stats from "../data/github.json";
+import { getCollection } from "astro:content";
+const noteCount = (await getCollection("notes")).length;
+---
+<Base bodyClass="range">
+  <canvas id="world" aria-hidden="true"></canvas>
+  <div class="world-still" aria-hidden="true"></div>
+  <RangeMap arenas={arenas} />
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-h">
+      <svg class="hero-event" viewBox="0 0 800 360" role="img" aria-labelledby="hero-svg-t">
+        <title id="hero-svg-t">A small machine on the left; a water line rising over it from the right.</title>
+        <defs>
+          <linearGradient id="hw" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2ee6d6" stop-opacity=".55" /><stop offset="1" stop-color="#2ee6d6" stop-opacity="0" /></linearGradient>
+        </defs>
+        <g class="grid">{Array.from({ length: 17 }, (_, i) => <line x1={i * 50} y1="0" x2={i * 50} y2="360" />)}</g>
+        <path class="water" d="M0 210 C 120 196 200 224 320 208 S 560 192 800 206 L 800 360 L 0 360 Z" fill="url(#hw)" />
+        <path class="surface" d="M0 210 C 120 196 200 224 320 208 S 560 192 800 206" />
+        <g class="machine" transform="translate(300 232)">
+          <rect x="-60" y="-14" width="120" height="28" rx="14" />
+          <rect x="-74" y="-8" width="14" height="16" rx="3" />
+          <circle cx="44" cy="0" r="6" />
+          <line x1="-20" y1="-14" x2="-20" y2="-26" /><line x1="20" y1="-14" x2="20" y2="-26" />
+        </g>
+        <g class="ray"><line x1="356" y1="232" x2="520" y2="248" /><circle cx="520" cy="248" r="3" /></g>
+        <text x="528" y="252" class="lbl">red is gone by 5 m</text>
+        <text x="24" y="196" class="lbl">nature</text>
+        <text x="24" y="344" class="lbl dim">the judge</text>
+      </svg>
+      <div class="hero-text">
+        <p class="pixel kick">{person.handle} · range</p>
+        <h1 id="hero-h">Nature grades every machine. These are my bets, and their scores.</h1>
+        <p class="lede">I'm {person.name}, an autonomy and robotics engineer in Dhaka. I build machines that have to perceive the world and act in it: underwater vehicles, rovers, rockets, and the firmware and vision underneath them. This page is a test range. Each arena is one force of nature, one machine I built or helped build, and what actually happened.</p>
+        <p class="mono quick">
+          <a href="#water">jump to the water</a>
+          <a href="/notes">all notes ({noteCount})</a>
+          <a href="/cv">cv</a>
+        </p>
+        <p class="src">Live from GitHub, rebuilt {stats.generatedAtLabel}: {stats.publicRepos} public repositories, {stats.contributionsLastYear.toLocaleString("en-US")} contributions in the last year.</p>
+      </div>
+    </section>
+
+    {arenas.map((a) => (
+      <section id={a.id} class={`arena sig-${a.signal}`} data-arena={a.n} aria-labelledby={`${a.id}-h`}>
+        <div class="story">
+          <p class="force"><span class="pixel num" data-bn={a.bn}>{String(a.n).padStart(2, "0")}</span> <span class="mono">{a.force}</span></p>
+          <h2 id={`${a.id}-h`}>{a.title}</h2>
+          <p class="kicker">{a.kicker}</p>
+          {a.story.map((p) => <p set:html={p} />)}
+          <Margin text={a.margin} />
+          {a.evidence.length > 0 && (
+            <dl class="evidence">
+              {a.evidence.map((e) => (
+                <div>
+                  <dt class="num">{e.value}</dt>
+                  <dd>{e.label} <span class="src">{e.href ? <a href={e.href}>{e.source}</a> : e.source}</span></dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {a.notes.length > 0 && (
+            <ul class="deeper mono" aria-label={`Read more about ${a.title}`}>
+              {a.notes.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+            </ul>
+          )}
+        </div>
+        <aside class="bench" aria-label={`Test bench: ${a.benchTitle}`}>
+          <h3 class="mono">{a.benchTitle}</h3>
+          <div class="bench-body" data-bench={a.bench} data-arena-id={a.id}>
+            <p class="mono dim">Loading the bench…</p>
+          </div>
+        </aside>
+        {a.photos.length > 0 && (
+          <div class="photos">
+            {a.photos.map((ph) => (
+              <figure>
+                <img src={ph.src} alt={ph.alt} loading="lazy" decoding="async" />
+                <figcaption>{ph.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+      </section>
+    ))}
+
+    <section class="coda" aria-labelledby="coda-h">
+      <h2 id="coda-h">The range keeps going.</h2>
+      <p>New arenas get added when the machines do. The notes hold the long versions: essays from the Mongla notebook, re-graded old projects, and the failures with their timestamps.</p>
+      <p class="mono"><a href="/notes">Read the notes</a> <a href="/log">See the log</a> <a href={`mailto:${person.email}`}>Write to me</a></p>
+    </section>
+  </main>
+</Base>
+
+<script>
+  import "../scripts/range-client.ts";
+</script>
+
+<style>
+  #world { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; opacity: 0; transition: opacity 0.8s ease; }
+  :global(body.world-ready) #world { opacity: 1; }
+  .world-still { position: fixed; inset: 0; z-index: 0; background: radial-gradient(120% 80% at 70% 60%, #0a1416 0%, #000 60%); }
+  main { position: relative; z-index: 2; }
+
+  .hero { min-height: 100svh; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: var(--gutter); padding: 7rem var(--gutter) 4rem; }
+  .hero-event { width: 100%; height: auto; overflow: visible; }
+  .hero-event .grid line { stroke: #10161a; stroke-width: 1; }
+  .hero-event .surface { fill: none; stroke: var(--medium); stroke-width: 1.4; }
+  .hero-event .machine rect, .hero-event .machine circle, .hero-event .machine line { fill: none; stroke: var(--chalk); stroke-width: 1.4; }
+  .hero-event .machine rect:first-child { fill: #ff5c4d22; stroke: var(--failure); }
+  .hero-event .ray line { stroke: var(--measured); stroke-dasharray: 3 4; }
+  .hero-event .ray circle { fill: var(--measured); }
+  .hero-event .lbl { fill: var(--dim); font: 400 13px var(--mono); }
+  .hero-event .lbl.dim { fill: var(--faint); }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-event .water, .hero-event .surface { animation: rise 2.4s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes rise { from { transform: translateY(90px); opacity: 0; } to { transform: none; opacity: 1; } }
+  }
+  .kick { color: var(--measured); font-size: 0.95rem; margin-bottom: 1.2rem; }
+  .hero h1 { font-size: clamp(2.1rem, 4.2vw, var(--s6)); font-weight: 450; max-width: 18ch; }
+  .lede { font-size: var(--s1); line-height: 1.6; color: #dcd9d0; }
+  .quick { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-top: 1.6rem; }
+
+  .arena { min-height: 100svh; display: grid; grid-template-columns: minmax(0, 46ch) minmax(18rem, 30rem); grid-template-areas: "story bench" "photos photos"; justify-content: space-between; align-content: center; gap: 2.5rem var(--gutter); padding: 8rem var(--gutter) 6rem calc(var(--gutter) + 3.5rem); }
+  .story { grid-area: story; background: linear-gradient(90deg, rgb(0 0 0 / .86), rgb(0 0 0 / .62) 80%, transparent); padding: 1.6rem 1.8rem 1.2rem 0; border-radius: 0 6px 6px 0; }
+  .force { display: flex; gap: 0.8rem; align-items: baseline; color: var(--dim); margin-bottom: 0.4rem; }
+  .force .pixel { font-size: 2.2rem; line-height: 1; color: var(--sig); }
+  .force .pixel:hover::after { content: " " attr(data-bn); color: var(--dim); font-family: var(--serif); }
+  .arena h2 { font-size: clamp(2rem, 3.6vw, var(--s5)); }
+  .kicker { font-style: italic; font-size: var(--s1); color: #e9e6dc; }
+  .evidence { display: grid; gap: 0.9rem; margin: 1.6rem 0 0; }
+  .evidence div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 1rem; align-items: baseline; border-top: 1px solid var(--line); padding-top: 0.7rem; }
+  .evidence dt { color: var(--sig); font-size: 1.05rem; }
+  .evidence dd { margin: 0; font-size: 0.93rem; color: #d6d3ca; }
+  .evidence .src { display: block; margin-top: 0.15rem; }
+  .deeper { list-style: none; padding: 0; margin: 1.6rem 0 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; }
+  .bench { grid-area: bench; align-self: end; background: rgb(7 9 11 / .9); border: 1px solid var(--line); border-top: 2px solid var(--sig); border-radius: 4px; padding: 1rem 1.1rem 1.2rem; backdrop-filter: blur(4px); }
+  .bench h3 { font-size: 0.8rem; color: var(--sig); margin: 0 0 0.8rem; font-weight: 400; }
+  .photos { grid-area: photos; display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.4rem; }
+  .photos figure { margin: 0; }
+  .photos img { aspect-ratio: 16 / 10; object-fit: cover; }
+  .sig-measured { --sig: var(--measured); } .sig-failure { --sig: var(--failure); } .sig-medium { --sig: var(--medium); } .sig-estimate { --sig: var(--estimate); }
+  .dim { color: var(--faint); }
+  .coda { padding: 10rem var(--gutter) 8rem calc(var(--gutter) + 3.5rem); background: linear-gradient(transparent, #000 30%); }
+  .coda .mono { display: flex; gap: 1.6rem; flex-wrap: wrap; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding-top: 6rem; }
+    .arena { grid-template-columns: 1fr; grid-template-areas: "story" "bench" "photos"; padding: 6rem var(--gutter) 4rem; }
+    .story { background: rgb(0 0 0 / .78); padding: 1.2rem; border-radius: 6px; }
+    .coda { padding-left: var(--gutter); }
+  }
+</style>

@@ -1,0 +1,1996 @@
+{
+ "generatedAt": "2026-11-16T08:24:57.226Z",
+ "generatedAtLabel": "2026-11-16",
+ "login": "fh1m",
+ "since": "2023-05-07",
+ "followers": 16,
+ "publicRepos": 23,
+ "ownRepos": 22,
+ "archivedRepos": 3,
+ "totalStars": 15,
+ "contributionsLastYear": 2489,
+ "commitsLastYear": 2084,
+ "privateContributionsLastYear": 54,
+ "busiestDay": [
+  "2026-10-14",
+  341
+ ],
+ "days": [
+  [
+   "2025-11-16",
+   0
+  ],
+  [
+   "2025-11-17",
+   0
+  ],
+  [
+   "2025-11-18",
+   0
+  ],
+  [
+   "2025-11-19",
+   0
+  ],
+  [
+   "2025-11-20",
+   0
+  ],
+  [
+   "2025-11-21",
+   0
+  ],
+  [
+   "2025-11-22",
+   0
+  ],
+  [
+   "2025-11-23",
+   0
+  ],
+  [
+   "2025-11-24",
+   0
+  ],
+  [
+   "2025-11-25",
+   0
+  ],
+  [
+   "2025-11-26",
+   0
+  ],
+  [
+   "2025-11-27",
+   0
+  ],
+  [
+   "2025-11-28",
+   0
+  ],
+  [
+   "2025-11-29",
+   0
+  ],
+  [
+   "2025-11-30",
+   0
+  ],
+  [
+   "2025-12-01",
+   0
+  ],
+  [
+   "2025-12-02",
+   0
+  ],
+  [
+   "2025-12-03",
+   0
+  ],
+  [
+   "2025-12-04",
+   1
+  ],
+  [
+   "2025-12-05",
+   0
+  ],
+  [
+   "2025-12-06",
+   0
+  ],
+  [
+   "2025-12-07",
+   0
+  ],
+  [
+   "2025-12-08",
+   0
+  ],
+  [
+   "2025-12-09",
+   0
+  ],
+  [
+   "2025-12-10",
+   0
+  ],
+  [
+   "2025-12-11",
+   0
+  ],
+  [
+   "2025-12-12",
+   0
+  ],
+  [
+   "2025-12-13",
+   0
+  ],
+  [
+   "2025-12-14",
+   0
+  ],
+  [
+   "2025-12-15",
+   0
+  ],
+  [
+   "2025-12-16",
+   0
+  ],
+  [
+   "2025-12-17",
+   0
+  ],
+  [
+   "2025-12-18",
+   0
+  ],
+  [
+   "2025-12-19",
+   0
+  ],
+  [
+   "2025-12-20",
+   0
+  ],
+  [
+   "2025-12-21",
+   0
+  ],
+  [
+   "2025-12-22",
+   0
+  ],
+  [
+   "2025-12-23",
+   6
+  ],
+  [
+   "2025-12-24",
+   0
+  ],
+  [
+   "2025-12-25",
+   0
+  ],
+  [
+   "2025-12-26",
+   0
+  ],
+  [
+   "2025-12-27",
+   0
+  ],
+  [
+   "2025-12-28",
+   0
+  ],
+  [
+   "2025-12-29",
+   0
+  ],
+  [
+   "2025-12-30",
+   0
+  ],
+  [
+   "2025-12-31",
+   0
+  ],
+  [
+   "2026-01-01",
+   0
+  ],
+  [
+   "2026-01-02",
+   0
+  ],
+  [
+   "2026-01-03",
+   0
+  ],
+  [
+   "2026-01-04",
+   0
+  ],
+  [
+   "2026-01-05",
+   0
+  ],
+  [
+   "2026-01-06",
+   0
+  ],
+  [
+   "2026-01-07",
+   3
+  ],
+  [
+   "2026-01-08",
+   0
+  ],
+  [
+   "2026-01-09",
+   0
+  ],
+  [
+   "2026-01-10",
+   0
+  ],
+  [
+   "2026-01-11",
+   0
+  ],
+  [
+   "2026-01-12",
+   0
+  ],
+  [
+   "2026-01-13",
+   0
+  ],
+  [
+   "2026-01-14",
+   0
+  ],
+  [
+   "2026-01-15",
+   0
+  ],
+  [
+   "2026-01-16",
+   0
+  ],
+  [
+   "2026-01-17",
+   0
+  ],
+  [
+   "2026-01-18",
+   0
+  ],
+  [
+   "2026-01-19",
+   0
+  ],
+  [
+   "2026-01-20",
+   0
+  ],
+  [
+   "2026-01-21",
+   0
+  ],
+  [
+   "2026-01-22",
+   0
+  ],
+  [
+   "2026-01-23",
+   0
+  ],
+  [
+   "2026-01-24",
+   0
+  ],
+  [
+   "2026-01-25",
+   0
+  ],
+  [
+   "2026-01-26",
+   0
+  ],
+  [
+   "2026-01-27",
+   0
+  ],
+  [
+   "2026-01-28",
+   0
+  ],
+  [
+   "2026-01-29",
+   0
+  ],
+  [
+   "2026-01-30",
+   0
+  ],
+  [
+   "2026-01-31",
+   0
+  ],
+  [
+   "2026-02-01",
+   0
+  ],
+  [
+   "2026-02-02",
+   0
+  ],
+  [
+   "2026-02-03",
+   0
+  ],
+  [
+   "2026-02-04",
+   0
+  ],
+  [
+   "2026-02-05",
+   0
+  ],
+  [
+   "2026-02-06",
+   0
+  ],
+  [
+   "2026-02-07",
+   0
+  ],
+  [
+   "2026-02-08",
+   0
+  ],
+  [
+   "2026-02-09",
+   0
+  ],
+  [
+   "2026-02-10",
+   0
+  ],
+  [
+   "2026-02-11",
+   0
+  ],
+  [
+   "2026-02-12",
+   0
+  ],
+  [
+   "2026-02-13",
+   0
+  ],
+  [
+   "2026-02-14",
+   0
+  ],
+  [
+   "2026-02-15",
+   0
+  ],
+  [
+   "2026-02-16",
+   0
+  ],
+  [
+   "2026-02-17",
+   0
+  ],
+  [
+   "2026-02-18",
+   0
+  ],
+  [
+   "2026-02-19",
+   0
+  ],
+  [
+   "2026-02-20",
+   0
+  ],
+  [
+   "2026-02-21",
+   0
+  ],
+  [
+   "2026-02-22",
+   0
+  ],
+  [
+   "2026-02-23",
+   0
+  ],
+  [
+   "2026-02-24",
+   0
+  ],
+  [
+   "2026-02-25",
+   0
+  ],
+  [
+   "2026-02-26",
+   0
+  ],
+  [
+   "2026-02-27",
+   0
+  ],
+  [
+   "2026-02-28",
+   0
+  ],
+  [
+   "2026-03-01",
+   0
+  ],
+  [
+   "2026-03-02",
+   0
+  ],
+  [
+   "2026-03-03",
+   0
+  ],
+  [
+   "2026-03-04",
+   0
+  ],
+  [
+   "2026-03-05",
+   0
+  ],
+  [
+   "2026-03-06",
+   1
+  ],
+  [
+   "2026-03-07",
+   0
+  ],
+  [
+   "2026-03-08",
+   0
+  ],
+  [
+   "2026-03-09",
+   0
+  ],
+  [
+   "2026-03-10",
+   0
+  ],
+  [
+   "2026-03-11",
+   0
+  ],
+  [
+   "2026-03-12",
+   0
+  ],
+  [
+   "2026-03-13",
+   0
+  ],
+  [
+   "2026-03-14",
+   0
+  ],
+  [
+   "2026-03-15",
+   0
+  ],
+  [
+   "2026-03-16",
+   0
+  ],
+  [
+   "2026-03-17",
+   0
+  ],
+  [
+   "2026-03-18",
+   0
+  ],
+  [
+   "2026-03-19",
+   0
+  ],
+  [
+   "2026-03-20",
+   0
+  ],
+  [
+   "2026-03-21",
+   0
+  ],
+  [
+   "2026-03-22",
+   0
+  ],
+  [
+   "2026-03-23",
+   0
+  ],
+  [
+   "2026-03-24",
+   0
+  ],
+  [
+   "2026-03-25",
+   0
+  ],
+  [
+   "2026-03-26",
+   0
+  ],
+  [
+   "2026-03-27",
+   2
+  ],
+  [
+   "2026-03-28",
+   0
+  ],
+  [
+   "2026-03-29",
+   0
+  ],
+  [
+   "2026-03-30",
+   0
+  ],
+  [
+   "2026-03-31",
+   0
+  ],
+  [
+   "2026-04-01",
+   0
+  ],
+  [
+   "2026-04-02",
+   1
+  ],
+  [
+   "2026-04-03",
+   1
+  ],
+  [
+   "2026-04-04",
+   0
+  ],
+  [
+   "2026-04-05",
+   0
+  ],
+  [
+   "2026-04-06",
+   0
+  ],
+  [
+   "2026-04-07",
+   0
+  ],
+  [
+   "2026-04-08",
+   0
+  ],
+  [
+   "2026-04-09",
+   0
+  ],
+  [
+   "2026-04-10",
+   0
+  ],
+  [
+   "2026-04-11",
+   0
+  ],
+  [
+   "2026-04-12",
+   1
+  ],
+  [
+   "2026-04-13",
+   0
+  ],
+  [
+   "2026-04-14",
+   0
+  ],
+  [
+   "2026-04-15",
+   1
+  ],
+  [
+   "2026-04-16",
+   0
+  ],
+  [
+   "2026-04-17",
+   0
+  ],
+  [
+   "2026-04-18",
+   2
+  ],
+  [
+   "2026-04-19",
+   7
+  ],
+  [
+   "2026-04-20",
+   10
+  ],
+  [
+   "2026-04-21",
+   0
+  ],
+  [
+   "2026-04-22",
+   7
+  ],
+  [
+   "2026-04-23",
+   0
+  ],
+  [
+   "2026-04-24",
+   5
+  ],
+  [
+   "2026-04-25",
+   16
+  ],
+  [
+   "2026-04-26",
+   5
+  ],
+  [
+   "2026-04-27",
+   0
+  ],
+  [
+   "2026-04-28",
+   0
+  ],
+  [
+   "2026-04-29",
+   8
+  ],
+  [
+   "2026-04-30",
+   7
+  ],
+  [
+   "2026-05-01",
+   2
+  ],
+  [
+   "2026-05-02",
+   0
+  ],
+  [
+   "2026-05-03",
+   0
+  ],
+  [
+   "2026-05-04",
+   7
+  ],
+  [
+   "2026-05-05",
+   10
+  ],
+  [
+   "2026-05-06",
+   3
+  ],
+  [
+   "2026-05-07",
+   18
+  ],
+  [
+   "2026-05-08",
+   9
+  ],
+  [
+   "2026-05-09",
+   8
+  ],
+  [
+   "2026-05-10",
+   0
+  ],
+  [
+   "2026-05-11",
+   0
+  ],
+  [
+   "2026-05-12",
+   0
+  ],
+  [
+   "2026-05-13",
+   0
+  ],
+  [
+   "2026-05-14",
+   0
+  ],
+  [
+   "2026-05-15",
+   14
+  ],
+  [
+   "2026-05-16",
+   4
+  ],
+  [
+   "2026-05-17",
+   2
+  ],
+  [
+   "2026-05-18",
+   0
+  ],
+  [
+   "2026-05-19",
+   0
+  ],
+  [
+   "2026-05-20",
+   0
+  ],
+  [
+   "2026-05-21",
+   0
+  ],
+  [
+   "2026-05-22",
+   0
+  ],
+  [
+   "2026-05-23",
+   0
+  ],
+  [
+   "2026-05-24",
+   0
+  ],
+  [
+   "2026-05-25",
+   0
+  ],
+  [
+   "2026-05-26",
+   0
+  ],
+  [
+   "2026-05-27",
+   0
+  ],
+  [
+   "2026-05-28",
+   0
+  ],
+  [
+   "2026-05-29",
+   0
+  ],
+  [
+   "2026-05-30",
+   0
+  ],
+  [
+   "2026-05-31",
+   6
+  ],
+  [
+   "2026-06-01",
+   0
+  ],
+  [
+   "2026-06-02",
+   0
+  ],
+  [
+   "2026-06-03",
+   4
+  ],
+  [
+   "2026-06-04",
+   3
+  ],
+  [
+   "2026-06-05",
+   3
+  ],
+  [
+   "2026-06-06",
+   3
+  ],
+  [
+   "2026-06-07",
+   0
+  ],
+  [
+   "2026-06-08",
+   0
+  ],
+  [
+   "2026-06-09",
+   0
+  ],
+  [
+   "2026-06-10",
+   0
+  ],
+  [
+   "2026-06-11",
+   1
+  ],
+  [
+   "2026-06-12",
+   0
+  ],
+  [
+   "2026-06-13",
+   0
+  ],
+  [
+   "2026-06-14",
+   0
+  ],
+  [
+   "2026-06-15",
+   0
+  ],
+  [
+   "2026-06-16",
+   5
+  ],
+  [
+   "2026-06-17",
+   0
+  ],
+  [
+   "2026-06-18",
+   2
+  ],
+  [
+   "2026-06-19",
+   1
+  ],
+  [
+   "2026-06-20",
+   12
+  ],
+  [
+   "2026-06-21",
+   9
+  ],
+  [
+   "2026-06-22",
+   1
+  ],
+  [
+   "2026-06-23",
+   3
+  ],
+  [
+   "2026-06-24",
+   7
+  ],
+  [
+   "2026-06-25",
+   4
+  ],
+  [
+   "2026-06-26",
+   3
+  ],
+  [
+   "2026-06-27",
+   6
+  ],
+  [
+   "2026-06-28",
+   3
+  ],
+  [
+   "2026-06-29",
+   7
+  ],
+  [
+   "2026-06-30",
+   13
+  ],
+  [
+   "2026-07-01",
+   3
+  ],
+  [
+   "2026-07-02",
+   7
+  ],
+  [
+   "2026-07-03",
+   1
+  ],
+  [
+   "2026-07-04",
+   22
+  ],
+  [
+   "2026-07-05",
+   5
+  ],
+  [
+   "2026-07-06",
+   4
+  ],
+  [
+   "2026-07-07",
+   0
+  ],
+  [
+   "2026-07-08",
+   0
+  ],
+  [
+   "2026-07-09",
+   0
+  ],
+  [
+   "2026-07-10",
+   7
+  ],
+  [
+   "2026-07-11",
+   3
+  ],
+  [
+   "2026-07-12",
+   4
+  ],
+  [
+   "2026-07-13",
+   9
+  ],
+  [
+   "2026-07-14",
+   0
+  ],
+  [
+   "2026-07-15",
+   2
+  ],
+  [
+   "2026-07-16",
+   0
+  ],
+  [
+   "2026-07-17",
+   0
+  ],
+  [
+   "2026-07-18",
+   0
+  ],
+  [
+   "2026-07-19",
+   0
+  ],
+  [
+   "2026-07-20",
+   0
+  ],
+  [
+   "2026-07-21",
+   0
+  ],
+  [
+   "2026-07-22",
+   0
+  ],
+  [
+   "2026-07-23",
+   0
+  ],
+  [
+   "2026-07-24",
+   0
+  ],
+  [
+   "2026-07-25",
+   0
+  ],
+  [
+   "2026-07-26",
+   0
+  ],
+  [
+   "2026-07-27",
+   0
+  ],
+  [
+   "2026-07-28",
+   0
+  ],
+  [
+   "2026-07-29",
+   0
+  ],
+  [
+   "2026-07-30",
+   5
+  ],
+  [
+   "2026-07-31",
+   6
+  ],
+  [
+   "2026-08-01",
+   0
+  ],
+  [
+   "2026-08-02",
+   27
+  ],
+  [
+   "2026-08-03",
+   13
+  ],
+  [
+   "2026-08-04",
+   0
+  ],
+  [
+   "2026-08-05",
+   0
+  ],
+  [
+   "2026-08-06",
+   17
+  ],
+  [
+   "2026-08-07",
+   10
+  ],
+  [
+   "2026-08-08",
+   0
+  ],
+  [
+   "2026-08-09",
+   0
+  ],
+  [
+   "2026-08-10",
+   0
+  ],
+  [
+   "2026-08-11",
+   0
+  ],
+  [
+   "2026-08-12",
+   0
+  ],
+  [
+   "2026-08-13",
+   0
+  ],
+  [
+   "2026-08-14",
+   0
+  ],
+  [
+   "2026-08-15",
+   0
+  ],
+  [
+   "2026-08-16",
+   0
+  ],
+  [
+   "2026-08-17",
+   0
+  ],
+  [
+   "2026-08-18",
+   0
+  ],
+  [
+   "2026-08-19",
+   0
+  ],
+  [
+   "2026-08-20",
+   0
+  ],
+  [
+   "2026-08-21",
+   0
+  ],
+  [
+   "2026-08-22",
+   0
+  ],
+  [
+   "2026-08-23",
+   0
+  ],
+  [
+   "2026-08-24",
+   0
+  ],
+  [
+   "2026-08-25",
+   0
+  ],
+  [
+   "2026-08-26",
+   2
+  ],
+  [
+   "2026-08-27",
+   12
+  ],
+  [
+   "2026-08-28",
+   20
+  ],
+  [
+   "2026-08-29",
+   19
+  ],
+  [
+   "2026-08-30",
+   15
+  ],
+  [
+   "2026-08-31",
+   10
+  ],
+  [
+   "2026-09-01",
+   24
+  ],
+  [
+   "2026-09-02",
+   10
+  ],
+  [
+   "2026-09-03",
+   53
+  ],
+  [
+   "2026-09-04",
+   23
+  ],
+  [
+   "2026-09-05",
+   24
+  ],
+  [
+   "2026-09-06",
+   28
+  ],
+  [
+   "2026-09-07",
+   90
+  ],
+  [
+   "2026-09-08",
+   30
+  ],
+  [
+   "2026-09-09",
+   5
+  ],
+  [
+   "2026-09-10",
+   37
+  ],
+  [
+   "2026-09-11",
+   55
+  ],
+  [
+   "2026-09-12",
+   6
+  ],
+  [
+   "2026-09-13",
+   0
+  ],
+  [
+   "2026-09-14",
+   17
+  ],
+  [
+   "2026-09-15",
+   55
+  ],
+  [
+   "2026-09-16",
+   5
+  ],
+  [
+   "2026-09-17",
+   17
+  ],
+  [
+   "2026-09-18",
+   0
+  ],
+  [
+   "2026-09-19",
+   9
+  ],
+  [
+   "2026-09-20",
+   26
+  ],
+  [
+   "2026-09-21",
+   34
+  ],
+  [
+   "2026-09-22",
+   25
+  ],
+  [
+   "2026-09-23",
+   69
+  ],
+  [
+   "2026-09-24",
+   105
+  ],
+  [
+   "2026-09-25",
+   80
+  ],
+  [
+   "2026-09-26",
+   13
+  ],
+  [
+   "2026-09-27",
+   0
+  ],
+  [
+   "2026-09-28",
+   32
+  ],
+  [
+   "2026-09-29",
+   0
+  ],
+  [
+   "2026-09-30",
+   1
+  ],
+  [
+   "2026-10-01",
+   52
+  ],
+  [
+   "2026-10-02",
+   17
+  ],
+  [
+   "2026-10-03",
+   23
+  ],
+  [
+   "2026-10-04",
+   13
+  ],
+  [
+   "2026-10-05",
+   8
+  ],
+  [
+   "2026-10-06",
+   6
+  ],
+  [
+   "2026-10-07",
+   4
+  ],
+  [
+   "2026-10-08",
+   13
+  ],
+  [
+   "2026-10-09",
+   15
+  ],
+  [
+   "2026-10-10",
+   18
+  ],
+  [
+   "2026-10-11",
+   14
+  ],
+  [
+   "2026-10-12",
+   5
+  ],
+  [
+   "2026-10-13",
+   26
+  ],
+  [
+   "2026-10-14",
+   341
+  ],
+  [
+   "2026-10-15",
+   23
+  ],
+  [
+   "2026-10-16",
+   21
+  ],
+  [
+   "2026-10-17",
+   26
+  ],
+  [
+   "2026-10-18",
+   2
+  ],
+  [
+   "2026-10-19",
+   2
+  ],
+  [
+   "2026-10-20",
+   23
+  ],
+  [
+   "2026-10-21",
+   8
+  ],
+  [
+   "2026-10-22",
+   7
+  ],
+  [
+   "2026-10-23",
+   20
+  ],
+  [
+   "2026-10-24",
+   3
+  ],
+  [
+   "2026-10-25",
+   0
+  ],
+  [
+   "2026-10-26",
+   0
+  ],
+  [
+   "2026-10-27",
+   0
+  ],
+  [
+   "2026-10-28",
+   0
+  ],
+  [
+   "2026-10-29",
+   0
+  ],
+  [
+   "2026-10-30",
+   1
+  ],
+  [
+   "2026-10-31",
+   0
+  ],
+  [
+   "2026-11-01",
+   0
+  ],
+  [
+   "2026-11-02",
+   0
+  ],
+  [
+   "2026-11-03",
+   1
+  ],
+  [
+   "2026-11-04",
+   0
+  ],
+  [
+   "2026-11-05",
+   0
+  ],
+  [
+   "2026-11-06",
+   7
+  ],
+  [
+   "2026-11-07",
+   74
+  ],
+  [
+   "2026-11-08",
+   71
+  ],
+  [
+   "2026-11-09",
+   73
+  ],
+  [
+   "2026-11-10",
+   136
+  ],
+  [
+   "2026-11-11",
+   28
+  ],
+  [
+   "2026-11-12",
+   25
+  ],
+  [
+   "2026-11-13",
+   1
+  ],
+  [
+   "2026-11-14",
+   0
+  ],
+  [
+   "2026-11-15",
+   0
+  ],
+  [
+   "2026-11-16",
+   29
+  ]
+ ],
+ "languages": [
+  {
+   "name": "Python",
+   "color": "#3572A5",
+   "bytes": 13024813,
+   "share": 0.6330961153345128
+  },
+  {
+   "name": "C",
+   "color": "#555555",
+   "bytes": 3944491,
+   "share": 0.19172958023059125
+  },
+  {
+   "name": "QML",
+   "color": "#44a51c",
+   "bytes": 2348562,
+   "share": 0.11415637820076605
+  },
+  {
+   "name": "Shell",
+   "color": "#89e051",
+   "bytes": 325901,
+   "share": 0.015841045632181673
+  },
+  {
+   "name": "Svelte",
+   "color": "#ff3e00",
+   "bytes": 191191,
+   "share": 0.009293206696090059
+  },
+  {
+   "name": "Lua",
+   "color": "#000080",
+   "bytes": 190562,
+   "share": 0.009262632939941283
+  },
+  {
+   "name": "JavaScript",
+   "color": "#f1e05a",
+   "bytes": 147425,
+   "share": 0.007165875994011627
+  },
+  {
+   "name": "TypeScript",
+   "color": "#3178c6",
+   "bytes": 122006,
+   "share": 0.005930336554352264
+  },
+  {
+   "name": "Roff",
+   "color": "#ecdebe",
+   "bytes": 95999,
+   "share": 0.00466621624249023
+  },
+  {
+   "name": "CSS",
+   "color": "#663399",
+   "bytes": 54416,
+   "share": 0.0026449944588104912
+  },
+  {
+   "name": "Vim Script",
+   "color": "#199f4b",
+   "bytes": 50364,
+   "share": 0.002448039196624735
+  },
+  {
+   "name": "C++",
+   "color": "#f34b7d",
+   "bytes": 49801,
+   "share": 0.0024206734975599324
+  },
+  {
+   "name": "HTML",
+   "color": "#e34c26",
+   "bytes": 8808,
+   "share": 0.0004281297999338946
+  },
+  {
+   "name": "Dockerfile",
+   "color": "#384d54",
+   "bytes": 6224,
+   "share": 0.00030252950440378746
+  },
+  {
+   "name": "Makefile",
+   "color": "#427819",
+   "bytes": 4846,
+   "share": 0.00023554916104446562
+  },
+  {
+   "name": "PowerShell",
+   "color": "#012456",
+   "bytes": 3942,
+   "share": 0.00019160850037913403
+  },
+  {
+   "name": "CMake",
+   "color": "#DA3434",
+   "bytes": 3792,
+   "share": 0.00018431746155192193
+  },
+  {
+   "name": "PureBasic",
+   "color": "#5a6986",
+   "bytes": 57,
+   "share": 0.0000027705947543405983
+  }
+ ],
+ "repos": [
+  {
+   "name": "secure-terminal-p2p-chat",
+   "description": "What does Wireshark see when two terminals talk? A P2P terminal chat that upgrades from plaintext to RSA-OAEP + AES-256-GCM, with a strict mode and downgrade detection.",
+   "url": "https://github.com/fh1m/secure-terminal-p2p-chat",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T06:02:22Z",
+   "createdAt": "2026-04-12T08:19:23Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "aes-gcm",
+    "cryptography",
+    "network-security",
+    "p2p-chat",
+    "rsa"
+   ],
+   "commits": 5
+  },
+  {
+   "name": "passless",
+   "description": "Can a login have no secret worth stealing? A Python/Flask WebAuthn service: passkeys, multi-device, every verification step enforced and tested.",
+   "url": "https://github.com/fh1m/passless",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:58:57Z",
+   "createdAt": "2026-05-04T07:32:16Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "authentication",
+    "flask",
+    "passkeys",
+    "security",
+    "webauthn"
+   ],
+   "commits": 20
+  },
+  {
+   "name": "start-page",
+   "description": "A keyboard-first browser new tab: one or two letters to anywhere, key:query to search. Built on Tilde Enhanced.",
+   "url": "https://github.com/fh1m/start-page",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:49:50Z",
+   "createdAt": "2023-10-15T07:05:14Z",
+   "language": "JavaScript",
+   "color": "#f1e05a",
+   "topics": [
+    "browser",
+    "javascript",
+    "keyboard-driven",
+    "productivity",
+    "startpage"
+   ],
+   "commits": 8
+  },
+  {
+   "name": "half-a-second",
+   "description": "Where will the bottle be half a second from now? A 2024 YOLOv7 + CSRT tracker's speed readout, measured against Kalman and least-squares predictors.",
+   "url": "https://github.com/fh1m/half-a-second",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:48:30Z",
+   "createdAt": "2024-03-17T20:15:05Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "computer-vision",
+    "kalman-filter",
+    "object-tracking",
+    "state-estimation",
+    "yolov7"
+   ],
+   "commits": 10
+  },
+  {
+   "name": "interview-bottle",
+   "description": "The underwater-robotics team interview task, graded properly three years later: 15 training images, a learning rate meant for TPUs, a test split that was the training set, and a pool.",
+   "url": "https://github.com/fh1m/interview-bottle",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:48:06Z",
+   "createdAt": "2023-12-03T11:16:02Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "data-leakage",
+    "object-detection",
+    "ssd-mobilenet",
+    "tensorflow",
+    "underwater-robotics"
+   ],
+   "commits": 11
+  },
+  {
+   "name": "four-leds",
+   "description": "Can a person steer a camera onto a target with four LEDs? A 2024 YOLOv5 + Arduino rig analysed as a human-in-the-loop controller: why bang-bang feedback hunts.",
+   "url": "https://github.com/fh1m/four-leds",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:41:06Z",
+   "createdAt": "2024-03-31T21:59:35Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "arduino",
+    "control-systems",
+    "human-in-the-loop",
+    "visual-servoing",
+    "yolov5"
+   ],
+   "commits": 7
+  },
+  {
+   "name": "pareidolia",
+   "description": "What does a 2001 face detector actually look at? The Viola–Jones cascade opened up: its first nine questions, how far you can tilt your head, and the faces it finds in coins and gravel.",
+   "url": "https://github.com/fh1m/pareidolia",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:33:47Z",
+   "createdAt": "2023-11-29T12:03:31Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "computer-vision",
+    "face-detection",
+    "haar-cascade",
+    "interpretability",
+    "opencv"
+   ],
+   "commits": 5
+  },
+  {
+   "name": "happy-little-trees",
+   "description": "When does a decision tree stop learning and start painting every accident? Depth sweep, decision-boundary canvases and cost-complexity pruning.",
+   "url": "https://github.com/fh1m/happy-little-trees",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:29:38Z",
+   "createdAt": "2023-11-29T13:20:31Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "decision-trees",
+    "machine-learning",
+    "overfitting",
+    "scikit-learn",
+    "visualization"
+   ],
+   "commits": 6
+  },
+  {
+   "name": "trust-issues",
+   "description": "How many lying readings can a sensor calibration survive? Least squares vs Huber vs Theil–Sen vs RANSAC on a depth-sensor line.",
+   "url": "https://github.com/fh1m/trust-issues",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:28:36Z",
+   "createdAt": "2023-11-29T12:34:40Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "linear-regression",
+    "ransac",
+    "robotics",
+    "robust-statistics",
+    "sensor-calibration"
+   ],
+   "commits": 4
+  },
+  {
+   "name": "green-at-depth",
+   "description": "How deep can a colour threshold go before the water lies to it? A 2023 HSV arrow detector, sunk metre by metre through a Beer–Lambert water model.",
+   "url": "https://github.com/fh1m/green-at-depth",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:24:59Z",
+   "createdAt": "2023-11-29T13:32:21Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "computer-vision",
+    "image-formation",
+    "opencv",
+    "robosub",
+    "underwater-robotics"
+   ],
+   "commits": 4
+  },
+  {
+   "name": "E-Bhapa",
+   "description": "Six hours, no team, one ultrasonic sensor: a 2024 contest robot's Arduino sketch, audited line by line and re-enacted in a simulator.",
+   "url": "https://github.com/fh1m/E-Bhapa",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-16T05:22:48Z",
+   "createdAt": "2024-02-29T13:08:45Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "arduino",
+    "embedded",
+    "mobile-robots",
+    "simulation",
+    "ultrasonic-sensor"
+   ],
+   "commits": 11
+  },
+  {
+   "name": "fh1m",
+   "description": "Config files for my GitHub profile.",
+   "url": "https://github.com/fh1m/fh1m",
+   "archived": false,
+   "stars": 1,
+   "forks": 0,
+   "pushedAt": "2026-11-16T04:07:40Z",
+   "createdAt": "2024-03-01T21:20:29Z",
+   "language": null,
+   "color": null,
+   "topics": [
+    "config",
+    "github-config"
+   ],
+   "commits": 44
+  },
+  {
+   "name": "mongla_ws",
+   "description": "An independent ROS 2 autonomy stack for autonomous underwater vehicles. Custom control board at 500 Hz, vision on a Hailo-8, and every capability claim carrying its evidence. Mongla is a research platform to push boundaries of underwater robotics. ",
+   "url": "https://github.com/fh1m/mongla_ws",
+   "archived": false,
+   "stars": 5,
+   "forks": 2,
+   "pushedAt": "2026-11-12T18:56:16Z",
+   "createdAt": "2026-04-18T12:35:52Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "autonomous-underwater-vehicle",
+    "auv",
+    "bangladesh",
+    "mavlink",
+    "robotics",
+    "ros2",
+    "computer-vision",
+    "esp32",
+    "hailo-8",
+    "raspberry-pi-5"
+   ],
+   "commits": 1375
+  },
+  {
+   "name": ".dotfiles",
+   "description": "Sensei Robotics: a dual-display Hyprland + Quickshell workstation and documented Arch setup",
+   "url": "https://github.com/fh1m/.dotfiles",
+   "archived": false,
+   "stars": 5,
+   "forks": 0,
+   "pushedAt": "2026-10-24T08:35:48Z",
+   "createdAt": "2026-09-27T22:15:36Z",
+   "language": "QML",
+   "color": "#44a51c",
+   "topics": [
+    "arch-linux",
+    "dotfiles",
+    "hyprland",
+    "nvidia",
+    "quickshell",
+    "robotics",
+    "spotify",
+    "zenbook"
+   ],
+   "commits": 438
+  },
+  {
+   "name": "rupsha_ws",
+   "description": "An autonomy stack for a ground rover. The body being built is a small Ackermann chassis.",
+   "url": "https://github.com/fh1m/rupsha_ws",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-10-23T17:39:38Z",
+   "createdAt": "2026-10-21T09:04:46Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [],
+   "commits": 8
+  },
+  {
+   "name": "fh1m.github.io",
+   "description": "Fahim Faisal — machines that perceive, reason, and act. Personal site (Astro 5, GitHub Pages).",
+   "url": "https://github.com/fh1m/fh1m.github.io",
+   "archived": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-10-16T09:03:13Z",
+   "createdAt": "2026-01-06T21:11:49Z",
+   "language": "Svelte",
+   "color": "#ff3e00",
+   "topics": [],
+   "commits": 51
+  },
+  {
+   "name": "Dristy",
+   "description": "Dristy — K210 vision firmware, host API, and research",
+   "url": "https://github.com/fh1m/Dristy",
+   "archived": false,
+   "stars": 1,
+   "forks": 0,
+   "pushedAt": "2026-09-19T16:07:07Z",
+   "createdAt": "2026-09-19T07:33:08Z",
+   "language": "C",
+   "color": "#555555",
+   "topics": [],
+   "commits": 8
+  },
+  {
+   "name": "mongla_sim",
+   "description": "Mongla Sim: Pixhawk-era AUV simulation, Gazebo/ArduSub SITL, 13 courses and an operator lab.",
+   "url": "https://github.com/fh1m/mongla_sim",
+   "archived": false,
+   "stars": 0,
+   "forks": 1,
+   "pushedAt": "2026-09-01T19:47:36Z",
+   "createdAt": "2026-08-26T20:37:22Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [],
+   "commits": 43
+  },
+  {
+   "name": "duburi-rnd",
+   "description": "The codebase for AUV, Research and Exprimental Concepts tested on Duburi 4.2. ",
+   "url": "https://github.com/fh1m/duburi-rnd",
+   "archived": false,
+   "stars": 1,
+   "forks": 0,
+   "pushedAt": "2026-04-04T04:25:33Z",
+   "createdAt": "2026-03-06T12:27:21Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [],
+   "commits": 33
+  },
+  {
+   "name": "duburi",
+   "description": "Most epic AUV in world.",
+   "url": "https://github.com/fh1m/duburi",
+   "archived": true,
+   "stars": 2,
+   "forks": 0,
+   "pushedAt": "2025-03-22T09:37:20Z",
+   "createdAt": "2025-03-22T09:37:19Z",
+   "language": null,
+   "color": null,
+   "topics": [
+    "auv",
+    "rov"
+   ],
+   "commits": 1
+  },
+  {
+   "name": "nvim-pde",
+   "description": "Custom Neovim port for my Personal development enviroment.",
+   "url": "https://github.com/fh1m/nvim-pde",
+   "archived": true,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2023-10-15T07:30:27Z",
+   "createdAt": "2023-10-15T07:27:30Z",
+   "language": "Vim Script",
+   "color": "#199f4b",
+   "topics": [],
+   "commits": 2
+  },
+  {
+   "name": "arch-scripts",
+   "description": "Bash and Python scripts written for my Arch system.",
+   "url": "https://github.com/fh1m/arch-scripts",
+   "archived": true,
+   "stars": 0,
+   "forks": 1,
+   "pushedAt": "2023-10-15T07:01:37Z",
+   "createdAt": "2023-10-15T06:37:26Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [],
+   "commits": 2
+  }
+ ]
+}

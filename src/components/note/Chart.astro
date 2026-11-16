@@ -1,0 +1,64 @@
+---
+/**
+ * A chart of numbers that appear in the note's own text: bars or a line.
+ * Static SVG, no script. The <title> carries every value, so the chart is readable without sight.
+ */
+type Tone = "measured" | "failure" | "medium" | "estimate" | "dim";
+interface Point { label: string; value: number; tone?: Tone }
+interface Props {
+  data: Point[];
+  kind?: "bar" | "line";
+  unit?: string;
+  caption: string;
+  title: string;
+  ref?: { value: number; label: string; tone?: Tone };
+  max?: number;
+  log?: boolean;
+  wide?: boolean;
+}
+const { data, kind = "bar", unit = "", caption, title, ref, max, log = false, wide = false } = Astro.props;
+const W = 900, H = 300, L = 70, R = 20, T = 24, B = 54;
+const vals = data.map((d) => d.value).concat(ref ? [ref.value] : []);
+const top = max ?? Math.max(...vals) * 1.12;
+const lo = log ? Math.max(Math.min(...vals.filter((v) => v > 0)) / 2, 1e-6) : 0;
+const y = (v: number) => (log ? T + (H - T - B) * (1 - (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(top) - Math.log10(lo))) : T + (H - T - B) * (1 - v / top));
+const step = (W - L - R) / data.length;
+const x = (i: number) => L + step * i + step / 2;
+const fmt = (v: number) => (Math.abs(v) >= 100 ? v.toLocaleString("en-US", { maximumFractionDigits: 0 }) : String(+v.toFixed(3)));
+const ticks = log ? [lo, Math.sqrt(lo * top), top].map((v) => +v.toPrecision(2)) : [0, top / 2, top].map((v) => +v.toPrecision(2));
+const colour = (t?: Tone) => `var(--${t ?? "measured"})`;
+const desc = `${title}. ` + data.map((d) => `${d.label}: ${fmt(d.value)}${unit}`).join("; ") + (ref ? `. Reference ${ref.label}: ${fmt(ref.value)}${unit}.` : ".");
+const path = data.map((d, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(d.value).toFixed(1)}`).join(" ");
+---
+<figure class:list={["chart", { wide }]}>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={desc}>
+    <title>{desc}</title>
+    {ticks.map((t) => (<g><line x1={L} x2={W - R} y1={y(t)} y2={y(t)} class="grid" /><text x={L - 10} y={y(t) + 4} class="tick" text-anchor="end">{fmt(t)}</text></g>))}
+    {kind === "bar" && data.map((d, i) => (
+      <g>
+        <rect x={x(i) - step * 0.32} width={step * 0.64} y={y(d.value)} height={Math.max(1, H - B - y(d.value))} fill={colour(d.tone)} rx="2" opacity="0.92" />
+        <text x={x(i)} y={y(d.value) - 7} class="val" text-anchor="middle">{fmt(d.value)}</text>
+      </g>
+    ))}
+    {kind === "line" && (
+      <g>
+        <path d={path} class="line" />
+        {data.map((d, i) => (<g><circle cx={x(i)} cy={y(d.value)} r="4.5" fill={colour(d.tone)} /><text x={x(i)} y={y(d.value) - 11} class="val" text-anchor="middle">{fmt(d.value)}</text></g>))}
+      </g>
+    )}
+    {ref && (<g><line x1={L} x2={W - R} y1={y(ref.value)} y2={y(ref.value)} class="ref" style={`stroke:${colour(ref.tone ?? "estimate")}`} /><text x={W - R} y={y(ref.value) - 7} class="reflbl" text-anchor="end" style={`fill:${colour(ref.tone ?? "estimate")}`}>{ref.label}</text></g>)}
+    {data.map((d, i) => <text x={x(i)} y={H - B + 22} class="lbl" text-anchor="middle">{d.label}</text>)}
+    {unit && <text x={L} y={14} class="tick">{unit.trim()}</text>}
+  </svg>
+  <figcaption set:html={caption} />
+</figure>
+<style>
+  .chart svg { width: 100%; height: auto; background: transparent; overflow: visible; }
+  .grid { stroke: #161b20; }
+  .tick, .lbl { font: 400 13px var(--mono); fill: var(--faint); }
+  .lbl { fill: var(--dim); }
+  .val { font: 400 13px var(--mono); fill: var(--chalk); }
+  .line { fill: none; stroke: var(--chalk); stroke-width: 1.6; opacity: 0.7; }
+  .ref { stroke-dasharray: 5 5; stroke-width: 1.4; }
+  .reflbl { font: 400 13px var(--mono); }
+</style>

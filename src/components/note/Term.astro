@@ -1,0 +1,14 @@
+---
+/** Terminal output, verbatim from the tool that printed it. */
+interface Props { lines: string[]; title?: string }
+const { lines, title } = Astro.props;
+---
+<figure class="term">
+  {title && <figcaption class="tt">{title}</figcaption>}
+  <pre>{lines.join("\n")}</pre>
+</figure>
+<style>
+  .term { margin: 2rem 0; background: #030405; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .tt { margin: 0; padding: 0.45rem 0.9rem; border-bottom: 1px solid var(--line); color: var(--faint); }
+  pre { margin: 0; padding: 1rem 0.9rem; font: 400 0.8rem/1.6 var(--mono); color: var(--measured); overflow-x: auto; }
+</style>

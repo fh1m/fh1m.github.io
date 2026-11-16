@@ -1,0 +1,78 @@
+---
+title: "Four LEDs"
+dek: "Can a person steer a camera onto a target when the only feedback is four LEDs? A control loop where the controller is a human."
+date: "2026-11"
+arena: delay
+kind: regrade
+repo: four-leds
+hero: /media/notes/four-leds-deadband_sweep.webp
+heroAlt: "Settling time and failure rate against the size of the buzzer zone, for on/off and dimmed LEDs"
+heroPlot: true
+sources:
+  - { label: "four-leds: the study, the v2 rig, the tests", href: "https://github.com/fh1m/four-leds" }
+  - { label: "Arduino tone() and Timer2", href: "https://docs.arduino.cc/language-reference/en/functions/advanced-io/tone/" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+
+April 2024. A laptop runs YOLOv5 on a webcam, finds a bottle, and remembers where it sat still for three seconds. Move the camera away and an Arduino lights the way back: red for left, green for right, white for up, blue for down, and a buzzer when you're within ±50 px.
+
+It worked on my desk. Nothing about it was ever measured. And it's a control loop: the *sensor* is a neural net, the *controller* is a person, and the *signal* between them is four bits. Control loops can be analysed, even when one of the parts has opinions.
+
+## The person, drawn the way a textbook would
+
+They see the LEDs about 250 ms late (a typical visual reaction time), move the camera at a comfortable 600 px/s in whichever direction is lit, and their hand shakes a little. Detections arrive at 15 Hz. Each zone size gets 200 tries from random starting points. Two displays:
+
+- **Bang-bang (2024):** each LED is on or off.
+- **Proportional:** the same LEDs, PWM-dimmed with the size of the error, so the person slows down on approach.
+
+<Fig src="/media/notes/four-leds-deadband_sweep.webp" alt="Failure rate and median settling time against buzzer zone size for on/off and dimmed LEDs" caption="At the 2024 zone of ±50 px, on/off LEDs never settle 95.5 % of the time. Dimmed: 2.0 %." wide plot />
+
+| buzzer zone | on/off: never settled | dimmed: never settled | dimmed: median settle |
+|---:|---:|---:|---:|
+| ±20 px | 99.5 % | 99.5 % | — |
+| ±30 px | 97.5 % | 6.5 % | 3.34 s |
+| **±50 px (2024)** | **95.5 %** | **2.0 %** | **1.04 s** |
+| ±75 px | 81.0 % | 0.0 % | 0.52 s |
+| ±100 px | 0.5 % | 0.5 % | 0.50 s |
+
+## Why it hunts
+
+The arithmetic fits on a sticky note. At 600 px/s with a 250 ms delay, the camera travels **150 px** after the LED changes and before the hand does. The 2024 zone is only 100 px wide. A person who obeys the LEDs exactly sails straight through, sees the opposite LED, and sails back. Forever.
+
+<Fig src="/media/notes/four-leds-one_try.webp" alt="Two traces: one try at the 2024 zone oscillating, one at a tight zone" caption="One try each. The on/off display at the 2024 zone hunts back and forth across the target." wide plot />
+
+<Pull>The LEDs never said slow down. Real people only managed because they slowed down on their own.</Pull>
+
+Dimming the LEDs adds the missing *slow down*, and the loop settles. Until you shrink the zone too far: at ±20 px even the dimmed display oscillates. Its effective gain (600 px/s over an 80 px ramp, 7.5 s⁻¹) times the 0.25 s delay is about 1.9, past the ~π/2 where a delayed loop stops being stable. The fix there is lower gain, not more LEDs.
+
+Same problem as an underwater vehicle centring itself on a gate from a camera: a slow detector, a delay before the thrusters answer, and a controller that has to brake before it arrives. Later vehicles taught me that properly. Four LEDs taught it first. The [delay arena](/#delay) lets you try both displays with your own reaction time on a slider.
+
+## v2: the rig, rebuilt with a "slow down"
+
+Building the dimmed display on a real Uno runs into two pieces of silicon trivia worth knowing:
+
+- **PWM only exists on pins 3, 5, 6, 9, 10 and 11.** v1 had white and blue on 12 and 13, which can only be on or off. You can't dim a pin that can't PWM.
+- **`tone()` borrows Timer2, which also drives PWM on pins 3 and 11.** A buzzer and a dimmable green LED on 11 can't coexist. Green moves to 9, the buzzer to 3, where losing PWM costs nothing.
+
+<figure class="wide">
+<svg viewBox="0 0 960 250" role="img" aria-labelledby="pins-t">
+  <title id="pins-t">Arduino Uno digital pins 2 to 13. Version 1: buzzer on 9, red 10, green 11, white 12, blue 13. Version 2: buzzer 3, blue 5, white 6, green 9, red 10. Pins 3, 5, 6, 9, 10 and 11 can do PWM.</title>
+  <style>{`.p{font:13px var(--mono);fill:var(--dim)}.h{font:12px var(--mono);fill:var(--faint)}.pwm{fill:none;stroke:var(--measured);stroke-dasharray:3 3}.pin{fill:#0b0f12;stroke:#2c333a}`}</style>
+  <text x="20" y="22" class="h">pin</text>
+  {[2,3,4,5,6,7,8,9,10,11,12,13].map((p, i) => (<g><rect class="pin" x={80 + i * 72} y="34" width="56" height="34" rx="3" />{[3,5,6,9,10,11].includes(p) && <rect class="pwm" x={77 + i * 72} y="31" width="62" height="40" rx="4" />}<text x={108 + i * 72} y="56" text-anchor="middle" class="p">{p}</text></g>))}
+  <text x="20" y="118" class="h">v1</text>
+  <text x="20" y="196" class="h">v2</text>
+  {[[9,"buzz","#a3a8ae"],[10,"red","#ff5c4d"],[11,"green","#b8f34a"],[12,"white","#f2f0e8"],[13,"blue","#4d7cff"]].map(([p, l, c]) => (<g><circle cx={108 + (Number(p) - 2) * 72} cy="112" r="12" fill={String(c)} opacity="0.9" /><text x={108 + (Number(p) - 2) * 72} y="146" text-anchor="middle" class="p">{l}</text></g>))}
+  {[[3,"buzz","#a3a8ae"],[5,"blue","#4d7cff"],[6,"white","#f2f0e8"],[9,"green","#b8f34a"],[10,"red","#ff5c4d"]].map(([p, l, c]) => (<g><circle cx={108 + (Number(p) - 2) * 72} cy="190" r="12" fill={String(c)} opacity="0.9" /><text x={108 + (Number(p) - 2) * 72} y="224" text-anchor="middle" class="p">{l}</text></g>))}
+</svg>
+<figcaption>Pin map, from the two sketches. Dashed outline: the pins that can actually do PWM. v1 put two of four LEDs where dimming is impossible.</figcaption>
+</figure>
+
+The v2 sketch reads `E <dx> <dy>` lines (signed error, as a percentage of "far"), sets each LED's brightness from its share of the error, sounds the buzzer inside the zone, and goes dark if the laptop stops talking for 400 ms rather than show a stale direction. 6,564 bytes on an Uno.
+
+## The bug I kept
+
+The 2024 `main.py` has an operator-precedence bug: it sends `leftdown` instead of `left,down`. It works anyway, because the Arduino only checks whether each word *appears* in the line. The original stays in the repo, bug included, and a test pins it on record.
+
+<Pull>Two bugs cancelling out is still two bugs.</Pull>

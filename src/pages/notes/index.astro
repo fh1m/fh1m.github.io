@@ -1,0 +1,100 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { arenas } from "../../data/arenas";
+
+const notes = (await getCollection("notes")).sort((a, b) => b.data.date.localeCompare(a.data.date));
+const tracks = arenas.map((a) => ({ arena: a, notes: notes.filter((n) => n.data.arena === a.id) })).filter((t) => t.notes.length);
+const kinds = [
+  { k: "all", label: "everything" },
+  { k: "project", label: "machines & projects" },
+  { k: "essay", label: "from the notebook" },
+  { k: "regrade", label: "re-graded" },
+  { k: "story", label: "stories" },
+];
+---
+<Base title="Notes" description="Field notes from the range: machines, essays from the Mongla notebook, re-graded old projects, and the failures with their timestamps.">
+  <main id="main" class="notes">
+    <header class="intro">
+      <p class="pixel kick">notes · {notes.length}</p>
+      <h1>The long versions.</h1>
+      <p class="lede">Every arena on the range has a notebook behind it. These are the pages: what was built, what was measured, what broke, and what I'd tell the version of me who started it. Sorted by the force that graded them.</p>
+      <div class="controls" role="group" aria-label="Filter notes">
+        {kinds.map((k, i) => <button type="button" data-kind={k.k} aria-pressed={i === 0 ? "true" : "false"}>{k.label}</button>)}
+        <label class="find"><span class="sr-only">Search notes</span><input type="search" placeholder="search: kalman, hailo, cat…" autocomplete="off" /></label>
+      </div>
+      <p class="count mono" aria-live="polite"></p>
+    </header>
+
+    {tracks.map(({ arena, notes: ns }) => (
+      <section class={`track sig-${arena.signal}`} aria-labelledby={`t-${arena.id}`}>
+        <h2 id={`t-${arena.id}`}><a href={`/#${arena.id}`}><span class="pixel" data-bn={arena.bn}>{String(arena.n).padStart(2, "0")}</span> {arena.title}</a> <span class="mono force">{arena.force}</span></h2>
+        <ul class="tiles">
+          {ns.map((n) => (
+            <li data-kind={n.data.kind} data-text={`${n.data.title} ${n.data.dek} ${n.data.repo ?? ""}`.toLowerCase()}>
+              <a href={`/notes/${n.id}`}>
+                {n.data.hero && <img class:list={[{ plot: n.data.heroPlot }]} src={n.data.hero} alt="" loading="lazy" decoding="async" />}
+                <span class="meta mono">{n.data.date} · {({ project: "project", essay: "notebook", regrade: "re-graded", story: "story" })[n.data.kind]}</span>
+                <span class="t">{n.data.title}</span>
+                <span class="d">{n.data.dek}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </main>
+</Base>
+
+<script>
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>(".controls button")];
+  const input = document.querySelector<HTMLInputElement>(".find input")!;
+  const items = [...document.querySelectorAll<HTMLLIElement>(".tiles li")];
+  const count = document.querySelector(".count")!;
+  let kind = new URLSearchParams(location.search).get("kind") ?? "all";
+  const apply = () => {
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    for (const li of items) {
+      const ok = (kind === "all" || li.dataset.kind === kind) && (!q || li.dataset.text!.includes(q));
+      li.hidden = !ok; if (ok) shown++;
+    }
+    document.querySelectorAll<HTMLElement>(".track").forEach((t) => { t.hidden = !t.querySelector("li:not([hidden])"); });
+    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kind === kind)));
+    count.textContent = shown === items.length ? "" : `${shown} of ${items.length} notes`;
+  };
+  buttons.forEach((b) => b.addEventListener("click", () => { kind = b.dataset.kind!; history.replaceState(null, "", kind === "all" ? location.pathname : `?kind=${kind}`); apply(); }));
+  input.addEventListener("input", apply);
+  apply();
+</script>
+
+<style>
+  .notes { padding: 8rem var(--gutter) 4rem; }
+  .intro { max-width: 70rem; margin-bottom: 4rem; }
+  .kick { color: var(--measured); }
+  h1 { font-size: clamp(2.6rem, 6vw, 5rem); font-weight: 450; }
+  .lede { font-size: var(--s1); color: #dcd9d0; max-width: 60ch; }
+  .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2rem; align-items: center; }
+  .controls button[aria-pressed="true"] { border-color: var(--measured); color: var(--measured); }
+  .find input { background: #000; border: 1px solid #2c333a; border-radius: 3px; color: var(--chalk); font: 400 0.8rem var(--mono); padding: 0.5rem 0.7rem; min-width: 16rem; }
+  .count { color: var(--dim); min-height: 1.2em; }
+
+  .track { margin: 0 0 4.5rem; }
+  .track h2 { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; font-size: var(--s3); border-top: 1px solid var(--line); padding-top: 1.2rem; }
+  .track h2 a { text-decoration: none; }
+  .track h2 .pixel { color: var(--sig); }
+  .track h2 .pixel:hover::after { content: " " attr(data-bn); color: var(--dim); }
+  .force { color: var(--faint); font-size: 0.78rem; }
+  .tiles { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 1.4rem; }
+  .tiles a { display: grid; gap: 0.45rem; text-decoration: none; height: 100%; padding-bottom: 0.4rem; border-bottom: 1px solid var(--line); }
+  .tiles img { aspect-ratio: 16 / 9; object-fit: cover; border-radius: 3px; background: #050607; filter: saturate(0.85) brightness(0.85); transition: filter 0.25s ease, transform 0.25s ease; }
+  .tiles img.plot { filter: invert(1) hue-rotate(180deg) brightness(0.85); }
+  .tiles a:hover img.plot, .tiles a:focus-visible img.plot { filter: invert(1) hue-rotate(180deg); }
+  .tiles a:hover img, .tiles a:focus-visible img { filter: none; transform: translateY(-2px); }
+  .tiles a:hover .t { color: var(--sig); }
+  .meta { color: var(--faint); font-size: 0.72rem; }
+  .t { font-size: 1.28rem; line-height: 1.2; font-weight: 500; }
+  .d { color: var(--dim); font-size: 0.95rem; line-height: 1.5; }
+  .sig-measured { --sig: var(--measured); } .sig-failure { --sig: var(--failure); } .sig-medium { --sig: var(--medium); } .sig-estimate { --sig: var(--estimate); }
+  @media (prefers-reduced-motion: reduce) { .tiles img { transition: none; } }
+</style>

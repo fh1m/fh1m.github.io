@@ -1,0 +1,74 @@
+---
+title: "The interview bottle"
+dek: "My entry task for an underwater robotics team, December 2023, graded properly three years later. The test set was the training set."
+date: "2026-11"
+arena: water
+kind: regrade
+repo: interview-bottle
+hero: /media/notes/interview-bottle-dry_vs_3m.webp
+heroAlt: "Four validation bottles with the detector's boxes, dry and under 3 m of simulated water"
+sources:
+  - { label: "interview-bottle: the re-grade and the fixed config", href: "https://github.com/fh1m/interview-bottle" }
+  - { label: "Goyal et al. (2017), the linear learning-rate scaling rule", href: "https://arxiv.org/abs/1706.02677" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+December 2023. The BRACU Duburi team gave applicants a task: train an object detector. I took a Kaggle water-bottle dataset, labelled it by hand in LabelImg, fine-tuned **SSD MobileNet v2 320×320** with the TensorFlow Object Detection API, and sent in screenshots like this one.
+
+<Fig src="/media/notes/interview-bottle-2023-shot.webp" alt="2023 screenshot: the detector boxing a Winner water bottle at 0.88 confidence, the box much wider than the bottle" caption="<b>December 2023.</b> Bottle: 0.88. Very pleased. Look how much wider than the bottle that box is. That's not an accident; it's the subject of this note." />
+
+Three years later the 2023 workspace was still on disk, complete with TensorBoard logs, the exported model and the TFRecords. So I re-opened the box.
+
+## What the logs remember
+
+<Fig src="/media/notes/interview-bottle-training_2023.webp" alt="Training losses and learning rate read back from the 2023 event files: learning rate warms up to 0.8; regularisation loss jumps and stays high" caption="Read back from the 2023 event files. The learning rate climbs to 0.8, and the regularisation loss jumps with it." wide plot />
+
+- **15 training images.** Ten for validation. That's the whole dataset.
+- **4,200 of 50,000 steps.** The run was stopped about 8 % of the way in.
+- **A learning rate meant for someone else's computer.** The config came from the model zoo, where `learning_rate_base: 0.8` is tuned for a **batch of 512 on TPUs**. Mine was **8**. The linear scaling rule says it should have been about 0.8 × 8 / 512 ≈ **0.0125**. The weights were being shoved around by steps 64 times too big.
+
+## The grade
+
+The re-grade's first finding came before any model ran:
+
+<Pull>test.tfrecord is a byte-for-byte copy of train.tfrecord.</Pull>
+
+All 15 "test" images are training images. On them, the model scores AP@0.5 = 1.000. Memory, not skill. The honest held-out set is the 10 validation images:
+
+| what | AP@0.5 |
+|---|---:|
+| "test" split (= training images) | 1.000 |
+| **validation, never trained on** | **0.405** |
+| logged by the 2023 eval job (validation, step 4000) | 0.506 |
+
+Why so low, when the boxes *look* right? A habit:
+
+<Stats items={[
+  { v: "72 %", l: "median share of the frame covered by the model's top box", tone: "failure" },
+  { v: "31 %", l: "covered by the real bottle, validation images" },
+  { v: "51 %", l: "covered by the real bottle, training images" },
+]} />
+
+Every training image is one product-shot bottle, front and centre, filling half the frame. Fifteen times. The cheapest correct answer the network could learn was *a big box in the middle*, and it learned that very well.
+
+## Would it have survived the pool?
+
+This was an interview for an *underwater* team, so the last question is obvious. The validation images go through the same water model as [green, at depth](/notes/green-at-depth).
+
+<Fig src="/media/notes/interview-bottle-ap_vs_depth.webp" alt="AP at 0.5 IoU against simulated water depth, falling from 0.4 to about 0.1 by 8 m" caption="AP@0.5 against water path. The bump at 1 m is ten images being ten images." plot />
+
+| water path | 0 m | 1 m | 2 m | 3 m | 5 m | 8 m |
+|---|---:|---:|---:|---:|---:|---:|
+| AP@0.5, validation | 0.405 | 0.538 | 0.372 | 0.224 | 0.160 | 0.109 |
+
+<Fig src="/media/notes/interview-bottle-dry_vs_3m.webp" alt="Four bottles, dry and at 3 m: everything turns cyan and the red CLEAR label turns dark green" caption="Dry, and at 3 m. Bottom right: the red <b>CLEAR</b> label is dark green underwater. Water eats red first, and a detector trained on white product shots has never seen that." wide />
+
+## What I'd change, and haven't
+
+The repo has a `pipeline.fixed.config` with the fixes this argues for: the learning rate scaled to the batch, a short warm-up, a real held-out split, and augmentations that break the habit (bottles small and off-centre; hue and brightness jitter closer to water). **It has not been retrained**, and the note says so in bold, because every number above is from the 2023 model.
+
+The 2023 repo also carried about 170 MB of other people's code: the model garden, cocoapi, protoc and the zoo checkpoint. That's upstream's to host. The repo is lighter now, and honest about what's mine.
+
+<Pull>The test set was the training set, and nobody checked, me included. A check nobody runs is a decoration.</Pull>

@@ -1,0 +1,80 @@
+---
+title: "Green, at depth"
+dek: "In 2023 I found arrows by asking each pixel whether it was green. Then I took the question for a swim."
+date: "2026-11"
+arena: water
+kind: regrade
+repo: green-at-depth
+hero: /media/notes/green-at-depth-filmstrip.webp
+heroAlt: "A filmstrip of the same test card sinking through water, with the mask each detector produced"
+sources:
+  - { label: "green-at-depth: the sweep and the detector", href: "https://github.com/fh1m/green-at-depth" }
+  - { label: "Pope & Fry (1997), pure-water absorption", href: "https://doi.org/10.1364/AO.36.008710" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+
+November 2023. I had just joined an underwater robotics team, and the vehicle had to follow green arrows. So I wrote forty lines of OpenCV that asked every pixel one question: *is your hue between 50 and 70?*
+
+It worked beautifully. On my desk.
+
+<Fig src="/media/notes/green-at-depth-desk-2023-arrow.webp" alt="The 2023 script running on a desk: a hollow green arrow outlined, plus several green reflections" caption="<b>November 2023.</b> The file was called arrow detection. It detected green, and also a few reflections that were feeling green that day." />
+
+Three years later I went back to find out exactly how wrong it was, and when.
+
+## Water is a filter that thickens with distance
+
+Light travelling through water loses red about twenty times faster than blue. The water also glows back at the camera with its own blue-green haze. A pixel underwater is two things added together:
+
+```
+I = J · e^(−k·d)  +  B · (1 − e^(−k·d))
+    what's there     what the water adds
+```
+
+`J` is the object's real colour, `B` the veiling light, `d` the metres of water between lens and object, `k` a per-channel attenuation. I used pure-water absorption from Pope & Fry (1997), scaled by four to stand in for a real pool. That scale is a knob, not a measurement, and the note says so wherever the number appears.
+
+You can sink the card yourself in the [water arena](/#water). The bench there runs the same model and the same 2023 threshold, live.
+
+## Sinking the card
+
+A synthetic RoboSub-style card (green arrow, orange gate post, sandy floor) goes down in 0.5 m steps. Because the card is synthetic, the true mask is known to the pixel, so every strategy gets an honest score: intersection-over-union against ground truth.
+
+<Fig src="/media/notes/green-at-depth-iou_vs_depth.webp" alt="Line chart of mask IoU against water depth for three strategies: as-is falls to zero by 5 m, gray-world follows it, inverting the water lasts to about 6 m" caption="IoU against the true arrow mask. <b>As-is</b> and <b>gray-world</b> both drop below 0.5 at 3.5 m. Inverting the water holds until 6.0 m." wide plot />
+
+| water path | as-is | gray-world | invert the water |
+|---:|---:|---:|---:|
+| 0 m | 1.000 | 1.000 | 1.000 |
+| 2 m | 0.777 | 0.995 | 1.000 |
+| 3 m | 0.532 | 0.605 | 0.987 |
+| 5 m | 0.000 | 0.015 | 0.621 |
+| 10 m | 0.000 | 0.000 | 0.421 |
+| **below 0.5 at** | **3.5 m** | **3.5 m** | **6.0 m** |
+
+## Three things I didn't expect
+
+**The first failure is a hallucination, not blindness.** At 2 m the *orange* gate post turns green enough to pass. The detector now reports two arrows. A detector that sees nothing at least tells you so. One that sees the wrong thing points the vehicle at a post with total confidence.
+
+**White balance fixes the hallucination but not the drowning.** Gray-world removes the fake arrow, then loses the real one at the same depth as before. The haze flattens saturation below the threshold's floor of 100, and no amount of rebalancing puts saturation back.
+
+**Knowing the physics buys depth until the noise collects the bill.** If you know the range (a DVL or sonar gives you that on a real vehicle) you can divide the water back out. That works until the red channel is so dim that dividing by it mostly amplifies sensor noise. Then the gate post comes back as speckle.
+
+<Pull>Water decides when the threshold dies. Engineering only gets to move the depth.</Pull>
+
+## Finishing the 2023 job
+
+The repo now also contains the detector I meant to write: one that finds *an arrow*, not just green, and says which way it points.
+
+- **Shape is a second opinion colour can't fake.** An arrow is solid but notched: its area is 55 to 92 % of its convex hull. The gate post is a rectangle at about 100 %. That single check removes the 2 m hallucination without any white balance.
+- **The head is the wide end.** My first attempt took the point farthest from the centroid as the tip, and got every arrow backwards. The head's bulk drags the centroid forward, so the tail corners win. Version two looks along the long axis and picks the end that is wider across.
+
+<Gallery items={[
+  { src: "/media/notes/green-at-depth-detect_2m.webp", alt: "The new detector at 2 m of simulated water: the arrow is boxed with its direction, the orange post is ignored", caption: "2 m of water. The post is ignored, the arrow is found and pointed." },
+  { src: "/media/notes/green-at-depth-detect_2023_rerun.webp", alt: "The original 2023 desk frame rerun through the new detector: one arrow found, pointing left", caption: "The original 2023 frame, rerun. One arrow, pointing left, reflections ignored." },
+]} credit="Both frames from github.com/fh1m/green-at-depth, reproducible with fixed seeds." />
+
+## What it taught, later
+
+The same lesson, learned for real in pools on the Duburi vehicles, is why the team's vision moved from colour rules to learned detectors trained on underwater footage. It's also why the paper we later wrote argued that [colour is class evidence](/notes/duburi): the colour shift isn't only noise to remove; sometimes it's the signal.
+
+The 2023 script is still in the repo, untouched, next to its original README. Nostalgia is allowed if it comes with a test suite.

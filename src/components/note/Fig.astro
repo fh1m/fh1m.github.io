@@ -1,0 +1,15 @@
+---
+/** A real image with its caption and credit. `wide` breaks out of the text column. */
+interface Props { src: string; alt: string; caption?: string; credit?: string; wide?: boolean; contain?: boolean; plot?: boolean }
+const { src, alt, caption, credit, wide = false, contain = false, plot = false } = Astro.props;
+---
+<figure class:list={["fig", { wide, contain, plot }]}>
+  <img src={src} alt={alt} loading="lazy" decoding="async" />
+  {(caption || credit) && <figcaption>{caption && <span set:html={caption} />}{credit && <span class="credit"> · {credit}</span>}</figcaption>}
+</figure>
+<style>
+  .fig.contain img { object-fit: contain; max-height: 72vh; }
+  /* Charts rendered on white: flip to OLED black, keep hues. */
+  .fig.plot img { filter: invert(1) hue-rotate(180deg) brightness(1.05); background: #000; }
+  .credit { color: var(--faint); }
+</style>

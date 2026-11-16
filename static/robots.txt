@@ -1,7 +1,0 @@
-# fahim-personal-site robots.txt
-# Allow all crawlers. Live domain: https://fh1m.github.io (GitHub Pages user site).
-
-User-agent: *
-Allow: /
-
-Sitemap: https://fh1m.github.io/sitemap-index.xml

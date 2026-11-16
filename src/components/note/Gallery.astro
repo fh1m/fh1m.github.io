@@ -1,0 +1,22 @@
+---
+/** Several real images side by side, each with its caption. Always full width. */
+interface Item { src: string; alt: string; caption?: string }
+interface Props { items: Item[]; credit?: string }
+const { items, credit } = Astro.props;
+---
+<div class="gallery wide" style={`--n:${Math.min(items.length, 3)}`}>
+  {items.map((it) => (
+    <figure>
+      <img src={it.src} alt={it.alt} loading="lazy" decoding="async" />
+      {it.caption && <figcaption set:html={it.caption} />}
+    </figure>
+  ))}
+  {credit && <p class="src gcredit">{credit}</p>}
+</div>
+<style>
+  .gallery { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 1.2rem; margin: 2.4rem 0; }
+  .gallery figure { margin: 0; }
+  .gallery img { aspect-ratio: 4 / 3; object-fit: cover; }
+  .gcredit { grid-column: 1 / -1; margin: 0; }
+  @media (max-width: 760px) { .gallery { grid-template-columns: 1fr; } }
+</style>

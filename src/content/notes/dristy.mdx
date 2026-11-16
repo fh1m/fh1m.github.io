@@ -1,0 +1,69 @@
+---
+title: "Dristy (দৃষ্টি)"
+dek: "A camera that answers with a number, not a video stream. Open firmware for a K210 that does the seeing so the robot doesn't have to."
+date: "2026-09"
+arena: sight
+kind: project
+repo: Dristy
+hero: /media/dristy/object.webp
+heroAlt: "The K210 camera's own LCD: a laptop boxed and labelled tvmonitor 61 percent"
+sources:
+  - { label: "Dristy: firmware, host API, mode audit", href: "https://github.com/fh1m/Dristy" }
+  - { label: "Kendryte K210 datasheet", href: "https://github.com/kendryte/kendryte-doc-datasheet" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+*Dristy* is Bengali for sight. It's open firmware and a host API for a Kendryte K210 camera module (a DFRobot SEN0305) that does vision on the camera itself, so a robot gets a compact answer over a serial line ("target at error_x, error_y") instead of a video stream it has to decode.
+
+A robot doesn't *see*. It has a sensor that turns light into numbers, and a program that has to decide what those numbers mean before the motors move. Dristy is that program, running on the sensor.
+
+<Fig src="/media/dristy/pipeline.webp" alt="Five boxes: light, pixels, look, answer, robot; from the lens to a few bytes on a UART" caption="From light to a number a robot can use. The last box receives four bytes, not a frame." wide />
+
+## Why put the brain in the camera
+
+A flight controller or a Raspberry Pi *can* run vision. Usually you shouldn't make it. If the main computer does vision, it has to ingest JPEG or YUV at tens of frames a second, and a stall in OpenCV stalls attitude control: you end up debugging why your PID is late. If the camera does vision, it sends a few bytes (an id, x, y, a size), and the robot's loop stays boring and fast. Dristy is the same idea as a GPS module: a specialist that speaks a short protocol.
+
+It's also the same idea as Mongla's board split, at a smaller scale: keep the slow, heavy thinking away from the thing that has to be on time.
+
+## What it does, shown rather than claimed
+
+Every LCD picture here was pulled off a live board over UART, from the device's own 320 × 240 screen.
+
+<Gallery items={[
+  { src: "/media/dristy/object.webp", alt: "On-device detection: a laptop boxed as tvmonitor at 61 percent", caption: "<b>Name the thing.</b> A tiny VOC-20 YOLO on the KPU calls a laptop a tvmonitor, at 61 %. Small, opinionated, honest about confidence." },
+  { src: "/media/dristy/colour.webp", alt: "Colour tracking overlay with a blob histogram", caption: "<b>Follow a colour</b> without a neural net: histogram plus blobs on the CPU. 16 live blobs at about 19 FPS." },
+  { src: "/media/dristy/motion.webp", alt: "Motion detection overlay reading MOTION 99", caption: "<b>Notice motion</b>: frame differencing as a tripwire. Wake the expensive detector only if the world moved." },
+]} credit="Captured on a DFRobot SEN0305 over UART, 19 Sep 2026." />
+
+The same firmware also reads QR codes, AprilTags and ArUco markers, follows a line by regression on a contrast strip, estimates optical flow, detects faces on the KPU, and runs a hybrid detect-and-track mode for a lock that survives a missed frame.
+
+| job | mode | measured on the desk |
+|---|---|---|
+| VOC detect | `DETECT` | about 7 FPS when the net runs |
+| colour | `COLOUR_TRACK` | 16 blobs, about 19 FPS |
+| line | `LINE_FOLLOW` | line valid, about 20 FPS |
+| motion | `MOTION_DETECT` | 55 %, then 99 in the shot above |
+| tags, QR, face | those modes | handshake ok; zero hits until shown a marker or face |
+
+Zeros there mean the scene had no tag or face in it, not that the mode is dead. The audit says which.
+
+## The budget is the architecture
+
+The K210 has two 64-bit RISC-V cores, a convolution engine (the KPU), 8 MiB of SRAM, no Linux and no MMU. On a chip that small, where every buffer goes is the design.
+
+<Fig src="/media/dristy/k210-budget.webp" alt="K210 SRAM budget: SRAM0 4 MiB for code and classical vision, SRAM1 2 MiB for trackers and overlays, AI SRAM 2 MiB for KPU feature maps" caption="One chip, 8 MiB of SRAM, spent on the latest frame. Model input widths are multiples of 64 so the camera can DMA straight into AI SRAM without the CPU touching a pixel." wide />
+
+<Stats items={[
+  { v: "400 MHz", l: "PLL1 raised at boot: about +33 % KPU speed before any micro-optimisation" },
+  { v: "320 × 240", l: "one mailbox frame; the newest wins" },
+  { v: "0x55 0xAA", l: "the industry-common packet framing, so stock tools still work" },
+]} />
+
+One rule runs through all of it, the same one that runs through Mongla:
+
+<Pull>Keep the newest frame, throw the rest away. Dristy is a mailbox, not a queue.</Pull>
+
+A robot that steers on a picture from 200 ms ago is worse off than one that missed a frame. The camera preview and the neural net even share one camera lease, so opening the detector has to stop the preview first. That isn't a bug; it's the physics of one pipe.

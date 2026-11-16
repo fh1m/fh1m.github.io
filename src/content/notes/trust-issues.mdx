@@ -1,0 +1,73 @@
+---
+title: "Trust issues"
+dek: "A depth sensor, a straight line, and the fraction of liars it can survive."
+date: "2026-11"
+arena: noise
+kind: regrade
+repo: trust-issues
+hero: /media/notes/trust-issues-thirty.webp
+heroAlt: "One calibration run with 30 percent lying readings and four fitted lines"
+heroPlot: true
+sources:
+  - { label: "trust-issues: the study and the calibration tool", href: "https://github.com/fh1m/trust-issues" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+import Term from "../../components/note/Term.astro";
+
+My first machine-learning script, November 2023, fit a line through 100 polite, made-up points with ordinary least squares. Least squares is a wonderful listener. It weighs every point equally, including the ones that are lying.
+
+<Fig src="/media/notes/trust-issues-2023.webp" alt="The 2023 plot: a blue least-squares line through test points" caption="<b>November 2023.</b> Top right, one point sits about two units above the line. In that script it's honest Gaussian noise. On a real sensor it's exactly what a liar looks like, and the line would lean towards it all the same." plot />
+
+On a robot, points lie all the time. The pressure sensor that tells an underwater vehicle its depth gets calibrated by fitting exactly this kind of line, raw counts to metres. The calibration data arrives with bubbles on the port, cable tugs and the occasional bit-flip on the bus. So the real question: **what fraction of the data can lie before the depth estimate is useless?** Statisticians call that the *breakdown point*. I call it the moment the vehicle starts believing the pool is deeper than it is.
+
+## The interrogation
+
+Each trial is a 120-reading calibration run. A growing fraction of the readings gets a spike of +2 to +6 m. Four estimators fit the line, scored on mean depth error across the sensor's range, median over 40 trials.
+
+<Fig src="/media/notes/trust-issues-breakdown.webp" alt="Median depth error against the fraction of lying readings for least squares, Huber, Theil-Sen and RANSAC" caption="Depth error against the fraction of liars. Least squares leaves on the first lie. RANSAC is still flat at 60 %." wide plot />
+
+| liars | least squares | Huber | Theil–Sen | RANSAC |
+|---:|---:|---:|---:|---:|
+| 0 % | 0.3 cm | 0.3 cm | 0.5 cm | 0.3 cm |
+| 5 % | 22.7 cm | 0.4 cm | 0.6 cm | 0.4 cm |
+| 20 % | 84.7 cm | 1.2 cm | 0.7 cm | 0.3 cm |
+| 35 % | 137.9 cm | 8.6 cm | 1.2 cm | 0.3 cm |
+| 50 % | 199.5 cm | 185.7 cm | 8.2 cm | 0.4 cm |
+| 60 % | 244.3 cm | 239.3 cm | 292.3 cm | 0.5 cm |
+| **under 5 cm until** | **0 %** | **30 %** | **45 %** | **60 %+** |
+
+## Verdicts
+
+- **Least squares** breaks with *one* liar; its breakdown point is 0 %. Five percent bad readings put the vehicle 23 cm off in depth.
+- **Huber** bends instead of breaking, and it's cheap enough for a microcontroller. It collapses abruptly between 35 and 40 %.
+- **Theil–Sen** takes the median of all pairwise slopes. Its theoretical breakdown is about 29 %, but it holds longer here because these liars scatter rather than agree.
+- **RANSAC** wins this round, and the reason matters more than the win. It trusts the largest group that *agrees*. These liars disagree with each other, so they never outvote the truth.
+
+<Pull>No estimator survives an organised lie. That's what a second, independent sensor is for.</Pull>
+
+A sensor that drifts consistently (a conspiracy, rather than a crowd of individual liars) would beat RANSAC too. That's the limit of statistics: it can outvote noise, but it can't outvote a systematic error. Physics, or a different instrument, has to do that.
+
+## From a study to a tool
+
+The study became a tool. Give it a CSV of raw readings against ground truth and it fits a calibration that doesn't take the liars' side. RANSAC decides *who* to believe, then plain least squares refits the believers, because least squares is still the best judge of honest witnesses.
+
+<Term title="python -m trustissues.calibrate examples/synthetic_calibration.csv --plot fit.png" lines={[
+  "truth = 0.0124264 * raw + -1.71894",
+  "believed 46 of 60 readings",
+  "  refused row 13: raw=589 truth=9.347",
+  "  refused row 17: raw=963 truth=15.739",
+  "  …",
+  "plain least squares would be off by up to 2.233 truth units across this range",
+]} />
+
+<Fig src="/media/notes/trust-issues-calibrate.webp" alt="Believed readings as dots along the fitted calibration line, refused readings as crosses well above it, and the steeper dashed line plain least squares would have drawn" caption="The tool on its example file: a made-up sensor with a quarter of its readings spiked. Dashed: what least squares would have believed. The inlier band defaults to 2.5 robust standard deviations of a rough fit, so it works in any unit." plot />
+
+<Stats items={[
+  { v: "0 %", l: "breakdown point of least squares: one liar is enough", tone: "failure" },
+  { v: "60 %+", l: "lying readings RANSAC shrugged off, when the liars disagree", tone: "measured" },
+  { v: "46 / 60", l: "readings the tool believed on its example file" },
+]} src="Seeded, deterministic. python -m trustissues.run reproduces the table in about 50 s." />
+
+Try it with your own hands in the [noise arena](/#noise): drag the slider and watch the dashed line get talked into things.

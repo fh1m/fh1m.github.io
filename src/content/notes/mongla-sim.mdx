@@ -1,0 +1,74 @@
+---
+title: "The pool we built"
+dek: "Mongla Sim: Gazebo, ArduSub SITL and an operator lab. Thirteen courses, a native DVL, and a test that fails if the simulator and the autonomy stop agreeing."
+date: "2026-09"
+arena: mongla
+kind: project
+repo: mongla_sim
+hero: /media/mongla/sim-pool-overview.webp
+heroAlt: "The simulated pool from above: lane lines, a gate, bins and slalom poles"
+sources:
+  - { label: "mongla_sim: the simulator", href: "https://github.com/fh1m/mongla_sim" }
+  - { label: "bluerov2_gz (MIT): the vehicle model it started from", href: "https://github.com/clydemcqueen/bluerov2_gz" }
+  - { label: "sauvc26-world (MIT): the props", href: "https://github.com/auv-amarine/sauvc26-world" }
+  - { label: "ArduSub SITL", href: "https://ardupilot.org/dev/docs/sitl-simulator-software-in-the-loop.html" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+Pool time is scarce, and a pool can't be reset to the same water twice. A simulated pool costs one terminal and comes back identical every run. So most of an underwater vehicle's life happens in water somebody built. The trick is making sure that water isn't lying.
+
+Mongla Sim is Gazebo Harmonic plus ArduSub software-in-the-loop plus a web operator lab. It gives the autonomy stack the exact MAVLink and camera surface it expects from a real vehicle, without the pool. Thirteen courses, including the SAUVC 2026 final layout, with props from the open sauvc26-world models.
+
+<Gallery items={[
+  { src: "/media/mongla/sim-gate-course.webp", alt: "A simulated gate course with lane lines on the pool floor", caption: "The gate course." },
+  { src: "/media/mongla/sim-bins-torpedo.webp", alt: "Simulated bins and a torpedo board", caption: "Bins and torpedo." },
+  { src: "/media/mongla/sim-slalom.webp", alt: "Simulated slalom poles in red and white", caption: "Slalom." },
+]} credit="Screenshots from the simulator, rendered by Gazebo." />
+
+## The contract is a test, not a promise
+
+The simulator and the autonomy stack live in one repository but build as two workspaces, so neither can quietly reach into the other. They're refereed by a single test that reads the simulator's launch files, model description and ArduSub parameters, and fails the moment they stop agreeing with what the autonomy expects.
+
+That test exists because of a real hole in how ROS 2 launch works. Pass a launch argument that a launch file doesn't declare, and nothing happens: no error, no log line, just a configuration nobody reads. A renamed argument fails silently in both directions. So the contract is asserted, not trusted.
+
+| surface | value |
+|---|---|
+| autonomy MAVLink | UDP 14550 |
+| cameras | front and bottom, 640 × 480 |
+| DVL (Gazebo's native sensor) | velocity and bottom-track altitude |
+| ground truth | its own topic, for scoring |
+| operator lab | bound to 127.0.0.1 by default, because its API can arm thrusters |
+
+<Pull>Both failure modes of the vision path are silent. So "it launched cleanly" is never the pass criterion.</Pull>
+
+The README says exactly what to look for before believing vision works: the right model name in the detector log, a *non-empty* class list (a missing class file doesn't crash, it just publishes nothing, forever), and an alignment line that appears when a gate is in frame. That paragraph is the most useful one in the repo, because it names the failure that looks exactly like success.
+
+## Measuring the sim with the sim
+
+`sim_shakedown` is the one-command proof the loop works: arm, hold depth, drive out, drive back, surface, disarm. Two symmetric timed legs and no position feedback, so it's the same file that runs on the real vehicle. Then the residual is measured against ground truth.
+
+<Stats items={[
+  { v: "0.266 m", l: "horizontal residual, run 1 (5 s legs at 55 %, −1.2 m)" },
+  { v: "0.200 m", l: "run 2" },
+  { v: "0.011–0.037 m", l: "of that along-track: symmetric legs retrace almost exactly" },
+]} src="Measured against /duburi/sim/ground_truth before and after." />
+
+The structure is the finding: along-track error almost cancels, and cross-track heading drift dominates. That's a fact about timed dead reckoning that a real pool would teach you more expensively.
+
+The simulator also knows its own lies. The pool is 1.6 m deep, so deeper targets bottom out. `surface()` won't confirm in simulation, because the simulated barometer reads 0.33 m at the surface while ArduSub controls on its own estimator. The hull surfaces; the readback never reaches zero. It's written down with the numbers rather than patched over.
+
+## The lab
+
+<Gallery items={[
+  { src: "/media/lab/ue-operator.webp", alt: "The web operator lab: two camera views, teleop pad and status", caption: "<b>Operate</b>: both cameras, a D-pad, arm, turbidity, record." },
+  { src: "/media/lab/ue-operator-form.webp", alt: "The dataset recording form with front, bottom, frames and labels options", caption: "<b>Datasets</b>: record a run with frames and labels from the simulator's bounding-box sensor." },
+]} />
+
+The lab exists for the boring reason that most of a vision season is data. Every recorded clip carries its frame counts in a `meta.json`, and the docs include the three-line script that checks frames on disk equal the counts, because the recorder drops writes on a full queue without erroring. An existing directory proves nothing.
+
+<Fig src="/media/mongla-docs/water-murky.webp" alt="The same simulated gate in murky water, barely visible" caption="One turbidity parameter, turned up. The single variable that decides whether a real run scores, so the simulator models it." />
+
+Clean water teaches you the shape of the task. It teaches you nothing about the task. The real water is in [the Mongla note](/notes/mongla).

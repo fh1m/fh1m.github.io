@@ -1,0 +1,70 @@
+---
+title: "A rover arm that types"
+dek: "The University Rover Challenge asks a rover to find a keyboard and type on it, alone. Inverse kinematics, a separate vision unit, and a dataset pipeline."
+date: "2025-05"
+arena: ground
+kind: story
+hero: /media/lab/sim-rover-terrain.webp
+heroAlt: "A simulated rover on dune terrain beside a mission control display"
+sources:
+  - { label: "BRAC University: Mongol-Tori in the URC 2025 global top 10", href: "https://www.bracu.ac.bd/news/brac-universitys-mongol-tori-team-ranks-among-global-top-10-university-rover-challenge-2025" }
+  - { label: "BRAC University: first runner-up, Bangladesh ICT & Innovation Awards 2025", href: "https://www.bracu.ac.bd/news/bracu-mongol-tori-first-runner-bangladesh-ict-and-innovation-awards-2025" }
+  - { label: "BRACU Mongol-Tori", href: "https://www.bracu-mongoltori.com" }
+  - { label: "University Rover Challenge", href: "https://urc.marssociety.org/" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+The University Rover Challenge is a Mars-analogue competition. One of its tasks asks a rover to do something that sounds like a joke and isn't: find a keyboard and type on it, without a human. From December 2024 to May 2025 I worked on that task with BRACU Mongol-Tori's autonomous sub-team.
+
+The task decomposes into three problems that each look easy alone: *where's the keyboard*, *where's each key*, and *how do I put the arm's tip there*. None of them is easy while a rover is parked on uneven ground.
+
+## Where's each key
+
+I built a standalone, lightweight vision unit for alignment and key detection, deliberately separate from the rover's main computer, so typing couldn't starve navigation and navigation couldn't stall typing. Custom OCR and image processing told the keys apart and located each one.
+
+<Fig src="/media/lab/detect-keyboard.webp" alt="A keyboard with individual keys detected and boxed" caption="Keyboard and individual keys, detected for the typing task." contain />
+
+I also ran the dataset pipeline for URC 2025: the labelled images that taught the detector what a key looks like at rover distance and at an angle.
+
+## Where's the tip
+
+The arm had two joints that mattered for reaching. A two-link arm has a closed-form inverse: given where the tip should go, the elbow angle comes from the law of cosines and the shoulder from two arctangents.
+
+<figure class="wide">
+<svg viewBox="0 0 900 300" role="img" aria-labelledby="ik-t">
+  <title id="ik-t">Two-link inverse kinematics: shoulder at the origin, link lengths L1 and L2, target at distance d. The elbow angle q2 equals arccos of (d squared minus L1 squared minus L2 squared) over (2 L1 L2). The shoulder angle q1 equals atan2 of the target minus atan2 of L2 sin q2 over L1 plus L2 cos q2.</title>
+  <style>{`.l{stroke:var(--chalk);stroke-width:3;stroke-linecap:round}.g{stroke:#2c333a;stroke-dasharray:4 4}.t{font:14px var(--mono);fill:var(--dim)}.m{font:15px var(--mono);fill:var(--chalk)}`}</style>
+  <line class="g" x1="60" y1="240" x2="400" y2="240" />
+  <line class="g" x1="60" y1="240" x2="330" y2="110" />
+  <line class="l" x1="60" y1="240" x2="210" y2="80" />
+  <line class="l" x1="210" y1="80" x2="330" y2="110" />
+  <circle cx="60" cy="240" r="6" fill="var(--measured)" /><circle cx="210" cy="80" r="6" fill="var(--measured)" /><circle cx="330" cy="110" r="6" fill="var(--estimate)" />
+  <text x="112" y="150" class="t">L1</text><text x="272" y="84" class="t">L2</text><text x="200" y="196" class="t">d</text>
+  <text x="96" y="232" class="t">q1</text><text x="222" y="104" class="t">q2</text><text x="342" y="114" class="t">key</text>
+  <text x="450" y="110" class="m">cos q2 = (d² − L1² − L2²) / (2·L1·L2)</text>
+  <text x="450" y="150" class="m">q1 = atan2(y, x) − atan2(L2·sin q2, L1 + L2·cos q2)</text>
+  <text x="450" y="200" class="t">|cos q2| > 1  →  the key is out of reach.</text>
+  <text x="450" y="226" class="t">Say so; don't stretch.</text>
+</svg>
+<figcaption>Two-link IK, elbow up. The interesting line is the last one: an unreachable key is an answer, not an exception.</figcaption>
+</figure>
+
+An in-house GUI and simulation environment made calibration possible before the hardware existed. A laptop is the cheapest place to find a failure.
+
+You can drive the arm in [the ground arena](/#ground): click a key, or use the arrow keys, and it solves for the joint angles live. Push it to the far corner of the keyboard and it tells you it can't reach, with the distance.
+
+<Fig src="/media/lab/sim-rover-terrain.webp" alt="A simulated rover on dune terrain beside the mission control display" caption="A rover on simulated dunes, with the mission HUD alongside." wide contain />
+
+## How it went
+
+<Stats items={[
+  { v: "global top 10", l: "Mongol-Tori at URC 2025" },
+  { v: "1st runner-up", l: "Bangladesh ICT & Innovation Awards 2025" },
+  { v: "2-DOF", l: "arm, solved in closed form" },
+]} src="BRAC University news, linked in the sources." />
+
+<Pull>The keyboard is the easy part. Finding the keyboard is the task.</Pull>
+
+The rover arm taught the same lesson as the underwater vehicle, from the other side: perception is where the uncertainty lives, and control is only as good as the coordinates it's handed.

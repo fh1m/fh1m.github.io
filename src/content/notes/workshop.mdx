@@ -1,0 +1,66 @@
+---
+title: "The workshop"
+dek: "Tools I built for myself: a new-tab page that takes a key and goes anywhere, a 2022 editor in screenshots, and the small sharp things engineers make between machines."
+date: "2026-11"
+arena: workshop
+kind: project
+hero: /media/notes/start-page-2023.webp
+heroAlt: "October 2023: a black new-tab page with a large clock on a tiling-window desktop"
+sources:
+  - { label: "start-page", href: "https://github.com/fh1m/start-page" }
+  - { label: "Tilde Enhanced by Ozenc Bilgili, the template", href: "https://github.com/ozencb/tilde-enhanced" }
+  - { label: "nvim-pde", href: "https://github.com/fh1m/nvim-pde" }
+  - { label: "comma.ai calib_challenge (the original)", href: "https://github.com/commaai/calib_challenge" }
+  - { label: "My calib_challenge fork", href: "https://github.com/fh1m/comma-calib-challenge" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+Every engineer has a workshop: the tools they built because the shop didn't sell the one they needed, or sold it with too many buttons. Mine mostly live in terminals and in the first thing a browser shows.
+
+## A new tab that takes a key
+
+A browser new-tab page: a black screen, a clock and a text box. Built in October 2023 on Ozenc Bilgili's Tilde Enhanced, then re-keyed for how I actually move around the web.
+
+<Fig src="/media/notes/start-page-2023.webp" alt="October 2023: the start page with a large clock, on a riced tiling-window desktop" caption="<b>October 2023</b>, in its natural habitat: a riced bspwm desktop. The setup has since moved on." wide />
+
+Every site I open more than twice a day gets a one- or two-letter key. Type the key, press Enter, done. The same keys take arguments: `g:kalman filter` searches GitHub, `r/r/robotics` opens a subreddit, `?` shows the grid, and anything else becomes a web search.
+
+<Stats items={[
+  { v: "1.38", l: "characters per shortcut key, on average, across 21 shortcuts" },
+  { v: "13.3", l: "characters in the domain each one replaces" },
+]} />
+
+The whole brain is one parser that checks in a fixed order: does it look like a URL? Is it *exactly* a key? Is it `key:query`, then `key/path`? Otherwise search. Order matters. `d` (Drive) and `dc` (Discord) share a first letter, and that only works because a key must match exactly: prefixes never win. You can type into the real grammar in the [workshop arena](/#workshop).
+
+<Gallery items={[
+  { src: "/media/notes/start-page-search.webp", alt: "The start page with g:kalman filter typed into the box", caption: "A GitHub search, two keystrokes in." },
+  { src: "/media/notes/start-page-now.webp", alt: "The start page today: clock and the help grid", caption: "Today, with the help grid." },
+]} />
+
+During the clean-up I found the default search had been labelled *DuckDuckGo* while pointing at Google since 2023, a leftover from the template. It says Google now. At least it's honest.
+
+## An editor, in screenshots
+
+In 2022 I built my own Neovim configuration and screenshotted it as it grew, the way some people photograph a plant. The repo is mostly those screenshots, which is fitting: an editor config is a diary written in Lua.
+
+<Gallery items={[
+  { src: "/media/notes/nvim-2022-07-05.webp", alt: "Neovim in July 2022: a code buffer with a file tree and status line", caption: "5 July 2022." },
+  { src: "/media/notes/nvim-2022-10-12.webp", alt: "Neovim in October 2022: split buffers with a more elaborate theme", caption: "12 October 2022." },
+]} credit="From github.com/fh1m/nvim-pde." />
+
+## Estimating where a car is pointing
+
+In 2023 I attempted comma.ai's open calibration challenge: given dashcam video, recover the camera's pitch and yaw relative to the direction of travel. It's a fork, an attempt, and the fun was in the estimation, not the leaderboard. It was also the first time I met the idea that motion itself is a measurement: the road slides past the camera in a pattern that points at where the car is going.
+
+<Fig src="/media/calib/challenge.webp" alt="A dashcam frame from comma.ai's calibration challenge: a road ahead with palm trees" caption="A frame from comma.ai's challenge data. That same idea (the scene's motion is a sensor) came back years later as a downward camera on an underwater vehicle." />
+
+## The rest of the bench
+
+- **[Passless](/notes/passless):** a login with no secret worth stealing.
+- **[Secure terminal chat](/notes/secure-p2p-chat):** what Wireshark sees before and after a handshake.
+- **Dotfiles and Arch scripts:** the machine I work on, kept in version control, because a setup you can't rebuild is a setup you're afraid to change.
+
+<Pull>A tool you built yourself is the only one whose failures you're allowed to be smug about.</Pull>

@@ -1,0 +1,66 @@
+---
+title: "Pareidolia"
+dek: "My first face detector found me. Three years later it also found two backpacks. What does a 2001 detector actually look at?"
+date: "2026-11"
+arena: sight
+kind: regrade
+repo: pareidolia
+hero: /media/notes/pareidolia-rerun.webp
+heroAlt: "The 2023 webcam frame rerun: three boxes, one on a face, one on two backpacks, one on a curtain fold"
+sources:
+  - { label: "pareidolia: the three studies and the fixed webcam loop", href: "https://github.com/fh1m/pareidolia" }
+  - { label: "Viola & Jones (2001), rapid object detection", href: "https://doi.org/10.1109/CVPR.2001.990517" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+My first computer-vision program, November 2023, opened a webcam, ran OpenCV's Haar cascade and drew a green box on my face. It felt like magic. Magic is a bad place to stop: a machine that finds faces has to be looking for *something*.
+
+<Fig src="/media/notes/face-2023.webp" alt="A webcam crop of Fahim's face in 2023, inside the detector's green box" caption="<b>November 2023.</b> Found. The green border is the 2023 detector's own box, cropped from the original screenshot." />
+
+The detector is the Viola–Jones cascade (2001), as shipped in OpenCV's `haarcascade_frontalface_default.xml`: **25 stages and 2,913 tiny comparisons**. Each one asks whether one rectangle of pixels is brighter than the rectangle next to it. That's the whole model. You can print it.
+
+## The first nine questions
+
+Every 24 × 24 window in the image has to pass stage 0 before anything else looks at it. Stage 0 asks nine light-versus-dark questions:
+
+<Fig src="/media/notes/pareidolia-stage0.webp" alt="The nine stage-0 Haar features drawn over a detected face" caption="Stage 0, all nine features. Dark band of eyes over lighter cheeks; a bright bridge of nose between dark sockets; a darker mouth line under a lighter lip." wide />
+
+No eyes, no skin, no idea what a person is. A face is whatever has its shadows in the right places. Most windows fail within these nine questions, which is why this ran in real time on 2001 hardware. You can step through the nine on my own 2023 face in the [sight arena](/#sight); the bench computes each comparison on the real pixels.
+
+## How far can you tilt your head?
+
+The face is rotated in 2° steps about its own centre, padded with flat grey so the detector can't cheat on a mirrored copy. A hit only counts if it lands on the real face at a plausible size.
+
+<Fig src="/media/notes/pareidolia-rotation.webp" alt="Strip of detection hits and misses across in-plane tilt angles" caption="Found continuously from −16° to +22°. Lopsided because the face in the photo already leans." wide plot />
+
+That's a window of about 38°. It comes back for two frames near −55°, for reasons the cascade does not explain. A *frontal* face detector means it: tilt your head like a curious dog and you stop existing.
+
+## Faces in things
+
+With the neighbour vote loosened from 5 to 3, the cascade ran over twelve images with no people in them: coffee, a rocket, gravel, grass, the Moon, the Hubble deep field, tissue under a microscope, a page of text.
+
+<Fig src="/media/notes/pareidolia-coins.webp" alt="The patches the detector called faces, mostly heads on ancient coins" caption="The nine 'faces' it found. Seven are portrait heads on ancient Greek coins." wide />
+
+It found **9 faces**. Seven are on a tray of ancient Greek coins, which really do carry portrait heads. So the detector was *right*, and I was the one who assumed. The other two, a motion-blurred clock and a patch of gravel, are true pareidolia: the brain's habit of seeing faces in sockets and clouds, reproduced in 2,913 rectangles.
+
+## Back to the bedroom
+
+The same detector, run again on the original 2023 screenshot:
+
+<Fig src="/media/notes/pareidolia-rerun.webp" alt="The 2023 frame rerun with three detections: the face, two backpacks on a door, a curtain fold" caption="Three faces. One is me. One is <b>two backpacks hanging on the door</b>: a dark blob over a dark blob, which is all stage 0 ever wanted. The small one is a fold in the curtain." wide />
+
+Fair disclosure: the new loop equalises the histogram first, which the 2023 one didn't. That brings out shadows, including the backpacks'. Same model, slightly different question, very different furniture.
+
+<Stats items={[
+  { v: "2,913", l: "rectangle comparisons in the whole model" },
+  { v: "−16° … +22°", l: "head tilt it tolerates before you stop existing" },
+  { v: "7 of 9", l: "'false' faces that were real faces on coins", tone: "estimate" },
+]} />
+
+## Why it matters to me
+
+Every detector I trained after this, on underwater vehicles and rovers, was a deeper and more opaque version of this one. This was the last time I could print the whole model, read it, and point at the exact rectangle that made the mistake.
+
+<Pull>The detector wasn't wrong about the backpacks. It answered the question it was asked. Most vision bugs are a question asked badly.</Pull>

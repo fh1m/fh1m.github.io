@@ -1,0 +1,48 @@
+---
+title: "What Wireshark sees"
+dek: "A terminal chat that starts in plaintext on purpose, upgrades to RSA-OAEP and AES-256-GCM, and shows you both sides of the line in packet captures."
+date: "2026"
+arena: workshop
+kind: project
+repo: secure-terminal-p2p-chat
+hero: /media/notes/p2p-chat-wireshark_sec.webp
+heroAlt: "Wireshark showing a chat message as AES-GCM ciphertext"
+sources:
+  - { label: "secure-terminal-p2p-chat", href: "https://github.com/fh1m/secure-terminal-p2p-chat" }
+  - { label: "NIST SP 800-38D: GCM", href: "https://csrc.nist.gov/pubs/sp/800/38/d/final" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+
+Two terminals, one TCP socket, no server in the middle. The chat starts in **plaintext on purpose**, so you can watch what an eavesdropper sees. Then `/share` runs a handshake (RSA-2048 with OAEP to move a session key, RSA-PSS signatures to prove who sent it) and every message after that is AES-256-GCM.
+
+<Gallery items={[
+  { src: "/media/notes/p2p-chat-Wireshark_clear.webp", alt: "Wireshark: the chat text readable in the TCP payload", caption: "<b>Before /share.</b> Every word, readable in the payload." },
+  { src: "/media/notes/p2p-chat-wireshark_sec.webp", alt: "Wireshark: the same chat as ciphertext with a key id", caption: "<b>After /share.</b> Noise, plus a key id." },
+]} />
+
+## Four questions
+
+Secure chat answers four questions, and each one needs a different tool:
+
+| question | the threat | the tool |
+|---|---|---|
+| confidentiality: can outsiders read it? | eavesdropping | AES-256-GCM |
+| integrity: was it changed? | tampering | GCM's authentication tag |
+| authenticity: is it really them? | impersonation | RSA-PSS signatures, key fingerprints |
+| freshness: is it new? | replay | nonces, timestamps, sequence counters |
+
+Confidentiality is the one everybody remembers. The other three are where real protocols break.
+
+<Fig src="/media/notes/p2p-chat-chatview_sec.webp" alt="The terminal chat view after the secure session is established" caption="The session after the handshake, with its key and state in the terminal." wide />
+
+## The downgrade I added later
+
+Going back to it, one gap stood out. A chat that starts in plaintext has to accept plaintext. So what happens if plaintext arrives *after* a secure session exists? A peer that holds the key has no reason to send it. Either something broke, or someone else is talking.
+
+Now two things guard that line. Plaintext after a secure session raises a downgrade warning instead of being shown like any other message. And `/strict` refuses plaintext entirely, for when you'd rather drop a message than read a forged one. Four tests pin both behaviours.
+
+<Pull>A protocol that quietly accepts the weaker option has a weaker option, not a stronger one.</Pull>
+
+Rekeying (`/rekey`) rotates to a fresh session key through the same handshake. The protocol messages are newline-delimited JSON, deliberately readable, because the point of the project is that you can inspect every byte and see which property each one buys.

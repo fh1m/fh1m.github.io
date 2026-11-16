@@ -1,0 +1,77 @@
+---
+title: "Half a second"
+dek: "In 2024 my webcam narrated a bottle: 'probably move to right with speed of 98.41 px/s'. It felt like prediction. It was subtraction."
+date: "2026-11"
+arena: delay
+kind: regrade
+repo: half-a-second
+hero: /media/notes/half-a-second-run-2024-1.webp
+heroAlt: "A 2024 webcam frame: a water bottle in a blue tracking box with a narrated direction and speed"
+sources:
+  - { label: "half-a-second: simulation, replay and the fixed live loop", href: "https://github.com/fh1m/half-a-second" }
+  - { label: "Issue #2: detections as measurements, not resets", href: "https://github.com/fh1m/half-a-second/issues/2" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Pull from "../../components/note/Pull.astro";
+import Stats from "../../components/note/Stats.astro";
+
+March 2024. I pointed YOLOv7 and a CSRT tracker at a water bottle and had the window narrate what it saw. *Probably move to right with speed of 98.41 px/s.* Two decimal places. Very confident.
+
+It was this frame's box centre minus the last one, divided by the time between them. Box centres jitter, so the narration jittered, and so did any "prediction" built on it. The rewrite asks two honest questions: **how wrong was that, and how far ahead can anyone actually see?** It answers twice: once in simulation, where the truth is known, and once on the real 2024 recording.
+
+<Fig src="/media/notes/half-a-second-run-2024-1.webp" alt="A 2024 webcam frame with the bottle tracked and the narrated verdict on screen" caption="<b>March 2024.</b> Tested, in the README's words, in different lighting conditions." />
+
+## Three ways to guess the future
+
+The motion is a hand waving a bottle: four slow sinusoids per axis at 30 fps. The tracker reports it with 3 px of jitter (about what CSRT gave me) and loses it on 5 % of frames. Three predictors guess where the bottle will be *h* frames later:
+
+- **Last two frames (2024):** velocity is the difference of consecutive centres.
+- **Least squares over 8 frames:** fit a line through recent centres, take its slope.
+- **Constant-velocity Kalman filter:** its process noise tuned on a *different* trajectory, so it doesn't get to study for the test.
+
+<Fig src="/media/notes/half-a-second-error_vs_horizon.webp" alt="RMS prediction error against look-ahead time for three predictors; Kalman lowest everywhere, all growing fast past 150 ms" caption="Prediction error against look-ahead. The Kalman filter wins everywhere and still loses to the future." wide plot />
+
+| look-ahead | last two frames | least squares | Kalman |
+|---:|---:|---:|---:|
+| 33 ms | 9.5 px | 6.0 px | **5.5 px** |
+| 167 ms | 35.9 px | 28.2 px | **22.1 px** |
+| 333 ms | 79.8 px | 75.4 px | **61.4 px** |
+| 500 ms | 138.6 px | 139.1 px | **118.9 px** |
+| 1 s | 378.0 px | 375.4 px | **351.2 px** |
+
+<Fig src="/media/notes/half-a-second-three_seconds.webp" alt="Three seconds of the true path with predictions made 167 ms and 500 ms early" caption="The true path, with guesses made 167 ms and 500 ms early. Hands don't move at constant velocity, and they won't start for us." wide plot />
+
+## Asking the real 2024 video
+
+The 2024 recording draws CSRT's box in pure blue, and nothing else in my room is that blue. So the bottle's actual 2024 track can be read straight back off the pixels: 35 s at 30 Hz, box visible in 92 % of samples. Then the same filter runs over it.
+
+<Fig src="/media/notes/half-a-second-replay_2024.webp" alt="The real 2024 bottle track and the left/right verdict before and after filtering" caption="The real track, and how often the left/right verdict flipped between samples." wide plot />
+
+<Stats items={[
+  { v: "17 %", l: "verdict flips the simulation predicted for the 2024 method", tone: "estimate" },
+  { v: "19 %", l: "flips actually measured on the 2024 recording", tone: "failure" },
+  { v: "11 %", l: "after a Kalman filter and an honest 'still' below 40 px/s", tone: "measured" },
+]} />
+
+The model guessed 17 %. Reality said 19 %. Close enough to be useful, wrong enough to stay humble.
+
+## The tracker, fixed
+
+The rebuilt live loop does what the analysis says: filter first, then speak.
+
+- The box centre goes through the Kalman filter before anyone says left or right.
+- **"Still" is an answer.** Below a sixteenth of the frame width per second, the verdict is *still* instead of a coin flip.
+- A ghost circle shows where the filter expects the bottle **half a second from now**.
+- **Trackers drift; detectors don't.** YOLOv8 re-seeds the tracker every 5 frames. Without that, CSRT wandered off the bottle and spent the rest of the 2024 recording tracking my wall.
+
+<Fig src="/media/notes/half-a-second-live_2024_rerun.webp" alt="The fixed loop on the 2024 recording: the bottle tracked, a ghost circle half a second ahead, verdict still" caption="The fixed loop on the original footage." />
+
+On the 2024 recording its verdict changes on **16 %** of moving frames, against 19 % before. Better, not done: each re-seed makes the box jump a little, and the filter reads every jump as motion. The real fix is to feed detections into the filter as measurements instead of resetting the tracker. It's filed as an issue, not hidden in the README.
+
+## What I take from it
+
+Filtering is the cheap win: close in, the Kalman filter cuts error by about 40 % over raw differencing, for a handful of multiplies per frame.
+
+<Pull>Better filtering can't predict a hand. Only a better model of the thing moving can.</Pull>
+
+Past about 150 ms every constant-velocity model is wrong in the same way. That's the whole game in robotics: an underwater vehicle tracking a gate doesn't need to predict a hand, it needs to predict *itself*, and its own dynamics are knowable. That's where this line of thinking went next: [the frame-age problem](/notes/the-frame-age-problem), and the [lock ladder](/notes/tracking-without-detection).

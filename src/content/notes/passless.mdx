@@ -1,0 +1,47 @@
+---
+title: "Passless"
+dek: "Can a login have no secret worth stealing? A WebAuthn service where the server keeps only something it's safe to lose."
+date: "2026"
+arena: workshop
+kind: project
+repo: passless
+hero: /media/notes/passless-ceremony.webp
+heroAlt: "Two screens: creating a passkey account, then authenticated"
+sources:
+  - { label: "passless", href: "https://github.com/fh1m/passless" }
+  - { label: "W3C Web Authentication Level 2", href: "https://www.w3.org/TR/webauthn-2/" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+
+A password is a shared secret: you know it, the server knows a hash of it, and so does whoever breaches the server. Passless is a Python/Flask WebAuthn service that tries the other design. The secret never leaves your device, and the server keeps only a public key.
+
+<Fig src="/media/notes/passless-ceremony.webp" alt="Registering a passkey, then signing in with it, side by side" caption="Registered and signed in by a real Chrome with a virtual authenticator, driven over the DevTools protocol. No password was typed, because there isn't one." wide />
+
+## What the server actually keeps
+
+After that registration and one sign-in, here's the entire credential row:
+
+| username | public key | length | counter | device type |
+|---|---|---:|---:|---|
+| fh1m | `pQECAyYgASFYIKmUPLnH29V8…` | 77 bytes (COSE EC2 P-256) | 2 | single_device |
+
+Steal the whole database and you can *verify* signatures. You can't *make* them. The counter is the second line of defence: it rose to 2 on both the authenticator and the server, and a cloned authenticator replaying an old count gets refused.
+
+<Pull>The best secret to protect is the one you never had to store.</Pull>
+
+## The ceremony
+
+1. The browser sends a username. The server sends back a challenge, its relying-party ID, and the credentials it will accept.
+2. The authenticator checks you're present (biometric or PIN), then signs the challenge together with the origin and a hash of the relying-party ID.
+3. The server checks every piece: challenge, origin, RP ID hash, presence and verification flags, the signature, and that the counter went up.
+
+Each check maps to an attack. The origin check stops a phishing site relaying the ceremony; the RP ID hash stops a credential minted for one site being used at another; the counter catches clones.
+
+<Gallery items={[
+  { src: "/media/notes/passless-1-register.webp", alt: "The Create passkey account screen", caption: "Register: a username, then the device does the rest." },
+  { src: "/media/notes/passless-3-signed-in.webp", alt: "The Authenticated screen with the authenticator's metadata", caption: "Signed in, with the authenticator's metadata shown." },
+]} />
+
+It began as a course project, and the report maps each requirement to where it's implemented. 25 tests cover the rejections that matter: an invalid origin, a missing challenge, an unknown credential, and a credential presented for the wrong user. It runs on localhost, self-signed HTTPS, or a Cloudflare tunnel for testing across real phones and laptops.
