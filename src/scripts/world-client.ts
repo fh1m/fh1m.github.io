@@ -21,6 +21,7 @@ function ensure() {
 }
 
 document.addEventListener("astro:page-load", () => {
+  if (!document.body.dataset.world) { document.body.classList.remove("world-on"); return; } // pages opt in to the world
   if (world) { document.body.classList.add("world-on"); world.go(state()); return; }
   const start = () => ensure();
   if ("requestIdleCallback" in window) requestIdleCallback(start, { timeout: 400 }); else setTimeout(start, 200);

@@ -9,6 +9,7 @@ export interface Project {
   summary: string; repo?: string; commitsKey?: string; hero?: string; heroAlt?: string;
   notes: { href: string; label: string }[]; status: string; private?: boolean;
   place?: string; figures?: [string, string][]; gallery?: [string, string][]; bench?: [string, string, string];
+  line?: string; stat?: string;
 }
 
 export const projects: Project[] = [
@@ -61,9 +62,30 @@ const benches: Record<string, [string, string, string]> = {
   mongla: ["hull", "The Mongla hull, from its own CAD", "drag to turn it"],
   tools: ["query", "The start page's query grammar", "type a query"],
 };
-for (const p of projects) Object.assign(p, extra[p.slug] ?? { place: "dhaka" }, benches[p.slug] ? { bench: benches[p.slug] } : {});
+/** One line per track, in the voice, and the one number that matters. Every claim is sourced above or in the notes. */
+const tracks: Record<string, [string, string]> = {
+  aerd: ["Rockets: the only place a bug becomes a debris field.", "2023–25"],
+  gimbal: ["A filter with no memory, holding a rocket upright. Mostly.", "2 gists"],
+  meghdhut: ["GPS-denied, named for a cloud messenger. Not flying yet.", "private"],
+  duburi: ["Three trips to Irvine to learn that water grades on a curve.", "8th / 58, twice"],
+  mongla: ["4,742 tests. 0 dives. Nobody has told the ocean yet.", "1,368 commits"],
+  "mongla-sim": ["A pool that never closes, refereed by a contract test.", "6 courses"],
+  "green-at-depth": ["Sink a green arrow until the threshold starts seeing things.", "re-graded"],
+  "interview-bottle": ["The test set was the training set. I graded myself and passed.", "re-graded"],
+  rupsha: ["A rover that has only ever driven inside a computer. It says so on the label.", "0 FIELD claims"],
+  "mongol-tori": ["Finding the key is the task. Pressing it is arithmetic.", "URC 2025"],
+  "e-bhapa": ["Built in one night, modelled on a cat. Never once turned.", "−255 → 1"],
+  "four-leds": ["A human in the loop is a 250 ms delay with opinions.", "250 ms"],
+  dristy: ["A camera that answers with a number, in 8 MiB.", "8 MiB"],
+  den: ["Two machines, five panels, one keyboard. Where everything else happens.", "436 commits"],
+  pareidolia: ["A 2001 face detector checks nine rectangles. Two backpacks passed.", "9 features"],
+  "half-a-second": ["Two decimal places of confidence, half a second late.", "0.5 s"],
+  "trust-issues": ["Least squares believes everyone. One liar is enough.", "1 liar"],
+  tools: ["Small sharp tools, because the shop didn't sell them.", "3 tools"],
+};
+for (const p of projects) Object.assign(p, extra[p.slug] ?? { place: "dhaka" }, benches[p.slug] ? { bench: benches[p.slug] } : {}, tracks[p.slug] ? { line: tracks[p.slug][0], stat: tracks[p.slug][1] } : {});
 
-export interface ElementInfo { id: Element; name: string; force: string; nature: string; glyph: string; intro: string; projects: Project[]; lessonCount: number; layer: Element }
+export interface ElementInfo { id: Element; name: string; bn: string; colour: string; force: string; nature: string; glyph: string; intro: string; projects: Project[]; lessonCount: number; layer: Element }
 
 const G = {
   air: `<path d="M6 18h22a6 6 0 1 0-6-6"/><path d="M6 26h32a6 6 0 1 1-6 6"/><path d="M10 34h12"/>`,
@@ -79,7 +101,11 @@ const meta: Record<Element, Omit<ElementInfo, "projects" | "lessonCount" | "id" 
   fire: { name: "Fire", force: "heat, power, and finite silicon", nature: "Every operation costs energy. I always collect.", glyph: G.fire, intro: "Fire is the energy we make and spend: firmware on tiny chips, neural accelerators, the machine I work on. It's where I learned that shared silicon is a schedule, and freshness beats throughput." },
 };
 
+/** The four nations: the only colour on the site. */
+const nation: Record<Element, { bn: string; colour: string }> = {
+  water: { bn: "জল", colour: "#4f8fe0" }, earth: { bn: "মাটি", colour: "#79b35f" }, fire: { bn: "আগুন", colour: "#e5533d" }, air: { bn: "বাতাস", colour: "#eaa63b" },
+};
 export const elements: ElementInfo[] = (["water", "earth", "fire", "air"] as Element[]).map((id) => ({
-  id, layer: id, ...meta[id], projects: projects.filter((p) => p.element === id), lessonCount: lessons.filter((l) => l.element === id).length,
+  id, layer: id, ...meta[id], ...nation[id], projects: projects.filter((p) => p.element === id), lessonCount: lessons.filter((l) => l.element === id).length,
 }));
 export const elementById = Object.fromEntries(elements.map((e) => [e.id, e])) as Record<Element, ElementInfo>;

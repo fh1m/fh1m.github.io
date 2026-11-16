@@ -5,8 +5,8 @@ import "../styles/global.css";
 import { person } from "../data/facts";
 import type { WorldState } from "../world/globe";
 
-interface Props { title?: string; description?: string; bodyClass?: string; world?: WorldState; crumbs?: { href: string; label: string }[]; bare?: boolean }
-const { title, description = "Fahim Faisal (fh1m): an engineer's notebook. Autonomy across air, water, earth and silicon, told from the real commits, including the parts that were wrong.", bodyClass = "", world = { layer: "all" }, crumbs = [], bare = false } = Astro.props;
+interface Props { title?: string; description?: string; bodyClass?: string; world?: WorldState; crumbs?: { href: string; label: string }[]; bare?: boolean; chrome?: boolean }
+const { title, description = "Fahim Faisal (fh1m): an engineer's notebook. Autonomy across air, water, earth and silicon, told from the real commits, including the parts that were wrong.", bodyClass = "", world, crumbs = [], bare = false, chrome = true } = Astro.props;
 const fullTitle = title ? `${title} · ${person.name}` : `${person.name} · an engineer's notebook`;
 const nav = [
   { href: "/air", label: "Air" },
@@ -37,18 +37,18 @@ const here = Astro.url.pathname;
     <meta name="twitter:card" content="summary_large_image" />
     <ClientRouter fallback="swap" />
   </head>
-  <body class={bodyClass} data-world={JSON.stringify(world)}>
+  <body class={bodyClass} data-world={world ? JSON.stringify(world) : undefined}>
     <a class="skip" href="#main">Skip to content</a>
     <div class="world" aria-hidden="true" transition:persist="world" transition:animate="none">
       <canvas id="world"></canvas>
       <div class="pins"></div>
     </div>
-    <header class="top">
+    {chrome && <header class="top">
       <a class="mark" href="/" aria-label={`${person.name}, home`}><span class="mono">fh1m</span><span class="dotmark" aria-hidden="true"></span></a>
       <nav aria-label="Site">
         <ul>{nav.map((n) => <li><a href={n.href} aria-current={here.startsWith(n.href) ? "page" : undefined}>{n.label}</a></li>)}</ul>
       </nav>
-    </header>
+    </header>}
     {crumbs.length > 0 && (
       <nav class="descent" aria-label="Where you are">
         <ol><li><a href="/">Pale blue dot</a></li>{crumbs.map((c) => <li><a href={c.href}>{c.label}</a></li>)}</ol>
