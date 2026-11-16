@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-16T08:24:57.226Z",
+ "generatedAt": "2026-11-16T23:33:32.304Z",
  "generatedAtLabel": "2026-11-16",
  "login": "fh1m",
  "since": "2023-05-07",
@@ -1479,6 +1479,10 @@
   [
    "2026-11-16",
    29
+  ],
+  [
+   "2026-11-17",
+   0
   ]
  ],
  "languages": [
@@ -1592,6 +1596,31 @@
   }
  ],
  "repos": [
+  {
+   "name": "mongla_ws",
+   "description": "An independent ROS 2 autonomy stack for autonomous underwater vehicles. Custom control board at 500 Hz, vision on a Hailo-8, and every capability claim carrying its evidence. Mongla is a research platform to push boundaries of underwater robotics. ",
+   "url": "https://github.com/fh1m/mongla_ws",
+   "archived": false,
+   "stars": 5,
+   "forks": 2,
+   "pushedAt": "2026-11-16T20:57:23Z",
+   "createdAt": "2026-04-18T12:35:52Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "autonomous-underwater-vehicle",
+    "auv",
+    "bangladesh",
+    "mavlink",
+    "robotics",
+    "ros2",
+    "computer-vision",
+    "esp32",
+    "hailo-8",
+    "raspberry-pi-5"
+   ],
+   "commits": 1375
+  },
   {
    "name": "secure-terminal-p2p-chat",
    "description": "What does Wireshark see when two terminals talk? A P2P terminal chat that upgrades from plaintext to RSA-OAEP + AES-256-GCM, with a strict mode and downgrade detection.",
@@ -1828,31 +1857,6 @@
     "github-config"
    ],
    "commits": 44
-  },
-  {
-   "name": "mongla_ws",
-   "description": "An independent ROS 2 autonomy stack for autonomous underwater vehicles. Custom control board at 500 Hz, vision on a Hailo-8, and every capability claim carrying its evidence. Mongla is a research platform to push boundaries of underwater robotics. ",
-   "url": "https://github.com/fh1m/mongla_ws",
-   "archived": false,
-   "stars": 5,
-   "forks": 2,
-   "pushedAt": "2026-11-12T18:56:16Z",
-   "createdAt": "2026-04-18T12:35:52Z",
-   "language": "Python",
-   "color": "#3572A5",
-   "topics": [
-    "autonomous-underwater-vehicle",
-    "auv",
-    "bangladesh",
-    "mavlink",
-    "robotics",
-    "ros2",
-    "computer-vision",
-    "esp32",
-    "hailo-8",
-    "raspberry-pi-5"
-   ],
-   "commits": 1375
   },
   {
    "name": ".dotfiles",

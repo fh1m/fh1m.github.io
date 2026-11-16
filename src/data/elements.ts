@@ -3,6 +3,9 @@
  * Fire is silicon: the energy we make and spend (firmware, compute, chips, tools).
  */
 import { lessons, type Element } from "./lessons";
+import commitsData from "./commits.json";
+/** Commit counts come from the snapshot (scripts/mine-commits.mjs), never typed in. */
+export const commitCount = (key: string) => (commitsData.projects as Record<string, { commits: unknown[] }>)[key].commits.length.toLocaleString("en-US");
 
 export interface Project {
   slug: string; element: Element; title: string; years: string; role: string;
@@ -46,7 +49,7 @@ const extra: Record<string, Pick<Project, "place" | "figures" | "gallery" | "her
     figures: [["8th / 58", "RoboSub 2025"], ["8th / 58", "RoboSub 2026"], ["4,083 → 6,234", "best round, points"], ["Sep 2023", "joined, junior AI & MV"]],
     gallery: [["/media/mongla-docs/team-bd-flag.webp", "Walking in with the flag of Bangladesh."], ["/media/mongla-docs/robosub-tent.webp", "The pit. Most of RoboSub happens under a tent."], ["/media/mongla-docs/pool-dual-auvs.webp", "Two vehicles in the pool. Both the programme's."], ["/media/mongla-docs/robosub-torpedo.webp", "The vehicle's own camera at RoboSub, facing the torpedo board. The boxes and the display are today's Mongla detector, run on that footage later."], ["/media/mongla-docs/robosub-octagon.webp", "The same camera looking up at the octagon. Today's detector finds it at 0.91."], ["/media/duburi/pool-test.webp", "On the deck, dry, which is where vehicles spend most of their lives."]] },
   "mongla-sim": { place: "mongla",
-    figures: [["6", "courses"], ["43", "commits"]],
+    figures: [["6", "courses"], [commitCount("mongla-sim"), "commits"]],
     gallery: [["/media/mongla-docs/water-clear.webp", "Clear water."], ["/media/mongla-docs/water-murky.webp", "The same gate, one turbidity parameter later."], ["/media/mongla/sim-slalom.webp", "Slalom."], ["/media/mongla/sim-bins-torpedo.webp", "Bins and torpedo."]] },
   rupsha: { place: "khulna",
     figures: [["~3 %", "tag range long, Gazebo"], ["4.5 m", "seen every frame"], ["8 m", "never seen"], ["0", "FIELD claims"]],
@@ -55,7 +58,7 @@ const extra: Record<string, Pick<Project, "place" | "figures" | "gallery" | "her
     figures: [["400 MHz", "PLL1"], ["8 MiB", "SRAM, placed by hand"], ["Sep 2026", "paused"]],
     gallery: [["/media/dristy/pipeline.webp", "Light to a number to a robot."], ["/media/dristy/k210-budget.webp", "8 MiB, every byte accounted for."], ["/media/dristy/motion.webp", "Motion, at 99."], ["/media/dristy/colour.webp", "Colour blobs."]] },
   den: { place: "dhaka",
-    figures: [["436", "commits"], ["2", "machines"], ["5", "panels"]],
+    figures: [[commitCount("den"), "commits"], ["2", "machines"], ["5", "panels"]],
     gallery: [["/media/den/den-layout.webp", "The layout: two machines, five panels."], ["/media/den/radio-lab.webp", "The radio lab panel."], ["/media/notes/nvim-2022-07-05.webp", "The editor in July 2022."], ["/media/notes/nvim-2022-10-12.webp", "Three months later."]] },
   "e-bhapa": { place: "dhaka",
     figures: [["1", "night to build"], ["−255 → 1", "uint8 speed"], ["87 %", "of the run pinned to a wall"]],
@@ -116,7 +119,7 @@ const tracks: Record<string, [string, string]> = {
   gimbal: ["A filter with no memory, holding a rocket upright. Mostly.", "2 gists"],
   meghdhut: ["GPS-denied, named for a cloud messenger. Not flying yet.", "private"],
   duburi: ["Three trips to Irvine to learn that water grades on a curve.", "8th / 58, twice"],
-  mongla: ["4,742 tests. 0 dives. Nobody has told the ocean yet.", "1,368 commits"],
+  mongla: ["4,742 tests. 0 dives. Nobody has told the ocean yet.", `${commitCount("mongla")} commits`],
   "mongla-sim": ["A pool that never closes, refereed by a contract test.", "6 courses"],
   "green-at-depth": ["Sink a green arrow until the threshold starts seeing things.", "re-graded"],
   "interview-bottle": ["The test set was the training set. I graded myself and passed.", "re-graded"],
@@ -125,7 +128,7 @@ const tracks: Record<string, [string, string]> = {
   "e-bhapa": ["Built in one night, modelled on a cat. Never once turned.", "−255 → 1"],
   "four-leds": ["A human in the loop is a 250 ms delay with opinions.", "250 ms"],
   dristy: ["A camera that answers with a number, in 8 MiB.", "8 MiB"],
-  den: ["Two machines, five panels, one keyboard. Where everything else happens.", "436 commits"],
+  den: ["Two machines, five panels, one keyboard. Where everything else happens.", `${commitCount("den")} commits`],
   pareidolia: ["A 2001 face detector checks nine rectangles. Two backpacks passed.", "9 features"],
   "half-a-second": ["Two decimal places of confidence, half a second late.", "0.5 s"],
   "trust-issues": ["Least squares believes everyone. One liar is enough.", "1 liar"],

@@ -6,7 +6,7 @@
  */
 import { getCollection } from "astro:content";
 import { ZONE_INFO } from "../../game/zones";
-import { projects } from "../../data/elements";
+import { projects, commitCount } from "../../data/elements";
 import { lessons } from "../../data/lessons";
 import { series } from "../../data/series";
 import { results, person } from "../../data/facts";
@@ -33,7 +33,7 @@ const years: { y: number | "now"; ch: string[]; guide: string }[] = [
   { y: 2023, ch: ["sky", "water"], guide: "Rockets in February, water in September. The green-arrow detector worked on his desk and failed in water: the first time a test environment lied to him." },
   { y: 2024, ch: ["cat", "current"], guide: "E-Bhapa, built in one night. Its real lesson arrived two years later, on re-reading: the compiler won't argue for you." },
   { y: 2025, ch: ["ground"], guide: "The rover's arm learned to type for the University Rover Challenge, and RoboSub was graded on a curve set by water." },
-  { y: 2026, ch: ["mongla", "dristy", "rupsha"], guide: "Mongla: over thirteen hundred commits and zero dives. The zero stays on the front page because it's the honest number." },
+  { y: 2026, ch: ["mongla", "dristy", "rupsha"], guide: `Mongla: ${commitCount("mongla")} commits and zero dives. The zero stays on the front page because it's the honest number.` },
   { y: "now", ch: ["mohona"], guide: "Next is the first dive. Every number on this planet gets measured again in real water." },
 ];
 const chapterById = Object.fromEntries(chapters.map((c) => [c.id, c]));
