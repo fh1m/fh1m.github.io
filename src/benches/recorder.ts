@@ -19,7 +19,7 @@ export function mount(el: HTMLElement, bus: EventTarget) {
     days.forEach(([, n], i) => {
       const x = Math.floor(i / 7) * cw, y = (i % 7) * ch;
       const a = n ? 0.18 + 0.82 * Math.sqrt(n / max) : 0.05;
-      ctx.fillStyle = n ? `rgba(111,156,255,${a})` : "rgba(111,156,255,0.07)";
+      ctx.fillStyle = n ? `rgba(123,156,224,${a})` : "rgba(123,156,224,0.07)";
       ctx.fillRect(x + 0.6, y + 0.6, cw - 1.2, ch - 1.2);
     });
     const x = Math.floor(pick / 7) * cw, y = (pick % 7) * ch;

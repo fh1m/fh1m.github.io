@@ -1,0 +1,82 @@
+---
+import Base from "../../layouts/Base.astro";
+import Sheet from "../../components/stage/Sheet.astro";
+import Explore from "../../components/note/Explore.astro";
+import { projects, elementById, type Project } from "../../data/elements";
+import { lessons } from "../../data/lessons";
+import { PLACES } from "../../world/globe";
+export const getStaticPaths = () => projects.map((p) => ({ params: { slug: p.slug }, props: { p } }));
+const { p } = Astro.props as { p: Project };
+const el = elementById[p.element];
+const ll = lessons.filter((l) => l.project === p.slug);
+const place = PLACES[p.place ?? "dhaka"];
+const gallery = p.gallery ?? (p.hero ? [[p.hero, p.heroAlt ?? p.title]] : []);
+---
+<Base bare title={p.title} description={p.summary} world={{ layer: p.element, focus: [place.ll[0] + 6, place.ll[1]], dist: 3.0, side: "left", pins: [p.place ?? "dhaka"], ui: false }}>
+  <Sheet trail={[{ href: `/${el.id}`, label: el.name }, { label: place.name.split(" ·")[0] }]} title={p.title} meta={`${p.years} · ${p.role} · ${p.status}`} back={`/${el.id}`}>
+      <p class="sum">{p.summary}</p>
+
+      {p.figures && (
+        <dl class="figs">{p.figures.map(([n, l]) => <div><dt class="mono">{n}</dt><dd>{l}</dd></div>)}</dl>
+      )}
+
+      {p.bench && <Explore bench={p.bench[0]} n="live" title={p.bench[1]} hint={p.bench[2]} />}
+
+      {gallery.length > 0 && (
+        <ul class="gal" data-n={gallery.length}>{gallery.map(([src, alt], i) => <li class={i === 0 ? "big" : ""}><img src={src} alt={alt} loading={i === 0 ? "eager" : "lazy"} /><span class="mono">{alt}</span></li>)}</ul>
+      )}
+
+      {p.commitsKey && (
+        <section class="cons">
+          <p class="label">Constellation · every commit, by date · <span class="redk">red = fixes and retractions</span></p>
+          <canvas data-commits={p.commitsKey} aria-label={`Every commit in ${p.repo}, by date`}></canvas>
+          <p class="read mono" aria-live="polite">point at a star</p>
+        </section>
+      )}
+
+      {ll.length > 0 && (
+        <section class="lls">
+          <p class="label">Lessons learned</p>
+          <ul>{ll.map((l) => (
+            <li><a href={`/lessons/${l.slug}`}>
+              <span class="mono faint">{l.id} · {l.date}</span>
+              <span class="t">{l.title}</span>
+              <span class="wrong">{l.believed}</span>
+            </a></li>
+          ))}</ul>
+        </section>
+      )}
+
+      <footer class="links mono">
+        {p.repo && <a href={`https://github.com/${p.repo}`}>github.com/{p.repo} ↗</a>}
+        {p.notes.map((n) => <a href={n.href}>{n.label} →</a>)}
+        {p.private && <span class="faint">private · described, not linked</span>}
+      </footer>
+  </Sheet>
+</Base>
+<script>
+  import "../../scripts/constellation.ts";
+</script>
+<style>
+  :global(.sheet .x) { margin: 0 0 1.4rem; }
+  .sum { margin: 1rem 0 1.2rem; max-width: 62ch; color: var(--ink); }
+  .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1px; margin: 0 0 1.2rem; background: var(--line); border: 1px solid var(--line); }
+  .figs div { background: rgb(3 6 14 / .95); padding: .7rem .8rem; }
+  .figs dt { font-size: var(--t2); color: var(--ink-hi); }
+  .figs dd { margin: .15rem 0 0; font-size: var(--t-2); color: var(--dim); }
+  .gal { list-style: none; margin: 0 0 1.4rem; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .gal li { position: relative; margin: 0; }
+  .gal li.big { grid-column: span 2; grid-row: span 2; }
+  .gal img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--navy); border: 1px solid var(--line); }
+  .gal li.big img { aspect-ratio: auto; }
+  .gal span { position: absolute; left: .4rem; bottom: .35rem; font-size: var(--t-2); color: var(--ink-hi); background: rgb(0 0 0 / .6); padding: .05rem .3rem; }
+  .cons canvas { width: 100%; height: 150px; display: block; background: #000; border: 1px solid var(--line); cursor: crosshair; }
+  .redk { color: var(--red); }
+  .read { margin: .4rem 0 1.2rem; font-size: var(--t-2); color: var(--dim); min-height: 2.8em; max-width: none; }
+  .lls ul { list-style: none; margin: .4rem 0 1.2rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .6rem; }
+  .lls a { display: grid; gap: .3rem; padding: .7rem .8rem; border: 1px solid var(--line); text-decoration: none; font-size: var(--t-1); height: 100%; }
+  .lls a:hover { border-color: var(--blue); }
+  .lls .t { color: var(--ink-hi); }
+  .links { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; font-size: var(--t-1); border-top: 1px solid var(--line); padding-top: 1rem; }
+  @media (max-width: 900px) { .gal { grid-template-columns: 1fr 1fr; } }
+</style>

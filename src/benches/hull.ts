@@ -32,7 +32,7 @@ function parse(buf: ArrayBuffer) {
 export function mount(el: HTMLElement, bus: EventTarget) {
   const say = readout(el);
   const holder = document.createElement("div");
-  holder.style.cssText = "position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#03060f";
+  holder.style.cssText = "position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#02040a";
   el.prepend(holder);
   const gl2 = (() => { try { return !!document.createElement("canvas").getContext("webgl2"); } catch { return false; } })();
   if (!gl2) {
@@ -42,17 +42,17 @@ export function mount(el: HTMLElement, bus: EventTarget) {
   }
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
-  renderer.setClearColor(0x030405);
+  renderer.setClearColor(0x02040a);
   renderer.domElement.setAttribute("role", "img");
   renderer.domElement.setAttribute("aria-label", "The Mongla AUV hull, rendered from its CAD mesh, taking itself apart as the fader moves");
   holder.append(renderer.domElement);
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x030405, 3.2, 6.5);
+  scene.fog = new THREE.Fog(0x02040a, 3.2, 6.5);
   const cam = new THREE.PerspectiveCamera(30, 1.6, 0.05, 20);
   cam.position.set(2.6, 0.9, 2.3); cam.lookAt(0, 0, 0);
-  scene.add(new THREE.HemisphereLight(0x9fd8ff, 0x061018, 0.9));
+  scene.add(new THREE.HemisphereLight(0x9fb4dc, 0x061018, 0.9));
   const key = new THREE.DirectionalLight(0xfff2e0, 2.2); key.position.set(2, 3, 2); scene.add(key);
-  const rim = new THREE.DirectionalLight(0x2ee6d6, 1.4); rim.position.set(-3, -1, -2); scene.add(rim);
+  const rim = new THREE.DirectionalLight(0x7b9ce0, 1.4); rim.position.set(-3, -1, -2); scene.add(rim);
 
   let mesh: THREE.Mesh | null = null, base: Float32Array, parts: Uint8Array | null = null, dirs: Float32Array;
   const pivot = new THREE.Group(); // spins about world Y; the mesh inside keeps its CAD orientation

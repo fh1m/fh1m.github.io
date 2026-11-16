@@ -69,8 +69,8 @@ export function buttons(parent: HTMLElement, items: { label: string; pressed?: b
 
 export const css = getComputedStyle(document.documentElement);
 export const C = {
-  chalk: "#eceef3", dim: "#a7b1c6", faint: "#6f7d99", line: "#16233f",
-  measured: "#6f9cff", failure: "#ff4a42", medium: "#3b6fe0", estimate: "#b8c4dc", pink: "#e5322d", time: "#6f9cff", air: "#e5322d",
+  chalk: "#eef0f4", dim: "#8d97a8", faint: "#5d6678", line: "#161d2c",
+  measured: "#7b9ce0", failure: "#d7655d", medium: "#6aa7c4", estimate: "#a9b2c2", pink: "#d7655d", time: "#7b9ce0", air: "#d7655d",
 };
 
 export function emit(bus: EventTarget, bench: string, value: unknown) {

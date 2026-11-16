@@ -1,0 +1,45 @@
+---
+import Base from "../../layouts/Base.astro";
+import Sheet from "../../components/stage/Sheet.astro";
+import { lessons, type Lesson } from "../../data/lessons";
+import { projects, elementById } from "../../data/elements";
+import { PLACES } from "../../world/globe";
+export const getStaticPaths = () => lessons.map((l, i) => ({ params: { slug: l.slug }, props: { l, prev: lessons[i - 1] ?? null, next: lessons[i + 1] ?? null } }));
+const { l, prev, next } = Astro.props as { l: Lesson; prev: Lesson | null; next: Lesson | null };
+const el = elementById[l.element];
+const proj = projects.find((p) => p.slug === l.project);
+const place = PLACES[proj?.place ?? "dhaka"];
+---
+<Base bare title={`${l.id}: ${l.title}`} description={l.lesson} world={{ layer: l.element, focus: [place.ll[0] + 8, place.ll[1]], dist: 3.4, side: "left", pins: [proj?.place ?? "dhaka"] }}>
+  <Sheet trail={[{ href: "/lessons", label: "Lessons learned" }, { href: `/${el.id}`, label: el.name }, ...(proj ? [{ href: `/projects/${proj.slug}`, label: proj.title }] : [])]} title={l.title} meta={`${l.id} · ${l.date}`} back="/lessons">
+    <dl class="llis">
+      <dt class="label">Driving event</dt><dd>{l.driving}</dd>
+      <dt class="label">Believed</dt><dd class="wrong">{l.believed}</dd>
+      <dt class="label">True</dt><dd class="right">{l.truth}</dd>
+      <dt class="label">Lesson</dt><dd class="lesson">{l.lesson}</dd>
+      <dt class="label">Recommendation</dt><dd>{l.recommendation}</dd>
+      <dt class="label">Evidence</dt><dd class="ev mono">{l.refs.map((r) => <a href={r.href}>{r.label}{r.href.startsWith("http") ? " ↗" : " →"}</a>)}</dd>
+    </dl>
+    {l.voice && <blockquote class="voice"><p>{l.voice.line}</p><footer class="mono">{l.voice.who}</footer></blockquote>}
+    <nav class="pn mono" aria-label="More lessons">
+      {prev ? <a href={`/lessons/${prev.slug}`}>← {prev.id} {prev.title}</a> : <span />}
+      {next && <a href={`/lessons/${next.slug}`}>{next.id} {next.title} →</a>}
+    </nav>
+  </Sheet>
+</Base>
+<style>
+  .llis { display: grid; grid-template-columns: 9rem 1fr; gap: .9rem 1.4rem; margin: .4rem 0 1.6rem; }
+  .llis dt { margin: .2rem 0 0; }
+  .llis dd { margin: 0; max-width: 64ch; color: var(--ink); }
+  .llis dd.wrong { color: var(--dim); }
+  .llis dd.right { color: var(--ink-hi); text-decoration: none; }
+  .lesson { font: 500 var(--t2)/1.35 var(--sans); color: var(--ink-hi) !important; }
+  .ev { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; font-size: var(--t-1); }
+  .voice { margin: 0 0 1.6rem; padding-left: 1rem; border-left: 1px solid var(--line-2); }
+  .voice p { margin: 0 0 .3rem; font-style: italic; color: var(--ink); }
+  .voice footer { font-size: var(--t-2); color: var(--faint); }
+  .pn { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; font-size: var(--t-1); }
+  .pn a { text-decoration: none; color: var(--dim); }
+  .pn a:hover { color: var(--ink-hi); }
+  @media (max-width: 700px) { .llis { grid-template-columns: 1fr; gap: .2rem; } .llis dd { margin-bottom: .8rem; } }
+</style>

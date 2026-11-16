@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import { person, education, roles, results, publications, skills, mongla } from "../data/facts";
 import stats from "../data/github.json";
 ---
-<Base title="CV" description="CV of Fahim Faisal (fh1m): autonomy and robotics: perception, control, embedded." bodyClass="cv-page">
+<Base title="CV" description="CV of Fahim Faisal (fh1m): autonomy and robotics: perception, control, embedded." bodyClass="cv-page" world={{ layer: "all", side: "left", dist: 5.4 }}>
   <main id="main" class="cv">
     <header class="cv-head">
       <div>
@@ -44,7 +44,7 @@ import stats from "../data/github.json";
         <li><a href="https://github.com/fh1m/mongla_ws"><b>Mongla</b></a>: independent ROS 2 autonomy stack for AUVs. {mongla.loopHz} Hz board loop (board and firmware by Rakibul Islam), {mongla.detectHz} Hz detection through the live graph, {mongla.tests.toLocaleString("en-US")} tests. Not yet in water.</li>
         <li><a href="https://github.com/fh1m/Dristy"><b>Dristy</b></a>: open firmware and host API for a K210 vision co-processor (KPU nets, classical vision, compact serial answers).</li>
         <li><a href="https://github.com/fh1m/rupsha_ws"><b>Rupsha</b></a>: ROS 2 autonomy stack for an Ackermann rover; Gazebo-verified, chassis in build.</li>
-        <li><a href="https://github.com/fh1m/mongla_sim"><b>Mongla Sim</b></a>: Gazebo + ArduSub SITL with 13 courses, a native DVL and an operator lab.</li>
+        <li><a href="https://github.com/fh1m/mongla_sim"><b>Mongla Sim</b></a>: Gazebo + ArduSub SITL with six courses, a native DVL and an operator lab.</li>
         <li><b>Re-graded early work</b> (2023–24, revisited 2026 with measurements and fixes): <a href="https://github.com/fh1m/green-at-depth">green-at-depth</a>, <a href="https://github.com/fh1m/half-a-second">half-a-second</a>, <a href="https://github.com/fh1m/four-leds">four-leds</a>, <a href="https://github.com/fh1m/E-Bhapa">E-Bhapa</a>, <a href="https://github.com/fh1m/trust-issues">trust-issues</a>, <a href="https://github.com/fh1m/pareidolia">pareidolia</a>, <a href="https://github.com/fh1m/interview-bottle">interview-bottle</a>.</li>
         <li><b>Security</b>: <a href="https://github.com/fh1m/passless">Passless</a> (WebAuthn, 25 tests), <a href="https://github.com/fh1m/secure-terminal-p2p-chat">secure terminal P2P chat</a> (RSA-OAEP + AES-256-GCM, strict mode).</li>
       </ul>
@@ -75,37 +75,38 @@ import stats from "../data/github.json";
 </Base>
 
 <style>
-  .cv { max-width: 58rem; margin: 0 auto; padding: 8rem var(--gutter) 5rem; --accent: var(--pink); }
-  .cv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; border-bottom: 3px solid var(--pink); padding-bottom: 1.4rem; margin-bottom: 2.4rem; }
-  h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); margin: 0 0 .2rem; }
-  .role { font: italic 400 1.35rem "Instrument Serif", var(--serif); color: var(--pink); margin: 0 0 .7rem; }
-  .contact { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0; color: var(--dim); }
-  h2 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: .14em; color: var(--pink); margin: 2.6rem 0 1rem; font-family: var(--mono); font-weight: 700; }
+  .cv { position: relative; z-index: 1; width: min(54rem, calc(100% - 2 * var(--gutter))); margin: 4.6rem var(--gutter) 3rem auto; padding: 2rem 2.2rem 2.4rem; background: rgb(3 6 14 / .9); backdrop-filter: blur(12px); border: 1px solid var(--line); --pink: var(--blue); }
+  .cv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; border-bottom: 1px solid var(--line-2); padding-bottom: 1.2rem; margin-bottom: 1.6rem; }
+  h1 { font: 500 var(--t5) var(--sans); color: var(--ink-hi); margin: 0 0 .3rem; }
+  .role { font: italic 400 var(--t1) var(--sans); color: var(--ink); margin: 0 0 .6rem; }
+  .contact { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0; color: var(--dim); font-size: var(--t-1); }
+  h2 { font: 400 var(--t-1) var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--dim); margin: 2rem 0 .8rem; }
   .results, .own, .pubs { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
   .results li { display: grid; grid-template-columns: 3.4rem 1fr; gap: .8rem; }
-  .results .num { color: var(--pink); font-weight: 700; }
+  .results .num { color: var(--ink-hi); }
   .role-item { margin: 0 0 1.4rem; }
   .role-item header { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; flex-wrap: wrap; }
-  .role-item h3 { font-size: 1.15rem; margin: 0; }
+  .role-item h3 { font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 0; }
   .role-item h3 a { text-decoration: none; }
-  .dates { color: var(--dim); }
-  .title { margin: .15rem 0 .4rem; color: #e1ded5; font-weight: 500; }
-  .role-item ul { margin: 0; padding-left: 1.1rem; color: #d6d3ca; }
-  .role-item li { margin: .2rem 0; font-size: .96rem; }
-  .role-item li::marker { color: var(--pink); }
+  .dates { color: var(--dim); font-size: var(--t-2); }
+  .title { margin: .15rem 0 .4rem; color: var(--ink); }
+  .role-item ul { margin: 0; padding-left: 1.1rem; color: var(--ink); }
+  .role-item li { margin: .2rem 0; font-size: var(--t-1); }
+  .role-item li::marker { color: var(--faint); }
   .dim { color: var(--dim); }
   .skills { display: grid; gap: .45rem; margin: 0; }
   .skills div { display: grid; grid-template-columns: 11rem 1fr; gap: 1rem; }
-  .skills dt { font: 700 .8rem var(--mono); color: var(--pink); }
+  .skills dt { font: 400 var(--t-2) var(--mono); color: var(--dim); }
   .skills dd { margin: 0; }
   .src { margin-top: 3rem; }
-  .btn-pill { display: inline-block; font: 700 .9rem var(--display); text-decoration: none; padding: .65rem 1.1rem; border-radius: 999px; background: var(--pink); color: #000; }
-  .btn-pill:hover { color: #000; background: #ff5c9a; }
+  .btn-pill { display: inline-block; font: 400 var(--t-1) var(--mono); text-decoration: none; padding: .5rem .9rem; border: 1px solid var(--line-2); color: var(--ink-hi); }
+  .btn-pill:hover { border-color: var(--blue); }
   @media print {
     :global(html), :global(body) { background: #fff !important; color: #000 !important; font-size: 9.3pt; line-height: 1.38; }
-    :global(.top), :global(.foot), :global(.skip), .no-print { display: none !important; }
+    :global(.top), :global(.foot), :global(.skip), :global(.world), :global(.descent), .no-print { display: none !important; }
     :global(.grain::after) { display: none; }
-    .cv { padding: 0 1mm; margin: 0; max-width: none; width: auto; --pink: #c2185b; }
+    .cv { padding: 0 1mm; margin: 0; max-width: none; width: auto; background: none; border: 0; backdrop-filter: none; --pink: #1d3d7a; }
+    h2 { color: #1d3d7a; }
     h1 { font-size: 22pt; }
     .role { font-size: 12pt; margin-bottom: .3rem; }
     .role-item li { font-size: 9pt; margin: .05rem 0; }

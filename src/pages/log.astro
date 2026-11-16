@@ -6,24 +6,25 @@ import mongla from "../data/mongla.json";
 
 const repos = [...stats.repos].filter((r) => r.name !== "fh1m").sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
 const water = mongla.water.events;
+const chapterHref: Record<string, string> = { source: "/notes", sky: "/projects/aerd", water: "/projects/duburi", cat: "/projects/e-bhapa", ground: "/projects/mongol-tori", current: "/water", mongla: "/projects/mongla", dristy: "/projects/dristy", rupsha: "/projects/rupsha", den: "/projects/den", mohona: "/" };
 const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earlier vehicle", RECORDED_WATER_REPLAY: "real footage, replayed", CURRENT_WATER: "in water, this platform", NOT_YET: "not yet" };
 ---
-<Base title="Log" description="The dated record: every reach of the river, every repository, and every time a vehicle in this lineage was actually in water.">
+<Base title="Log" description="The dated record: every project, every repository, and every time a vehicle in this lineage was actually in water." world={{ layer: "all", side: "left", dist: 6 }}>
   <main id="main" class="log">
     <header>
       <p class="kick"><span class="bn">লগ</span> <span class="mono">the log · rebuilt {stats.generatedAtLabel}</span></p>
       <h1>The dated record.</h1>
-      <p class="lede">The river, flattened into dates. Then the numbers, generated at build time from the public GitHub API and from Mongla's own snapshot at commit <code>{mongla.provenance.commit.slice(0, 7)}</code>, so nothing here is typed by hand.</p>
+      <p class="lede">The notebook, flattened into dates. Then the numbers, generated at build time from the public GitHub API and from Mongla's own snapshot at commit <code>{mongla.provenance.commit.slice(0, 7)}</code>, so nothing here is typed by hand.</p>
     </header>
 
     <section aria-labelledby="h-time">
-      <h2 id="h-time">Downstream, in order</h2>
+      <h2 id="h-time">In order</h2>
       <ol class="timeline">
         {chapters.map((c) => (
           <li class={`d-${c.domain}`}>
             <span class="when mono">{c.when}</span>
             <span class="dot" aria-hidden="true"></span>
-            <a href={`/#${c.id}`}><span class="bn">{c.bn}</span> <b>{c.title}</b></a>
+            <a href={chapterHref[c.id] ?? "/notes"}><span class="bn">{c.bn}</span> <b>{c.title}</b></a>
             <span class="lesson">{c.lesson}</span>
           </li>
         ))}
@@ -76,40 +77,40 @@ const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earli
 </script>
 
 <style>
-  .log { max-width: 84rem; margin: 0 auto; padding: 8rem var(--gutter) 5rem; }
-  .kick { display: flex; gap: .8rem; align-items: baseline; }
-  .kick .bn { color: var(--pink); font-size: 1.4rem; }
-  .kick .mono { color: var(--dim); }
-  h1 { font-size: clamp(3rem, 7vw, 6rem); font-weight: 750; letter-spacing: -0.04em; background: linear-gradient(92deg, var(--water), var(--sight), var(--ground)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .lede { font: 400 var(--s1)/1.55 var(--serif); color: #e5e2da; max-width: 60ch; }
-  h2 { font-size: clamp(1.8rem, 3.4vw, 2.8rem); margin-top: 5rem; border-top: 3px solid var(--accent, var(--pink)); padding-top: 1.2rem; }
-  .timeline { list-style: none; margin: 1.6rem 0 0; padding: 0; position: relative; }
-  .timeline::before { content: ""; position: absolute; left: 11.6rem; top: .4rem; bottom: .4rem; width: 3px; background: linear-gradient(var(--pink), var(--air), var(--water), var(--ground), var(--sight), var(--time)); border-radius: 3px; }
-  .timeline li { display: grid; grid-template-columns: 10.6rem 2rem 1fr; gap: .3rem 0; align-items: baseline; padding: .7rem 0; }
-  .when { color: var(--dim); text-align: right; padding-right: 1rem; }
-  .dot { width: 15px; height: 15px; border-radius: 50%; background: var(--accent); justify-self: center; box-shadow: 0 0 12px var(--accent); transform: translateY(2px); }
-  .timeline a { text-decoration: none; font-size: 1.2rem; }
-  .timeline a .bn { color: var(--accent); margin-right: .3rem; }
-  .timeline .lesson { grid-column: 3; font: italic 400 1.1rem "Instrument Serif", var(--serif); color: var(--accent); }
+  .log { position: relative; z-index: 1; width: min(64rem, calc(100% - 2 * var(--gutter))); margin: 4.6rem var(--gutter) 3rem auto; padding: 2rem 2.2rem 2.4rem; background: rgb(3 6 14 / .9); backdrop-filter: blur(12px); border: 1px solid var(--line); }
+  .kick { display: flex; gap: .8rem; align-items: baseline; margin: 0 0 .5rem; }
+  .kick .bn { color: var(--blue); font-family: var(--bangla); }
+  .kick .mono { color: var(--dim); font-size: var(--t-2); }
+  h1 { font: 500 var(--t5) var(--sans); color: var(--ink-hi); margin: 0 0 .6rem; }
+  .lede { color: var(--ink); max-width: 62ch; }
+  h2 { font: 400 var(--t-1) var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--dim); margin: 2.4rem 0 .8rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+  .timeline { list-style: none; margin: .8rem 0 0; padding: 0; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 9.6rem; top: .4rem; bottom: .4rem; width: 1px; background: var(--line-2); }
+  .timeline li { display: grid; grid-template-columns: 8.6rem 2rem 1fr; gap: .2rem 0; align-items: baseline; padding: .45rem 0; }
+  .when { color: var(--dim); text-align: right; padding-right: 1rem; font-size: var(--t-2); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); justify-self: center; transform: translateY(-1px); }
+  .timeline a { text-decoration: none; color: var(--ink-hi); }
+  .timeline a .bn { color: var(--blue); margin-right: .3rem; font-family: var(--bangla); }
+  .timeline .lesson { grid-column: 3; font-style: italic; color: var(--ink); font-size: var(--t-1); }
   .dim { color: var(--dim); }
-  td:nth-child(4) { font: 400 .92rem/1.5 var(--serif); color: #dcd9d0; min-width: 22rem; }
-  .st { font: 700 .66rem var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: .15rem .45rem; border-radius: 4px; white-space: nowrap; }
-  .st.yes { background: var(--water); color: #000; }
-  .st.no { background: var(--failure); color: #000; }
-  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.4rem; margin: 1.6rem 0 2.4rem; }
-  .nums div { border-left: 4px solid var(--accent); padding-left: 1rem; }
-  .nums dt { font-size: 2.4rem; color: var(--accent); line-height: 1; }
-  .nums dd { margin: .35rem 0 0; color: var(--dim); font-size: .9rem; }
-  .bench { background: #05060a; border: 3px solid var(--accent); border-radius: 14px; padding: 1.2rem 1.3rem 1.4rem; box-shadow: 10px 10px 0 color-mix(in srgb, var(--accent) 45%, #000); }
-  .bench h3 { font-size: 1.15rem; display: flex; gap: .6rem; align-items: center; }
-  .tag { font: 700 .65rem var(--mono); text-transform: uppercase; letter-spacing: .1em; background: var(--accent); color: #000; padding: .15rem .45rem; border-radius: 4px; }
-  .repos { list-style: none; padding: 0; margin: 1.6rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.2rem; }
-  .repos li { border: 2px solid #1d2130; border-radius: 12px; padding: 1rem 1.1rem; display: grid; gap: .35rem; transition: border-color .2s, transform .2s var(--ease); }
-  .repos li:hover { border-color: var(--pink); transform: translateY(-2px); }
-  .repos a { text-decoration: none; font-size: 1.1rem; }
-  .repos p { margin: 0; font: 400 .95rem/1.5 var(--serif); color: #d6d3ca; }
-  .lang { color: var(--dim); display: inline-flex; gap: .4rem; align-items: center; }
-  .lang i { width: .7rem; height: .7rem; border-radius: 50%; display: inline-block; }
+  td:nth-child(4) { font-size: var(--t-1); color: var(--ink); min-width: 20rem; }
+  .st { font: 400 var(--t-2) var(--mono); padding: .05rem .4rem; border: 1px solid var(--line-2); white-space: nowrap; }
+  .st.yes { color: var(--blue); border-color: var(--blue); }
+  .st.no { color: var(--red); border-color: var(--red); }
+  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1px; margin: .8rem 0 1.6rem; background: var(--line); border: 1px solid var(--line); }
+  .nums div { background: rgb(3 6 14 / .95); padding: .7rem .8rem; }
+  .nums dt { font: 400 var(--t3) var(--mono); color: var(--ink-hi); line-height: 1.1; }
+  .nums dd { margin: .25rem 0 0; color: var(--dim); font-size: var(--t-2); }
+  .bench { border: 1px solid var(--line); padding: 1rem 1.1rem 1.2rem; }
+  .bench h3 { font: 500 var(--t1) var(--sans); display: flex; gap: .6rem; align-items: center; color: var(--ink-hi); }
+  .tag { font: 400 var(--t-2) var(--mono); color: var(--dim); border: 1px solid var(--line-2); padding: .05rem .4rem; }
+  .repos { list-style: none; padding: 0; margin: .8rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .6rem; }
+  .repos li { border: 1px solid var(--line); padding: .8rem .9rem; display: grid; gap: .3rem; transition: border-color .2s; }
+  .repos li:hover { border-color: var(--blue); }
+  .repos a { text-decoration: none; color: var(--ink-hi); }
+  .repos p { margin: 0; font-size: var(--t-1); color: var(--ink); }
+  .lang { color: var(--dim); display: inline-flex; gap: .4rem; align-items: center; font-size: var(--t-2); }
+  .lang i { width: .55rem; height: .55rem; border-radius: 50%; display: inline-block; }
   @media (max-width: 700px) {
     .timeline::before { left: .45rem; }
     .timeline li { grid-template-columns: 1.6rem 1fr; }

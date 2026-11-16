@@ -66,15 +66,15 @@ export function mount(el: HTMLElement, bus: EventTarget) {
   const draw = () => {
     const { ctx, w, h } = cv; const s = Math.min(w, h) / ROOM * 0.94, ox = (w - ROOM * s) / 2, oy = (h - ROOM * s) / 2;
     ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = "#2a3d66"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, ROOM * s, ROOM * s); ctx.lineWidth = 1;
+    ctx.strokeStyle = "#24304a"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, ROOM * s, ROOM * s); ctx.lineWidth = 1;
     ctx.strokeStyle = version === "v1" ? C.failure : C.medium; ctx.beginPath();
     st.trail.forEach(([x, y], i) => (i ? ctx.lineTo(ox + x * s, oy + y * s) : ctx.moveTo(ox + x * s, oy + y * s))); ctx.stroke();
     const px = ox + st.x * s, py = oy + st.y * s;
     ctx.save(); ctx.translate(px, py); ctx.rotate(st.th);
-    ctx.fillStyle = "#0a1430"; ctx.strokeStyle = C.chalk; ctx.fillRect(-12, -9, 24, 18); ctx.strokeRect(-12, -9, 24, 18);
+    ctx.fillStyle = "#070c18"; ctx.strokeStyle = C.chalk; ctx.fillRect(-12, -9, 24, 18); ctx.strokeRect(-12, -9, 24, 18);
     ctx.fillStyle = C.estimate; ctx.beginPath(); ctx.arc(10, -4, 2.5, 0, 7); ctx.arc(10, 4, 2.5, 0, 7); ctx.fill();
     ctx.restore();
-    ctx.strokeStyle = "rgba(229,50,45,.45)"; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(px, py);
+    ctx.strokeStyle = "rgba(215,101,93,.45)"; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(px, py);
     const d = sonar() / 100; ctx.lineTo(px + Math.cos(st.th) * d * s, py + Math.sin(st.th) * d * s); ctx.stroke(); ctx.setLineDash([]);
     const pin = st.t ? (st.pinned / st.t) * 100 : 0;
     say(`${version} · ${st.t.toFixed(0)} s · pinned against a wall <b class="${pin > 30 ? "failure" : "measured"}">${pin.toFixed(0)} %</b> of the time`);

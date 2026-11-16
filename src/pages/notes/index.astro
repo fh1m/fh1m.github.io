@@ -1,116 +1,40 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Sheet from "../../components/stage/Sheet.astro";
 import { getCollection } from "astro:content";
 import { series } from "../../data/series";
-
 const notes = await getCollection("notes");
-const shelves = series.map((s) => ({ s, parts: notes.filter((n) => n.data.series === s.id).sort((a, b) => a.data.part - b.data.part) }));
-const kinds = [
-  { k: "all", label: "everything" },
-  { k: "project", label: "machines & projects" },
-  { k: "essay", label: "from the notebook" },
-  { k: "regrade", label: "re-graded" },
-  { k: "story", label: "stories" },
-];
-const kindLabel: Record<string, string> = { project: "project", essay: "notebook", regrade: "re-graded", story: "story" };
+const total = notes.length;
 ---
-<Base title="Notes" description="Six series of field notes: the machines, water from first principles, seeing, time, measuring honestly, and building things that run.">
-  <main id="main" class="notes">
-    <header class="intro">
-      <p class="kick"><span class="bn">খাতা</span> <span class="mono">the notebook · {notes.length} notes in {series.length} series</span></p>
-      <h1>The long versions.</h1>
-      <p class="lede">Every reach of the river has a notebook behind it. These are the pages, arranged as series you can read in order: each part builds on the last, the way you'd learn it at a bench. Most have something to drag.</p>
-      <ol class="toc">
-        {shelves.map(({ s, parts }) => <li class={`d-${s.domain}`}><a href={`#${s.id}`}><span class="bn">{s.bn}</span> {s.title} <span class="c">{parts.length}</span></a></li>)}
-      </ol>
-      <div class="controls" role="group" aria-label="Filter notes">
-        {kinds.map((k, i) => <button type="button" data-kind={k.k} aria-pressed={i === 0 ? "true" : "false"}>{k.label}</button>)}
-        <label class="find"><span class="sr-only">Search notes</span><input type="search" placeholder="search: kalman, hailo, cat…" autocomplete="off" /></label>
-      </div>
-      <p class="count mono" aria-live="polite"></p>
-    </header>
-
-    {shelves.map(({ s, parts }) => (
-      <section id={s.id} class={`shelf d-${s.domain}`} aria-labelledby={`h-${s.id}`}>
-        <header class="shelf-head">
-          <span class="bn big" aria-hidden="true">{s.bn}</span>
-          <div>
-            <h2 id={`h-${s.id}`}>{s.title}</h2>
-            <p>{s.blurb}</p>
-          </div>
-        </header>
-        <ol class="tiles">
-          {parts.map((n) => (
-            <li data-kind={n.data.kind} data-text={`${n.data.title} ${n.data.dek} ${n.data.repo ?? ""}`.toLowerCase()}>
-              <a href={`/notes/${n.id}`}>
-                <span class="pic">{n.data.hero && <img class:list={[{ plot: n.data.heroPlot }]} src={n.data.hero} alt="" loading="lazy" decoding="async" />}<span class="part">{n.data.part}</span></span>
-                <span class="meta mono">{kindLabel[n.data.kind]} · {n.data.date}</span>
-                <span class="t">{n.data.title}</span>
-                <span class="d">{n.data.dek}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </section>
-    ))}
-  </main>
+<Base bare title="Notebook" description="The long versions: machines, water from first principles, seeing, time, truth and building, most with something to drag." world={{ layer: "all", side: "left", dist: 5 }}>
+  <Sheet wide title="Notebook" meta={`${total} notes · ${series.length} series · most have something to drag`}>
+    {series.map((s) => {
+      const parts = notes.filter((n) => n.data.series === s.id).sort((a, b) => a.data.part - b.data.part);
+      return parts.length > 0 && (
+        <section class="ser" id={s.id}>
+          <h2><span class="bn" lang="bn">{s.bn}</span> {s.title} <span class="mono faint">{parts.length}</span></h2>
+          <ul>{parts.map((n) => (
+            <li><a href={`/notes/${n.id}`}>
+              {n.data.hero ? <img src={n.data.hero} alt="" loading="lazy" /> : <span class="noimg" />}
+              <span class="pn mono">{String(n.data.part).padStart(2, "0")}</span>
+              <span class="t">{n.data.title}</span>
+            </a></li>
+          ))}</ul>
+        </section>
+      );
+    })}
+  </Sheet>
 </Base>
-
-<script>
-  const buttons = [...document.querySelectorAll<HTMLButtonElement>(".controls button")];
-  const input = document.querySelector<HTMLInputElement>(".find input")!;
-  const items = [...document.querySelectorAll<HTMLLIElement>(".tiles li")];
-  const count = document.querySelector(".count")!;
-  let kind = new URLSearchParams(location.search).get("kind") ?? "all";
-  const apply = () => {
-    const q = input.value.trim().toLowerCase();
-    let shown = 0;
-    for (const li of items) {
-      const ok = (kind === "all" || li.dataset.kind === kind) && (!q || li.dataset.text!.includes(q));
-      li.hidden = !ok; if (ok) shown++;
-    }
-    document.querySelectorAll<HTMLElement>(".shelf").forEach((t) => { t.hidden = !t.querySelector("li:not([hidden])"); });
-    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kind === kind)));
-    count.textContent = shown === items.length ? "" : `${shown} of ${items.length} notes`;
-  };
-  buttons.forEach((b) => b.addEventListener("click", () => { kind = b.dataset.kind!; history.replaceState(null, "", kind === "all" ? location.pathname : `?kind=${kind}`); apply(); }));
-  input.addEventListener("input", apply);
-  apply();
-</script>
-
 <style>
-  .notes { padding: 8rem var(--gutter) 5rem; max-width: 100rem; margin: 0 auto; }
-  .intro { max-width: 72rem; margin-bottom: 5rem; }
-  .kick { display: flex; gap: .8rem; align-items: baseline; }
-  .kick .bn { color: var(--pink); font-size: 1.4rem; }
-  .kick .mono { color: var(--dim); }
-  h1 { font-size: clamp(3rem, 8vw, 7rem); font-weight: 750; letter-spacing: -0.045em; background: linear-gradient(92deg, var(--pink), var(--air) 40%, var(--ground) 70%, var(--sight)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .lede { font: 400 var(--s1)/1.55 var(--serif); color: #e5e2da; max-width: 58ch; }
-  .toc { list-style: none; padding: 0; margin: 2rem 0 0; display: flex; flex-wrap: wrap; gap: .5rem; }
-  .toc a { display: inline-flex; gap: .5rem; align-items: baseline; text-decoration: none; font: 600 .9rem var(--display); padding: .5rem .9rem; border-radius: 999px; background: var(--accent); color: #000; transition: transform .2s var(--ease); }
-  .toc a:hover { transform: translateY(-2px) rotate(-1deg); color: #000; }
-  .toc .c { font: 700 .72rem var(--mono); opacity: .7; }
-  .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.6rem; align-items: center; }
-  .find input { background: #000; border: 1.5px solid #2a2e3c; border-radius: 999px; color: var(--chalk); font: 400 0.82rem var(--mono); padding: 0.55rem 0.9rem; min-width: 16rem; }
-  .find input:focus { border-color: var(--pink); outline: none; }
-  .count { color: var(--dim); min-height: 1.2em; }
-
-  .shelf { margin: 0 0 6rem; }
-  .shelf-head { display: flex; gap: 1.6rem; align-items: flex-end; border-top: 3px solid var(--accent); padding-top: 1.4rem; margin-bottom: 2rem; }
-  .shelf-head .big { font-size: clamp(3rem, 7vw, 5.6rem); line-height: .9; color: var(--accent); }
-  .shelf-head h2 { font-size: clamp(1.9rem, 3.6vw, 3rem); margin: 0 0 .3rem; }
-  .shelf-head p { color: var(--dim); margin: 0; }
-  .tiles { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 2rem 1.6rem; }
-  .tiles a { display: grid; gap: 0.5rem; text-decoration: none; height: 100%; }
-  .pic { position: relative; display: block; border-radius: 10px; overflow: hidden; border: 2px solid #1d2130; background: #07080c; aspect-ratio: 16 / 9; transition: border-color .2s, transform .3s var(--ease), box-shadow .3s var(--ease); }
-  .pic img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) brightness(.85); transition: filter .3s; }
-  .pic img.plot { filter: invert(1) hue-rotate(180deg) brightness(.85); }
-  .part { position: absolute; left: .6rem; top: .6rem; font: 800 1rem var(--display); background: var(--accent); color: #000; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; }
-  .tiles a:hover .pic, .tiles a:focus-visible .pic { border-color: var(--accent); transform: translate(-4px, -4px); box-shadow: 8px 8px 0 var(--accent); }
-  .tiles a:hover img:not(.plot) { filter: none; }
-  .tiles a:hover .t { color: var(--accent); }
-  .meta { color: var(--faint); font-size: 0.72rem; }
-  .t { font-size: 1.3rem; line-height: 1.15; font-weight: 650; letter-spacing: -0.015em; }
-  .d { color: var(--dim); font: 400 .98rem/1.5 var(--serif); }
-  @media (prefers-reduced-motion: reduce) { .pic, .pic img { transition: none; } }
+  .ser { margin-bottom: 1.6rem; scroll-margin-top: 1rem; }
+  h2 { display: flex; align-items: baseline; gap: .6rem; font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 0 0 .6rem; }
+  .bn { font-family: "Tiro Bangla", serif; color: var(--blue); font-weight: 400; }
+  .faint { font-size: var(--t-2); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .6rem; }
+  a { display: grid; grid-template-columns: auto 1fr; gap: .35rem .5rem; text-decoration: none; }
+  img, .noimg { grid-column: 1 / -1; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: var(--navy); border: 1px solid var(--line); filter: saturate(.75) brightness(.85); transition: filter .25s, border-color .25s; }
+  a:hover img { filter: none; border-color: var(--blue); }
+  .pn { font-size: var(--t-2); color: var(--faint); padding-top: .1rem; }
+  .t { font-size: var(--t-1); color: var(--ink); line-height: 1.35; }
+  a:hover .t { color: var(--ink-hi); }
 </style>

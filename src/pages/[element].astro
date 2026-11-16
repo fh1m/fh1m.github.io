@@ -1,0 +1,13 @@
+---
+import Base from "../layouts/Base.astro";
+import Stage from "../components/stage/Stage.astro";
+import { elements } from "../data/elements";
+import type { ElementInfo } from "../data/elements";
+export const getStaticPaths = () => elements.map((el) => ({ params: { element: el.id }, props: { el } }));
+const { el } = Astro.props as { el: ElementInfo };
+const focus: Record<string, [number, number]> = { water: [89.6, 21.5], earth: [89.5, 23], fire: [100, 25], air: [90, 30] };
+const pins: Record<string, string[]> = { water: ["mongla", "irvine", "dhaka"], earth: ["khulna", "dhaka"], fire: ["dhaka"], air: ["dhaka"] };
+---
+<Base bare title={el.name} description={`${el.name}: ${el.intro}`} world={{ layer: el.id, ui: true, sats: true, active: el.id, side: "left", focus: focus[el.id], dist: 4.2, pins: pins[el.id] }}>
+  <Stage el={el} />
+</Base>
