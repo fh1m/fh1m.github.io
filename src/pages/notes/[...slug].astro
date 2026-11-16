@@ -25,13 +25,13 @@ const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateS
 <Base title={d.title} description={d.dek} bodyClass="note-page" crumb={{ href: `/notes#${ser.id}`, label: `${ser.title}, part ${d.part} of ${parts.length}`, bn: ser.bn }} progress>
   <main id="main" class="note" style={`--acc:${ACCENT[ser.domain] ?? "#4f8fe0"}`}>
 
-    <header class="cover">
-      {d.hero && <img class:list={["cover-img", { plot: d.heroPlot }]} src={d.hero} alt={d.heroAlt ?? ""} fetchpriority="high" />}
+    <header class:list={["cover", { "has-img": !!d.hero }]}>
       <div class="cover-text">
         <p class="kicker"><time datetime={d.date}>{when}</time></p>
         <h1>{d.title}</h1>
         <p class="dek">{d.dek}</p>
       </div>
+      {d.hero && <img class:list={["cover-img", { plot: d.heroPlot }]} src={d.hero} alt={d.heroAlt ?? ""} fetchpriority="high" />}
     </header>
 
     <article class="scenes"><Content /></article>
@@ -73,53 +73,56 @@ const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateS
   .note { --acc: #4f8fe0; position: relative; }
   .bn { font-family: var(--bangla); color: var(--acc); }
 
-  .cover { position: relative; min-height: 100svh; display: grid; align-items: end; overflow: hidden; }
-  .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
-  .cover-img.plot { object-fit: contain; filter: invert(1) hue-rotate(180deg); opacity: .35; }
-  .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 30%, #0b1233 92%); }
-  .cover-text { position: relative; z-index: 1; padding: 0 var(--gutter) 12svh; max-width: 70rem; }
-  .kicker { font: 700 var(--t-1) var(--story); color: var(--acc); margin: 0 0 .8rem; }
-  h1 { font: 900 clamp(2.6rem, 7vw, 6rem)/1 var(--story); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.02em; max-width: 18ch; }
-  .dek { font: 600 clamp(1.15rem, 2vw, 1.6rem)/1.4 var(--story); color: #dfe4ff; max-width: 40ch; margin: 0; }
+  .cover { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; padding: clamp(3rem, 8vh, 5.5rem) var(--gutter) clamp(2rem, 5vh, 3.5rem); }
+  .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
+  .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: 8px; }
+  .cover-img.plot { filter: invert(1) hue-rotate(180deg); }
+  .cover-text { max-width: 44rem; }
+  .kicker { font: 500 var(--t-1) var(--sans); color: var(--acc); margin: 0 0 .8rem; }
+  h1 { font: 600 clamp(2rem, 4.2vw, 3.2rem)/1.08 var(--sans); color: #fff; margin: 0 0 1rem; letter-spacing: -.015em; max-width: 22ch; }
+  .dek { font: 400 clamp(1.05rem, 1.5vw, 1.25rem)/1.5 var(--sans); color: #d0d0d0; max-width: 52ch; margin: 0; }
 
-  .scenes :global(.scene) { position: relative; min-height: 100svh; padding: 14svh var(--gutter); display: grid; align-content: center; opacity: .25; transform: translateY(24px); transition: opacity .8s ease, transform .8s ease; }
+  .scenes :global(.scene) { position: relative; padding: clamp(3rem, 7vh, 5rem) var(--gutter); display: grid; align-content: center; opacity: .35; transform: translateY(12px); transition: opacity .8s ease, transform .8s ease; }
   .scenes :global(.scene.in) { opacity: 1; transform: none; }
   .scenes :global(.scene + .scene) { border-top: 1px solid rgb(255 255 255 / .06); }
   .scenes :global(.scene-split) { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 4vw; align-items: start; align-content: start; }
-  .scenes :global(.scene-stage) { position: sticky; top: 0; height: 100svh; margin: -14svh 0; display: grid; align-items: center; }
+  .scenes :global(.scene-stage) { position: sticky; top: 4rem; height: calc(100svh - 5rem); display: grid; align-items: center; }
   .scenes :global(.stage-inner) { display: grid; }
   .scenes :global(.stage-item) { grid-area: 1 / 1; opacity: 0; transform: scale(.98); transition: opacity .6s ease, transform .6s ease; pointer-events: none; max-height: 86svh; overflow: auto; }
   .scenes :global(.stage-item.on) { opacity: 1; transform: none; pointer-events: auto; }
   .scenes :global(.stage-item > *) { margin: 0 !important; max-width: none !important; width: 100%; }
   .scenes :global(.stage-item img) { max-height: 74svh; width: 100%; object-fit: contain; }
-  .scenes :global(.beat) { min-height: 42svh; display: grid; align-content: center; padding: 4svh 0; }
-  .scenes :global(.scene-split .scene-text) { padding: 6svh 0; }
-  .scenes :global(.scene-text h2) { font: 900 clamp(1.8rem, 3.6vw, 3rem)/1.08 var(--story); color: #fff; margin: 0 0 1.4rem; max-width: 20ch; letter-spacing: -.01em; }
-  .scenes :global(.scene-text p), .scenes :global(.scene-text li) { font: 500 clamp(1.05rem, 1.3vw, 1.25rem)/1.7 var(--story); color: #dfe4ff; max-width: 52ch; }
+  .scenes :global(.beat) { padding: 0 0 1.4rem; }
+  .scenes :global(.scene-split .beat + .beat) { padding-top: 22vh; }
+  .scenes :global(.scene-split .scene-text) { padding: 0 0 20vh; }
+  .scenes :global(.scene-text h2) { font: 600 clamp(1.3rem, 2.2vw, 1.75rem)/1.2 var(--sans); color: #fff; margin: 0 0 1rem; max-width: 32ch; }
+  .scenes :global(.scene-text p), .scenes :global(.scene-text li) { font: 400 var(--t0)/1.7 var(--sans); color: #d6d6d6; max-width: 62ch; }
   .scenes :global(.scene-text strong) { color: #fff; }
   .scenes :global(.scene-text a) { color: #fff; text-decoration-color: var(--acc); }
-  .scenes :global(.scene-statement) { justify-items: center; text-align: left; }
-  .scenes :global(.scene-statement .scene-text) { max-width: 56rem; }
-  .scenes :global(.scene-statement .scene-text p) { font-size: clamp(1.2rem, 1.8vw, 1.55rem); max-width: 46ch; }
-  .scenes :global(.scene-intro p:first-child) { font-size: clamp(1.3rem, 2.2vw, 1.9rem); line-height: 1.45; color: #fff; }
+  .scenes :global(.scene-statement) { justify-items: start; }
+  .scenes :global(.scene-statement .scene-text) { max-width: 52rem; width: 100%; }
+  
+  .scenes :global(.scene-intro p:first-child) { font-size: var(--t1); line-height: 1.55; color: #fff; }
   .scenes :global(.pull) { margin: 2rem 0; padding: 0; border: 0; }
-  .scenes :global(.pull p) { font: 900 clamp(1.6rem, 3.4vw, 2.8rem)/1.15 var(--story) !important; color: var(--acc) !important; max-width: 24ch !important; }
+  .scenes :global(.pull p) { font: 500 clamp(1.15rem, 1.8vw, 1.45rem)/1.4 var(--sans) !important; color: #fff !important; max-width: 40ch !important; }
+  .scenes :global(.pull) { border-left: 2px solid var(--acc) !important; padding-left: 1.2rem !important; }
   .scenes :global(table) { width: 100%; font: 400 var(--t-1)/1.5 var(--mono); }
-  .scenes :global(pre) { font-size: clamp(.95rem, 1.3vw, 1.2rem); padding: 1.4rem; background: #0e1640; border-radius: 1rem; overflow-x: auto; }
+  .scenes :global(pre) { font-size: clamp(.95rem, 1.3vw, 1.2rem); padding: 1.4rem; background: #0c0c0e; border-radius: 1rem; overflow-x: auto; }
 
-  .end { min-height: 80svh; padding: 14svh var(--gutter); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 4vw; align-content: center; border-top: 1px solid rgb(255 255 255 / .08); }
-  .end h2 { font: 800 var(--t1) var(--story); color: var(--acc); margin: 0 0 1rem; }
+  .end { padding: clamp(3rem, 7vh, 5rem) var(--gutter); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 4vw; align-content: center; border-top: 1px solid rgb(255 255 255 / .08); }
+  .end h2 { font: 600 var(--t1) var(--sans); color: var(--acc); margin: 0 0 1rem; }
   .chapters { list-style: none; margin: 0 0 2rem; padding: 0; display: grid; gap: .3rem; }
-  .chapters a { display: grid; grid-template-columns: 2.4rem 1fr; gap: .6rem; padding: .7rem 0; border-bottom: 1px solid rgb(255 255 255 / .08); text-decoration: none; font: 700 clamp(1.05rem, 1.6vw, 1.4rem)/1.3 var(--story); color: #9aa6d8; }
+  .chapters a { display: grid; grid-template-columns: 2.4rem 1fr; gap: .6rem; padding: .7rem 0; border-bottom: 1px solid rgb(255 255 255 / .08); text-decoration: none; font: 400 var(--t0)/1.4 var(--sans); color: #8c8c8c; }
   .chapters a:hover, .chapters a[aria-current="page"] { color: #fff; }
   .chapters .pn { font-family: var(--mono); color: var(--acc); }
   .moves { display: flex; flex-wrap: wrap; gap: .6rem; }
-  .sources { margin: 0 0 2rem; padding-left: 1.1rem; display: grid; gap: .4rem; font: 500 var(--t-1)/1.5 var(--story); }
-  .sources a, .end-col > p a { color: #dfe4ff; }
+  .sources { margin: 0 0 2rem; padding-left: 1.1rem; display: grid; gap: .4rem; font: 500 var(--t-1)/1.5 var(--sans); }
+  .sources a, .end-col > p a { color: #e2e2e2; }
 
   @media (max-width: 900px) {
+    .cover.has-img { grid-template-columns: 1fr; }
     .scenes :global(.scene-split) { grid-template-columns: 1fr; }
-    .scenes :global(.scene-stage) { order: -1; top: 3.4rem; height: auto; margin: 0; z-index: 2; background: #0b1233; padding: .6rem 0; }
+    .scenes :global(.scene-stage) { order: -1; top: 3.4rem; height: auto; margin: 0; z-index: 2; background: #000; padding: .6rem 0; }
     .scenes :global(.stage-item) { max-height: 42svh; }
     .scenes :global(.stage-item img) { max-height: 38svh; }
     .scenes :global(.beat) { min-height: 40svh; }

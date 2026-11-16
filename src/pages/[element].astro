@@ -15,13 +15,13 @@ const first = el.projects.find((p) => p.hero);
 ---
 <Base title={el.name} nation={el.id} description={`${el.name}: ${el.nature}`} crumb={{ href: "/everything", label: "All the work" }}>
   <main id="main" class="screens">
-    <header class="screen cover">
-      {first && <img class="cover-img" src={first.hero} alt="" aria-hidden="true" fetchpriority="high" />}
-      <div class="measure rel">
+    <header class:list={["screen", "cover", { "has-img": !!first }]}>
+      <div class="rel">
         <p class="bnbig" lang="bn">{el.bn}</p>
         <h1 class="s-h1">{el.name}</h1>
         <p class="s-dek">{el.nature}</p>
       </div>
+      {first && <img class="cover-img" src={first.hero} alt={first.heroAlt ?? ""} fetchpriority="high" />}
     </header>
 
     {z && (
@@ -43,7 +43,7 @@ const first = el.projects.find((p) => p.hero);
     </section>
 
     {ll.length > 0 && (
-      <section class="screen short" aria-labelledby="h-l">
+      <section class="screen" aria-labelledby="h-l">
         <h2 class="s-h2" id="h-l">What {el.name.toLowerCase()} taught me</h2>
         <ul class="wall">{ll.map((l) => <li><a href={`/lessons/${l.slug}`}><span class="t">{l.title}</span><span class="s-struck b">{l.believed}</span></a></li>)}</ul>
       </section>
@@ -51,19 +51,19 @@ const first = el.projects.find((p) => p.hero);
   </main>
 </Base>
 <style>
-  .cover { align-content: end; overflow: hidden; min-height: 92svh; }
-  .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .4; }
-  .cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 30%, #0b1233 92%); }
+  .cover { grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; }
+  .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
+  .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: 8px; }
   .rel { position: relative; z-index: 1; }
-  .bnbig { font: 400 clamp(4.5rem, 12vw, 9rem)/1 var(--bangla); color: var(--c); margin: 0 0 .4rem; }
+  .bnbig { font: 400 clamp(2.4rem, 5vw, 3.6rem)/1 var(--bangla); color: var(--c); margin: 0 0 .4rem; }
   .split { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 4vw; align-items: center; }
   dl { display: grid; grid-template-columns: auto 1fr; gap: .9rem 1.6rem; margin: 0; padding: 1.6rem; border-radius: 1rem; background: rgb(255 255 255 / .05); }
-  dt { font: 600 var(--t-1) var(--story); color: #9aa6d8; }
+  dt { font: 500 var(--t-1) var(--sans); color: #8c8c8c; }
   dd { margin: 0; font: 400 var(--t0) var(--mono); color: #fff; }
   .go { margin-top: 1.6rem; }
   .wall { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 2rem 3rem; }
   .wall a { display: grid; gap: .4rem; text-decoration: none; }
-  .t { font: 900 clamp(1.2rem, 1.8vw, 1.5rem)/1.25 var(--story); color: #fff; }
-  .b { font: 600 var(--t-1)/1.5 var(--story); }
-  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+  .t { font: 600 var(--t1)/1.3 var(--sans); color: #fff; }
+  .b { font: 500 var(--t-1)/1.5 var(--sans); }
+  @media (max-width: 900px) { .split, .cover.has-img { grid-template-columns: 1fr; } }
 </style>

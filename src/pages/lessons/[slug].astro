@@ -18,17 +18,16 @@ const when = new Date(l.date + (l.date.length === 7 ? "-01" : "")).toLocaleDateS
         <p class="s-dek">{l.lesson}</p>
       </div>
     </header>
-    <section class="screen short"><div class="measure"><p class="s-label">What happened</p><p class="s-big">{l.driving}</p></div></section>
-    <section class="screen short"><div class="measure"><p class="s-label">What I believed</p><p class="s-big"><span class="s-struck">{l.believed}</span></p></div></section>
-    <section class="screen short"><div class="measure"><p class="s-label">What was true</p><p class="s-big">{l.truth}</p></div></section>
-    <section class="screen short">
-      <div class="measure">
-        <p class="s-label">Next time</p>
-        <p class="s-big">{l.recommendation}</p>
-        <p class="s-meta ev">Evidence: {l.refs.map((r, k) => <>{k > 0 && ", "}<a class:list={{ h: r.href.includes("/commit/") }} href={r.href}>{r.label}</a></>)}</p>
-      </div>
+    <section class="screen">
+      <dl class="rec">
+        <dt>What happened</dt><dd>{l.driving}</dd>
+        <dt>What I believed</dt><dd><span class="s-struck">{l.believed}</span></dd>
+        <dt>What was true</dt><dd>{l.truth}</dd>
+        <dt>Next time</dt><dd>{l.recommendation}</dd>
+        <dt>Evidence</dt><dd class="s-meta">{l.refs.map((r, k) => <>{k > 0 && ", "}<a class:list={{ h: r.href.includes("/commit/") }} href={r.href}>{r.label}</a></>)}</dd>
+      </dl>
     </section>
-    <nav class="screen short moves" aria-label="More lessons">
+    <nav class="screen moves" aria-label="More lessons">
       <div class="measure row">
         {prev && <a class="pill ghost" href={`/lessons/${prev.slug}`}>Previous: {prev.title}</a>}
         {next && <a class="pill" href={`/lessons/${next.slug}`}>Next: {next.title}</a>}
@@ -38,7 +37,10 @@ const when = new Date(l.date + (l.date.length === 7 ? "-01" : "")).toLocaleDateS
 </Base>
 <style>
   .s-kicker a { color: inherit; }
-  .ev { margin-top: 2rem; }
+  .rec { display: grid; grid-template-columns: 11rem minmax(0, 52rem); gap: 1.4rem 2.4rem; margin: 0; }
+  .rec dt { font: 500 var(--t-1)/1.6 var(--sans); color: var(--c); padding-top: .15rem; }
+  .rec dd { margin: 0; font: 400 var(--t1)/1.55 var(--sans); color: #e8e8e8; }
+  @media (max-width: 700px) { .rec { grid-template-columns: 1fr; gap: .3rem; } .rec dd { margin-bottom: 1rem; } }
   .h { font-family: var(--mono); }
   .row { display: flex; flex-wrap: wrap; gap: .7rem; }
 </style>

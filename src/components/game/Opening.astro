@@ -23,7 +23,7 @@ const beats = [
       <radialGradient id="sunGlow"><stop offset="0" stop-color="#fff6d8" /><stop offset=".18" stop-color="#ffe7a3" stop-opacity=".9" /><stop offset="1" stop-color="#ffd36b" stop-opacity="0" /></radialGradient>
       <linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#cfd8ff" stop-opacity="0" /><stop offset=".5" stop-color="#e6ebff" stop-opacity=".55" /><stop offset="1" stop-color="#cfd8ff" stop-opacity="0" /></linearGradient>
     </defs>
-    <rect width="1600" height="900" fill="#0b1233" />
+    <rect width="1600" height="900" fill="#000" />
     <g class="stars">{stars.map((s) => <circle cx={s.x} cy={s.y} r={s.s} fill="#fff" style={`animation-delay:${s.d}s`} />)}</g>
 
     <!-- the Sun, far away and still too bright -->
@@ -65,7 +65,7 @@ const beats = [
 </section>
 
 <style>
-  .opening { position: fixed; inset: 0; z-index: 10; background: #0b1233; transition: opacity 1.2s ease; }
+  .opening { position: fixed; inset: 0; z-index: 10; background: #000; transition: opacity 1.2s ease; }
   .opening.gone { opacity: 0; pointer-events: none; }
   .scene { position: absolute; inset: 0; width: 100%; height: 100%; }
   .stars circle { animation: tw 4s ease-in-out infinite; }
@@ -93,13 +93,13 @@ const beats = [
   .opening[data-beat="5"] .photo { filter: grayscale(.6) brightness(.7); transition: filter 3s ease, opacity 1.6s ease; }
 
   .captions { position: absolute; left: 50%; bottom: 13vh; transform: translateX(-50%); width: min(44rem, 88vw); text-align: center; }
-  .beat { position: absolute; inset: auto 0 0; margin: 0; font: 600 var(--t2)/1.45 var(--story); color: #f2f4ff; opacity: 0; transform: translateY(8px); transition: opacity .7s ease, transform .7s ease; text-shadow: 0 2px 12px #0b1233; }
+  .beat { position: absolute; inset: auto 0 0; margin: 0; font: 600 var(--t2)/1.45 var(--story); color: #f2f4ff; opacity: 0; transform: translateY(8px); transition: opacity .7s ease, transform .7s ease; text-shadow: 0 2px 12px #000; }
   .beat.on { opacity: 1; transform: none; }
   .beat.q { font-size: var(--t3); font-style: italic; }
-  .who { display: block; margin-top: .5rem; font: 500 var(--t-1) var(--story); font-style: normal; color: #aab4e6; }
+  .who { display: block; margin-top: .5rem; font: 500 var(--t-1) var(--story); font-style: normal; color: #a3a3a3; }
   .controls { position: absolute; right: 1.4rem; bottom: 1.4rem; display: flex; gap: .6rem; }
   .controls button { font: 700 var(--t-1) var(--story); border: 0; border-radius: 999px; padding: .55rem 1.1rem; cursor: pointer; }
-  .next { background: #ffd15c; color: #0b1233; }
+  .next { background: #ffd15c; color: #000; }
   .skip { background: rgb(255 255 255 / .12); color: #fff; }
   @media (prefers-reduced-motion: reduce) { .voyager, .beat, .sun, .photo { transition: none; } .craft, .stars circle, .ring { animation: none; } }
 </style>

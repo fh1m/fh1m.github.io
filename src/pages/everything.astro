@@ -17,7 +17,7 @@ const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: 
 ---
 <Base title="All the work" description="Every project by Fahim Faisal, grouped by where it has to work: air, water, land and silicon. The writing, the lessons, and every public repository.">
   <main id="main" class="screens">
-    <header class="screen short">
+    <header class="screen">
       <div class="measure">
         <h1 class="s-h1">All the work</h1>
         <p class="s-dek">Machines that have to work on their own: in the air, under water, on land and on small chips. Each one links to what broke and what fixed it.</p>
@@ -32,7 +32,7 @@ const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: 
       </section>
     ))}
 
-    <section class="screen short" aria-labelledby="h-w">
+    <section class="screen" aria-labelledby="h-w">
       <h2 class="s-h2" id="h-w">The writing</h2>
       <ul class="trio">
         <li><a href="/missions/air"><span class="ti">Missions</span><span class="ln">{MISSIONS.length} real failures you can debug yourself, each with an after-action report.</span></a></li>
@@ -54,12 +54,12 @@ const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: 
 <style>
   .bn { color: var(--c); margin-right: .4rem; }
   .gh { margin-top: 1.6rem; max-width: 56ch; }
-  .ti { font: 900 clamp(1.2rem, 2vw, 1.7rem)/1.2 var(--story); color: #fff; }
-  .ln { font: 600 var(--t0)/1.45 var(--story); color: #dfe4ff; }
+  .ti { font: 600 var(--t1)/1.3 var(--sans); color: #fff; }
+  .ln { font: 400 var(--t0)/1.45 var(--sans); color: #e2e2e2; }
   .trio { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 2.4rem; }
   .trio a, .repos a { display: grid; gap: .4rem; text-decoration: none; }
   .repos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.8rem 2.6rem; }
-  .rn { font: 500 var(--t0) var(--mono); color: #fff; }
-  .repos .ln { font-weight: 500; font-size: var(--t-1); color: #c9d3ff; }
+  .rn { font: 400 var(--t0) var(--mono); color: #fff; }
+  .repos .ln { font-weight: 500; font-size: var(--t-1); color: #c8c8c8; }
   .repos a:hover .rn { text-decoration: underline; }
 </style>

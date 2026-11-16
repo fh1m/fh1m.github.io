@@ -36,7 +36,7 @@ export function start(canvas: HTMLCanvasElement): World {
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  const scene = new THREE.Scene(); scene.background = new THREE.Color("#0b1233");
+  const scene = new THREE.Scene(); scene.background = new THREE.Color("#000");
   const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 3000);
 
   // Space: two layers of stars (parallax), a distant sun, a moon

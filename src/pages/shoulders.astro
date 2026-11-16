@@ -10,7 +10,7 @@ const home = [
 ---
 <Base title="Shoulders" description="The beliefs the work taught me, and the people whose ideas changed a decision in it.">
   <main id="main" class="screens">
-    <header class="screen short">
+    <header class="screen">
       <div class="measure">
         <h1 class="s-h1">Shoulders</h1>
         <p class="s-dek">What the work taught me, in rules I still follow, and the people whose ideas changed a decision in it. The quote is theirs; what it changed is mine.</p>
@@ -35,7 +35,7 @@ const home = [
       </ul>
     </section>
 
-    <section class="screen short" aria-labelledby="h-h">
+    <section class="screen" aria-labelledby="h-h">
       <h2 class="s-h2" id="h-h">Closer to home</h2>
       <ul class="cols">{home.map((h) => <li><p class="q nm">{h.name}</p><p class="s-meta">{h.where}</p><p class="ch">{h.did}</p></li>)}</ul>
     </section>
@@ -45,7 +45,7 @@ const home = [
   .cols { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 2.6rem 3.4rem; }
   .cols p { margin: 0 0 .4rem; }
   .sm { font-size: clamp(1.15rem, 1.7vw, 1.45rem) !important; }
-  .q { font: 800 clamp(1.1rem, 1.5vw, 1.35rem)/1.4 var(--story); color: #fff; }
-  .nm { font-weight: 900; }
-  .ch { font: 500 var(--t0)/1.6 var(--story); color: #dfe4ff; }
+  .q { font: 500 var(--t1)/1.45 var(--sans); color: #fff; }
+  .nm { font-weight: 600; }
+  .ch { font: 400 var(--t0)/1.6 var(--sans); color: #e2e2e2; }
 </style>
