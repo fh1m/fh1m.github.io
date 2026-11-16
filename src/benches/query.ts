@@ -36,7 +36,7 @@ function parse(q: string): { rule: string; to: string } {
 export function mount(el: HTMLElement, bus: EventTarget) {
   const wrap = document.createElement("div");
   wrap.innerHTML = `<label for="q-in">new tab</label>
-    <input id="q-in" type="text" autocomplete="off" spellcheck="false" value="g:kalman filter" style="width:100%;margin-top:.4rem;background:#000;border:1px solid #2c333a;border-radius:3px;color:${C.measured};font:400 1.05rem var(--mono);padding:.7rem .8rem" />`;
+    <input id="q-in" type="text" autocomplete="off" spellcheck="false" value="g:kalman filter" style="width:100%;margin-top:.4rem;background:#000;border:1px solid #2a3d66;border-radius:3px;color:${C.measured};font:400 1.05rem var(--mono);padding:.7rem .8rem" />`;
   el.append(wrap);
   const say = readout(el);
   const keys = document.createElement("p");

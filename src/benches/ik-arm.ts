@@ -32,7 +32,7 @@ export function mount(el: HTMLElement, bus: EventTarget) {
     ctx.font = `${Math.round(g.key * 0.38)}px 'Commit Mono', monospace`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ROWS.forEach((keys, r) => [...keys].forEach((k, c) => {
       const p = keyCenter(r, c); const sel = r === row && c === col;
-      ctx.strokeStyle = sel ? C.estimate : "#2c333a"; ctx.lineWidth = sel ? 1.6 : 1;
+      ctx.strokeStyle = sel ? C.estimate : "#2a3d66"; ctx.lineWidth = sel ? 1.6 : 1;
       ctx.strokeRect(p.x - g.key / 2 + 2, p.y - g.key / 2 + 2, g.key - 4, g.key - 4);
       ctx.fillStyle = sel ? C.estimate : C.dim; ctx.fillText(k, p.x, p.y);
     }));

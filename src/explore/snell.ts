@@ -22,7 +22,7 @@ export function mount(root: HTMLElement) {
   s("line", { x1: PX, x2: PX, y1: 30, y2: H - 30, stroke: C.chalk, "stroke-width": 3 }, el);
   s("text", { x: PX - 8, y: 40, "text-anchor": "end", class: "x-lbl" }, el).textContent = "flat port";
   s("text", { x: PX + 10, y: 40, class: "x-lbl", fill: C.medium }, el).textContent = "water";
-  s("rect", { x: PX - 70, y: CY - 22, width: 50, height: 44, rx: 4, fill: "#11161b", stroke: C.dim }, el);
+  s("rect", { x: PX - 70, y: CY - 22, width: 50, height: 44, rx: 4, fill: "#0a1430", stroke: C.dim }, el);
   s("circle", { cx: PX - 20, cy: CY, r: 9, fill: "none", stroke: C.dim }, el);
   const airL = s("path", { fill: "none", stroke: C.dim, "stroke-dasharray": "6 6" }, el);
   const watL = s("path", { fill: C.medium, "fill-opacity": 0.12, stroke: C.medium, "stroke-width": 2.5 }, el);

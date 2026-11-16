@@ -1,0 +1,120 @@
+---
+import Base from "../layouts/Base.astro";
+import { chapters } from "../data/story";
+import stats from "../data/github.json";
+import mongla from "../data/mongla.json";
+
+const repos = [...stats.repos].filter((r) => r.name !== "fh1m").sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
+const water = mongla.water.events;
+const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earlier vehicle", RECORDED_WATER_REPLAY: "real footage, replayed", CURRENT_WATER: "in water, this platform", NOT_YET: "not yet" };
+---
+<Base title="Log" description="The dated record: every reach of the river, every repository, and every time a vehicle in this lineage was actually in water.">
+  <main id="main" class="log">
+    <header>
+      <p class="kick"><span class="bn">লগ</span> <span class="mono">the log · rebuilt {stats.generatedAtLabel}</span></p>
+      <h1>The dated record.</h1>
+      <p class="lede">The river, flattened into dates. Then the numbers, generated at build time from the public GitHub API and from Mongla's own snapshot at commit <code>{mongla.provenance.commit.slice(0, 7)}</code>, so nothing here is typed by hand.</p>
+    </header>
+
+    <section aria-labelledby="h-time">
+      <h2 id="h-time">Downstream, in order</h2>
+      <ol class="timeline">
+        {chapters.map((c) => (
+          <li class={`d-${c.domain}`}>
+            <span class="when mono">{c.when}</span>
+            <span class="dot" aria-hidden="true"></span>
+            <a href={`/#${c.id}`}><span class="bn">{c.bn}</span> <b>{c.title}</b></a>
+            <span class="lesson">{c.lesson}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section aria-labelledby="h-water" class="d-water">
+      <h2 id="h-water">Every time a vehicle in this lineage was in water</h2>
+      <p class="dim">From <a href="https://github.com/fh1m/mongla_ws/blob/main/docs/evidence/water.json">water.json</a> in mongla_ws: the project's own ledger of water contact, with evidence for each row.</p>
+      <table>
+        <thead><tr><th>when</th><th>where</th><th>status</th><th>what happened</th></tr></thead>
+        <tbody>{water.map((e) => <tr><td class="num">{e.date}</td><td>{e.place}</td><td><span class:list={["st", e.status === "NOT_YET" ? "no" : "yes"]}>{statusLabel[e.status] ?? e.status}</span></td><td>{e.observed}</td></tr>)}</tbody>
+      </table>
+    </section>
+
+    <section aria-labelledby="h-gh" class="d-sight">
+      <h2 id="h-gh">The last year, from GitHub</h2>
+      <dl class="nums">
+        <div><dt class="num">{stats.contributionsLastYear.toLocaleString("en-US")}</dt><dd>public contributions, last 12 months</dd></div>
+        <div><dt class="num">{stats.commitsLastYear.toLocaleString("en-US")}</dt><dd>of them commits</dd></div>
+        <div><dt class="num">{stats.publicRepos}</dt><dd>public repositories</dd></div>
+        <div><dt class="num">{mongla.provenance.commits.toLocaleString("en-US")}</dt><dd>commits on Mongla since {mongla.provenance.firstCommit.slice(0, 10)}</dd></div>
+      </dl>
+      <aside class="bench" aria-label="Bench: the flight recorder">
+        <h3><span class="tag">bench</span> The flight recorder</h3>
+        <div class="bench-body" data-bench="recorder"><p class="mono">Loading the bench…</p></div>
+      </aside>
+    </section>
+
+    <section aria-labelledby="h-repos">
+      <h2 id="h-repos">Every public repository</h2>
+      <ul class="repos">
+        {repos.map((r) => (
+          <li>
+            <a href={r.url}><b>{r.name}</b></a>
+            <span class="lang mono"><i style={`background:${r.color ?? "#555"}`}></i>{r.language ?? "—"}{r.archived && " · archived"}</span>
+            <p>{r.description}</p>
+            <span class="mono dim">last push {r.pushedAt.slice(0, 10)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+</Base>
+
+<script>
+  const bus = new EventTarget();
+  const el = document.querySelector<HTMLElement>('[data-bench="recorder"]');
+  if (el) new IntersectionObserver(([e], io) => { if (!e.isIntersecting) return; io.disconnect(); import("../benches/recorder").then((m) => { el.replaceChildren(); m.mount(el, bus); el.dataset.ready = "1"; }); }, { rootMargin: "400px" }).observe(el);
+</script>
+
+<style>
+  .log { max-width: 84rem; margin: 0 auto; padding: 8rem var(--gutter) 5rem; }
+  .kick { display: flex; gap: .8rem; align-items: baseline; }
+  .kick .bn { color: var(--pink); font-size: 1.4rem; }
+  .kick .mono { color: var(--dim); }
+  h1 { font-size: clamp(3rem, 7vw, 6rem); font-weight: 750; letter-spacing: -0.04em; background: linear-gradient(92deg, var(--water), var(--sight), var(--ground)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { font: 400 var(--s1)/1.55 var(--serif); color: #e5e2da; max-width: 60ch; }
+  h2 { font-size: clamp(1.8rem, 3.4vw, 2.8rem); margin-top: 5rem; border-top: 3px solid var(--accent, var(--pink)); padding-top: 1.2rem; }
+  .timeline { list-style: none; margin: 1.6rem 0 0; padding: 0; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 11.6rem; top: .4rem; bottom: .4rem; width: 3px; background: linear-gradient(var(--pink), var(--air), var(--water), var(--ground), var(--sight), var(--time)); border-radius: 3px; }
+  .timeline li { display: grid; grid-template-columns: 10.6rem 2rem 1fr; gap: .3rem 0; align-items: baseline; padding: .7rem 0; }
+  .when { color: var(--dim); text-align: right; padding-right: 1rem; }
+  .dot { width: 15px; height: 15px; border-radius: 50%; background: var(--accent); justify-self: center; box-shadow: 0 0 12px var(--accent); transform: translateY(2px); }
+  .timeline a { text-decoration: none; font-size: 1.2rem; }
+  .timeline a .bn { color: var(--accent); margin-right: .3rem; }
+  .timeline .lesson { grid-column: 3; font: italic 400 1.1rem "Instrument Serif", var(--serif); color: var(--accent); }
+  .dim { color: var(--dim); }
+  td:nth-child(4) { font: 400 .92rem/1.5 var(--serif); color: #dcd9d0; min-width: 22rem; }
+  .st { font: 700 .66rem var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: .15rem .45rem; border-radius: 4px; white-space: nowrap; }
+  .st.yes { background: var(--water); color: #000; }
+  .st.no { background: var(--failure); color: #000; }
+  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.4rem; margin: 1.6rem 0 2.4rem; }
+  .nums div { border-left: 4px solid var(--accent); padding-left: 1rem; }
+  .nums dt { font-size: 2.4rem; color: var(--accent); line-height: 1; }
+  .nums dd { margin: .35rem 0 0; color: var(--dim); font-size: .9rem; }
+  .bench { background: #05060a; border: 3px solid var(--accent); border-radius: 14px; padding: 1.2rem 1.3rem 1.4rem; box-shadow: 10px 10px 0 color-mix(in srgb, var(--accent) 45%, #000); }
+  .bench h3 { font-size: 1.15rem; display: flex; gap: .6rem; align-items: center; }
+  .tag { font: 700 .65rem var(--mono); text-transform: uppercase; letter-spacing: .1em; background: var(--accent); color: #000; padding: .15rem .45rem; border-radius: 4px; }
+  .repos { list-style: none; padding: 0; margin: 1.6rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.2rem; }
+  .repos li { border: 2px solid #1d2130; border-radius: 12px; padding: 1rem 1.1rem; display: grid; gap: .35rem; transition: border-color .2s, transform .2s var(--ease); }
+  .repos li:hover { border-color: var(--pink); transform: translateY(-2px); }
+  .repos a { text-decoration: none; font-size: 1.1rem; }
+  .repos p { margin: 0; font: 400 .95rem/1.5 var(--serif); color: #d6d3ca; }
+  .lang { color: var(--dim); display: inline-flex; gap: .4rem; align-items: center; }
+  .lang i { width: .7rem; height: .7rem; border-radius: 50%; display: inline-block; }
+  @media (max-width: 700px) {
+    .timeline::before { left: .45rem; }
+    .timeline li { grid-template-columns: 1.6rem 1fr; }
+    .when { grid-column: 2; text-align: left; padding: 0; order: -1; }
+    .dot { grid-row: 1 / span 3; grid-column: 1; }
+    .timeline a, .timeline .lesson { grid-column: 2; }
+  }
+</style>

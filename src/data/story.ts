@@ -24,6 +24,7 @@ export interface Chapter {
   benches?: { key: string; title: string }[];
   notes: { href: string; label: string }[];
   lesson: string;      // one line: what the water taught here
+  heritage?: { bn: string; who: string; line: string; href: string };  // Bangladesh's engineering heritage, one poetic link
 }
 
 const mCommits = mongla.provenance.commits.toLocaleString("en-US");
@@ -89,6 +90,7 @@ export const chapters: Chapter[] = [
       { href: "/notes/why-radar-doesnt-work-underwater", label: "why radar doesn't work underwater" },
     ],
     lesson: "The first failure is a hallucination, not blindness.",
+    heritage: { bn: "জগদীশচন্দ্র বসু", who: "Jagadish Chandra Bose", line: "Born in Mymensingh in 1858, he was generating millimetre-wave radio in 1895, before most of the world had heard of radio. A hundred and thirty years later, salt water still eats those waves within centimetres. Some problems you inherit with the river.", href: "https://en.wikipedia.org/wiki/Jagadish_Chandra_Bose" },
   },
   {
     id: "cat", n: 3, when: "2024", bn: "বিড়াল", bnGloss: "cat", domain: "ground",
@@ -157,6 +159,7 @@ export const chapters: Chapter[] = [
       { href: "/notes/tracking-without-detection", label: "tracking without detection" },
     ],
     lesson: "Reality must take precedence over public relations.",
+    heritage: { bn: "সত্যেন্দ্রনাথ বসু", who: "Satyendra Nath Bose", line: "In 1924, teaching at Dhaka University, he counted light particles a new way and posted the paper to Einstein. Every boson carries his name. Counting honestly, from Dhaka, has a precedent.", href: "https://en.wikipedia.org/wiki/Satyendra_Nath_Bose" },
   },
   {
     id: "mongla", n: 6, when: "Apr 2026 →", bn: "মোংলা", bnGloss: "Mongla, the port", domain: "water",
@@ -181,6 +184,7 @@ export const chapters: Chapter[] = [
       { href: "/notes/the-71-transposes", label: "the 71 transposes" },
     ],
     lesson: "A capability is only real if the path to it is.",
+    heritage: { bn: "ফজলুর রহমান খান", who: "Fazlur Rahman Khan", line: "Born in Dhaka in 1929, he made skyscrapers tall by making structure the decision rather than the decoration: the tube. Mongla's board and computer split is the same kind of choice, at a smaller scale.", href: "https://en.wikipedia.org/wiki/Fazlur_Rahman_Khan" },
   },
   {
     id: "dristy", n: 7, when: "Sep 2026", bn: "দৃষ্টি", bnGloss: "sight", domain: "sight",
@@ -214,6 +218,7 @@ export const chapters: Chapter[] = [
     ],
     notes: [],
     lesson: "Nothing is FIELD until it has been outdoors.",
+    heritage: { bn: "রূপসা → পশুর → মোংলা", who: "the rivers", line: "Rupsha runs past Khulna and becomes the Pasur; the Pasur carries the port of Mongla to the Sundarbans and the Bay. The projects took the rivers' names in the same order: the rover upstream, the underwater vehicle at the port.", href: "https://en.wikipedia.org/wiki/Rupsa_River" },
   },
   {
     id: "den", n: 9, when: "always", bn: "ঘর", bnGloss: "home", domain: "workshop",

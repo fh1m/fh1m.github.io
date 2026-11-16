@@ -32,7 +32,7 @@ function parse(buf: ArrayBuffer) {
 export function mount(el: HTMLElement, bus: EventTarget) {
   const say = readout(el);
   const holder = document.createElement("div");
-  holder.style.cssText = "position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#030405";
+  holder.style.cssText = "position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#03060f";
   el.prepend(holder);
   const gl2 = (() => { try { return !!document.createElement("canvas").getContext("webgl2"); } catch { return false; } })();
   if (!gl2) {

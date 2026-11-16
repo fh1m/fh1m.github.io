@@ -48,7 +48,7 @@ export interface Role {
 
 export const roles: Role[] = [
   {
-    org: "BRACU Duburi", title: "Engineering Team Lead · formerly Sub-Team Lead, AI & Machine Vision", dates: "Oct 2023 – Sep 2026", url: "https://bracuduburi.com",
+    org: "BRACU Duburi", title: "Engineering Team Lead · formerly Sub-Team Lead, AI & Machine Vision", dates: "Sep 2023 – 2026", url: "https://bracuduburi.com",
     points: [
       "Rebuilt the AUV vision stack on modern CNN detectors with a custom dataset pipeline, domain-specific pretraining and source-free domain adaptation.",
       "Deployed detection on edge hardware for on-vehicle inference; built the team's dev and deployment tooling.",
@@ -60,7 +60,7 @@ export const roles: Role[] = [
     org: "Mongla (independent)", title: "Author · autonomy stack for AUVs", dates: "Apr 2026 – present", url: "https://github.com/fh1m/mongla_ws",
     points: [
       "Independent ROS 2 autonomy stack: perception, estimation and a mission language over MAVLink to a 500 Hz control board.",
-      "Hailo-8 detection at 53.9 Hz through the live ROS graph; 18.0 ms photon-to-detection median latency.",
+      "Hailo-8 detection at 53.9 Hz through the live ROS graph; 18.0 ms photon-to-detection median latency. The control board and its firmware are Rakibul Islam's.",
       "Every capability carries the file or the measurement behind it; the blocked rows stay visible.",
     ],
     source: "mongla, repo",
@@ -110,7 +110,7 @@ export interface Result {
 export const results: Result[] = [
   { year: 2026, event: "RoboSub 2026", team: "BRACU Duburi", result: "8th of 58 teams", detail: "Best round 6,234 points (semi-final 2). Two vehicles qualified for the semi-finals. Engineering lead.", source: "mongla, cv26" },
   { year: 2025, event: "RoboSub 2025", team: "BRACU Duburi", result: "8th of 58 teams, Entrepreneurship award", detail: "Best round 4,083 points (semi-final 1). Direct-qualified for the semi-finals. Vision sub-team lead.", source: "mongla, cv26" },
-  { year: 2025, event: "University Rover Challenge 2025", team: "BRACU Mongol-Tori", result: "Global top 10", detail: "Autonomous subteam: typing arm, vision unit, dataset pipeline.", source: "cv26" },
+  { year: 2025, event: "University Rover Challenge 2025", team: "BRACU Mongol-Tori", result: "Global top 10, as reported by BRAC University", detail: "Autonomous subteam: typing arm, vision unit, dataset pipeline.", source: "cv26, bracu.ac.bd news" },
 ];
 
 export const publications = [

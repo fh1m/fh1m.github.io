@@ -29,7 +29,7 @@ export function mount(el: HTMLElement, bus: EventTarget) {
     const { ctx, w, h } = cv;
     ctx.clearRect(0, 0, w, h);
     const ym = h / 2, sy = (h * 0.42) / 200;
-    ctx.fillStyle = "rgba(198,255,61,0.12)"; ctx.fillRect(0, ym - s.zone * sy, w, 2 * s.zone * sy);
+    ctx.fillStyle = "rgba(59,111,224,0.16)"; ctx.fillRect(0, ym - s.zone * sy, w, 2 * s.zone * sy);
     ctx.strokeStyle = C.line; ctx.beginPath(); ctx.moveTo(0, ym); ctx.lineTo(w, ym); ctx.stroke();
     ctx.strokeStyle = s.mode === "bang" ? C.failure : C.medium; ctx.lineWidth = 1.6; ctx.beginPath();
     xs.forEach((x, i) => { const px = (i / xs.length) * w, py = ym - Math.max(-200, Math.min(200, x)) * sy; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });

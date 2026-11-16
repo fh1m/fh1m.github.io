@@ -1,0 +1,121 @@
+---
+import Base from "../layouts/Base.astro";
+import { person, education, roles, results, publications, skills, mongla } from "../data/facts";
+import stats from "../data/github.json";
+---
+<Base title="CV" description="CV of Fahim Faisal (fh1m): autonomy and robotics: perception, control, embedded." bodyClass="cv-page">
+  <main id="main" class="cv">
+    <header class="cv-head">
+      <div>
+        <h1>{person.fullName}</h1>
+        <p class="role">{person.line}</p>
+        <p class="contact mono">
+          <span>{person.place}</span>
+          <a href={`mailto:${person.email}`}>{person.email}</a>
+          <a href={person.github}>github.com/{person.handle}</a>
+          <a href="https://fh1m.github.io">fh1m.github.io</a>
+          {person.linkedin && <a href={person.linkedin}>LinkedIn</a>}
+        </p>
+      </div>
+      <p class="dl no-print"><a class="btn-pill" href="/cv/fahim-faisal-cv.pdf" download>download PDF</a></p>
+    </header>
+
+    <section aria-labelledby="cv-results">
+      <h2 id="cv-results">Results</h2>
+      <ul class="results">
+        {results.map((r) => <li><span class="num">{r.year}</span><span><b>{r.event}</b> · {r.team}: {r.result}.{r.detail && <span class="dim"> {r.detail}</span>}</span></li>)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="cv-exp">
+      <h2 id="cv-exp">Experience</h2>
+      {roles.map((r) => (
+        <article class="role-item">
+          <header><h3>{r.url ? <a href={r.url}>{r.org}</a> : r.org}</h3><span class="mono dates">{r.dates}</span></header>
+          <p class="title">{r.title}</p>
+          <ul>{r.points.map((p) => <li>{p}</li>)}</ul>
+        </article>
+      ))}
+    </section>
+
+    <section aria-labelledby="cv-own">
+      <h2 id="cv-own">Selected open work</h2>
+      <ul class="own">
+        <li><a href="https://github.com/fh1m/mongla_ws"><b>Mongla</b></a>: independent ROS 2 autonomy stack for AUVs. {mongla.loopHz} Hz board loop (board and firmware by Rakibul Islam), {mongla.detectHz} Hz detection through the live graph, {mongla.tests.toLocaleString("en-US")} tests. Not yet in water.</li>
+        <li><a href="https://github.com/fh1m/Dristy"><b>Dristy</b></a>: open firmware and host API for a K210 vision co-processor (KPU nets, classical vision, compact serial answers).</li>
+        <li><a href="https://github.com/fh1m/rupsha_ws"><b>Rupsha</b></a>: ROS 2 autonomy stack for an Ackermann rover; Gazebo-verified, chassis in build.</li>
+        <li><a href="https://github.com/fh1m/mongla_sim"><b>Mongla Sim</b></a>: Gazebo + ArduSub SITL with 13 courses, a native DVL and an operator lab.</li>
+        <li><b>Re-graded early work</b> (2023–24, revisited 2026 with measurements and fixes): <a href="https://github.com/fh1m/green-at-depth">green-at-depth</a>, <a href="https://github.com/fh1m/half-a-second">half-a-second</a>, <a href="https://github.com/fh1m/four-leds">four-leds</a>, <a href="https://github.com/fh1m/E-Bhapa">E-Bhapa</a>, <a href="https://github.com/fh1m/trust-issues">trust-issues</a>, <a href="https://github.com/fh1m/pareidolia">pareidolia</a>, <a href="https://github.com/fh1m/interview-bottle">interview-bottle</a>.</li>
+        <li><b>Security</b>: <a href="https://github.com/fh1m/passless">Passless</a> (WebAuthn, 25 tests), <a href="https://github.com/fh1m/secure-terminal-p2p-chat">secure terminal P2P chat</a> (RSA-OAEP + AES-256-GCM, strict mode).</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="cv-pub">
+      <h2 id="cv-pub">Publications</h2>
+      <ul class="pubs">{publications.map((p) => <li><b>{p.title}</b>. {p.authors}. <span class="dim">{p.venue}.</span></li>)}</ul>
+    </section>
+
+    <section aria-labelledby="cv-edu">
+      <h2 id="cv-edu">Education</h2>
+      {education.map((e) => (
+        <article class="role-item">
+          <header><h3>{e.org}</h3><span class="mono dates">{e.dates}</span></header>
+          <p class="title">{e.degree}{e.note && <span class="dim"> {e.note}</span>}</p>
+        </article>
+      ))}
+    </section>
+
+    <section aria-labelledby="cv-skills">
+      <h2 id="cv-skills">Tools</h2>
+      <dl class="skills">{Object.entries(skills).filter(([k]) => k !== "source").map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+    </section>
+
+    <p class="src">Generated from the site's single facts file, {stats.generatedAtLabel}. Every line has a source in <a href="https://github.com/fh1m/fh1m.github.io/blob/main/src/data/facts.ts">facts.ts</a>.</p>
+  </main>
+</Base>
+
+<style>
+  .cv { max-width: 58rem; margin: 0 auto; padding: 8rem var(--gutter) 5rem; --accent: var(--pink); }
+  .cv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; border-bottom: 3px solid var(--pink); padding-bottom: 1.4rem; margin-bottom: 2.4rem; }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); margin: 0 0 .2rem; }
+  .role { font: italic 400 1.35rem "Instrument Serif", var(--serif); color: var(--pink); margin: 0 0 .7rem; }
+  .contact { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0; color: var(--dim); }
+  h2 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: .14em; color: var(--pink); margin: 2.6rem 0 1rem; font-family: var(--mono); font-weight: 700; }
+  .results, .own, .pubs { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
+  .results li { display: grid; grid-template-columns: 3.4rem 1fr; gap: .8rem; }
+  .results .num { color: var(--pink); font-weight: 700; }
+  .role-item { margin: 0 0 1.4rem; }
+  .role-item header { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; flex-wrap: wrap; }
+  .role-item h3 { font-size: 1.15rem; margin: 0; }
+  .role-item h3 a { text-decoration: none; }
+  .dates { color: var(--dim); }
+  .title { margin: .15rem 0 .4rem; color: #e1ded5; font-weight: 500; }
+  .role-item ul { margin: 0; padding-left: 1.1rem; color: #d6d3ca; }
+  .role-item li { margin: .2rem 0; font-size: .96rem; }
+  .role-item li::marker { color: var(--pink); }
+  .dim { color: var(--dim); }
+  .skills { display: grid; gap: .45rem; margin: 0; }
+  .skills div { display: grid; grid-template-columns: 11rem 1fr; gap: 1rem; }
+  .skills dt { font: 700 .8rem var(--mono); color: var(--pink); }
+  .skills dd { margin: 0; }
+  .src { margin-top: 3rem; }
+  .btn-pill { display: inline-block; font: 700 .9rem var(--display); text-decoration: none; padding: .65rem 1.1rem; border-radius: 999px; background: var(--pink); color: #000; }
+  .btn-pill:hover { color: #000; background: #ff5c9a; }
+  @media print {
+    :global(html), :global(body) { background: #fff !important; color: #000 !important; font-size: 9.3pt; line-height: 1.38; }
+    :global(.top), :global(.foot), :global(.skip), .no-print { display: none !important; }
+    :global(.grain::after) { display: none; }
+    .cv { padding: 0 1mm; margin: 0; max-width: none; width: auto; --pink: #c2185b; }
+    h1 { font-size: 22pt; }
+    .role { font-size: 12pt; margin-bottom: .3rem; }
+    .role-item li { font-size: 9pt; margin: .05rem 0; }
+    .results, .own, .pubs { gap: .3rem; }
+    h1, .title, .role-item h3 { color: #000; }
+    .contact, .dates, .dim, .src, .role-item ul { color: #333; }
+    .role-item ul, .skills dd, .results li, .own li, .pubs li { color: #111; }
+    a { color: #000; text-decoration: none; }
+    h2 { margin-top: 1.1rem; break-after: avoid; }
+    .role-item { break-inside: avoid; margin-bottom: .7rem; }
+    .cv-head { margin-bottom: 1rem; padding-bottom: .8rem; }
+  }
+</style>

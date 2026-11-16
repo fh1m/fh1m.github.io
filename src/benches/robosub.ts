@@ -8,12 +8,12 @@ import data from "../data/mongla.json";
 
 type Task = { task: string; points: number };
 const GROUPS: [RegExp, string, string][] = [
-  [/^Gate/, "gate", "#ff2e7e"],
-  [/^(Channel|Avoid Debris)/, "channel / slalom", "#00e1ff"],
-  [/^Restore/, "restore", "#c6ff3d"],
-  [/^Random Pinger/, "pinger", "#ffd23f"],
-  [/^Return Home/, "return home", "#a98bff"],
-  [/^Weight/, "weight bonus", "#7d8292"],
+  [/^Gate/, "gate", "#e5322d"],
+  [/^(Channel|Avoid Debris)/, "channel / slalom", "#3b6fe0"],
+  [/^Restore/, "restore", "#6f9cff"],
+  [/^Random Pinger/, "pinger", "#b8c4dc"],
+  [/^Return Home/, "return home", "#8a1f1c"],
+  [/^Weight/, "weight bonus", "#3a4a6e"],
 ];
 const groupOf = (t: string) => GROUPS.find(([re]) => re.test(t)) ?? GROUPS[GROUPS.length - 1];
 
@@ -26,7 +26,7 @@ export function mount(el: HTMLElement, bus: EventTarget) {
   const svg = document.createElementNS(NS, "svg");
   svg.setAttribute("viewBox", "0 0 640 300");
   svg.setAttribute("role", "img");
-  svg.style.cssText = "width:100%;height:auto;display:block;background:#05060a;border:1px solid var(--line);border-radius:6px";
+  svg.style.cssText = "width:100%;height:auto;display:block;background:#03060f;border:1px solid var(--line);border-radius:6px";
   el.append(svg);
   const say = readout(el);
   const legend = document.createElement("p");
@@ -43,11 +43,11 @@ export function mount(el: HTMLElement, bus: EventTarget) {
     svg.replaceChildren();
     svg.setAttribute("aria-label", `RoboSub ${year}, BRAC U, ${y.overall.rank}th of ${y.teams}. ` + rounds.map(([n, r]) => `${n}: ${r.score} points`).join("; ") + `. Finals wild card at ${y.wildcard}.`);
     const add = (tag: string, attrs: Record<string, string | number>, text?: string) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, String(attrs[k])); if (text) n.textContent = text; svg.append(n); return n; };
-    for (let v = 0; v <= max; v += 1000) { add("line", { x1: X(v), x2: X(v), y1: top - 10, y2: top + rounds.length * rowH, stroke: "#14161f" }); add("text", { x: X(v), y: top + rounds.length * rowH + 16, "text-anchor": "middle", fill: "#7d8292", "font-size": 11, "font-family": "Commit Mono, monospace" }, String(v)); }
+    for (let v = 0; v <= max; v += 1000) { add("line", { x1: X(v), x2: X(v), y1: top - 10, y2: top + rounds.length * rowH, stroke: "#0c1730" }); add("text", { x: X(v), y: top + rounds.length * rowH + 16, "text-anchor": "middle", fill: "#6f7d99", "font-size": 11, "font-family": "Commit Mono, monospace" }, String(v)); }
     rounds.forEach(([name, r], i) => {
       const yy = top + i * rowH;
-      add("text", { x: 0, y: yy + 22, fill: "#f4f1ea", "font-size": 13, "font-family": "Commit Mono, monospace" }, name);
-      add("text", { x: 0, y: yy + 38, fill: "#7d8292", "font-size": 11, "font-family": "Commit Mono, monospace" }, r.rank ? `round rank ${r.rank}` : "");
+      add("text", { x: 0, y: yy + 22, fill: "#eceef3", "font-size": 13, "font-family": "Commit Mono, monospace" }, name);
+      add("text", { x: 0, y: yy + 38, fill: "#6f7d99", "font-size": 11, "font-family": "Commit Mono, monospace" }, r.rank ? `round rank ${r.rank}` : "");
       let acc = 0;
       for (const t of r.tasks) {
         if (t.points <= 0) continue;
@@ -58,11 +58,11 @@ export function mount(el: HTMLElement, bus: EventTarget) {
         rect.addEventListener("pointerenter", show); rect.addEventListener("focus", show);
         acc += t.points;
       }
-      add("text", { x: X(acc) + 6, y: yy + 28, fill: "#f4f1ea", "font-size": 13, "font-family": "Commit Mono, monospace", "font-weight": 700 }, String(r.score));
+      add("text", { x: X(acc) + 6, y: yy + 28, fill: "#eceef3", "font-size": 13, "font-family": "Commit Mono, monospace", "font-weight": 700 }, String(r.score));
     });
     const wx = X(y.wildcard);
-    add("line", { x1: wx, x2: wx, y1: top - 14, y2: top + rounds.length * rowH, stroke: "#ff4d5e", "stroke-width": 2, "stroke-dasharray": "5 4" });
-    add("text", { x: wx, y: top - 18, fill: "#ff4d5e", "font-size": 11, "text-anchor": "middle", "font-family": "Commit Mono, monospace" }, `finals wild card ${y.wildcard}`);
+    add("line", { x1: wx, x2: wx, y1: top - 14, y2: top + rounds.length * rowH, stroke: "#ff4a42", "stroke-width": 2, "stroke-dasharray": "5 4" });
+    add("text", { x: wx, y: top - 18, fill: "#ff4a42", "font-size": 11, "text-anchor": "middle", "font-family": "Commit Mono, monospace" }, `finals wild card ${y.wildcard}`);
     const best = Math.max(...rounds.map(([, r]) => r.score));
     say(`${year}: ${y.overall.rank}th of ${y.teams} · best round <b>${best.toLocaleString("en-US")}</b> · wild card ${y.wildcard.toLocaleString("en-US")}. Hover or tab through a bar to read a task.`);
   };

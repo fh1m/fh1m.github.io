@@ -1,20 +1,23 @@
 ---
-import "@fontsource-variable/bricolage-grotesque/opsz.css";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
 import "@fontsource-variable/newsreader/opsz.css";
 import "@fontsource-variable/newsreader/opsz-italic.css";
-import "@fontsource/instrument-serif/400-italic.css";
 import "@fontsource/tiro-bangla/400.css";
 import "../styles/global.css";
 import { person } from "../data/facts";
 
 interface Props { title?: string; description?: string; bodyClass?: string }
-const { title, description = "Fahim Faisal (fh1m): autonomy and robotics engineer in Dhaka. Rockets, rovers, underwater vehicles and the firmware and vision under them, told downstream.", bodyClass = "" } = Astro.props;
-const fullTitle = title ? `${title} · ${person.name}` : `${person.name}: downstream`;
+const { title, description = "Fahim Faisal (fh1m): autonomy and robotics engineer in Dhaka. Rockets, rovers, underwater vehicles, and the firmware, vision and estimation underneath them.", bodyClass = "" } = Astro.props;
+const fullTitle = title ? `${title} · ${person.name}` : `${person.name} · autonomy and robotics`;
 const nav = [
-  { href: "/#source", label: "river" },
-  { href: "/notes", label: "notes" },
-  { href: "/log", label: "log" },
-  { href: "/cv", label: "cv" },
+  { href: "/#sheets", label: "Work" },
+  { href: "/notes", label: "Notes" },
+  { href: "/log", label: "Log" },
+  { href: "/cv", label: "CV" },
 ];
 const here = Astro.url.pathname;
 ---
@@ -27,54 +30,57 @@ const here = Astro.url.pathname;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" href="/fonts/commit-mono-400-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={new URL(here, Astro.site)} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL("/og.png", Astro.site)} />
+    <meta property="og:image" content={new URL("/og.jpg", Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body class={`grain ${bodyClass}`}>
+  <body class={bodyClass}>
     <a class="skip" href="#main">Skip to content</a>
     <header class="top">
       <a class="mark" href="/" aria-label={`${person.name}, home`}>
-        <span class="sprite mark-sprite" aria-hidden="true"></span><span class="pixel">fh1m</span><span class="who">{person.name}</span>
+        <span class="mono id">FH1M</span><span class="who">{person.name}</span>
       </a>
       <nav aria-label="Site">
         <ul>
           {nav.map((n) => (
-            <li><a href={n.href} aria-current={here.startsWith(n.href) && n.href !== "/#source" ? "page" : undefined}>{n.label}</a></li>
+            <li><a href={n.href} aria-current={here.startsWith(n.href) && n.href !== "/#sheets" ? "page" : undefined}>{n.label}</a></li>
           ))}
         </ul>
       </nav>
     </header>
     <slot />
     <footer class="foot">
-      <p class="mono">
-        <a href={`mailto:${person.email}`}>{person.email}</a>
-        <a href={person.github}>github.com/fh1m</a>
-        {person.linkedin && <a href={person.linkedin}>linkedin</a>}
-      </p>
-      <p class="mono dim">Made in Dhaka. read. derive. build. break. repeat. No number here without its source. <a href="https://github.com/fh1m/fh1m.github.io">Source</a>.</p>
+      <div class="foot-grid">
+        <p class="label">Contact</p>
+        <p class="mono links">
+          <a href={`mailto:${person.email}`}>{person.email}</a>
+          <a href={person.github}>github.com/fh1m</a>
+          {person.linkedin && <a href={person.linkedin}>LinkedIn</a>}
+        </p>
+        <p class="label">Note</p>
+        <p class="mono dim">Made in Dhaka. No number here without its source. <a href="https://github.com/fh1m/fh1m.github.io">Source</a>. <span class="bn" title="read. derive. build. break. repeat.">পড়ো · ভাবো · বানাও · ভাঙো</span></p>
+      </div>
     </footer>
   </body>
 </html>
 
 <style>
-  .top { position: fixed; inset: 0 0 auto 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 1rem var(--gutter); pointer-events: none; }
-  .top > * { pointer-events: auto; }
-  .top { transition: background .3s, backdrop-filter .3s; }
-  :global(body.past-hero) .top, :global(body:not(.home)) .top { background: linear-gradient(rgb(0 0 0 / .92), rgb(0 0 0 / .6)); backdrop-filter: blur(8px); }
-  .mark { display: inline-flex; gap: 0.7rem; align-items: baseline; text-decoration: none; }
-  .mark { align-items: center; }
-  .mark-sprite { width: 34px; height: 44px; }
-  .mark .pixel { font-size: 1.15rem; color: var(--pink); letter-spacing: 0.04em; }
-  .mark .who { font: 400 0.8rem var(--mono); color: var(--dim); }
-  nav ul { list-style: none; display: flex; gap: 1.4rem; margin: 0; padding: 0.35rem 0.8rem; background: rgb(0 0 0 / 0.55); backdrop-filter: blur(6px); border-radius: 4px; }
-  nav a { font: 400 0.8rem var(--mono); text-decoration: none; color: var(--dim); }
-  nav a:hover, nav a[aria-current="page"] { color: var(--pink); }
-  .foot { position: relative; z-index: 2; padding: 4rem var(--gutter) 3rem; border-top: 1px solid var(--line); background: var(--black); display: grid; gap: 0.4rem; }
-  .foot p { margin: 0; display: flex; gap: 1.4rem; flex-wrap: wrap; }
+  .top { position: fixed; inset: 0 0 auto 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 0.85rem var(--gutter); border-bottom: 1px solid transparent; transition: background .25s, border-color .25s; }
+  :global(body.scrolled) .top, :global(body:not(.home)) .top { background: rgb(0 0 0 / .88); backdrop-filter: blur(8px); border-bottom-color: var(--line); }
+  .mark { display: inline-flex; gap: 0.9rem; align-items: baseline; text-decoration: none; }
+  .mark .id { font-size: 0.82rem; font-weight: 500; color: #fff; letter-spacing: 0.14em; padding: 0.15rem 0.45rem; background: var(--accent); }
+  .mark .who { font: 500 0.88rem var(--sans); color: var(--chalk); }
+  nav ul { list-style: none; display: flex; gap: 1.8rem; margin: 0; padding: 0; }
+  nav a { font: 500 0.82rem var(--sans); text-decoration: none; color: var(--dim); letter-spacing: 0.01em; padding: 0.3rem 0; border-bottom: 2px solid transparent; }
+  nav a:hover { color: var(--chalk); }
+  nav a[aria-current="page"] { color: var(--chalk); border-bottom-color: var(--accent); }
+  .foot { position: relative; z-index: 2; padding: 3rem var(--gutter) 2.6rem; border-top: 1px solid var(--line-2); background: var(--black); }
+  .foot-grid { display: grid; grid-template-columns: 7rem 1fr; gap: 0.6rem 1.4rem; max-width: 80rem; }
+  .foot p { margin: 0; }
+  .links { display: flex; gap: 1.6rem; flex-wrap: wrap; }
   .dim { color: var(--faint); }
-  @media (max-width: 560px) { .mark .who { display: none; } nav ul { gap: 0.9rem; } }
+  .bn { color: var(--dim); margin-left: .6rem; }
+  @media (max-width: 560px) { .mark .who { display: none; } nav ul { gap: 1.1rem; } .foot-grid { grid-template-columns: 1fr; } }
 </style>
