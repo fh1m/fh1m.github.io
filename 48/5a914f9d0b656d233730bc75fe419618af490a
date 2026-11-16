@@ -1,0 +1,32 @@
+src/content/notes/duburi.mdx
+  h_f1b9066eb9899c 22,24,29,65-66,70-71
+src/content/notes/low-cost-vio-and-the-dvl-question.mdx
+  h_f1b9066eb9899c 2-4,9-10,12-14,17,20,22,24,26,28,30,32,34,36,38,40,42,44-50
+src/content/notes/mongla.mdx
+  h_f1b9066eb9899c 76
+src/content/notes/rockets.mdx
+  h_f1b9066eb9899c 19,50-52
+src/content/notes/round-7-closes-no-twice.mdx
+  h_f1b9066eb9899c 9-10,53
+src/content/notes/the-frame-age-problem.mdx
+  h_f1b9066eb9899c 3-4,10-11,13-14,18,20,22,24,26,28,30,32-38,40,42-47,49-55,57,59,61,63,65
+src/content/notes/the-sign-flip-at-the-mavlink-boundary.mdx
+  h_f1b9066eb9899c 18,24-31
+src/content/notes/tracking-without-detection.mdx
+  h_f1b9066eb9899c 3-4,9-10,12-14,17,19,21,23,25,27,29,31-37,39,41,43-49,51,53,55,57,59-65
+src/content/notes/what-thirty-minutes-of-sitting-still-taught-us.mdx
+  h_f1b9066eb9899c 19,32-39
+src/styles/global.css
+  h_f1b9066eb9899c 147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "485a914f9d0b656d233730bc75fe419618af490a",
+  "prompts": {},
+  "humans": {
+    "h_f1b9066eb9899c": {
+      "author": "fh1m <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
