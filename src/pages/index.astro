@@ -42,7 +42,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     </header>
 
     <nav class="spot" id="spot" aria-label="Start with these">
-      {spotlight.map((s) => <a href={`/projects/${s.slug}`}><img src={s.hero} alt="" width="160" height="100" loading="lazy" /><span class="st">{s.title}</span><span class="sh">{s.hook}</span></a>)}
+      {spotlight.map((s) => <a href={`/projects/${s.slug}`}><img src={`/media/thumbs/${s.slug}.webp`} alt="" width="160" height="100" loading="lazy" /><span class="st">{s.title}</span><span class="sh">{s.hook}</span></a>)}
     </nav>
 
     <nav class="index" id="index" aria-label="Everything in the system">
@@ -338,7 +338,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .spot .sh { font: 400 var(--t-2)/1.35 var(--sans); color: #9aa1ad; padding: 0 .2rem; }
   .index { position: relative; flex: 1 1 auto; min-height: 0; width: 17rem; display: flex; opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
   .index:global(.on) { opacity: 1; }
-  .index details { max-height: 100%; display: flex; flex-direction: column; background: rgb(8 9 12 / .82); border: 1px solid #262626; border-radius: var(--r-3); padding: .6rem .7rem; overflow: hidden; }
+  .index details { max-height: 100%; display: flex; flex-direction: column; background: #08090c; border: 1px solid #262626; border-radius: var(--r-3); padding: .6rem .7rem; overflow: hidden; }
   .index summary { font: 500 var(--t-1) var(--sans); color: #e8e8e8; cursor: pointer; padding: .2rem 0 .5rem; }
   .find input { width: 100%; box-sizing: border-box; font: 400 var(--t-1) var(--sans); color: #fff; background: #111318; border: 1px solid #2a2a2a; border-radius: var(--r-2); padding: .45rem .6rem; margin-bottom: .5rem; }
   .tree { list-style: none; margin: 0; padding: 0 .2rem 0 0; overflow-y: auto; min-height: 0; scrollbar-width: thin; }
