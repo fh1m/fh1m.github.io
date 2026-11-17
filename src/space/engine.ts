@@ -140,14 +140,17 @@ export function start(canvas: HTMLCanvasElement): World {
 
   // camera: a state (target, distance, yaw, pitch) with eased flights; drag to orbit, wheel to zoom
   const look = new THREE.Vector3(), camState = { dist: 260, yaw: 0.6, pitch: 0.55 };
-  let flight: { fromLook: THREE.Vector3; toId: string | null; toLook: THREE.Vector3; d0: number; d1: number; p0: number; p1: number; t: number; dur: number } | null = null;
+  let flight: { fromLook: THREE.Vector3; toId: string | null; toLook: THREE.Vector3; d0: number; d1: number; p0: number; p1: number; y0: number; y1: number; t: number; dur: number } | null = null;
   let follow: string | null = null;
   const worldPos = (id: string, out = new THREE.Vector3()) => (nodes.get(id) ? nodes.get(id)!.getWorldPosition(out) : out.set(0, 0, 0));
   const sizeOf = (id: string) => (id === "fh1m" ? 7 : byId[id]?.size ?? 1) * (byId[id]?.kind === "moon" || byId[id]?.kind === "rock" ? 1 : 1);
   function flyTo(id: string | null, dist?: number, dur = 1.8) {
     const toLook = id ? worldPos(id) : new THREE.Vector3();
     const d1 = dist ?? (id ? Math.max(9, sizeOf(id) * (byId[id]?.kind === "planet" ? 5.2 : 9)) : 260);
-    flight = { fromLook: look.clone(), toId: id, toLook, d0: camState.dist, d1, p0: camState.pitch, p1: id ? 0.32 : 0.55, t: 0, dur: reduce ? 0.01 : dur };
+    // look at a body from its sunlit side (the star is at the origin), a little off-axis
+    let y1 = camState.yaw;
+    if (id && id !== "fh1m" && toLook.lengthSq() > 1) { const want = Math.atan2(toLook.z, toLook.x) + Math.PI - 0.55; y1 = camState.yaw + Math.atan2(Math.sin(want - camState.yaw), Math.cos(want - camState.yaw)); }
+    flight = { fromLook: look.clone(), toId: id, toLook, d0: camState.dist, d1, p0: camState.pitch, p1: id ? 0.32 : 0.55, y0: camState.yaw, y1, t: 0, dur: reduce ? 0.01 : dur };
     follow = id;
   }
 
@@ -181,14 +184,17 @@ export function start(canvas: HTMLCanvasElement): World {
   function choose(id: string) {
     const b = byId[id];
     if (b?.kind === "planet") { go(b.zone!); return; }
-    flyTo(ALIAS[id] ?? id); sound.whoosh(); objCbs.forEach((f) => f(id));
+    flyTo(ALIAS[id] ?? id); shift(true); sound.whoosh(); objCbs.forEach((f) => f(id));
   }
   function go(z: ZoneId | null) {
     zone = z; sound.whoosh(); sound.scene(z ?? "space");
-    flyTo(z); zoneCbs.forEach((f) => f(z));
+    flyTo(z); shift(!!z); zoneCbs.forEach((f) => f(z));
   }
 
-  const resize = () => { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < h ? 58 : 40; cam.updateProjectionMatrix(); };
+  // with a panel open on the right of a wide screen, shift the picture so the subject sits in the free space
+  let shifted = false;
+  const resize = () => { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.fov = w < h ? 58 : 40; if (shifted && w > 900) cam.setViewOffset(w, h, w * 0.12, 0, w, h); else cam.clearViewOffset(); cam.updateProjectionMatrix(); };
+  const shift = (on: boolean) => { if (on !== shifted) { shifted = on; resize(); } };
   addEventListener("resize", resize); resize();
 
   // labels: planets always; a world's moons when you are at that world; the star and stations when zoomed out
@@ -196,7 +202,7 @@ export function start(canvas: HTMLCanvasElement): World {
   const screen = new Map<string, { x: number; y: number; z: number; visible: boolean }>();
   const v3 = new THREE.Vector3();
 
-  let last = performance.now(), running = true, tAcc = 0;
+  let last = performance.now(), running = true, tAcc = 0, frameMs = 16, frameN = 0;
   function tick(now: number) {
     if (!running) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = (tAcc += reduce ? 0 : dt);
@@ -222,6 +228,7 @@ export function start(canvas: HTMLCanvasElement): World {
       look.copy(flight.fromLook).lerp(to, k);
       camState.dist = Math.exp(Math.log(flight.d0) + (Math.log(flight.d1) - Math.log(flight.d0)) * k);
       camState.pitch = flight.p0 + (flight.p1 - flight.p0) * k;
+      camState.yaw = flight.y0 + (flight.y1 - flight.y0) * k;
       if (flight.t >= 1) flight = null;
     } else if (follow) look.lerp(worldPos(follow, v3), 1 - Math.exp(-dt * 8));
     if (!drag && !flight && !reduce) camState.yaw += dt * (follow ? 0.03 : 0.012); // a slow drift, never still
@@ -241,6 +248,13 @@ export function start(canvas: HTMLCanvasElement): World {
     modeT += dt; if (mode === "fixed" && modeT > 3) mode = "idle";
 
     renderer.render(scene, cam);
+    // adaptive resolution: if frames run long for a while, render fewer pixels; recover when fast
+    frameMs = frameMs * 0.95 + dt * 1000 * 0.05;
+    if (++frameN % 60 === 0) {
+      const pr = renderer.getPixelRatio();
+      if (frameMs > 24 && pr > 0.6) { renderer.setPixelRatio(Math.max(0.6, pr - 0.25)); resize(); }
+      else if (frameMs < 14 && pr < Math.min(devicePixelRatio, 1.5)) { renderer.setPixelRatio(Math.min(Math.min(devicePixelRatio, 1.5), pr + 0.25)); resize(); }
+    }
 
     // project labels
     const w = canvas.clientWidth, h = canvas.clientHeight;

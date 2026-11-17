@@ -17,12 +17,13 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
 ---
 <Base chrome={false} bodyClass="game" description="Fahim Faisal, robotics engineer from Dhaka: underwater vehicles, rockets, rovers and vision on small chips, laid out as a solar system you can fly through. Every project has the failure that taught something and the commit that fixed it.">
   <main id="main" class="game-shell">
-    <img class="poster-img" src="/world/poster.webp" alt="" width="1600" height="1000" />
+    <img class="poster-img" src="/world/poster.webp" alt="The fh1m system from above: a star, four worlds on their orbits, a ringed gas giant, a belt of rocks, and stations. Every body is listed in the index." width="1600" height="1000" />
     <canvas id="world" aria-label="The fh1m system: a star, four worlds with their projects as moons, a belt of lessons, and stations. Every body is also listed in the index."></canvas>
     <div class="labels" id="labels" aria-hidden="true">
       {labelIds.map((l) => <button type="button" tabindex="-1" class:list={["lbl", l.cls]} data-lbl={l.id} {...(l.zone ? { "data-zone": l.zone } : { "data-focus": l.id })}>{l.label}</button>)}
     </div>
 
+    <div class="left">
     <header class="intro" id="intro">
       <h1><button type="button" data-focus="fh1m">Fahim Faisal</button></h1>
       <p>Robotics engineer from Dhaka. I led engineering for BRACU Duburi's RoboSub 2026 campaign and build autonomy that has to work with nobody watching: underwater, in the air, on wheels, on small chips. This system is everything I've built, and what each one got wrong first.</p>
@@ -51,6 +52,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
         </ol>
       </details>
     </nav>
+    </div>
 
     <nav class="zones" id="zones" aria-label="Worlds">
       {ZONE_INFO.map((z) => <button type="button" data-zone={z.id} style={`--c:${z.colour}`} aria-keyshortcuts={keys[z.id]}><span class="n">{PLANETS.find((p) => p.id === z.id)!.label}</span><span class="bn" lang="bn">{z.bn}</span></button>)}
@@ -92,7 +94,9 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   // the 3D planet, or (reduced motion, low-end, no WebGL2, ?poster) a still of it with the same UI on top
   const poster = wantsPoster();
   if (poster) document.getElementById("main")!.classList.add("poster");
-  const worldP = poster ? Promise.resolve(startPoster()) : import("../space/engine").then((m) => m.start(document.getElementById("world") as HTMLCanvasElement));
+  // the engine (three.js) loads after the page has painted, so the opening photo comes first
+  const afterLoad = () => new Promise<void>((r) => (document.readyState === "complete" ? r() : addEventListener("load", () => r(), { once: true })));
+  const worldP = poster ? Promise.resolve(startPoster()) : afterLoad().then(() => import("../space/engine")).then((m) => m.start(document.getElementById("world") as HTMLCanvasElement));
   const opening = document.getElementById("opening")!;
   const beats = [...opening.querySelectorAll<HTMLElement>(".beat")];
   const title = document.getElementById("intro")!, zonesEl = document.getElementById("zones")!;
@@ -119,7 +123,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     const names: Record<string, string> = Object.fromEntries(panels.map((p) => [p.dataset.obj!, p.querySelector("h2")!.textContent!]));
     let current: string | null = null;
     const closePanel = () => { if (!panels.some((p) => p.classList.contains("on"))) return; panels.forEach((p) => p.classList.remove("on")); world.setYear(null); world.go((current || null) as never); };
-    world.onObject((id) => { plates.forEach((p) => p.classList.remove("on")); panels.forEach((p) => p.classList.toggle("on", p.dataset.obj === id)); panels.find((p) => p.dataset.obj === id)?.querySelector<HTMLElement>(".close")?.focus({ preventScroll: true }); });
+    world.onObject((id) => { plates.forEach((p) => p.classList.remove("on")); panels.forEach((p) => { const on = p.dataset.obj === id; p.classList.toggle("on", on); if (on) p.querySelectorAll<HTMLImageElement>("img[data-src]").forEach((im) => { im.src = im.dataset.src!; im.removeAttribute("data-src"); }); }); panels.find((p) => p.dataset.obj === id)?.querySelector<HTMLElement>(".close")?.focus({ preventScroll: true }); });
     world.onHover((id, x, y) => { tip.textContent = id ? names[id] ?? "" : ""; tip.classList.toggle("on", !!id); tip.style.transform = `translate(${x + 16}px, ${y + 14}px)`; });
     document.querySelectorAll<HTMLButtonElement>("[data-focus]").forEach((b) => b.addEventListener("click", () => world.focus(b.dataset.focus!)));
     panels.forEach((p) => p.querySelector(".close")!.addEventListener("click", closePanel));
@@ -287,7 +291,9 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .tip:global(.on) { opacity: 1; }
   .skip-game .short { display: none; }
   @media (max-width: 520px) { .skip-game .long { display: none; } .skip-game .short { display: inline; } }
-  .intro { position: absolute; z-index: 4; left: 1.2rem; top: 1rem; width: min(34rem, 60vw); opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
+  .left { position: absolute; z-index: 4; left: 1.2rem; top: 1rem; bottom: 6rem; width: min(30rem, 40vw); display: flex; flex-direction: column; gap: .9rem; pointer-events: none; }
+  .left > * { pointer-events: auto; }
+  .intro { position: relative; opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
   .intro:global(.on) { opacity: 1; }
   .intro h1 { margin: 0 0 .5rem; font: 600 var(--t2)/1.1 var(--sans); }
   .intro h1 button { all: unset; cursor: pointer; color: #fff; }
@@ -295,12 +301,13 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .intro p { margin: 0 0 .5rem; font: 400 var(--t-1)/1.55 var(--sans); color: #c9ccd2; max-width: 52ch; text-shadow: 0 1px 8px #000; }
   .intro .live { font: 400 var(--t-2)/1.4 var(--mono); color: #8a94a3; }
   .intro .cta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
-  .index { position: absolute; z-index: 4; left: 1.2rem; top: 15.5rem; bottom: 6rem; width: 17rem; opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
+  .index { position: relative; flex: 1 1 auto; min-height: 0; width: 17rem; display: flex; opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
   .index:global(.on) { opacity: 1; }
   .index details { max-height: 100%; display: flex; flex-direction: column; background: rgb(8 9 12 / .82); border: 1px solid #262626; border-radius: 10px; padding: .6rem .7rem; overflow: hidden; }
   .index summary { font: 500 var(--t-1) var(--sans); color: #e8e8e8; cursor: pointer; padding: .2rem 0 .5rem; }
   .find input { width: 100%; box-sizing: border-box; font: 400 var(--t-1) var(--sans); color: #fff; background: #111318; border: 1px solid #2a2a2a; border-radius: 6px; padding: .45rem .6rem; margin-bottom: .5rem; }
-  .tree { list-style: none; margin: 0; padding: 0 .2rem 0 0; overflow-y: auto; max-height: calc(100svh - 26rem); scrollbar-width: thin; }
+  .tree { list-style: none; margin: 0; padding: 0 .2rem 0 0; overflow-y: auto; min-height: 0; scrollbar-width: thin; }
+  .index details[open] { flex: 1 1 auto; }
   .tree ol { list-style: none; margin: 0 0 .4rem; padding: 0 0 0 .8rem; border-left: 1px solid #262626; }
   .tree button { all: unset; display: block; cursor: pointer; padding: .2rem .3rem; border-radius: 4px; font: 400 var(--t-1)/1.35 var(--sans); color: #b8bcc4; }
   .tree button:hover, .tree button:focus-visible { color: #fff; background: rgb(255 255 255 / .06); }
@@ -311,6 +318,6 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .lbl.star { font: 500 13px/1 var(--sans); color: #ffcf8a; }
   .lbl.station { color: #9aa3b2; }
   .lbl:hover { color: #fff; text-decoration: underline; }
-  @media (max-width: 900px) { .index { top: auto; bottom: 4.6rem; left: .6rem; right: .6rem; width: auto; } .index details:not([open]) { background: rgb(8 9 12 / .82); } .tree { max-height: 40svh; } .intro { width: auto; right: .6rem; left: .6rem; } .intro p:not(.cta) { display: none; } }
+  @media (max-width: 900px) { .left { left: .6rem; right: .6rem; width: auto; bottom: 4.6rem; } .index { width: auto; } .tree { max-height: 40svh; } .intro p:not(.cta) { display: none; } }
   .nojs { position: absolute; inset: auto 1rem 1rem; z-index: 12; color: #fff; }
 </style>

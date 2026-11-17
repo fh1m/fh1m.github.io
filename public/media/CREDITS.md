@@ -99,3 +99,6 @@ credit and link their coverage of the teams the author worked on.
 | `media/certs/robosub-2024.png` | RoboNation — RoboSub 2024 participation |
 | `media/certs/robosub-2025.png` | RoboNation — RoboSub 2025 participation |
 | `media/certs/robosub-2026.png` | RoboNation — RoboSub 2026 participation |
+| `media/duburi26/*` | BRACU Duburi (bracuduburi.com), team photos and renders, used with credit |
+| `media/own/fahim.webp`, `media/own/fahim-team.webp` | Fahim Faisal's own photos |
+| `world/pbd.webp`, `world/pbd-1200.webp` | NASA/JPL-Caltech, Pale Blue Dot Revisited (PIA23645, 2020), public domain |

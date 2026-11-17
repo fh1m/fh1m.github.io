@@ -10,7 +10,7 @@ float h3(vec3 p){ p = fract(p * 0.3183099 + .1); p *= 17.0; return fract(p.x * p
 float vnoise(vec3 x){ vec3 i = floor(x), f = fract(x); f = f*f*(3.0-2.0*f);
   return mix(mix(mix(h3(i+vec3(0,0,0)),h3(i+vec3(1,0,0)),f.x), mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x), f.y),
              mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x), mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x), f.y), f.z); }
-float fbm(vec3 p){ float a = .5, s = 0.; for (int i = 0; i < 5; i++){ s += a * vnoise(p); p *= 2.03; a *= .5; } return s; }
+float fbm(vec3 p){ float a = .5, s = 0.; for (int i = 0; i < 4; i++){ s += a * vnoise(p); p *= 2.03; a *= .5; } return s; }
 `;
 
 const VERT = /* glsl */ `
@@ -28,8 +28,8 @@ const SURF: Record<Surface, string> = {
   desert: `float n = fbm(vObj * 3.5); col = mix(uA, uB, n); col = mix(col, uC, smoothstep(.62, .75, fbm(vObj * 9. + 2.)) * .6);
            col = mix(col, vec3(.86,.84,.8), smoothstep(.82, .9, abs(vObj.y)));`,
   // silicon: dark plates, lit traces, warm hotspots like a chip under load
-  silicon: `vec2 g = vec2(atan(vObj.z, vObj.x) * 12., asin(vObj.y) * 12.); vec2 c = abs(fract(g) - .5);
-            float trace = smoothstep(.47, .5, max(c.x, c.y)) * step(.45, fbm(floor(vec3(g, 1.)) * .7));
+  silicon: `vec2 g = vec2(atan(vObj.z, vObj.x) * 12., asin(vObj.y) * 12.); vec2 cc = abs(fract(g) - .5);
+            float trace = smoothstep(.47, .5, max(cc.x, cc.y)) * step(.45, fbm(floor(vec3(g, 1.)) * .7));
             col = mix(uA, uB, fbm(vObj * 4.)); col += uC * trace * (.5 + .5 * sin(uTime * 1.5 + g.x)) * .9; emit = trace * .6;`,
   rock: `col = mix(uA, uB, fbm(vObj * 5.));`,
   // home: oceans, continents, cloud

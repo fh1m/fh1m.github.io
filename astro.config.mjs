@@ -10,7 +10,7 @@ export default defineConfig({
   // unified (not the default Sätteri) so notes can be split into scenes at build time
   markdown: { processor: unified({ rehypePlugins: [rehypeScenes] }) },
   integrations: [mdx()],
-  build: { inlineStylesheets: "auto" },
+  build: { inlineStylesheets: "always" },
   vite: {
     build: { chunkSizeWarningLimit: 700 },
   },

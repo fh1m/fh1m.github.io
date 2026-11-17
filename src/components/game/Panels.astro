@@ -56,7 +56,7 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
       <button class="close" type="button" aria-label="Close">Close</button>
       <p class="kicker"><span class="bn" lang="bn">{z.bn}</span> {z.name}, {p.years}</p>
       <h2 id={`obj-${slug}`}>{p.title}</h2>
-      {p.hero && d && <img src={p.hero} alt={p.heroAlt ?? ""} width={d.w} height={d.h} loading="lazy" style={`max-width:min(100%, ${d.w}px)`} />}
+      {p.hero && d && <img data-src={p.hero} alt={p.heroAlt ?? ""} width={d.w} height={d.h} loading="lazy" style={`max-width:min(100%, ${d.w}px)`} />}
       {p.line && <p class="pline">{p.line}</p>}
       <p class="sum">{p.summary}</p>
       {p.figures && <dl>{p.figures.slice(0, 4).map(([n, l]) => <><dt>{l}</dt><dd>{n}</dd></>)}</dl>}
@@ -128,7 +128,7 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
 <aside class="objpanel wide about" data-obj="fh1m" style="--c:#ffcf8a" aria-labelledby="obj-fh1m">
   <button class="close" type="button" aria-label="Close">Close</button>
   <div class="about-grid">
-    <img src="/media/own/fahim.webp" alt="Fahim Faisal on a cliff path by the sea, smiling" width="768" height="1024" loading="lazy" />
+    <img data-src="/media/own/fahim.webp" alt="Fahim Faisal on a cliff path by the sea, smiling" width="768" height="1024" loading="lazy" />
     <div>
       <p class="kicker">The star of this system, for lack of a better one</p>
       <h2 id="obj-fh1m">{person.fullName}</h2>
@@ -150,7 +150,7 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
   <button class="close" type="button" aria-label="Close">Close</button>
   <p class="kicker">Home, about six billion kilometres back</p>
   <h2 id="obj-home">The pale blue dot</h2>
-  <img class="pbd" src="/world/cover.webp" alt="Voyager 1's Pale Blue Dot: Earth as a single pale pixel inside a band of scattered sunlight" width="720" height="720" loading="lazy" />
+  <img class="pbd" data-src="/world/cover.webp" alt="Voyager 1's Pale Blue Dot: Earth as a single pale pixel inside a band of scattered sunlight" width="720" height="720" loading="lazy" />
   <p class="pline">Somewhere in that pixel is Dhaka, and a desk with a cat on it. Everything in this system was built there.</p>
   <p class="sum">Bangladesh is a delta, and some very large ideas came out of it:</p>
   <ul class="heritage-list">{heritage.map((h) => <li><button type="button" data-focus={h.id}><span lang="bn">{h.bn}</span> {h.name}</button></li>)}</ul>

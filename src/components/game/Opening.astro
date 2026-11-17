@@ -19,7 +19,7 @@ const beats = [
     <span class="dot-ring"></span>
   </div>
   <div class="text">
-    {beats.map((b, i) => <p class:list={["beat", { q: i === 3, me: i === 4 }]} data-i={i}>{b}{i === 3 && <span class="who">Carl Sagan, who asked for the picture</span>}</p>)}
+    {beats.map((b, i) => <p class:list={["beat", { q: i === 3, me: i === 4, on: i === 0, first: i === 0 }]} data-i={i}>{b}{i === 3 && <span class="who">Carl Sagan, who asked for the picture</span>}</p>)}
   </div>
   <p class="credit">Image: NASA/JPL-Caltech, Pale Blue Dot Revisited (2020)</p>
   <div class="controls">
@@ -31,8 +31,7 @@ const beats = [
   .opening { position: fixed; inset: 0; z-index: 30; background: #000; overflow: hidden; cursor: pointer; transition: opacity 1.2s ease; font-family: var(--sans); }
   .opening.gone { opacity: 0; pointer-events: none; }
   .photo-wrap { position: absolute; inset: 0; transform-origin: 59.45% 51.88%; transition: transform 9s cubic-bezier(.25,.1,.2,1), filter 2s ease; will-change: transform; }
-  .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 59.45% 51.88%; opacity: 0; transition: opacity 2.2s ease; }
-  .opening[data-beat] .photo { opacity: 1; }
+  .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 59.45% 51.88%; }
   .opening[data-beat="2"] .photo-wrap, .opening[data-beat="3"] .photo-wrap { transform: scale(3.2); }
   .opening[data-beat="4"] .photo-wrap { transform: scale(5.5); filter: brightness(.55); }
   .dot-ring { position: absolute; left: 59.45%; top: 51.88%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border: 1px solid rgb(255 255 255 / .7); border-radius: 50%; opacity: 0; transition: opacity 1.5s ease 1s; }
@@ -40,6 +39,7 @@ const beats = [
   .text { position: absolute; left: clamp(1.4rem, 6vw, 5rem); bottom: clamp(5rem, 14vh, 9rem); width: min(40rem, 86vw); }
   .beat { position: absolute; left: 0; bottom: 0; margin: 0; font: 400 clamp(1.15rem, 2vw, 1.6rem)/1.45 var(--sans); color: #f2f2f2; text-shadow: 0 2px 18px rgb(0 0 0 / .9); opacity: 0; transform: translateY(10px); transition: opacity .25s ease, transform .25s ease; }
   .beat.on { opacity: 1; transform: none; transition: opacity .9s ease .3s, transform .9s ease .3s; }
+  .beat.first.on { transition: none; }
   .beat.q { font-style: italic; font-size: clamp(1.4rem, 2.6vw, 2.1rem); }
   .beat.me { font-size: clamp(1.1rem, 1.8vw, 1.45rem); }
   .who { display: block; margin-top: .6rem; font: 400 var(--t-1) var(--sans); font-style: normal; color: #b8bcc4; }

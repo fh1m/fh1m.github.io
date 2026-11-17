@@ -46,6 +46,23 @@ test("planet: skip the opening, then at least 8 objects each open their own pane
   expect(errors).toEqual([]);
 });
 
+test("the index reaches everything: every entry opens its own panel or world, and search narrows it", async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.addInitScript(() => sessionStorage.setItem("seen-opening", "1"));
+  await page.goto("/");
+  await expect(page.locator(".index.on")).toBeVisible({ timeout: 20_000 });
+  const ids = await page.locator(".tree [data-focus]").evaluateAll((bs) => bs.map((b) => (b as HTMLElement).dataset.focus!));
+  expect(ids.length).toBeGreaterThanOrEqual(40);
+  for (const id of ids) {
+    await page.evaluate((id) => (document.querySelector(`.tree [data-focus="${id}"]`) as HTMLButtonElement).click(), id);
+    await expect(page.locator(`.objpanel[data-obj="${id}"].on h2`), id).toBeVisible();
+  }
+  await page.locator("#find").fill("dristy");
+  await expect(page.locator('.tree li:not([hidden]) [data-focus="dristy"]')).toBeVisible();
+  expect(await page.locator(".tree li:not([hidden]) [data-focus]").count()).toBeLessThan(ids.length / 4);
+  expect(errors).toEqual([]);
+});
+
 test("a mission: wrong guesses are struck through, the right one shows the fix and the report", async ({ page }) => {
   await page.addInitScript(() => sessionStorage.setItem("seen-opening", "1"));
   await page.goto("/");

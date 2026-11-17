@@ -26,4 +26,5 @@ export const IDLE: string[] = [
   "Wubba lubba dub dub is not a valid commit message. He checked.",
   "On a scale of one to ten, how would you rate your latency?",
   "Become one with the data. Then delete half of it.",
+  "Air, water, land, fire. Long ago the four worlds lived together in harmony. Then he started committing to all of them in the same week.",
 ];
