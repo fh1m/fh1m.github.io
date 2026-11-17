@@ -21,7 +21,7 @@ const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: 
       <div class="measure">
         <h1 class="s-h1">All the work</h1>
         <p class="s-dek">Machines that have to work on their own: in the air, under water, on land and on small chips. Each one links to what broke and what fixed it.</p>
-        <p class="s-meta gh">In the last year: {fmt(gh.contributionsLastYear)} contributions on GitHub, {fmt(gh.commitsLastYear)} of them commits, across {gh.ownRepos} repositories of my own. Counted from the GitHub API when this site was built, {gh.generatedAtLabel}.</p>
+        <p class="s-meta gh" data-live-commits>In the last year: {fmt(gh.contributionsLastYear)} contributions on GitHub, {fmt(gh.commitsLastYear)} of them commits, across {gh.ownRepos} repositories of my own. Counted from the GitHub API when this site was built, {gh.generatedAtLabel}.</p>
       </div>
     </header>
 
@@ -51,6 +51,9 @@ const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: 
     </section>
   </main>
 </Base>
+<script>
+  import "../scripts/live-stats";
+</script>
 <style>
   .bn { color: var(--c); margin-right: .4rem; }
   .gh { margin-top: 1.6rem; max-width: 56ch; }

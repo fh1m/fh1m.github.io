@@ -3,9 +3,7 @@
  * the time machine and Bunnu work unchanged on top of a still picture of the planet.
  * Used for reduced motion, low-end devices, no WebGL2, or ?poster=1.
  */
-import type { World } from "./main";
-import type { ZoneId } from "./planet";
-import type { Mode } from "./forms";
+import type { World, ZoneId, Mode } from "../space/engine";
 import { createSound } from "./audio";
 
 export function startPoster(): World {
@@ -21,6 +19,8 @@ export function startPoster(): World {
     onZone: (cb) => zoneCbs.push(cb),
     onObject: (cb) => objCbs.push(cb),
     onHover: () => {},
+    onFrame: () => {},
+    onBunnu: () => {},
   };
 }
 

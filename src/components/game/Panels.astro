@@ -36,6 +36,16 @@ const years: { y: number | "now"; ch: string[]; guide: string }[] = [
   { y: 2026, ch: ["mongla", "dristy", "rupsha"], guide: `Mongla: ${commitCount("mongla")} commits and zero dives. The zero stays on the front page because it's the honest number.` },
   { y: "now", ch: ["mohona"], guide: "Next is the first dive. Every number on this planet gets measured again in real water." },
 ];
+// the tea house menu: ideas borrowed, and what each one changed. Short and true, never the point.
+const teaMenu = [
+  { idea: "Become one with the data", from: "Andrej Karpathy", did: "Duburi's vision pipeline starts by throwing data away: about 5,000 raw pool frames, blur- and exposure-checked down to about 3,500, before any model is chosen." },
+  { idea: "Delete code", from: "George Hotz", did: "Mongla deletes what nothing launches. A capability is only real if the path to it is." },
+  { idea: "Reduce until it can't be reduced", from: "Rick Rubin", did: "Dristy answers in 22 bytes instead of a video stream." },
+  { idea: "Don't fool yourself; you're the easiest person to fool", from: "Richard Feynman", did: "Every number on this site carries the measurement that produced it, and the zero dives stay visible." },
+  { idea: "There are no accidents", from: "Master Oogway", did: "Every failure gets a lesson report and the commit that killed it. The belt is the filing cabinet." },
+  { idea: "Look for a new angle", from: "Hiro Hamada", did: "The frame-age bug only cracked when he stopped timing the model and started reading the camera's sequence counter." },
+  { idea: "If you only do what you can do, you'll never be more than you are now", from: "Master Shifu", did: "Rockets, then rovers, then submarines, then firmware. Each one started out beyond him." },
+];
 const chapterById = Object.fromEntries(chapters.map((c) => [c.id, c]));
 const strip = (h: string) => h.replace(/<[^>]+>/g, "");
 ---
@@ -65,7 +75,7 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
     <p class="bnname" lang="bn">{h.bn}</p>
     <p class="pline">{h.line}</p>
     <p class="sum">Bangladesh is a delta, so this is where they stand. None of this planet happens without people like them having been here first.</p>
-    <p class="links"><a href="/shoulders">Shoulders</a></p>
+    <p class="links"><button type="button" data-focus="home">Back to home</button></p>
   </aside>
 ))}
 
@@ -115,13 +125,56 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
   <p class="links"><a href="/cv/fahim-faisal-cv.pdf" download>Download the PDF</a><a href="/cv">Read it here</a></p>
 </aside>
 
+<aside class="objpanel wide about" data-obj="fh1m" style="--c:#ffcf8a" aria-labelledby="obj-fh1m">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <div class="about-grid">
+    <img src="/media/own/fahim.webp" alt="Fahim Faisal on a cliff path by the sea, smiling" width="768" height="1024" loading="lazy" />
+    <div>
+      <p class="kicker">The star of this system, for lack of a better one</p>
+      <h2 id="obj-fh1m">{person.fullName}</h2>
+      <p class="pline">Robotics engineer from Dhaka. I build autonomy that has to keep working when nobody can reach it: under water, in the air, on wheels, and on chips small enough to fit in a camera.</p>
+      <ul class="roles">
+        <li><span class="yr">2026</span> Team Lead (Engineering), BRACU Duburi: two AUVs at RoboSub 2026, 8th of 58</li>
+        <li><span class="yr">2023–25</span> AI &amp; machine vision, then vision lead, BRACU Duburi: 8th of 58 at RoboSub 2025</li>
+        <li><span class="yr">2025</span> Autonomous subteam, BRACU Mongol-Tori: a rover arm that types, URC 2025</li>
+        <li><span class="yr">2023–25</span> Guidance and control, Amateur Experimental Rocketry Dhaka</li>
+        <li><span class="yr">2026</span> Mongla, my own AUV autonomy stack, on Rakibul Islam's SROT board</li>
+      </ul>
+      <p class="sum">Co-author of BRACU Duburi's Technical Design Reports for RoboSub 2025 and 2026. I like systems I can take apart and explain back, numbers that come with the measurement that made them, and admitting the zero.</p>
+      <p class="links"><a href="/cv">CV</a><a href="/cv/fahim-faisal-cv.pdf" download>PDF</a><a href={person.github}>GitHub</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}<a href={`mailto:${person.email}`}>Email</a></p>
+    </div>
+  </div>
+</aside>
+
+<aside class="objpanel wide" data-obj="home" style="--c:#7fb6ff" aria-labelledby="obj-home">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <p class="kicker">Home, about six billion kilometres back</p>
+  <h2 id="obj-home">The pale blue dot</h2>
+  <img class="pbd" src="/world/cover.webp" alt="Voyager 1's Pale Blue Dot: Earth as a single pale pixel inside a band of scattered sunlight" width="720" height="720" loading="lazy" />
+  <p class="pline">Somewhere in that pixel is Dhaka, and a desk with a cat on it. Everything in this system was built there.</p>
+  <p class="sum">Bangladesh is a delta, and some very large ideas came out of it:</p>
+  <ul class="heritage-list">{heritage.map((h) => <li><button type="button" data-focus={h.id}><span lang="bn">{h.bn}</span> {h.name}</button></li>)}</ul>
+  <p class="links"><a href="https://science.nasa.gov/mission/voyager/voyager-1s-pale-blue-dot/">The picture, at NASA</a></p>
+</aside>
+
+<aside class="objpanel wide tea" data-obj="teahouse" style="--c:#ffb35c" aria-labelledby="obj-tea">
+  <button class="close" type="button" aria-label="Close">Close</button>
+  <p class="kicker">Past the belt, there's always a pot on</p>
+  <h2 id="obj-tea">The tea house</h2>
+  <p class="pline">A few ideas I borrowed, and what each one changed in the work. The menu is short on purpose.</p>
+  <ul class="menu">
+    {teaMenu.map((t) => <li><p class="dish">{t.idea}</p><p class="from">{t.from}</p><p class="did">{t.did}</p></li>)}
+  </ul>
+  <p class="sum small">Free refills. The owner believes leaves in hot water is the most important technology there is, and he may be right.</p>
+</aside>
+
 <aside class="objpanel" data-obj="voyager" style="--c:#c8c8c8" aria-labelledby="obj-voyager">
   <button class="close" type="button" aria-label="Close">Close</button>
   <p class="kicker">In orbit</p>
   <h2 id="obj-voyager">Voyager 1</h2>
   <p class="pline">Still going. It took the picture this all started from, then switched its cameras off for good.</p>
-  <p class="sum">Everything on this planet stands on somebody's shoulders: Sagan, who asked for that picture; Feynman, who said not to fool yourself; and four people in the delta, much closer to home.</p>
-  <p class="links"><a href="/shoulders">Shoulders</a><a href="https://science.nasa.gov/mission/voyager/voyager-1s-pale-blue-dot/">The picture, at NASA</a></p>
+  <p class="sum">Launched in 1977. On 14 February 1990, at Carl Sagan's request, it turned around and photographed Earth from about six billion kilometres: one pale pixel in a band of scattered sunlight. Minutes later its cameras were switched off for good.</p>
+  <p class="links"><button type="button" data-focus="home">See the dot</button><a href="https://science.nasa.gov/mission/voyager/voyager-1s-pale-blue-dot/">The picture, at NASA</a></p>
 </aside>
 
 <aside class="objpanel wide tm" data-obj="timemachine" style="--c:#8dff6a" aria-labelledby="obj-tm">
@@ -187,4 +240,21 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
   .tm-lesson { font-style: italic; color: #fff !important; }
   .bunnu-says { margin: .4rem 0 .9rem; padding: .7rem .8rem; border-radius: 6px; background: rgb(255 255 255 / .07); font: 600 var(--t-1)/1.5 var(--sans); color: #fff; }
   .bunnu-says .who { display: block; font: 600 var(--t-2) var(--sans); color: #ff9ec2; margin-bottom: .1rem; }
+.objpanel .links button { font: 500 var(--t-1) var(--sans); color: #000; background: #ececec; border: 0; border-radius: 6px; padding: .45rem .8rem; cursor: pointer; }
+.about-grid { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 1.2rem; align-items: start; }
+.about-grid img { width: 100%; height: auto; border-radius: 8px; }
+.roles { list-style: none; margin: .4rem 0 .9rem; padding: 0; display: grid; gap: .35rem; font: 400 var(--t-1)/1.5 var(--sans); color: #d6d6d6; }
+.roles .yr, .results .yr { display: inline-block; min-width: 4.4rem; font-family: var(--mono); color: var(--c); }
+.pbd { width: 100%; max-width: 18rem; height: auto; border-radius: 6px; margin: .3rem 0 .8rem; }
+.heritage-list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .35rem; }
+.heritage-list button { all: unset; cursor: pointer; font: 400 var(--t-1) var(--sans); color: #e8e8e8; }
+.heritage-list button:hover { color: var(--c); }
+.heritage-list span { font-family: var(--bangla); color: var(--c); margin-right: .4rem; }
+.menu { list-style: none; margin: .4rem 0 1rem; padding: 0; display: grid; gap: .8rem; }
+.menu li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .1rem 1rem; padding-bottom: .7rem; border-bottom: 1px dotted #3a3a3a; }
+.menu .dish { margin: 0; font: 500 var(--t0)/1.35 var(--sans); color: #fff; }
+.menu .from { margin: 0; font: italic 400 var(--t-1) var(--sans); color: var(--c); text-align: right; }
+.menu .did { grid-column: 1 / -1; margin: 0; font: 400 var(--t-1)/1.5 var(--sans); color: #b8bcc4; }
+.small { font-size: var(--t-2) !important; color: #8a8f99 !important; }
+@media (max-width: 700px) { .about-grid { grid-template-columns: 1fr; } .about-grid img { max-width: 12rem; } }
 </style>

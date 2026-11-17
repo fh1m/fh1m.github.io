@@ -1,63 +1,81 @@
 ---
 /**
- * Home: Voyager's last photograph, a fall into the dot, and a tiny planet holding the machines I
- * built for air, water, land and silicon. Bunnu is the guide; the world loads while the opening plays.
+ * Home: the fh1m system. A star (me), four worlds (the four places a machine can fail) with their
+ * projects as moons, a belt of wrong ideas, stations for the notes, the CV and time, and the pale
+ * blue dot at the edge. Bunnu flies a small ship to whatever you open and tells you what happened.
+ * Everything is also reachable from the index on the left, so nobody gets lost.
  */
 import Base from "../layouts/Base.astro";
 import Opening from "../components/game/Opening.astro";
 import Panels from "../components/game/Panels.astro";
 import { ZONE_INFO } from "../game/zones";
-import { projects } from "../data/elements";
-const bySlug = Object.fromEntries(projects.map((p) => [p.slug, p]));
+import { PLANETS, MOONS, STATIONS, ROCKS, HOME, PROBE } from "../space/system";
+import gh from "../data/github.json";
 const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "4" };
+const moonsOf = (z: string) => MOONS.filter((m) => m.parent === z);
+const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS.map((p) => ({ id: p.id, label: p.label, cls: "planet", zone: p.zone })), ...MOONS.map((m) => ({ id: m.id, label: m.label, cls: "moon" })), ...STATIONS.map((s) => ({ id: s.id, label: s.label, cls: "station" })), { id: HOME.id, label: "Home", cls: "station" }, { id: PROBE.id, label: "Voyager 1", cls: "station" }];
 ---
-<Base chrome={false} bodyClass="game" description="Fahim Faisal's robotics work as a small planet: rockets, underwater vehicles, rovers and edge AI, each with the failure that taught something and the commit that fixed it.">
+<Base chrome={false} bodyClass="game" description="Fahim Faisal, robotics engineer from Dhaka: underwater vehicles, rockets, rovers and vision on small chips, laid out as a solar system you can fly through. Every project has the failure that taught something and the commit that fixed it.">
   <main id="main" class="game-shell">
-    <img class="poster-img" src="/world/poster.webp" alt="The planet from orbit: a sandy airfield cap under clouds at the top, green land with a brown patch of earth, a blue sea along one side, and small landmarks around the rim. Every place on it can be opened from the buttons below." width="1600" height="1000" />
-    <canvas id="world" aria-label="A tiny planet with four zones: air, water, earth and fire. Choose a zone to send Bunnu there, or click anything on the planet."></canvas>
-
-    <div class="title" id="title" aria-live="polite">
-      <p class="els"><span style="--c:#eaa63b">Air.</span> <span style="--c:#4f8fe0">Water.</span> <span style="--c:#79b35f">Earth.</span> <span style="--c:#e5533d">Silicon.</span></p>
-      <p class="line">Four places a machine can fail. These are the machines I built for each, what broke, and what fixed it.</p>
-      <p class="meet">Bunnu is your guide. She watched all of it get built, and she'll tell you why it was built that way.</p>
+    <img class="poster-img" src="/world/poster.webp" alt="" width="1600" height="1000" />
+    <canvas id="world" aria-label="The fh1m system: a star, four worlds with their projects as moons, a belt of lessons, and stations. Every body is also listed in the index."></canvas>
+    <div class="labels" id="labels" aria-hidden="true">
+      {labelIds.map((l) => <button type="button" tabindex="-1" class:list={["lbl", l.cls]} data-lbl={l.id} {...(l.zone ? { "data-zone": l.zone } : { "data-focus": l.id })}>{l.label}</button>)}
     </div>
 
-    <nav class="zones" id="zones" aria-label="Zones">
-      {ZONE_INFO.map((z) => <button type="button" data-zone={z.id} style={`--c:${z.colour}`} aria-keyshortcuts={keys[z.id]}><span class="n">{z.name}</span><span class="bn" lang="bn">{z.bn}</span></button>)}
-      <button type="button" data-zone="" class="all" aria-keyshortcuts="0">The whole planet</button>
+    <header class="intro" id="intro">
+      <h1><button type="button" data-focus="fh1m">Fahim Faisal</button></h1>
+      <p>Robotics engineer from Dhaka. I led engineering for BRACU Duburi's RoboSub 2026 campaign and build autonomy that has to work with nobody watching: underwater, in the air, on wheels, on small chips. This system is everything I've built, and what each one got wrong first.</p>
+      <p class="live" data-live-commits>{gh.commitsLastYear.toLocaleString("en-US")} commits in the last year, counted {gh.generatedAtLabel}.</p>
+      <p class="cta"><a class="pill" href="/cv">For recruiters: the CV</a><a class="pill ghost" href="/everything">All the work, no space</a></p>
+    </header>
+
+    <nav class="index" id="index" aria-label="Everything in the system">
+      <details open>
+        <summary>Index</summary>
+        <label class="find"><span class="sr-only">Find</span><input id="find" type="search" placeholder="Find a project, a lesson…" autocomplete="off" /></label>
+        <ol class="tree">
+          <li><button type="button" data-focus="fh1m">The star: about me</button></li>
+          {PLANETS.map((p) => (
+            <li class="world" style={`--c:${ZONE_INFO.find((z) => z.id === p.zone)!.colour}`}>
+              <button type="button" data-zone={p.zone} class="wl">{p.label}</button>
+              <ol>{moonsOf(p.id).map((m) => <li><button type="button" data-focus={m.id}>{m.label}</button></li>)}</ol>
+            </li>
+          ))}
+          <li class="world" style="--c:#a7a39a"><button type="button" data-focus="graveyard" class="wl">The belt: what I got wrong</button>
+            <ol>{ROCKS.map((r) => <li><button type="button" data-focus={r.id}>{r.label}</button></li>)}</ol>
+          </li>
+          {STATIONS.map((s) => <li><button type="button" data-focus={s.id}>{s.label}</button></li>)}
+          <li><button type="button" data-focus="home">Home: the pale blue dot</button></li>
+          <li><button type="button" data-focus="voyager">Voyager 1</button></li>
+        </ol>
+      </details>
+    </nav>
+
+    <nav class="zones" id="zones" aria-label="Worlds">
+      {ZONE_INFO.map((z) => <button type="button" data-zone={z.id} style={`--c:${z.colour}`} aria-keyshortcuts={keys[z.id]}><span class="n">{PLANETS.find((p) => p.id === z.id)!.label}</span><span class="bn" lang="bn">{z.bn}</span></button>)}
+      <button type="button" data-zone="" class="all" aria-keyshortcuts="0">The whole system</button>
     </nav>
 
     {ZONE_INFO.map((z) => (
       <aside class="plate" data-plate={z.id} style={`--c:${z.colour}`} aria-labelledby={`plate-${z.id}`}>
-        <p class="kicker"><span class="bn" lang="bn">{z.bn}</span> {z.name}</p>
+        <p class="kicker"><span class="bn" lang="bn">{z.bn}</span> {PLANETS.find((p) => p.id === z.id)!.label}</p>
         <h2 id={`plate-${z.id}`}>{z.form}</h2>
         <p class="pline">{z.line}</p>
         <dl>{z.specs.map(([k, v]) => <><dt>{k}</dt><dd>{v}</dd></>)}</dl>
         <p class="real">{z.real} <a href={z.source.href}>{z.source.label}</a></p>
-        <div class="mission" data-mission-box={z.id}><p class="mission-row"><button type="button" class="start" data-mission={z.id}>Try the mission</button>{z.id === "air" && <span class="here">Start here, it's where the work started</span>}</p></div>
-        <p class="things-h">Things here</p>
-        <ul class="things">{z.objects.map((o) => <li><button type="button" data-focus={o}>{bySlug[o].title}</button></li>)}</ul>
+        <div class="mission" data-mission-box={z.id}><p class="mission-row"><button type="button" class="start" data-mission={z.id}>Try the mission</button></p></div>
+        <p class="things-h">Moons of this world</p>
+        <ul class="things">{moonsOf(z.id).map((m) => <li><button type="button" data-focus={m.id}>{m.label}</button></li>)}</ul>
       </aside>
     ))}
 
-    <Panels />
+<Panels />
     <p class="guide" id="guide" aria-live="polite"><span class="who">Bunnu</span> <span id="guide-say"></span></p>
     <p class="tip" id="tip" aria-hidden="true"></p>
 
     <div class="hud">
-      <details class="places">
-        <summary>Places</summary>
-        <ul>
-          <li><button type="button" data-focus="timemachine">The time machine</button></li>
-          <li><button type="button" data-focus="library">The library</button></li>
-          <li><button type="button" data-focus="graveyard">My wrong ideas</button></li>
-          <li><button type="button" data-focus="cv">The CV office</button></li>
-          <li><button type="button" data-focus="heritage-jcbose">The delta</button></li>
-          <li><button type="button" data-focus="voyager">Voyager</button></li>
-        </ul>
-      </details>
       <button class="snd" id="snd" type="button" aria-pressed="true">Sound</button>
-      <a class="skip-game" href="/everything"><span class="long">Skip the game, show me everything</span><span class="short">All the work</span></a>
     </div>
 
     <Opening />
@@ -67,15 +85,17 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
 <script>
   import { createSound } from "../game/audio";
   import { MISSIONS } from "../game/missions";
+  import { ANECDOTES, IDLE } from "../data/anecdotes";
+  import "../scripts/live-stats";
   import { startPoster, wantsPoster } from "../game/poster";
   const sfx = createSound(); sfx.scene("space");
   // the 3D planet, or (reduced motion, low-end, no WebGL2, ?poster) a still of it with the same UI on top
   const poster = wantsPoster();
   if (poster) document.getElementById("main")!.classList.add("poster");
-  const worldP = poster ? Promise.resolve(startPoster()) : import("../game/main").then((m) => m.start(document.getElementById("world") as HTMLCanvasElement));
+  const worldP = poster ? Promise.resolve(startPoster()) : import("../space/engine").then((m) => m.start(document.getElementById("world") as HTMLCanvasElement));
   const opening = document.getElementById("opening")!;
   const beats = [...opening.querySelectorAll<HTMLElement>(".beat")];
-  const title = document.getElementById("title")!, zonesEl = document.getElementById("zones")!;
+  const title = document.getElementById("intro")!, zonesEl = document.getElementById("zones")!;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let i = -1, timer = 0, done = false;
 
@@ -89,9 +109,8 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
     if (done) return; done = true; clearTimeout(timer);
     opening.classList.add("gone"); setTimeout(() => opening.remove(), 1300);
     const world = await worldP; world.fallIn();
-    title.classList.add("on");
-    setTimeout(() => { title.classList.remove("on"); zonesEl.classList.add("on"); }, reduce ? 300 : 7000);
-    const buttons = [...zonesEl.querySelectorAll<HTMLButtonElement>("button")];
+    title.classList.add("on"); zonesEl.classList.add("on"); document.getElementById("index")!.classList.add("on");
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>("button[data-zone]")];
     const go = (z: string) => world.go((z || null) as never);
     buttons.forEach((b) => b.addEventListener("click", () => go(b.dataset.zone ?? "")));
     const plates = [...document.querySelectorAll<HTMLElement>(".plate")];
@@ -100,7 +119,7 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
     const names: Record<string, string> = Object.fromEntries(panels.map((p) => [p.dataset.obj!, p.querySelector("h2")!.textContent!]));
     let current: string | null = null;
     const closePanel = () => { if (!panels.some((p) => p.classList.contains("on"))) return; panels.forEach((p) => p.classList.remove("on")); world.setYear(null); world.go((current || null) as never); };
-    world.onObject((id) => { plates.forEach((p) => p.classList.remove("on")); title.classList.remove("on"); panels.forEach((p) => p.classList.toggle("on", p.dataset.obj === id)); panels.find((p) => p.dataset.obj === id)?.querySelector<HTMLElement>(".close")?.focus({ preventScroll: true }); });
+    world.onObject((id) => { plates.forEach((p) => p.classList.remove("on")); panels.forEach((p) => p.classList.toggle("on", p.dataset.obj === id)); panels.find((p) => p.dataset.obj === id)?.querySelector<HTMLElement>(".close")?.focus({ preventScroll: true }); });
     world.onHover((id, x, y) => { tip.textContent = id ? names[id] ?? "" : ""; tip.classList.toggle("on", !!id); tip.style.transform = `translate(${x + 16}px, ${y + 14}px)`; });
     document.querySelectorAll<HTMLButtonElement>("[data-focus]").forEach((b) => b.addEventListener("click", () => world.focus(b.dataset.focus!)));
     panels.forEach((p) => p.querySelector(".close")!.addEventListener("click", closePanel));
@@ -146,7 +165,29 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
     document.querySelectorAll<HTMLButtonElement>("[data-mission]").forEach((b) => (b.onclick = () => run(b.dataset.mission!)));
     world.onZone((z) => { endMission(); if (z) greeted = true; });
     let greeted = false;
-    const greet = window.setTimeout(() => { if (!greeted) speak("Pick a place below, or click anything on the planet. Air is where the work started, in 2024."); }, reduce ? 400 : 7600);
+    const greet = window.setTimeout(() => { if (!greeted) speak("I'm Bunnu, and that's my ship. Pick a world, open anything in the index, or click my ship for a story from the logs."); }, reduce ? 400 : 3500);
+
+    // labels that sit on the bodies themselves
+    const lbls = new Map([...document.querySelectorAll<HTMLElement>("[data-lbl]")].map((b) => [b.dataset.lbl!, b]));
+    world.onFrame?.((pos) => {
+      for (const [id, b] of lbls) {
+        const q = pos.get(id);
+        if (!q || !q.visible) { b.style.opacity = "0"; b.style.pointerEvents = "none"; continue; }
+        b.style.opacity = "1"; b.style.pointerEvents = "auto";
+        b.style.transform = `translate(${q.x.toFixed(1)}px, ${q.y.toFixed(1)}px)`;
+      }
+    });
+    // Bunnu tells a real story when you poke her ship; now and then, a line of her own
+    let ai = Math.floor(Math.random() * ANECDOTES.length);
+    world.onBunnu?.(() => { greeted = true; ai = (ai + 1) % ANECDOTES.length; speak(ANECDOTES[ai].line); world.sound.pluck(660); });
+    setInterval(() => { if (!document.hidden && !document.querySelector(".objpanel.on, .plate.in-mission") && Math.random() < 0.35) speak(IDLE[Math.floor(Math.random() * IDLE.length)]); }, 45000);
+    // find anything in the index
+    const find = document.getElementById("find") as HTMLInputElement;
+    find.addEventListener("input", () => {
+      const q = find.value.trim().toLowerCase();
+      document.querySelectorAll<HTMLLIElement>(".tree li").forEach((li) => { const hit = !q || li.textContent!.toLowerCase().includes(q); li.hidden = !hit; });
+    });
+    find.addEventListener("keydown", (e) => { if (e.key === "Enter") document.querySelector<HTMLButtonElement>(".tree li:not([hidden]) button")?.click(); });
 
     // the time machine
     const tmRange = document.getElementById("tm-year") as HTMLInputElement | null, tmAge = document.getElementById("tm-age")!;
@@ -155,12 +196,13 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
       if (!tmRange) return;
       const i = +tmRange.value, el = tmYears[i], y = el.dataset.y === "now" ? null : +el.dataset.y!;
       tmYears.forEach((t, k) => (t.hidden = k !== i)); world.setYear(y);
+      const said = el.querySelector<HTMLElement>(".bunnu-says"); if (said && tmRange.dataset.touched) speak(said.textContent!.replace(/^Bunnu\s*/, ""));
       const back = y === null ? 0 : 2026 - y;
       tmAge.textContent = back === 0 ? "Now: everything built so far is on the planet." : `${y}: anything built after this is gone from the planet.`;
     };
-    tmRange?.addEventListener("input", setTM); setTM();
+    tmRange?.addEventListener("input", () => { tmRange.dataset.touched = "1"; setTM(); }); setTM();
     world.onObject((id) => { if (id !== "timemachine" && tmRange && tmRange.value !== tmRange.max) { tmRange.value = tmRange.max; setTM(); } });
-    world.onZone((z) => { current = z; panels.forEach((p) => p.classList.remove("on")); buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.zone || null) === z))); title.classList.remove("on"); plates.forEach((p) => p.classList.toggle("on", p.dataset.plate === z)); });
+    world.onZone((z) => { current = z; panels.forEach((p) => p.classList.remove("on")); buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.zone || null) === z))); plates.forEach((p) => p.classList.toggle("on", p.dataset.plate === z)); });
     addEventListener("keydown", (e) => { const k = "01234".indexOf(e.key); if (k >= 0) go(["", "air", "water", "earth", "fire"][k]); });
     const snd = document.getElementById("snd")!;
     snd.setAttribute("aria-pressed", String(world.sound.on()));
@@ -178,12 +220,6 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
   .game-shell { position: fixed; inset: 0; }
   #world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
   .game-shell::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / .55) 100%); }
-  .title { position: absolute; z-index: 3; left: clamp(1.4rem, 5vw, 4rem); bottom: 7.5rem; width: min(30rem, 86vw); opacity: 0; transform: translateY(10px); transition: opacity 1.2s ease, transform 1.2s ease; pointer-events: none; font-family: var(--sans); }
-  .title:global(.on) { opacity: 1; transform: none; }
-  .els { margin: 0 0 .7rem; font: 600 var(--t2) var(--sans); display: flex; gap: .9rem; flex-wrap: wrap; letter-spacing: .01em; }
-  .els span { color: var(--c); }
-  .line { font: 600 var(--t1)/1.5 var(--sans); color: #fff; margin: 0 0 .6rem; text-shadow: 0 2px 14px #000; }
-  .meet { font: 500 var(--t0) var(--sans); color: #c8c8c8; margin: 0; }
   .zones { position: absolute; z-index: 3; left: 50%; bottom: 1.6rem; transform: translate(-50%, 20px); display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; opacity: 0; transition: opacity .8s ease, transform .8s ease; pointer-events: none; }
   .zones:global(.on) { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
   .zones button { display: grid; justify-items: center; gap: .15rem; min-width: 6.2rem; padding: .65rem 1.1rem .55rem; border: 0; border-radius: 8px; background: rgb(255 255 255 / .1); color: #fff; cursor: pointer; font: 500 var(--t0) var(--sans); transition: background .25s, transform .25s cubic-bezier(.2,.8,.3,1.3); backdrop-filter: blur(6px); }
@@ -217,8 +253,7 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
     .guide { top: 3.6rem; bottom: auto; font-size: var(--t-1); }
     .hud { left: .6rem; right: .6rem; top: .6rem; justify-content: flex-end; gap: .4rem; }
     .skip-game { white-space: nowrap; }
-    .title { bottom: 5.4rem; }
-  }
+    }
   .poster-img { display: none; }
   .poster .poster-img { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .poster #world { display: none; }
@@ -250,13 +285,32 @@ const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "
   .things button:hover { background: var(--c); color: #000; }
   .tip { position: absolute; left: 0; top: 0; z-index: 6; margin: 0; pointer-events: none; font: 600 var(--t-1) var(--sans); color: #000; background: #fff; border-radius: 6px; padding: .3rem .75rem; opacity: 0; transition: opacity .15s; }
   .tip:global(.on) { opacity: 1; }
-  .places { position: relative; }
-  .places summary { list-style: none; font: 500 var(--t-1) var(--sans); color: #fff; background: rgb(255 255 255 / .12); border-radius: 6px; padding: .45rem .9rem; cursor: pointer; }
-  .places summary::-webkit-details-marker { display: none; }
-  .places ul { position: absolute; right: 0; top: 2.6rem; list-style: none; margin: 0; padding: .4rem; display: grid; gap: .2rem; min-width: 12rem; border-radius: 8px; background: rgb(9 14 44 / .92); backdrop-filter: blur(10px); }
-  .places ul button { width: 100%; text-align: left; font: 500 var(--t-1) var(--sans); color: #fff; background: none; border: 0; border-radius: .6rem; padding: .45rem .7rem; cursor: pointer; }
-  .places ul button:hover { background: rgb(255 255 255 / .12); }
   .skip-game .short { display: none; }
   @media (max-width: 520px) { .skip-game .long { display: none; } .skip-game .short { display: inline; } }
+  .intro { position: absolute; z-index: 4; left: 1.2rem; top: 1rem; width: min(34rem, 60vw); opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
+  .intro:global(.on) { opacity: 1; }
+  .intro h1 { margin: 0 0 .5rem; font: 600 var(--t2)/1.1 var(--sans); }
+  .intro h1 button { all: unset; cursor: pointer; color: #fff; }
+  .intro h1 button:hover { color: #ffcf8a; }
+  .intro p { margin: 0 0 .5rem; font: 400 var(--t-1)/1.55 var(--sans); color: #c9ccd2; max-width: 52ch; text-shadow: 0 1px 8px #000; }
+  .intro .live { font: 400 var(--t-2)/1.4 var(--mono); color: #8a94a3; }
+  .intro .cta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
+  .index { position: absolute; z-index: 4; left: 1.2rem; top: 15.5rem; bottom: 6rem; width: 17rem; opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
+  .index:global(.on) { opacity: 1; }
+  .index details { max-height: 100%; display: flex; flex-direction: column; background: rgb(8 9 12 / .82); border: 1px solid #262626; border-radius: 10px; padding: .6rem .7rem; overflow: hidden; }
+  .index summary { font: 500 var(--t-1) var(--sans); color: #e8e8e8; cursor: pointer; padding: .2rem 0 .5rem; }
+  .find input { width: 100%; box-sizing: border-box; font: 400 var(--t-1) var(--sans); color: #fff; background: #111318; border: 1px solid #2a2a2a; border-radius: 6px; padding: .45rem .6rem; margin-bottom: .5rem; }
+  .tree { list-style: none; margin: 0; padding: 0 .2rem 0 0; overflow-y: auto; max-height: calc(100svh - 26rem); scrollbar-width: thin; }
+  .tree ol { list-style: none; margin: 0 0 .4rem; padding: 0 0 0 .8rem; border-left: 1px solid #262626; }
+  .tree button { all: unset; display: block; cursor: pointer; padding: .2rem .3rem; border-radius: 4px; font: 400 var(--t-1)/1.35 var(--sans); color: #b8bcc4; }
+  .tree button:hover, .tree button:focus-visible { color: #fff; background: rgb(255 255 255 / .06); }
+  .tree .wl { color: var(--c, #e8e8e8); font-weight: 500; margin-top: .3rem; }
+  .labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+  .lbl { position: absolute; left: 0; top: 0; margin: 14px 0 0 10px; font: 400 12px/1 var(--sans); color: #c9ccd2; background: none; border: 0; padding: 2px 4px; cursor: pointer; white-space: nowrap; opacity: 0; transition: opacity .3s; text-shadow: 0 1px 6px #000; }
+  .lbl.planet { font: 500 14px/1 var(--sans); color: #fff; }
+  .lbl.star { font: 500 13px/1 var(--sans); color: #ffcf8a; }
+  .lbl.station { color: #9aa3b2; }
+  .lbl:hover { color: #fff; text-decoration: underline; }
+  @media (max-width: 900px) { .index { top: auto; bottom: 4.6rem; left: .6rem; right: .6rem; width: auto; } .index details:not([open]) { background: rgb(8 9 12 / .82); } .tree { max-height: 40svh; } .intro { width: auto; right: .6rem; left: .6rem; } .intro p:not(.cta) { display: none; } }
   .nojs { position: absolute; inset: auto 1rem 1rem; z-index: 12; color: #fff; }
 </style>

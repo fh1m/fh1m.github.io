@@ -16,7 +16,7 @@ export const person = {
   handle: "fh1m",
   email: "fh1m.faisal.work@gmail.com",
   github: "https://github.com/fh1m",
-  linkedin: null as string | null, // not yet confirmed by Fahim, so not shown
+  linkedin: "https://www.linkedin.com/in/fahim-faisal-10615322a/" as string | null, // as listed on bracuduburi.com/team/2026
   place: "Dhaka, Bangladesh",
   line: "Autonomy and robotics: perception, control, embedded.",
   source: "cv26",

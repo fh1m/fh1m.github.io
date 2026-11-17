@@ -1,105 +1,51 @@
 ---
 /**
- * The opening, illustrated: Voyager 1 turns around for one last picture (14 Feb 1990).
- * Facts from NASA, "10 Things You Might Not Know About Voyager's Famous 'Pale Blue Dot' Photo" (2020).
- * Every beat is one line. Click, Space or Enter goes on; "skip" goes straight to the planet.
+ * The opening: the real photograph. Voyager 1's Pale Blue Dot (NASA/JPL-Caltech, "Pale Blue Dot
+ * Revisited", PIA23645, 2020), a slow push toward the pixel that is Earth, then who I am.
+ * Facts: NASA, "10 Things You Might Not Know About Voyager's Famous 'Pale Blue Dot' Photo" (2020).
+ * Click, Space or Enter goes on; Skip goes straight to the system.
  */
-const stars = Array.from({ length: 140 }, (_, i) => {
-  const r = (n: number) => { const x = Math.sin(i * 12.9898 + n * 78.233) * 43758.5453; return x - Math.floor(x); };
-  return { x: r(1) * 1600, y: r(2) * 900, s: 0.6 + r(3) * 1.6, d: r(4) * 4 };
-});
 const beats = [
-  "February 1990. Voyager 1 is forty times farther from the Sun than we are, and it isn't coming back.",
-  "It took eight years and six requests before anyone let it look home. Pointing a camera that close to the Sun can blind it.",
-  "The cameras are frozen. They need three hours to warm up.",
-  "That beam isn't out in space. It's sunlight scattering inside the camera. A happy accident.",
-  "Look again at that dot. That's here. That's home. That's us.",
-  "At 05:22 GMT it switched its cameras off for good. That was the last thing it ever saw.",
+  "14 February 1990. Voyager 1, six billion kilometres out, turns its camera around one last time.",
+  "It took years of asking. The cameras needed three hours to warm up, and the beam across the frame is sunlight scattering inside the optics.",
+  "That point of light, inside the beam, is Earth.",
+  "“That's here. That's home. That's us.”",
+  "Somewhere in that pixel is Dhaka. I'm Fahim, and I build robots that have to work on their own. Here is everything I've built, laid out as a small system you can fly through.",
 ];
 ---
-<section class="opening" id="opening" aria-label="Opening: the Pale Blue Dot">
-  <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <defs>
-      <radialGradient id="sunGlow"><stop offset="0" stop-color="#fff6d8" /><stop offset=".18" stop-color="#ffe7a3" stop-opacity=".9" /><stop offset="1" stop-color="#ffd36b" stop-opacity="0" /></radialGradient>
-      <linearGradient id="beam" x1="0" x2="1"><stop offset="0" stop-color="#cfd8ff" stop-opacity="0" /><stop offset=".5" stop-color="#e6ebff" stop-opacity=".55" /><stop offset="1" stop-color="#cfd8ff" stop-opacity="0" /></linearGradient>
-    </defs>
-    <rect width="1600" height="900" fill="#000" />
-    <g class="stars">{stars.map((s) => <circle cx={s.x} cy={s.y} r={s.s} fill="#fff" style={`animation-delay:${s.d}s`} />)}</g>
-
-    <!-- the Sun, far away and still too bright -->
-    <g class="sun"><circle cx="300" cy="260" r="140" fill="url(#sunGlow)" /><circle cx="300" cy="260" r="9" fill="#fffbe9" /></g>
-
-    <!-- the photograph: the beam, and in it, us -->
-    <g class="photo">
-      <rect x="-200" y="0" width="2000" height="900" fill="#141c48" opacity=".6" />
-      <polygon class="beamband" points="980,-40 1080,-40 760,940 660,940" fill="url(#beam)" />
-      <polygon points="1240,-40 1290,-40 1050,940 1000,940" fill="url(#beam)" opacity=".5" />
-      <circle class="dot" cx="904" cy="468" r="3.2" fill="#b8d4ff" />
-      <circle class="ring" cx="904" cy="468" r="26" fill="none" stroke="#ff4f8b" stroke-width="2" />
-    </g>
-
-    <!-- Voyager 1, drawn flat -->
-    <g class="voyager">
-      <g class="craft">
-        <line x1="0" y1="0" x2="-360" y2="-40" stroke="#c9c3b5" stroke-width="3" />
-        <line x1="0" y1="0" x2="240" y2="120" stroke="#c9c3b5" stroke-width="5" />
-        <g transform="translate(240 120)"><rect x="-14" y="-30" width="28" height="60" rx="6" fill="#6b6f7d" /><rect x="-14" y="-30" width="28" height="12" fill="#8a8f9e" /><rect x="-14" y="2" width="28" height="12" fill="#8a8f9e" /></g>
-        <line x1="0" y1="0" x2="-190" y2="150" stroke="#c9c3b5" stroke-width="5" />
-        <g class="scan" transform="translate(-190 150)"><rect x="-30" y="-22" width="60" height="44" rx="5" fill="#3a3f4b" /><rect x="-44" y="-12" width="22" height="24" rx="4" fill="#22262f" /><circle class="lens" cx="-46" cy="0" r="9" fill="#2b3550" /></g>
-        <polygon points="-50,-30 50,-30 70,10 50,50 -50,50 -70,10" fill="#d9a441" />
-        <polygon points="-50,-30 50,-30 70,10 -70,10" fill="#e9b85a" />
-        <g transform="translate(0 -20)"><ellipse cx="0" cy="-60" rx="170" ry="52" fill="#e9e6dc" /><ellipse cx="0" cy="-48" rx="150" ry="36" fill="#d4d0c4" /><line x1="0" y1="-60" x2="0" y2="-150" stroke="#c9c3b5" stroke-width="4" /><circle cx="0" cy="-150" r="7" fill="#e9e6dc" /></g>
-      </g>
-    </g>
-    <!-- the shutter -->
-    <rect class="flash" width="1600" height="900" fill="#fff" />
-  </svg>
-
-  <div class="captions" aria-live="polite">
-    {beats.map((b, i) => <p class:list={["beat", { q: i === 4 }]} data-i={i}>{b}{i === 4 && <span class="who">Carl Sagan, who asked for the picture</span>}</p>)}
+<section class="opening" id="opening" aria-label="Opening: Voyager 1's Pale Blue Dot">
+  <div class="photo-wrap" aria-hidden="true">
+    <img class="photo" src="/world/pbd.webp" srcset="/world/pbd-1200.webp 1200w, /world/pbd.webp 2400w" sizes="100vw" alt="" width="2400" height="2375" fetchpriority="high" />
+    <span class="dot-ring"></span>
   </div>
+  <div class="text">
+    {beats.map((b, i) => <p class:list={["beat", { q: i === 3, me: i === 4 }]} data-i={i}>{b}{i === 3 && <span class="who">Carl Sagan, who asked for the picture</span>}</p>)}
+  </div>
+  <p class="credit">Image: NASA/JPL-Caltech, Pale Blue Dot Revisited (2020)</p>
   <div class="controls">
     <button class="next" id="op-next" type="button">Go on</button>
-    <button class="skip" id="op-skip" type="button">Skip</button>
+    <button class="op-skip" id="op-skip" type="button">Skip</button>
   </div>
 </section>
-
 <style>
-  .opening { position: fixed; inset: 0; z-index: 10; background: #000; transition: opacity 1.2s ease; }
+  .opening { position: fixed; inset: 0; z-index: 30; background: #000; overflow: hidden; cursor: pointer; transition: opacity 1.2s ease; font-family: var(--sans); }
   .opening.gone { opacity: 0; pointer-events: none; }
-  .scene { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .stars circle { animation: tw 4s ease-in-out infinite; }
-  @keyframes tw { 50% { opacity: .35; } }
-  .sun { opacity: 0; transition: opacity 2s ease; }
-  .photo { opacity: 0; transition: opacity 1.6s ease; }
-  .ring { opacity: 0; transform-box: fill-box; transform-origin: center; }
-  .voyager { transform: translate(1150px, 520px) rotate(-8deg) scale(.95); transition: transform 3.2s cubic-bezier(.45, 0, .2, 1), opacity 1.2s ease; }
-  .craft { animation: drift 9s ease-in-out infinite; }
-  @keyframes drift { 50% { transform: translate(-14px, 8px) rotate(1.2deg); } }
-  .lens { transition: fill 2.4s ease; }
-  .flash { opacity: 0; pointer-events: none; }
-
-  /* beats */
-  .opening[data-beat="0"] .sun, .opening[data-beat="1"] .sun, .opening[data-beat="2"] .sun { opacity: 1; }
-  .opening[data-beat="1"] .voyager { transform: translate(1050px, 560px) rotate(160deg) scale(.95); }
-  .opening[data-beat="2"] .voyager { transform: translate(1050px, 560px) rotate(160deg) scale(.95); }
-  .opening[data-beat="2"] .lens { fill: #ff9b4f; }
-  .opening[data-beat="3"] .photo, .opening[data-beat="4"] .photo, .opening[data-beat="5"] .photo { opacity: 1; }
-  .opening[data-beat="3"] .voyager, .opening[data-beat="4"] .voyager, .opening[data-beat="5"] .voyager { opacity: 0; }
-  .opening[data-beat="3"] .flash { animation: shutter .9s ease-out; }
-  @keyframes shutter { 0% { opacity: 0; } 8% { opacity: .9; } 100% { opacity: 0; } }
-  .opening[data-beat="4"] .ring { opacity: 1; animation: ping 2.6s ease-out infinite; }
-  @keyframes ping { 0% { transform: scale(.4); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
-  .opening[data-beat="5"] .photo { filter: grayscale(.6) brightness(.7); transition: filter 3s ease, opacity 1.6s ease; }
-
-  .captions { position: absolute; left: 50%; bottom: 13vh; transform: translateX(-50%); width: min(44rem, 88vw); text-align: center; }
-  .beat { position: absolute; inset: auto 0 0; margin: 0; font: 600 var(--t2)/1.45 var(--story); color: #f2f4ff; opacity: 0; transform: translateY(8px); transition: opacity .7s ease, transform .7s ease; text-shadow: 0 2px 12px #000; }
-  .beat.on { opacity: 1; transform: none; }
-  .beat.q { font-size: var(--t3); font-style: italic; }
-  .who { display: block; margin-top: .5rem; font: 500 var(--t-1) var(--story); font-style: normal; color: #a3a3a3; }
-  .controls { position: absolute; right: 1.4rem; bottom: 1.4rem; display: flex; gap: .6rem; }
-  .controls button { font: 700 var(--t-1) var(--story); border: 0; border-radius: 999px; padding: .55rem 1.1rem; cursor: pointer; }
-  .next { background: #ffd15c; color: #000; }
-  .skip { background: rgb(255 255 255 / .12); color: #fff; }
-  @media (prefers-reduced-motion: reduce) { .voyager, .beat, .sun, .photo { transition: none; } .craft, .stars circle, .ring { animation: none; } }
+  .photo-wrap { position: absolute; inset: 0; transform-origin: 59.45% 51.88%; transition: transform 9s cubic-bezier(.25,.1,.2,1), filter 2s ease; will-change: transform; }
+  .photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 59.45% 51.88%; opacity: 0; transition: opacity 2.2s ease; }
+  .opening[data-beat] .photo { opacity: 1; }
+  .opening[data-beat="2"] .photo-wrap, .opening[data-beat="3"] .photo-wrap { transform: scale(3.2); }
+  .opening[data-beat="4"] .photo-wrap { transform: scale(5.5); filter: brightness(.55); }
+  .dot-ring { position: absolute; left: 59.45%; top: 51.88%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border: 1px solid rgb(255 255 255 / .7); border-radius: 50%; opacity: 0; transition: opacity 1.5s ease 1s; }
+  .opening[data-beat="2"] .dot-ring { opacity: 1; }
+  .text { position: absolute; left: clamp(1.4rem, 6vw, 5rem); bottom: clamp(5rem, 14vh, 9rem); width: min(40rem, 86vw); }
+  .beat { position: absolute; left: 0; bottom: 0; margin: 0; font: 400 clamp(1.15rem, 2vw, 1.6rem)/1.45 var(--sans); color: #f2f2f2; text-shadow: 0 2px 18px rgb(0 0 0 / .9); opacity: 0; transform: translateY(10px); transition: opacity .25s ease, transform .25s ease; }
+  .beat.on { opacity: 1; transform: none; transition: opacity .9s ease .3s, transform .9s ease .3s; }
+  .beat.q { font-style: italic; font-size: clamp(1.4rem, 2.6vw, 2.1rem); }
+  .beat.me { font-size: clamp(1.1rem, 1.8vw, 1.45rem); }
+  .who { display: block; margin-top: .6rem; font: 400 var(--t-1) var(--sans); font-style: normal; color: #b8bcc4; }
+  .credit { position: absolute; right: 1.2rem; bottom: 1rem; margin: 0; font: 400 var(--t-2) var(--sans); color: rgb(255 255 255 / .45); }
+  .controls { position: absolute; left: clamp(1.4rem, 6vw, 5rem); bottom: 1.6rem; display: flex; gap: .5rem; }
+  .controls button { font: 500 var(--t-1) var(--sans); color: #000; background: #ececec; border: 0; border-radius: 6px; padding: .6rem 1rem; cursor: pointer; }
+  .controls .op-skip { background: transparent; color: #e8e8e8; border: 1px solid #555; }
+  @media (prefers-reduced-motion: reduce) { .photo-wrap, .beat { transition: none; } }
 </style>

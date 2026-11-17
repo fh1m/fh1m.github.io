@@ -2,12 +2,6 @@
  * An album: black, white, greys, and the four nations as the only colour.
  * Each page sets --c to its nation; red is still "this was wrong".
  */
-@font-face { font-family: "Zed Sans"; src: url("/fonts/zed-sans-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
-@font-face { font-family: "Zed Sans"; src: url("/fonts/zed-sans-medium.woff2") format("woff2"); font-weight: 500 700; font-style: normal; font-display: swap; }
-@font-face { font-family: "Zed Sans"; src: url("/fonts/zed-sans-italic.woff2") format("woff2"); font-weight: 400 700; font-style: italic; font-display: swap; }
-@font-face { font-family: "Nunito"; src: url("/fonts/nunito-var.woff2") format("woff2"); font-weight: 200 1000; font-style: normal; font-display: swap; }
-@font-face { font-family: "Obel Mono"; src: url("/fonts/obelmono.woff2") format("woff2"); font-weight: 300 800; font-style: normal; font-display: swap; }
-@font-face { font-family: "Obel Mono"; src: url("/fonts/obelmono-italic.woff2") format("woff2"); font-weight: 300 800; font-style: italic; font-display: swap; }
 
 :root {
   --black: #000;            /* the planet's space: the whole site lives in it */
@@ -34,9 +28,9 @@
   --estimate: #a9b2c2;
   --me: var(--red);
 
-  --sans: "Zed Sans", ui-sans-serif, system-ui, sans-serif;
-  --story: "Zed Sans", system-ui, sans-serif; /* one serious face for narration and reading */
-  --mono: "Obel Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --story: var(--sans);
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --serif: var(--sans);
   --display: var(--sans);
   --pixel: var(--mono);

@@ -1,6 +1,12 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import "@fontsource/tiro-bangla/400.css";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-sans/400-italic.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
 import "../styles/global.css";
 import { person } from "../data/facts";
 import { elements } from "../data/elements";
@@ -21,7 +27,6 @@ const colour = elements.find((e) => e.id === nation)?.colour;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#000" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" href="/fonts/zed-sans-regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="canonical" href={new URL(here, Astro.site)} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
