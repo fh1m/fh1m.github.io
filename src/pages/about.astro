@@ -1,0 +1,141 @@
+---
+/**
+ * The record: the professional side in one place. Who I am, what I'm on now, what the press
+ * wrote, the certificates, a year of GitHub activity and the languages it was in (rebuilt daily
+ * from the API, refreshed live in the browser), publications. Everything links to its source.
+ */
+import Base from "../layouts/Base.astro";
+import gh from "../data/github.json";
+import { person, publications, results } from "../data/facts";
+
+const press = [
+  { src: "The Business Standard", title: "BRACU Duburi qualifies two underwater vehicles for RoboSub 2026 semi-finals", url: "https://www.tbsnews.net/economy/corporates/bracu-duburi-qualifies-two-underwater-vehicles-robosub-2026-semi-finals-1467436", year: 2026, img: "/media/press/tbs-robosub-2026.webp" },
+  { src: "The Business Standard", title: "BRACU Duburi qualifies directly for RoboSub 2025 semi-final", url: "https://www.tbsnews.net/graduates/bracu-duburi-qualifies-directly-robosub-2025-semi-final-1202131", year: 2025, img: "/media/press/tbs-robosub-2025.webp" },
+  { src: "BRAC University", title: "BRACU Duburi wins special ‘Entrepreneurship’ award at RoboSub 2025", url: "https://www.bracu.ac.bd/news/bracu-duburi-wins-special-entrepreneurship-award-robosub-2025", year: 2025 },
+  { src: "BRACU Express", title: "BRACU Duburi’s innovation elevates Bangladesh in robotics", url: "https://bracuexpress.com/bracu-duburis-innovation-elevates-bangladesh-in-robotics/", year: 2025, img: "/media/press/bracuexpress-robotics.webp" },
+  { src: "BRAC University", title: "Mongol-Tori ranks among global top 10 at University Rover Challenge 2025", url: "https://www.bracu.ac.bd/news/brac-universitys-mongol-tori-team-ranks-among-global-top-10-university-rover-challenge-2025", year: 2025 },
+  { src: "BRAC University", title: "Mongol-Tori first runner-up at Bangladesh ICT & Innovation Awards 2025", url: "https://www.bracu.ac.bd/news/bracu-mongol-tori-first-runner-bangladesh-ict-and-innovation-awards-2025", year: 2025 },
+  { src: "The Daily Star", title: "First hybrid rocket engine in Bangladesh tested successfully", url: "https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016", year: 2024, img: "/media/press/dailystar-hybrid-rocket.webp" },
+  { src: "Dhaka Tribune", title: "AIUB, AERD launch first weather balloon", url: "https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon", year: 2023 },
+];
+const certs = [
+  { img: "/media/certs/robosub-2024.webp", cap: "RoboSub 2024, 27th annual, participation" },
+  { img: "/media/certs/robosub-2025.webp", cap: "RoboSub 2025, 28th annual, participation" },
+  { img: "/media/certs/robosub-2026.webp", cap: "RoboSub 2026, 29th annual, participation" },
+];
+const now = [
+  ["Mongla", "My own AUV autonomy stack, on Rakibul Islam's SROT board with a Hailo-8. Bench-validated; the next milestone is water."],
+  ["Vision that survives murk", "Domain generalization for underwater detection: the “Color is Also Class Evidence” line of work."],
+  ["Cheap sensing, honest estimates", "Turning a downward camera into a velocity sensor, so a vehicle doesn't need a DVL to know it moved."],
+];
+const life: [string, string, string][] = [
+  ["2021", "First code someone else depended on", "A web internship at Thinkit: a database migration and a pile of front-end bugs."],
+  ["2023", "Rockets", "Guidance and control at Amateur Experimental Rocketry Dhaka, part of the team behind the first hybrid rocket engine tested in Bangladesh."],
+  ["2023", "Then water", "Joined BRACU Duburi's vision sub-team. Learned that the pool disagrees with the dataset."],
+  ["2024", "A semester in Germany", "Autonomous Systems at IU, Bad Honnef. Back home, a thrust-vector gimbal that had to hold still on command."],
+  ["2025", "A rover arm that types", "Inverse kinematics and OCR for Mongol-Tori at the University Rover Challenge; vision lead at RoboSub."],
+  ["2026", "Leading, then leaving", "Engineering lead for two vehicles at RoboSub 2026. Left BRAC University on principle, started again at UIU."],
+  ["2026", "A stack of my own", "Mongla: an autonomy stack where every claim names the file or measurement behind it, and the dive count is honestly zero."],
+];
+// a year of contributions as a weekly heatmap (53 columns × 7 rows)
+const days = gh.days as [string, number][];
+const max = Math.max(1, ...days.map((d) => d[1]));
+const lvl = (n: number) => (n === 0 ? 0 : n < max * 0.15 ? 1 : n < max * 0.35 ? 2 : n < max * 0.6 ? 3 : 4);
+const first = new Date(days[0][0]).getDay();
+const cells = days.map(([d, n], i) => ({ d, n, x: Math.floor((i + first) / 7), y: (i + first) % 7 }));
+const langs = (gh.languages as { name: string; color: string; share: number }[]).slice(0, 6);
+---
+<Base title="The record" description="Fahim Faisal's record: press coverage, RoboSub certificates, a year of GitHub activity, languages, publications and current focus.">
+  <main id="main" class="screens">
+    <header class="screen">
+      <div class="measure head">
+        <img src="/media/own/fahim.webp" alt="Fahim Faisal" width="768" height="1024" />
+        <div>
+          <h1 class="s-h1">The record</h1>
+          <p class="s-dek">{person.fullName}, robotics engineer from Dhaka. The parts of the story other people wrote down: press, certificates, papers, and the commits themselves.</p>
+          <p class="s-meta"><a href="/cv">CV</a> · <a href="/cv/fahim-faisal-cv.pdf" download>PDF</a> · <a href={person.github}>GitHub</a> · {person.linkedin && <a href={person.linkedin}>LinkedIn</a>} · <a href={`mailto:${person.email}`}>{person.email}</a></p>
+        </div>
+      </div>
+    </header>
+
+    <section class="screen" id="now" aria-labelledby="h-now">
+      <h2 class="s-h2" id="h-now">Now</h2>
+      <ul class="cols">{now.map(([t, d]) => <li><p class="t">{t}</p><p class="s-txt">{d}</p></li>)}</ul>
+    </section>
+
+    <section class="screen" aria-labelledby="h-life">
+      <h2 class="s-h2" id="h-life">A life, so far</h2>
+      <ol class="life">{life.map(([y, t, d]) => <li><span class="yr">{y}</span><div><p class="t">{t}</p><p class="s-txt">{d}</p></div></li>)}</ol>
+    </section>
+
+    <section class="screen" aria-labelledby="h-act">
+      <h2 class="s-h2" id="h-act">The work, by day</h2>
+      <p class="s-meta" data-live-commits>{gh.contributionsLastYear.toLocaleString("en-US")} contributions in the last year, {gh.commitsLastYear.toLocaleString("en-US")} of them commits. From the GitHub API, {gh.generatedAtLabel}.</p>
+      <svg class="heat" viewBox={`0 0 ${53 * 13} ${7 * 13}`} role="img" aria-label={`Daily contributions over the last year; busiest day ${gh.busiestDay[0]} with ${gh.busiestDay[1]}.`}>
+        {cells.map((c) => <rect x={c.x * 13} y={c.y * 13} width="11" height="11" rx="2" class={`l${lvl(c.n)}`}><title>{c.d}: {c.n}</title></rect>)}
+      </svg>
+      <div class="langs" aria-label="Languages by bytes across public repositories">
+        <div class="bar">{langs.map((l) => <span style={`width:${(l.share * 100).toFixed(2)}%;background:${l.color}`}></span>)}</div>
+        <ul>{langs.map((l) => <li><i style={`background:${l.color}`}></i>{l.name} <span>{(l.share * 100).toFixed(1)} %</span></li>)}</ul>
+      </div>
+    </section>
+
+    <section class="screen" aria-labelledby="h-res">
+      <h2 class="s-h2" id="h-res">Results</h2>
+      <ul class="list">{results.map((r) => <li><span class="yr">{r.year}</span><span><b>{r.event}</b>, {r.team}: {r.result}.</span></li>)}</ul>
+    </section>
+
+    <section class="screen" aria-labelledby="h-press">
+      <h2 class="s-h2" id="h-press">In the press</h2>
+      <ul class="press">
+        {press.map((p) => (
+          <li><a href={p.url}>
+            {p.img ? <img src={p.img} alt="" loading="lazy" /> : <span class="noimg">{p.src}</span>}
+            <span class="pt">{p.title}</span><span class="s-meta">{p.src}, {p.year}</span>
+          </a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="screen" aria-labelledby="h-cert">
+      <h2 class="s-h2" id="h-cert">Certificates</h2>
+      <ul class="certs">{certs.map((c) => <li><figure><img src={c.img} alt={c.cap} loading="lazy" /><figcaption class="s-meta">{c.cap}</figcaption></figure></li>)}</ul>
+    </section>
+
+    <section class="screen" aria-labelledby="h-pub">
+      <h2 class="s-h2" id="h-pub">Publications</h2>
+      <ul class="list">{publications.map((p) => <li><span><b>{p.title}</b>. {p.authors}. <span class="s-meta">{p.venue}.</span></span></li>)}</ul>
+      <p class="s-meta">Also co-author of BRACU Duburi's Technical Design Reports for RoboSub 2025 and 2026.</p>
+    </section>
+  </main>
+</Base>
+<script>
+  import "../scripts/live-stats";
+</script>
+<style>
+  .head { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 1.6rem; align-items: center; }
+  .head img { width: 100%; height: auto; border-radius: var(--r-2); }
+  .cols { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.6rem; }
+  .t { font: 600 var(--t1) var(--sans); color: #fff; margin: 0 0 .3rem; }
+  .heat { width: 100%; max-width: 56rem; height: auto; margin: 1rem 0; }
+  .heat .l0 { fill: #15171c; } .heat .l1 { fill: #0e4429; } .heat .l2 { fill: #006d32; } .heat .l3 { fill: #26a641; } .heat .l4 { fill: #39d353; }
+  .langs .bar { display: flex; height: 8px; border-radius: var(--r-1); overflow: hidden; max-width: 56rem; }
+  .langs ul { list-style: none; padding: 0; margin: .7rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font: 400 var(--t-1) var(--sans); color: #d6d6d6; }
+  .langs i { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; }
+  .langs span { color: #8c8c8c; font-family: var(--mono); }
+  .list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .7rem; font: 400 var(--t0)/1.55 var(--sans); color: #d6d6d6; }
+  .list li { display: flex; gap: 1rem; } .yr { font-family: var(--mono); color: #8c8c8c; min-width: 3rem; }
+  .life { list-style: none; margin: 0; padding: 0; max-width: 46rem; border-left: 1px solid #2a2a2a; }
+  .life li { position: relative; display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: 1rem; padding: 0 0 1.4rem 1.4rem; }
+  .life li::before { content: ""; position: absolute; left: -5px; top: .55rem; width: 9px; height: 9px; border-radius: 50%; background: #ffcf8a; box-shadow: 0 0 10px rgb(255 207 138 / .5); }
+  .life .yr { padding-top: .2rem; color: #ffcf8a; }
+  .life .t { font-size: var(--t0); }
+  .life .s-txt { margin: 0; }
+  .press { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1.6rem; }
+  .press a { display: grid; gap: .45rem; text-decoration: none; }
+  .press img, .noimg { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-2); background: #111318; display: grid; place-items: center; font: 500 var(--t0) var(--sans); color: #8c8c8c; }
+  .pt { font: 500 var(--t0)/1.4 var(--sans); color: #fff; } .press a:hover .pt { text-decoration: underline; }
+  .certs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.4rem; }
+  .certs figure { margin: 0; } .certs img { width: 100%; height: auto; border-radius: var(--r-2); }
+  @media (max-width: 700px) { .head { grid-template-columns: 1fr; } .head img { max-width: 10rem; } }
+</style>

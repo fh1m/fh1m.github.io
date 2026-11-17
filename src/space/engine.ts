@@ -21,7 +21,7 @@ export interface World {
   setYear: (y: number | null) => void;
   onHover: (cb: (id: string | null, x: number, y: number) => void) => void;
   /** Screen positions of labelled bodies, for the HTML labels. */
-  onFrame: (cb: (pos: Map<string, { x: number; y: number; z: number; visible: boolean }>) => void) => void;
+  onFrame: (cb: (pos: Map<string, { x: number; y: number; z: number; r: number; visible: boolean }>) => void) => void;
   /** Bunnu's ship was clicked. */
   onBunnu: (cb: () => void) => void;
 }
@@ -156,7 +156,7 @@ export function start(canvas: HTMLCanvasElement): World {
 
   const sound = createSound();
   let zone: ZoneId | null = null, year: number | null = null, mode: Mode = "idle", modeT = 0;
-  const zoneCbs: ((z: ZoneId | null) => void)[] = [], objCbs: ((id: string) => void)[] = [], hoverCbs: ((id: string | null, x: number, y: number) => void)[] = [], frameCbs: ((m: Map<string, { x: number; y: number; z: number; visible: boolean }>) => void)[] = [], bunnuCbs: (() => void)[] = [];
+  const zoneCbs: ((z: ZoneId | null) => void)[] = [], objCbs: ((id: string) => void)[] = [], hoverCbs: ((id: string | null, x: number, y: number) => void)[] = [], frameCbs: ((m: Map<string, { x: number; y: number; z: number; r: number; visible: boolean }>) => void)[] = [], bunnuCbs: (() => void)[] = [];
 
   // input
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -199,7 +199,7 @@ export function start(canvas: HTMLCanvasElement): World {
 
   // labels: planets always; a world's moons when you are at that world; the star and stations when zoomed out
   const labelled = [...PLANETS.map((p) => p.id), ...STATIONS.map((s) => s.id), HOME.id, PROBE.id, "fh1m", ...MOONS.map((m) => m.id)];
-  const screen = new Map<string, { x: number; y: number; z: number; visible: boolean }>();
+  const screen = new Map<string, { x: number; y: number; z: number; r: number; visible: boolean }>();
   const v3 = new THREE.Vector3();
 
   let last = performance.now(), running = true, tAcc = 0, frameMs = 16, frameN = 0;
@@ -263,7 +263,8 @@ export function start(canvas: HTMLCanvasElement): World {
       n.getWorldPosition(v3); const d = v3.distanceTo(cam.position); v3.project(cam);
       const b = byId[id];
       const near = b?.kind === "moon" ? zone === b.zone && d < 140 : b?.kind === "station" || id === "fh1m" ? camState.dist > 60 || follow === id : true;
-      screen.set(id, { x: (v3.x * 0.5 + 0.5) * w, y: (-v3.y * 0.5 + 0.5) * h, z: d, visible: v3.z < 1 && n.visible && near });
+      const r = (sizeOf(id) / d) * (h / 2) / Math.tan((cam.fov * Math.PI) / 360);
+      screen.set(id, { x: (v3.x * 0.5 + 0.5) * w, y: (-v3.y * 0.5 + 0.5) * h, z: d, r, visible: v3.z < 1 && n.visible && near });
     }
     frameCbs.forEach((f) => f(screen));
     requestAnimationFrame(tick);

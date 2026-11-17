@@ -84,7 +84,7 @@ test("every project, element, mission, lesson and index page renders with zero e
   const lessons = await page.locator(".wall a").evaluateAll((as) => as.map((a) => a.getAttribute("href")!));
   expect(lessons.length).toBeGreaterThanOrEqual(16);
   const missions = ["air", "water", "earth", "fire"].map((z) => `/missions/${z}`);
-  await visitAll(page, ["/everything", "/air", "/water", "/earth", "/fire", ...projects, ...missions, ...lessons, "/lessons", "/notes", "/log", "/cv"]);
+  await visitAll(page, ["/everything", "/air", "/water", "/earth", "/fire", ...projects, ...missions, ...lessons, "/lessons", "/notes", "/log", "/cv", "/about"]);
 });
 
 test("notes: every explorable on every note mounts, zero errors", async ({ page }) => {

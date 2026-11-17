@@ -1,6 +1,6 @@
 /** Real pixel sizes of every image in public/media (src/data/media.json, generated from the files). */
 import media from "./media.json";
-const M = media as Record<string, [number, number]>;
+const M = media as Record<string, number[]>;
 export const dims = (src: string): { w: number; h: number; portrait: boolean; square: boolean } => {
   const [w, h] = M[src] ?? [1200, 800];
   return { w, h, portrait: h > w * 1.05, square: h >= w * 0.8 && h <= w * 1.05 };

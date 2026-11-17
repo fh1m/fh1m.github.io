@@ -53,11 +53,11 @@ const first = el.projects.find((p) => p.hero);
 <style>
   .cover { grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; }
   .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
-  .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: 8px; }
+  .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: var(--r-2); }
   .rel { position: relative; z-index: 1; }
   .bnbig { font: 400 clamp(2.4rem, 5vw, 3.6rem)/1 var(--bangla); color: var(--c); margin: 0 0 .4rem; }
   .split { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 4vw; align-items: center; }
-  dl { display: grid; grid-template-columns: auto 1fr; gap: .9rem 1.6rem; margin: 0; padding: 1.6rem; border-radius: 1rem; background: rgb(255 255 255 / .05); }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: .9rem 1.6rem; margin: 0; padding: 1.6rem; border-radius: var(--r-3); background: rgb(255 255 255 / .05); }
   dt { font: 500 var(--t-1) var(--sans); color: #8c8c8c; }
   dd { margin: 0; font: 400 var(--t0) var(--mono); color: #fff; }
   .go { margin-top: 1.6rem; }

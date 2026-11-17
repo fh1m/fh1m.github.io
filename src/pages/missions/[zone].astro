@@ -87,13 +87,13 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
   .h { font-family: var(--mono); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; max-width: none !important; }
   .aar-margin { display: grid; gap: 1rem; position: sticky; top: 1.4rem; }
-  .note { margin: 0; padding: .9rem 1rem; border-radius: 1rem; background: rgb(255 255 255 / .06); font: 500 var(--t-1)/1.55 var(--sans); color: #e2e2e2; }
+  .note { margin: 0; padding: .9rem 1rem; border-radius: var(--r-3); background: rgb(255 255 255 / .06); font: 500 var(--t-1)/1.55 var(--sans); color: #e2e2e2; }
   .note p { margin: 0 0 .4rem; }
   .note .who { font: 500 var(--t-2) var(--sans); color: #ff9ec2; margin-bottom: .2rem; }
-  .bunnu { border-left: 2px solid var(--c); border-radius: 0 8px 8px 0; }
+  .bunnu { border-left: 2px solid var(--c); border-radius: 0 var(--r-2) var(--r-2) 0; }
   blockquote.note p { font-style: italic; color: #fff; }
   blockquote.note footer { font: 500 var(--t-2) var(--sans); color: #8c8c8c; }
-  .photo img { width: 100%; height: auto; border-radius: .6rem; display: block; }
+  .photo img { width: 100%; height: auto; border-radius: var(--r-2); display: block; }
   .photo figcaption { margin-top: .5rem; font: 500 var(--t-2)/1.5 var(--sans); color: #8c8c8c; }
   @media (max-width: 860px) { .aar-grid { grid-template-columns: 1fr; } .aar-margin { position: static; } .two { grid-template-columns: 1fr; } }
 </style>

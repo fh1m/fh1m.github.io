@@ -21,17 +21,22 @@ const d = note.data;
 const ser = seriesById[d.series];
 const ACCENT: Record<string, string> = { workshop: "#e0b062", water: "#4f8fe0", sight: "#ef6a4f", time: "#a98cf0", ground: "#79b35f", air: "#eaa63b" };
 const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+// A cover image the body also shows would appear twice; the body's copy sits where the text points
+// at it, so that one stays and the cover goes text-only.
+const body = note.body ?? "";
+const cover = d.hero && !body.includes(`"${d.hero}"`) ? d.hero : undefined;
+const minutes = Math.max(1, Math.round(body.replace(/^import .*$/gm, "").split(/\s+/).filter((w) => /[a-z0-9]/i.test(w)).length / 200));
 ---
 <Base title={d.title} description={d.dek} bodyClass="note-page" crumb={{ href: `/notes#${ser.id}`, label: `${ser.title}, part ${d.part} of ${parts.length}`, bn: ser.bn }} progress>
   <main id="main" class="note" style={`--acc:${ACCENT[ser.domain] ?? "#4f8fe0"}`}>
 
-    <header class:list={["cover", { "has-img": !!d.hero }]}>
+    <header class:list={["cover", { "has-img": !!cover }]}>
       <div class="cover-text">
-        <p class="kicker"><time datetime={d.date}>{when}</time></p>
+        <p class="kicker"><time datetime={d.date}>{when}</time>, {minutes} minute read</p>
         <h1>{d.title}</h1>
         <p class="dek">{d.dek}</p>
       </div>
-      {d.hero && <img class:list={["cover-img", { plot: d.heroPlot }]} src={d.hero} alt={d.heroAlt ?? ""} fetchpriority="high" />}
+      {cover && <img class:list={["cover-img", { plot: d.heroPlot }]} src={cover} alt={d.heroAlt ?? ""} fetchpriority="high" />}
     </header>
 
     <article class="scenes"><Content /></article>
@@ -75,7 +80,7 @@ const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateS
 
   .cover { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; padding: clamp(3rem, 8vh, 5.5rem) var(--gutter) clamp(2rem, 5vh, 3.5rem); }
   .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
-  .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: 8px; }
+  .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: var(--r-2); }
   .cover-img.plot { filter: invert(1) hue-rotate(180deg); }
   .cover-text { max-width: 44rem; }
   .kicker { font: 500 var(--t-1) var(--sans); color: var(--acc); margin: 0 0 .8rem; }
@@ -106,7 +111,7 @@ const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateS
   .scenes :global(.pull p) { font: 500 clamp(1.15rem, 1.8vw, 1.45rem)/1.4 var(--sans) !important; color: #fff !important; max-width: 40ch !important; }
   .scenes :global(.pull) { border-left: 2px solid var(--acc) !important; padding-left: 1.2rem !important; }
   .scenes :global(table) { width: 100%; font: 400 var(--t-1)/1.5 var(--mono); }
-  .scenes :global(pre) { font-size: clamp(.95rem, 1.3vw, 1.2rem); padding: 1.4rem; background: #0c0c0e; border-radius: 1rem; overflow-x: auto; }
+  .scenes :global(pre) { font-size: clamp(.95rem, 1.3vw, 1.2rem); padding: 1.4rem; background: #0c0c0e; border-radius: var(--r-3); overflow-x: auto; }
 
   .end { padding: clamp(3rem, 7vh, 5rem) var(--gutter); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 4vw; align-content: center; border-top: 1px solid rgb(255 255 255 / .08); }
   .end h2 { font: 600 var(--t1) var(--sans); color: var(--acc); margin: 0 0 1rem; }

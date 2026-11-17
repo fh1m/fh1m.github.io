@@ -26,7 +26,7 @@ export function mount(el: HTMLElement, bus: EventTarget) {
   const svg = document.createElementNS(NS, "svg");
   svg.setAttribute("viewBox", "0 0 640 300");
   svg.setAttribute("role", "img");
-  svg.style.cssText = "width:100%;height:auto;display:block;background:#02040a;border:1px solid var(--line);border-radius:6px";
+  svg.style.cssText = "width:100%;height:auto;display:block;background:#02040a;border:1px solid var(--line);border-radius: var(--r-2)";
   el.append(svg);
   const say = readout(el);
   const legend = document.createElement("p");

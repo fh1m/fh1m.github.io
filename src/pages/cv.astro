@@ -2,6 +2,15 @@
 import Base from "../layouts/Base.astro";
 import { person, education, roles, results, publications, skills, mongla } from "../data/facts";
 import stats from "../data/github.json";
+// Proof of work: each number is measured, and each links to the write-up or commit that shows how.
+const proof = [
+  { n: "396 → 16.9 ms", what: "age of the camera frame the vehicle steers by, after replacing the queue with a keep-up thread", href: "/notes/the-frame-age-problem" },
+  { n: "18.0 ms", what: "median photon-to-detection latency on a Hailo-8, measured end to end", href: "/notes/mongla" },
+  { n: "701 FPS", what: "XFeat backbone on the Hailo-8, 23× the Pi 5 CPU; no published figure found elsewhere", href: "/notes/the-71-transposes" },
+  { n: "1.09 cm", what: "worst error turning a downward camera into a velocity sensor, over a 30 cm slide", href: "/notes/turning-a-camera-into-a-sensor" },
+  { n: "30.4 % → 1.2 %", what: "gate detections with “image enhancement” switched on; 17 configurations, so the feature was deleted", href: "/notes/mongla" },
+  { n: "958 / 958", what: "ESC frames reading zero with no motor attached; the health check was rewritten so it can fail", href: "/notes/from-worked-once-to-works-every-time" },
+];
 ---
 <Base title="CV" description="CV of Fahim Faisal (fh1m): autonomy and robotics: perception, control, embedded." bodyClass="cv-page">
   <main id="main" class="cv">
@@ -17,9 +26,15 @@ import stats from "../data/github.json";
           {person.linkedin && <a href={person.linkedin}>LinkedIn</a>}
         </p>
       </div>
-      <p class="dl no-print"><a class="btn-pill" href="/cv/fahim-faisal-cv.pdf" download>download PDF</a></p>
+      <p class="dl no-print"><a class="btn-pill" href="/cv/fahim-faisal-cv.pdf" download>Download the PDF</a></p>
     </header>
 
+    <section aria-labelledby="cv-proof">
+      <h2 id="cv-proof">Proof of work</h2>
+      <p class="dim lede">Measured, not estimated. Each one links to how it was measured.</p>
+      <ul class="proof">{proof.map((p) => <li><a href={p.href}><span class="pn">{p.n}</span><span class="pw">{p.what}</span></a></li>)}</ul>
+      <p class="dim gh">{stats.commitsLastYear.toLocaleString("en-US")} commits in the last year across {stats.ownRepos} public repositories of my own. Every project on the <a href="/everything">work index</a> links to its code.</p>
+    </section>
     <section aria-labelledby="cv-results">
       <h2 id="cv-results">Results</h2>
       <ul class="results">
@@ -39,7 +54,7 @@ import stats from "../data/github.json";
     </section>
 
     <section aria-labelledby="cv-own">
-      <h2 id="cv-own">Selected open work</h2>
+      <h2 id="cv-own">Selected work</h2>
       <ul class="own">
         <li><a href="https://github.com/fh1m/mongla_ws"><b>Mongla</b></a>: independent ROS 2 autonomy stack for AUVs. {mongla.loopHz} Hz board loop (board and firmware by Rakibul Islam), {mongla.detectHz} Hz detection through the live graph, {mongla.tests.toLocaleString("en-US")} tests. Not yet in water.</li>
         <li><a href="https://github.com/fh1m/Dristy"><b>Dristy</b></a>: open firmware and host API for a K210 vision co-processor (KPU nets, classical vision, compact serial answers).</li>
@@ -75,12 +90,21 @@ import stats from "../data/github.json";
 </Base>
 
 <style>
-  .cv { position: relative; z-index: 1; max-width: 54rem; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; --pink: var(--ink-hi); }
+  .cv { position: relative; z-index: 1; max-width: 58rem; margin-inline: auto; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; --pink: var(--ink-hi); }
   .cv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; border-bottom: 1px solid var(--line-2); padding-bottom: 1.2rem; margin-bottom: 1.6rem; }
   h1 { font: 500 var(--t5) var(--sans); color: var(--ink-hi); margin: 0 0 .3rem; }
   .role { font: italic 400 var(--t1) var(--sans); color: var(--ink); margin: 0 0 .6rem; }
   .contact { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0; color: var(--dim); font-size: var(--t-1); }
-  h2 { font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 2.2rem 0 .8rem; }
+  h2 { display: flex; align-items: center; gap: .9rem; font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 2.4rem 0 .9rem; }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--line-2); }
+  .lede { margin: -.3rem 0 1rem; font-size: var(--t-1); }
+  .proof { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1px; background: var(--line-2); border: 1px solid var(--line-2); border-radius: var(--r-3); overflow: hidden; }
+  .proof li { background: #070809; }
+  .proof a { display: grid; gap: .35rem; height: 100%; box-sizing: border-box; padding: 1rem 1.1rem 1.1rem; text-decoration: none; transition: background .15s; }
+  .proof a:hover { background: #101216; }
+  .pn { font: 500 var(--t2)/1.1 var(--mono); color: #ffcf8a; font-variant-numeric: tabular-nums; }
+  .pw { font: 400 var(--t-1)/1.45 var(--sans); color: var(--ink); }
+  .gh { margin: .9rem 0 0; font-size: var(--t-1); }
   .results, .own, .pubs { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
   .results li { display: grid; grid-template-columns: 3.4rem 1fr; gap: .8rem; }
   .results .num { color: var(--ink-hi); }
@@ -99,7 +123,7 @@ import stats from "../data/github.json";
   .skills dt { font: 400 var(--t-2) var(--mono); color: var(--dim); }
   .skills dd { margin: 0; }
   .src { margin-top: 3rem; }
-  .btn-pill { display: inline-block; font: 400 var(--t-1) var(--mono); text-decoration: none; padding: .5rem .9rem; border: 1px solid var(--line-2); color: var(--ink-hi); }
+  .btn-pill { display: inline-block; font: 400 var(--t-1) var(--sans); text-decoration: none; padding: .55rem 1rem; border: 1px solid var(--line-2); border-radius: var(--r-2); color: var(--ink-hi); }
   .btn-pill:hover { border-color: var(--blue); }
   @media print {
     :global(html), :global(body) { background: #fff !important; color: #000 !important; font-size: 9.3pt; line-height: 1.38; }
@@ -121,5 +145,11 @@ import stats from "../data/github.json";
     h2 { margin-top: 1.1rem; break-after: avoid; }
     .role-item { break-inside: avoid; margin-bottom: .7rem; }
     .cv-head { margin-bottom: 1rem; padding-bottom: .8rem; }
+    .proof { background: #ccc !important; border-color: #ccc !important; border-radius: 4px; grid-template-columns: repeat(3, 1fr); }
+    .proof li { background: #fff !important; } .proof a { padding: .35rem .5rem; gap: .1rem; }
+    .pn { color: #1d3d7a !important; font-size: 11pt; } .pw { color: #111 !important; font-size: 8.3pt; }
+    .lede, .gh { display: none; }
+    .src { display: none; }
+    h2::after { background: #ccc; }
   }
 </style>

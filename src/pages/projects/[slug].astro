@@ -106,7 +106,7 @@ const next = el.projects[i + 1];
   .bn { font-family: var(--bangla); color: var(--c); }
   .cover { border: 0; grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; }
   .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
-  .cover-img { width: 100%; height: auto; max-height: 56svh; object-fit: contain; border-radius: 8px; }
+  .cover-img { width: 100%; height: auto; max-height: 56svh; object-fit: contain; border-radius: var(--r-2); }
   .cover-text { max-width: 44rem; }
   .kicker { font: 500 var(--t-1) var(--sans); color: var(--c); margin: 0 0 .8rem; }
   h1 { font: 600 clamp(2rem, 4.2vw, 3.2rem)/1.08 var(--sans); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.02em; }
@@ -116,7 +116,7 @@ const next = el.projects[i + 1];
   .txt { font: 500 var(--t0)/1.7 var(--sans); color: #e2e2e2; max-width: 52ch; }
   .split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 4vw; align-items: start; }
   .col-stage :global(.x) { margin: 0; }
-  .lead { margin: 0; } .lead figcaption { margin-top: .6rem; font: 500 var(--t-1)/1.5 var(--sans); color: #a3a3a3; } .lead img { width: 100%; height: auto; max-height: 76svh; object-fit: contain; display: block; border-radius: .8rem; }
+  .lead { margin: 0; } .lead figcaption { margin-top: .6rem; font: 500 var(--t-1)/1.5 var(--sans); color: #a3a3a3; } .lead img { width: 100%; height: auto; max-height: 76svh; object-fit: contain; display: block; border-radius: var(--r-3); }
   .nums { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 1.4rem 2rem; }
   .nums li { display: grid; gap: .2rem; }
   .nums b { font: 500 clamp(1.4rem, 2.4vw, 2rem)/1.1 var(--mono); color: var(--c); font-variant-numeric: tabular-nums; }
@@ -124,7 +124,7 @@ const next = el.projects[i + 1];
   .pics { justify-items: center; }
   .pic-row { display: flex; gap: 2rem; align-items: center; justify-content: center; width: 100%; }
   .pic-row figure { margin: 0; display: grid; gap: .8rem; justify-items: center; min-width: 0; max-width: 100%; flex: 0 1 auto; }
-  .pic-row img { width: auto; height: auto; max-width: 100%; max-height: 64svh; border-radius: .8rem; display: block; }
+  .pic-row img { width: auto; height: auto; max-width: 100%; max-height: 64svh; border-radius: var(--r-3); display: block; }
   .pic-row.many img { max-height: 64svh; }
   .pic-row figcaption { font: 500 var(--t-1)/1.5 var(--sans); color: #a3a3a3; max-width: 56ch; text-align: center; }
   .statement { justify-items: center; }

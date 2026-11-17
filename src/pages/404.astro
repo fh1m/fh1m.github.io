@@ -3,22 +3,19 @@ import Base from "../layouts/Base.astro";
 ---
 <Base title="Lost" description="This page doesn't exist.">
   <main id="main" class="lost">
-    <span class="sprite big" aria-hidden="true"></span>
-    <p class="kick"><span class="bn">হারিয়ে গেছি</span> <span class="mono">404 · lost</span></p>
-    <h1>LOST is an honest answer.</h1>
-    <p>This page doesn't exist, and I'd rather say so than guess where you meant to go. A rung that names the wrong target confidently is worse than one that reports LOST.</p>
-    <p class="go"><a class="btn-pill" href="/">back to the river</a> <a class="btn-pill ghost" href="/notes">the notes</a></p>
+    <p class="kick"><span class="bn" lang="bn">হারিয়ে গেছি</span> 404</p>
+    <h1>Lost is an honest answer.</h1>
+    <p>This page doesn't exist, and I'd rather say so than guess where you meant to go. A tracker that names the wrong target confidently is worse than one that reports it lost.</p>
+    <p class="aside">On a scale of one to ten, how would you rate your link? Either way, the way home is below.</p>
+    <p class="go"><a class="pill" href="/">Back to the system</a><a class="pill ghost" href="/everything">All the work</a><a class="pill ghost" href="/notes">The notes</a></p>
   </main>
 </Base>
 <style>
-  .lost { min-height: 88svh; display: grid; place-content: center; justify-items: start; padding: 8rem var(--gutter) 4rem; max-width: 46rem; margin: 0 auto; }
-  .big { width: 123px; height: 160px; margin-bottom: 1.2rem; }
-  .kick { display: flex; gap: .8rem; align-items: baseline; }
-  .kick .bn { color: var(--pink); font-size: 1.3rem; }
-  .kick .mono { color: var(--dim); }
-  h1 { font-size: clamp(2.4rem, 6vw, 4.4rem); }
-  p { font: 400 1.15rem/1.65 var(--serif); }
-  .go { display: flex; gap: .7rem; flex-wrap: wrap; }
-  .btn-pill { display: inline-block; font: 700 .9rem var(--display); text-decoration: none; padding: .65rem 1.1rem; border-radius: 999px; background: var(--pink); color: #000; border: 2px solid var(--pink); }
-  .btn-pill.ghost { background: var(--navy); color: var(--chalk); border-color: #3a3f52; }
+  .lost { min-height: 88svh; display: grid; place-content: center; justify-items: start; padding: 8rem var(--gutter, 1.4rem) 4rem; max-width: 44rem; margin: 0 auto; }
+  .kick { display: flex; gap: .8rem; align-items: baseline; margin: 0 0 .6rem; font: 400 var(--t-1) var(--mono); color: var(--dim); }
+  .kick .bn { font: 400 var(--t1) var(--bangla); color: #ffcf8a; }
+  h1 { font: 600 clamp(2.2rem, 5vw, 3.6rem)/1.1 var(--sans); margin: 0 0 1rem; }
+  p { font: 400 var(--t0)/1.65 var(--sans); color: #d0d0d0; margin: 0 0 1rem; }
+  .aside { color: var(--dim); font-size: var(--t-1); }
+  .go { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .6rem; }
 </style>

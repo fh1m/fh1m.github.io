@@ -31,7 +31,7 @@ export function mount(el: HTMLElement, bus: EventTarget) {
   };
   slider(el, { label: "day", min: 0, max: days.length - 1, step: 1, value: pick, fmt: (v) => days[v][0], id: "rec-day" }, (v) => { pick = v; draw(); });
   const langs = document.createElement("div");
-  langs.style.cssText = "display:flex;height:8px;border-radius:2px;overflow:hidden;margin-top:1rem";
+  langs.style.cssText = "display:flex;height:8px;border-radius: var(--r-1);overflow:hidden;margin-top:1rem";
   langs.setAttribute("role", "img");
   const top = stats.languages.slice(0, 6);
   langs.setAttribute("aria-label", "Languages by bytes across public repositories: " + top.map((l) => `${l.name} ${(l.share * 100).toFixed(1)}%`).join(", "));

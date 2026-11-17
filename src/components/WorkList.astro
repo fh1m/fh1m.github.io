@@ -26,7 +26,7 @@ const { projects } = Astro.props;
 <style>
   .works { list-style: none; margin: 0; padding: 0; display: grid; }
   .works a { display: grid; grid-template-columns: 9rem minmax(0, 1fr) auto; gap: 1.6rem; align-items: center; padding: 1.1rem 0; border-bottom: 1px solid rgb(255 255 255 / .08); text-decoration: none; }
-  img, .noimg { width: 9rem; height: 6rem; object-fit: cover; border-radius: .6rem; background: rgb(255 255 255 / .05); }
+  img, .noimg { width: 9rem; height: 6rem; object-fit: cover; border-radius: var(--r-2); background: rgb(255 255 255 / .05); }
   .noimg { background: color-mix(in srgb, var(--c) 18%, transparent); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
   .wt { display: grid; gap: .25rem; }
   .ti { font: 600 var(--t1)/1.3 var(--sans); color: #fff; }

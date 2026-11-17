@@ -132,16 +132,15 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
     <div>
       <p class="kicker">The star of this system, for lack of a better one</p>
       <h2 id="obj-fh1m">{person.fullName}</h2>
-      <p class="pline">Robotics engineer from Dhaka. I build autonomy that has to keep working when nobody can reach it: under water, in the air, on wheels, and on chips small enough to fit in a camera.</p>
-      <ul class="roles">
-        <li><span class="yr">2026</span> Team Lead (Engineering), BRACU Duburi: two AUVs at RoboSub 2026, 8th of 58</li>
-        <li><span class="yr">2023–25</span> AI &amp; machine vision, then vision lead, BRACU Duburi: 8th of 58 at RoboSub 2025</li>
-        <li><span class="yr">2025</span> Autonomous subteam, BRACU Mongol-Tori: a rover arm that types, URC 2025</li>
-        <li><span class="yr">2023–25</span> Guidance and control, Amateur Experimental Rocketry Dhaka</li>
-        <li><span class="yr">2026</span> Mongla, my own AUV autonomy stack, on Rakibul Islam's SROT board</li>
+      <p class="pline">I like machines that can't phone home, and people who can explain their numbers. Four rules I keep, each one paid for:</p>
+      <ul class="rules">
+        <li><b>Believe the measurement.</b> A camera queue fed the sub frames 396 ms old while every benchmark looked healthy. Now I time the photon, not the code.</li>
+        <li><b>Delete before adding.</b> "Image enhancement" took gate detections from 30.4 % of frames to 1.2 %. It's gone.</li>
+        <li><b>Say the zero out loud.</b> My own AUV stack has 4,742 passing tests and no dives yet, and its front page says so.</li>
+        <li><b>Look for a new angle.</b> No velocity sensor on board, so the pool floor became the speedometer: 1.09 cm worst error over a 30 cm slide.</li>
       </ul>
-      <p class="sum">Co-author of BRACU Duburi's Technical Design Reports for RoboSub 2025 and 2026. I like systems I can take apart and explain back, numbers that come with the measurement that made them, and admitting the zero.</p>
-      <p class="links"><a href="/cv">CV</a><a href="/cv/fahim-faisal-cv.pdf" download>PDF</a><a href={person.github}>GitHub</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}<a href={`mailto:${person.email}`}>Email</a></p>
+      <p class="sum">Where the rules were learned: rockets at AERD, a rover arm at Mongol-Tori, engineering lead at BRACU Duburi, and a stack of my own. The dates are in the CV; the stories are on the planets.</p>
+      <p class="links"><a href="/cv">CV</a><a href="/about">The record</a><a href="/cv/fahim-faisal-cv.pdf" download>PDF</a><a href={person.github}>GitHub</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}<a href={`mailto:${person.email}`}>Email</a></p>
     </div>
   </div>
 </aside>
@@ -179,9 +178,9 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
 
 <aside class="objpanel wide tm" data-obj="timemachine" style="--c:#8dff6a" aria-labelledby="obj-tm">
   <button class="close" type="button" aria-label="Close">Close</button>
-  <p class="kicker">The garage</p>
+  <p class="kicker">Yesterday is history. This is where it's kept.</p>
   <h2 id="obj-tm">The time machine</h2>
-  <p class="pline">Drag through the years. The planet rebuilds itself the way it actually happened.</p>
+  <p class="pline">Drag through the years and the system rebuilds itself the way it actually happened. No portal fluid required; Bunnu checked.</p>
   <div class="tm-controls">
     <input type="range" id="tm-year" min="0" max={years.length - 1} step="1" value={years.length - 1} aria-label="Year" list="tm-ticks" />
     <datalist id="tm-ticks">{years.map((_, i) => <option value={i} />)}</datalist>
@@ -200,21 +199,21 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
 </aside>
 
 <style>
-  .objpanel { position: absolute; z-index: 5; right: clamp(1rem, 3vw, 2.4rem); top: 50%; width: min(26rem, 90vw); max-height: 82svh; overflow-y: auto; transform: translate(24px, -50%); opacity: 0; visibility: hidden; padding: 1.2rem 1.3rem 1.2rem; border-radius: 10px; background: rgb(9 14 44 / .86); backdrop-filter: blur(10px); color: #ececec; font-family: var(--sans); transition: opacity .5s ease .35s, transform .5s cubic-bezier(.2,.8,.3,1) .35s, visibility 0s linear .9s; scrollbar-width: thin; }
+  .objpanel { position: absolute; z-index: 5; right: clamp(1rem, 3vw, 2.4rem); top: 50%; width: min(26rem, 90vw); max-height: 82svh; overflow-y: auto; transform: translate(24px, -50%); opacity: 0; visibility: hidden; padding: 1.2rem 1.3rem 1.2rem; border-radius: var(--r-3); background: rgb(9 14 44 / .86); backdrop-filter: blur(10px); color: #ececec; font-family: var(--sans); transition: opacity .5s ease .35s, transform .5s cubic-bezier(.2,.8,.3,1) .35s, visibility 0s linear .9s; scrollbar-width: thin; }
   .objpanel:global(.on) { opacity: 1; visibility: visible; transform: translate(0, -50%); transition-delay: .35s, .35s, 0s; }
   .objpanel .kicker { margin: 0 0 .2rem; font: 600 var(--t-1) var(--sans); color: var(--c); }
   .objpanel .bn { font-family: var(--bangla); font-weight: 400; }
   .objpanel h2 { font: 600 var(--t3)/1.15 var(--sans); color: #fff; margin: 0 0 .7rem; padding-right: 4rem; }
-  .objpanel img { display: block; height: auto; max-height: 15rem; width: auto; object-fit: contain; border-radius: .6rem; margin: 0 0 .8rem; }
+  .objpanel img { display: block; height: auto; max-height: 15rem; width: auto; object-fit: contain; border-radius: var(--r-2); margin: 0 0 .8rem; }
   .objpanel .sum { font: 400 var(--t-1)/1.55 var(--sans); color: #b9c3f2; margin: 0 0 .8rem; }
-  .objpanel dl { display: grid; grid-template-columns: 1fr auto; gap: .25rem .9rem; margin: 0 0 .9rem; padding: .7rem .8rem; border-radius: 6px; background: rgb(255 255 255 / .06); }
+  .objpanel dl { display: grid; grid-template-columns: 1fr auto; gap: .25rem .9rem; margin: 0 0 .9rem; padding: .7rem .8rem; border-radius: var(--r-2); background: rgb(255 255 255 / .06); }
   .objpanel dt { font: 600 var(--t-2) var(--sans); color: #8c8c8c; }
   .objpanel dd { margin: 0; font: 400 var(--t-1) var(--mono); color: #fff; text-align: right; font-variant-numeric: tabular-nums; }
   .objpanel .links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; }
-  .objpanel .links a, .objpanel .links span { font: 500 var(--t-1) var(--sans); padding: .45rem .9rem; border-radius: 6px; background: #fff; color: #000; text-decoration: none; }
+  .objpanel .links a, .objpanel .links span { font: 500 var(--t-1) var(--sans); padding: .45rem .9rem; border-radius: var(--r-2); background: #fff; color: #000; text-decoration: none; }
   .objpanel .links a + a { background: rgb(255 255 255 / .12); color: #fff; }
   .objpanel .links span { background: rgb(255 255 255 / .12); color: #c8c8c8; }
-  .close { position: absolute; top: .9rem; right: .9rem; font: 500 var(--t-2) var(--sans); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: 6px; padding: .35rem .75rem; cursor: pointer; }
+  .close { position: absolute; top: .9rem; right: .9rem; font: 500 var(--t-2) var(--sans); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: var(--r-2); padding: .35rem .75rem; cursor: pointer; }
   @media (max-width: 760px) { .objpanel { top: auto; bottom: 1rem; left: 1rem; right: 1rem; width: auto; max-height: 64svh; transform: translateY(20px); } .objpanel:global(.on) { transform: none; } }
   .objpanel.wide { width: min(32rem, 92vw); }
   .objpanel .sub { margin: 0 0 .8rem; }
@@ -238,14 +237,15 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
   .tm-ch h3 { margin: .1rem 0 .3rem; font: 600 var(--t1) var(--sans); color: #fff; }
   .tm-ch p { font: 400 var(--t-1)/1.55 var(--sans); color: #c8c8c8; margin: 0 0 .3rem; }
   .tm-lesson { font-style: italic; color: #fff !important; }
-  .bunnu-says { margin: .4rem 0 .9rem; padding: .7rem .8rem; border-radius: 6px; background: rgb(255 255 255 / .07); font: 600 var(--t-1)/1.5 var(--sans); color: #fff; }
+  .bunnu-says { margin: .4rem 0 .9rem; padding: .7rem .8rem; border-radius: var(--r-2); background: rgb(255 255 255 / .07); font: 600 var(--t-1)/1.5 var(--sans); color: #fff; }
   .bunnu-says .who { display: block; font: 600 var(--t-2) var(--sans); color: #ff9ec2; margin-bottom: .1rem; }
-.objpanel .links button { font: 500 var(--t-1) var(--sans); color: #000; background: #ececec; border: 0; border-radius: 6px; padding: .45rem .8rem; cursor: pointer; }
+.objpanel .links button { font: 500 var(--t-1) var(--sans); color: #000; background: #ececec; border: 0; border-radius: var(--r-2); padding: .45rem .8rem; cursor: pointer; }
 .about-grid { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 1.2rem; align-items: start; }
-.about-grid img { width: 100%; height: auto; border-radius: 8px; }
-.roles { list-style: none; margin: .4rem 0 .9rem; padding: 0; display: grid; gap: .35rem; font: 400 var(--t-1)/1.5 var(--sans); color: #d6d6d6; }
+.about-grid img { width: 100%; height: auto; border-radius: var(--r-2); }
+.rules { list-style: none; margin: .4rem 0 .9rem; padding: 0; display: grid; gap: .55rem; font: 400 var(--t-1)/1.5 var(--sans); color: #c9ccd2; }
+.rules b { display: block; color: var(--c); font-weight: 600; }
 .roles .yr, .results .yr { display: inline-block; min-width: 4.4rem; font-family: var(--mono); color: var(--c); }
-.pbd { width: 100%; max-width: 18rem; height: auto; border-radius: 6px; margin: .3rem 0 .8rem; }
+.pbd { width: 100%; max-width: 18rem; height: auto; border-radius: var(--r-2); margin: .3rem 0 .8rem; }
 .heritage-list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .35rem; }
 .heritage-list button { all: unset; cursor: pointer; font: 400 var(--t-1) var(--sans); color: #e8e8e8; }
 .heritage-list button:hover { color: var(--c); }
