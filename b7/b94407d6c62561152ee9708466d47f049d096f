@@ -1,0 +1,42 @@
+src/components/album/Player.astro
+  h_b19ddd3ca98e3d 10
+src/components/game/BunnuWindow.astro
+  h_b19ddd3ca98e3d 1-53
+src/components/game/Panels.astro
+  h_b19ddd3ca98e3d 1-190
+src/components/game/Schematic.astro
+  h_b19ddd3ca98e3d 1-105
+src/game/bunnu.ts
+  h_b19ddd3ca98e3d 1-71
+src/game/forms.ts
+  h_b19ddd3ca98e3d 2-3,7,32-33,38-41,52-53,70-71,73-82,107-108,110,112,114-118,143-144,146-148,151-155,171-173,175-180
+src/game/landmarks.ts
+  h_b19ddd3ca98e3d 1-211
+src/game/main.ts
+  h_b19ddd3ca98e3d 2-3,9,11-12,16-27,49-54,68-69,81,89-116,124,132,150-151,153,156,159,197,207,213-215,226-233
+src/game/missions.ts
+  h_b19ddd3ca98e3d 1-84
+src/game/props.ts
+  h_b19ddd3ca98e3d 6,45,60,69,72,85,88-125,142
+src/game/zones.ts
+  h_b19ddd3ca98e3d 2,8-9,14,21,28,35
+src/pages/404.astro
+  h_b19ddd3ca98e3d 23
+src/pages/index.astro
+  h_b19ddd3ca98e3d 3,8-9,11-12,15,17,21-22,37-39,43-46,48-58,69,94-156,204-221
+src/pages/missions/[zone].astro
+  h_b19ddd3ca98e3d 1-92
+src/styles/global.css
+  h_b19ddd3ca98e3d 13-14,16-20,36,143,147,157,159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "b7b94407d6c62561152ee9708466d47f049d096f",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
