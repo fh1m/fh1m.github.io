@@ -1,0 +1,26 @@
+src/game/audio.ts
+  h_b19ddd3ca98e3d 1-38
+src/game/input.ts
+  h_b19ddd3ca98e3d 1-32
+src/game/main.ts
+  h_b19ddd3ca98e3d 1-110
+src/game/planet.ts
+  h_b19ddd3ca98e3d 1-102
+src/game/zero.ts
+  h_b19ddd3ca98e3d 1-65
+src/pages/everything.astro
+  h_b19ddd3ca98e3d 1-48
+src/pages/index.astro
+  h_b19ddd3ca98e3d 3-4,8-23,25-26,30-44,47-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "1e52430baa81a08b22e2cacff5cdfc7296f67af6",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
