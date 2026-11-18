@@ -1,0 +1,36 @@
+astro.config.mjs
+  h_b19ddd3ca98e3d 13
+public/media/CREDITS.md
+  h_b19ddd3ca98e3d 102-104
+src/components/game/Opening.astro
+  h_b19ddd3ca98e3d 22,34,42
+src/components/game/Panels.astro
+  h_b19ddd3ca98e3d 59,131,153
+src/data/anecdotes.ts
+  h_b19ddd3ca98e3d 29
+src/data/elements.ts
+  h_b19ddd3ca98e3d 24,50
+src/data/facts.ts
+  h_b19ddd3ca98e3d 56-57,67
+src/data/media.json
+  h_b19ddd3ca98e3d 641-676
+src/pages/index.astro
+  h_b19ddd3ca98e3d 20,26,55,97-99,126,294-296,304,309-310,321
+src/space/engine.ts
+  h_b19ddd3ca98e3d 143,150-153,187,191,194-197,205,231,251-257
+src/space/shaders.ts
+  h_b19ddd3ca98e3d 13,31-32
+tests/smoke.spec.ts
+  h_b19ddd3ca98e3d 49-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "a211f5850370c5d846aadbce1de95e31fe966d3f",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
