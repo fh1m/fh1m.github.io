@@ -1,0 +1,34 @@
+public/fonts/NUNITO-OFL.txt
+  h_b19ddd3ca98e3d 1-93
+src/components/game/Opening.astro
+  h_b19ddd3ca98e3d 1-105
+src/game/audio.ts
+  h_b19ddd3ca98e3d 2-10,12-13,15-24,26-27,29-39,42-102,104-106,109
+src/game/forms.ts
+  h_b19ddd3ca98e3d 2-7,10-11,13-24,26,28,31-34,36,38-47,49,51-75,77-103,105-112,115-131,133-143,145-149,153-158
+src/game/fx.ts
+  h_b19ddd3ca98e3d 1-15
+src/game/main.ts
+  h_b19ddd3ca98e3d 2-4,7-11,13-18,25-39,42-43,47-52,55-65,67-111,114-116,119,121-160,163,165-172
+src/game/planet.ts
+  h_b19ddd3ca98e3d 7-8,49,70-72,76-85,89-90
+src/game/props.ts
+  h_b19ddd3ca98e3d 1-110
+src/game/zones.ts
+  h_b19ddd3ca98e3d 1-39
+src/pages/index.astro
+  h_b19ddd3ca98e3d 3-4,7-9,11,13,15-34,37,40-41,46-75,77-82,87-91,93-104,106-119
+src/styles/global.css
+  h_b19ddd3ca98e3d 8,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "0387f7d2c27d6499ccd8519e9a028d28564118a2",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
