@@ -1,0 +1,22 @@
+src/game/forms.ts
+  h_b19ddd3ca98e3d 15-16
+src/game/landmarks.ts
+  h_b19ddd3ca98e3d 68
+src/game/main.ts
+  h_b19ddd3ca98e3d 38,62-65,86,115,124-126,130,170-177,185
+src/game/planet.ts
+  h_b19ddd3ca98e3d 87-110,112
+src/pages/projects/[slug].astro
+  h_b19ddd3ca98e3d 117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "b7079762bc709703c1d5398ea1aabc712af8061d",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
