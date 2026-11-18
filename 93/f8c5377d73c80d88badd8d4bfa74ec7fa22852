@@ -1,0 +1,16 @@
+src/game/poster.ts
+  h_b19ddd3ca98e3d 1-34
+src/pages/index.astro
+  h_b19ddd3ca98e3d 17,71,73-76,123,146-148,211-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "93f8c5377d73c80d88badd8d4bfa74ec7fa22852",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
