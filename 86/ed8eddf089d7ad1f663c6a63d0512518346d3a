@@ -1,0 +1,14 @@
+src/pages/projects/[slug].astro
+  h_b19ddd3ca98e3d 38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "86ed8eddf089d7ad1f663c6a63d0512518346d3a",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
