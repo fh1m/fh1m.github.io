@@ -1,0 +1,64 @@
+astro.config.mjs
+  h_b19ddd3ca98e3d 13-16
+src/benches/hull.ts
+  h_b19ddd3ca98e3d 35
+src/benches/query.ts
+  h_b19ddd3ca98e3d 39
+src/benches/recorder.ts
+  h_b19ddd3ca98e3d 34
+src/benches/robosub.ts
+  h_b19ddd3ca98e3d 29
+src/components/ScreenBar.astro
+  h_b19ddd3ca98e3d 11,15,35-36,41
+src/components/WorkList.astro
+  h_b19ddd3ca98e3d 29
+src/components/game/Opening.astro
+  h_b19ddd3ca98e3d 13,48
+src/components/game/Panels.astro
+  h_b19ddd3ca98e3d 135-140,142-143,181,183,202,207,209,213,216,240,242,244-246,248
+src/components/game/Schematic.astro
+  h_b19ddd3ca98e3d 83
+src/components/note/Term.astro
+  h_b19ddd3ca98e3d 11
+src/content/notes/workshop.mdx
+  h_b19ddd3ca98e3d 64-65
+src/data/media.ts
+  h_b19ddd3ca98e3d 3
+src/pages/404.astro
+  h_b19ddd3ca98e3d 6-10,14-20
+src/pages/[element].astro
+  h_b19ddd3ca98e3d 56,60
+src/pages/about.astro
+  h_b19ddd3ca98e3d 1-141
+src/pages/cv.astro
+  h_b19ddd3ca98e3d 5-13,29,32-37,57,93,98-107,126,148-153
+src/pages/index.astro
+  h_b19ddd3ca98e3d 13,15-19,28,34-41,44-47,131-132,186-194,205,211-212,230,254,261,263-264,270,282-283,291,299,314,316,328-330,332-338,341,343,347,351,356-363
+src/pages/missions/[zone].astro
+  h_b19ddd3ca98e3d 90,93,96
+src/pages/notes/[...slug].astro
+  h_b19ddd3ca98e3d 24-28,33,35,39,83,114
+src/pages/notes/index.astro
+  h_b19ddd3ca98e3d 51
+src/pages/projects/[slug].astro
+  h_b19ddd3ca98e3d 109,119,127
+src/scripts/live-stats.ts
+  h_b19ddd3ca98e3d 2-4,6-7,12-13,15,24-28,31-33
+src/space/engine.ts
+  h_b19ddd3ca98e3d 24,159,202,266-267
+src/styles/global.css
+  h_b19ddd3ca98e3d 7-11,62,75,77,120,132,134,139,148,191
+tests/smoke.spec.ts
+  h_b19ddd3ca98e3d 87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "e19269c09025cb612d8b80b2728b8b308c9cc891",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
