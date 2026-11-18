@@ -1,0 +1,48 @@
+src/components/ScreenBar.astro
+  h_b19ddd3ca98e3d 29-30,35-36
+src/components/WorkList.astro
+  h_b19ddd3ca98e3d 32-33
+src/components/game/Opening.astro
+  h_b19ddd3ca98e3d 26,68,96,99,102
+src/components/game/Panels.astro
+  h_b19ddd3ca98e3d 118,150,152,154,156-158,161,163-164,168,170-173,181-182,184-186,188-189
+src/components/game/Schematic.astro
+  h_b19ddd3ca98e3d 83
+src/game/main.ts
+  h_b19ddd3ca98e3d 39
+src/layouts/Base.astro
+  h_b19ddd3ca98e3d 22,24
+src/pages/[element].astro
+  h_b19ddd3ca98e3d 18-19,24,46,54-56,58,61,66-68
+src/pages/everything.astro
+  h_b19ddd3ca98e3d 20,35,57-58,62-63
+src/pages/index.astro
+  h_b19ddd3ca98e3d 177,180-181,183,185-186,189,192-194,196,198-199,201,203-206,208,215,218-221,223,225-226,229,231,233,236,238-240,243,245-246
+src/pages/lessons/[slug].astro
+  h_b19ddd3ca98e3d 21-28,30,40-43
+src/pages/lessons/index.astro
+  h_b19ddd3ca98e3d 10,41-42
+src/pages/missions/[zone].astro
+  h_b19ddd3ca98e3d 59-60,62,64-65,68-69,71,73-74,80,82-83,85,87
+src/pages/notes/[...slug].astro
+  h_b19ddd3ca98e3d 28,34,76-83,85,89,95-99,102-105,107-108,110,112-113,115,119-120,123,125
+src/pages/notes/index.astro
+  h_b19ddd3ca98e3d 11,49-50
+src/pages/projects/[slug].astro
+  h_b19ddd3ca98e3d 26,33,105,107-116,119,123,127,129,133-135,138-142,144
+src/pages/shoulders.astro
+  h_b19ddd3ca98e3d 13,38,48-50
+src/styles/global.css
+  h_b19ddd3ca98e3d 13-15,17-21,37-38,144,148,158,160,187-196,199-200,202-209
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "bbef9c152330d452edd2b3c703a0f1d8a7397667",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
