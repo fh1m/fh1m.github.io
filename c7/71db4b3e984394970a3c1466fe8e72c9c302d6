@@ -1,0 +1,24 @@
+src/components/game/Panels.astro
+  h_b19ddd3ca98e3d 29-37,143
+src/data/influences.ts
+  h_b19ddd3ca98e3d 2
+src/game/missions.ts
+  h_b19ddd3ca98e3d 3-4,15,23-24,26-28,31,37-38,40-42,46,52-53,56-57,59,61,67-68,70-72,75
+src/pages/index.astro
+  h_b19ddd3ca98e3d 3-4,14,20-22,37,44,108-110,112-113,120-122,125-126,128,131-132,135-138,140,142-143,146-147,149,159,215-231
+src/pages/missions/[zone].astro
+  h_b19ddd3ca98e3d 51
+src/pages/shoulders.astro
+  h_b19ddd3ca98e3d 3,11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "c771db4b3e984394970a3c1466fe8e72c9c302d6",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
