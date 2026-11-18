@@ -1,0 +1,18 @@
+src/components/game/Panels.astro
+  h_b19ddd3ca98e3d 9,36
+src/data/elements.ts
+  h_b19ddd3ca98e3d 6-8,52,61,122,131
+src/data/github.json
+  h_b19ddd3ca98e3d 2,1482-1485,1599-1623
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "55252bceb3c55ca3b6ccc8f1c430b939a83dc835",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
