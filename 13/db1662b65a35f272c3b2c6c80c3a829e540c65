@@ -1,0 +1,18 @@
+src/explore/loader.ts
+  h_b19ddd3ca98e3d 26-30
+src/pages/notes/[...slug].astro
+  h_b19ddd3ca98e3d 85,119
+src/scripts/constellation.ts
+  h_b19ddd3ca98e3d 35-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "13db1662b65a35f272c3b2c6c80c3a829e540c65",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
