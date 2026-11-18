@@ -1,0 +1,14 @@
+src/pages/index.astro
+  h_b19ddd3ca98e3d 45,341
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "9af5590050a8cd078c3e7f404e503b4bf711045d",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
