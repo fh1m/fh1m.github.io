@@ -247,7 +247,7 @@ test("Bunnu stays optional and remembers visited places across reloads", async (
   await expect(page.locator("#bunnu-toggle")).toHaveAttribute("aria-pressed", "false");
   await page.locator("#bunnu-toggle").click();
   await expect(page.locator("#guide.on")).toBeVisible();
-  for (const control of await page.locator(".hud > a, .hud > button:visible").all()) {
+  for (const control of await page.locator(".hud > a, .hud > button:visible, .zones button").all()) {
     const box = await control.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0);
