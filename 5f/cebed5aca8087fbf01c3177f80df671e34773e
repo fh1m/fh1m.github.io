@@ -1,0 +1,20 @@
+public/media/CREDITS.md
+  h_b19ddd3ca98e3d 178-181
+public/media/space/rick-perched.svg
+  h_b19ddd3ca98e3d 1
+src/pages/index.astro
+  h_b19ddd3ca98e3d 27-33,36-37,90-92,187,191,243,430-454,462
+tests/smoke.spec.ts
+  h_b19ddd3ca98e3d 244,250-255
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "5fcebed5aca8087fbf01c3177f80df671e34773e",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
