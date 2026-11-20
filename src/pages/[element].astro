@@ -6,12 +6,14 @@ import { elements, type ElementInfo } from "../data/elements";
 import { byElement } from "../data/lessons";
 import { ZONE_INFO } from "../game/zones";
 import { MISSIONS } from "../game/missions";
+import { dims } from "../data/media";
 export const getStaticPaths = () => elements.map((el) => ({ params: { element: el.id }, props: { el } }));
 const { el } = Astro.props as { el: ElementInfo };
 const ll = byElement(el.id);
 const z = ZONE_INFO.find((x) => x.id === el.id);
 const m = MISSIONS.find((x) => x.zone === el.id);
 const first = el.projects.find((p) => p.hero);
+const cover = first?.hero ? { src:first.hero, alt:first.heroAlt ?? "", ...dims(first.hero) } : null;
 ---
 <Base title={el.name} nation={el.id} description={`${el.name}: ${el.nature}`} crumb={{ href: "/everything", label: "All the work" }}>
   <main id="main" class="screens">
@@ -21,7 +23,7 @@ const first = el.projects.find((p) => p.hero);
         <h1 class="s-h1">{el.name}</h1>
         <p class="s-dek">{el.nature}</p>
       </div>
-      {first && <img class="cover-img" src={first.hero} alt={first.heroAlt ?? ""} fetchpriority="high" />}
+      {cover && <figure class="cover-media"><a href={cover.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${cover.alt}`}><img class="cover-img" src={cover.src} alt={cover.alt} width={cover.w} height={cover.h} fetchpriority="high" /></a><figcaption>{cover.alt} <span>Open image to inspect at full size.</span></figcaption></figure>}
     </header>
 
     {z && (
@@ -54,16 +56,21 @@ const first = el.projects.find((p) => p.hero);
   .cover { grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; }
   .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
   .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: var(--r-2); }
+  .cover-media { margin:0; min-width:0; }
+  .cover-media a { display:block; border-radius:var(--r-2); }
+  .cover-media figcaption { color:var(--dim); font:400 var(--t-1)/1.5 var(--sans); margin-top:.7rem; }
+  .cover-media figcaption span { display:block; color:var(--action); font-size:.8rem; margin-top:.35rem; }
   .rel { position: relative; z-index: 1; }
   .bnbig { font: 400 clamp(2.4rem, 5vw, 3.6rem)/1 var(--bangla); color: var(--c); margin: 0 0 .4rem; }
   .split { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 4vw; align-items: center; }
-  dl { display: grid; grid-template-columns: auto 1fr; gap: .9rem 1.6rem; margin: 0; padding: 1.6rem; border-radius: var(--r-3); background: rgb(255 255 255 / .05); }
-  dt { font: 500 var(--t-1) var(--sans); color: #8c8c8c; }
-  dd { margin: 0; font: 400 var(--t0) var(--mono); color: #fff; }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:.9rem 1.6rem; margin:0; padding:1.6rem; border-radius:var(--r-3); background:var(--surface); }
+  dt { font:500 var(--t-1) var(--sans); color:var(--dim); }
+  dd { margin:0; font:400 var(--t0) var(--mono); color:var(--ink-hi); }
   .go { margin-top: 1.6rem; }
   .wall { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 2rem 3rem; }
   .wall a { display: grid; gap: .4rem; text-decoration: none; }
-  .t { font: 600 var(--t1)/1.3 var(--sans); color: #fff; }
+  .t { font:600 var(--t1)/1.3 var(--display); color:var(--ink-hi); }
+  .wall .t::after { content:" →"; color:var(--action); }
   .b { font: 500 var(--t-1)/1.5 var(--sans); }
   @media (max-width: 900px) { .split, .cover.has-img { grid-template-columns: 1fr; } }
 </style>

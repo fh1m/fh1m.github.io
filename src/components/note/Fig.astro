@@ -1,13 +1,17 @@
 ---
+import { dims } from "../../data/media";
 /** A real image with its caption and credit. `wide` breaks out of the text column. */
 interface Props { src: string; alt: string; caption?: string; credit?: string; wide?: boolean; contain?: boolean; plot?: boolean }
 const { src, alt, caption, credit, wide = false, contain = false, plot = false } = Astro.props;
+const { w, h } = dims(src);
 ---
 <figure class:list={["fig", { wide, contain, plot }]}>
-  <img src={src} alt={alt} loading="lazy" decoding="async" />
-  {(caption || credit) && <figcaption>{caption && <span set:html={caption} />}{credit && <span class="credit"> · {credit}</span>}</figcaption>}
+  <a class="image-view" href={src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${alt}`}><img src={src} alt={alt} width={w} height={h} loading="lazy" decoding="async" /></a>
+  <figcaption>{caption && <span set:html={caption} />}{credit && <span class="credit"> · {credit}</span>}<span class="image-hint">Open image to inspect at full size.</span></figcaption>
 </figure>
 <style>
+  .image-view { display:block; border-radius:var(--r-2); }
+  .image-hint { display:block; color:var(--action); font-size:.8rem; margin-top:.4rem; }
   .fig.contain img { object-fit: contain; max-height: 72vh; }
   /* Charts rendered on white: flip to OLED black, keep hues. */
   .fig.plot img { filter: invert(1) hue-rotate(180deg) brightness(1.05); background: #000; }

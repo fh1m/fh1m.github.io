@@ -11,8 +11,8 @@ import WorkList from "../components/WorkList.astro";
 import gh from "../data/github.json";
 import { getCollection } from "astro:content";
 const notes = await getCollection("notes");
-const repos = gh.repos.filter((r) => !r.archived).sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
-const fmt = (n: number) => n.toLocaleString("en-US");
+const repoSummaries = new Map(notes.filter((note) => note.data.kind === "project" && note.data.repo).map((note) => [note.data.repo!.toLowerCase(), note.data.dek] as const));
+const repos = [...gh.repos].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 ---
 <Base title="All the work" description="Every project by Fahim Faisal, grouped by where it has to work: air, water, land and silicon. The writing, the lessons, and every public repository.">
@@ -21,7 +21,8 @@ const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: 
       <div class="measure">
         <h1 class="s-h1">All the work</h1>
         <p class="s-dek">Machines that have to work on their own: in the air, under water, on land and on small chips. Each one links to what broke and what fixed it.</p>
-        <p class="s-meta gh" data-live-commits>In the last year: {fmt(gh.contributionsLastYear)} contributions on GitHub, {fmt(gh.commitsLastYear)} of them commits, across {gh.ownRepos} repositories of my own. Counted from the GitHub API when this site was built, {gh.generatedAtLabel}.</p>
+        <p class="s-txt archive-intro">The machines are only part of it. The small tools, early experiments and unfinished ideas are here too.</p>
+        <nav class="index-paths" aria-label="Other ways through the archive"><a href="/log">The life behind the projects</a><a href="/about">Experience, press and papers</a><a href="#h-r">Including the small and unfinished repositories</a></nav>
       </div>
     </header>
 
@@ -43,26 +44,31 @@ const ago = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { month: 
 
     <section class="screen" aria-labelledby="h-r">
       <h2 class="s-h2" id="h-r">Every public repository</h2>
+      <p class="s-meta">Ordered by when they began. Public GitHub snapshot: {gh.generatedAtLabel}.</p>
       <ul class="repos">
         {repos.map((r) => (
-          <li><a href={r.url}><span class="rn">{r.name}</span><span class="ln">{r.description}</span><span class="s-meta">{r.language ? `${r.language}, ` : ""}updated {ago(r.pushedAt)}</span></a></li>
+          <li><a href={r.url}><span class="rn">{r.name}</span><span class="ln">{repoSummaries.get(r.name.toLowerCase()) ?? (r.description || "No public project description; open the repository for its current contents.")}</span><span class="s-meta">Started {ago(r.createdAt)}; {r.archived ? "archived" : `updated ${ago(r.pushedAt)}`}</span></a></li>
         ))}
       </ul>
     </section>
   </main>
 </Base>
-<script>
-  import "../scripts/live-stats";
-</script>
 <style>
   .bn { color: var(--c); margin-right: .4rem; }
-  .gh { margin-top: 1.6rem; max-width: 56ch; }
-  .ti { font: 600 var(--t1)/1.3 var(--sans); color: #fff; }
-  .ln { font: 400 var(--t0)/1.45 var(--sans); color: #e2e2e2; }
+  .archive-intro { margin-top:1.4rem; max-width:60ch; }
+  .ti { font:600 var(--t1)/1.3 var(--display); color:var(--ink-hi); }
+  .ti::after { content:" →"; color:var(--action); }
+  .ln { font:400 var(--t0)/1.45 var(--sans); color:var(--ink); }
   .trio { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 2.4rem; }
   .trio a, .repos a { display: grid; gap: .4rem; text-decoration: none; }
-  .repos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.8rem 2.6rem; }
-  .rn { font: 400 var(--t0) var(--mono); color: #fff; }
-  .repos .ln { font-weight: 500; font-size: var(--t-1); color: #c8c8c8; }
-  .repos a:hover .rn { text-decoration: underline; }
+  .repos { list-style:none; margin:0; padding:0; width:100%; }
+  .repos li { padding:1rem 0; border-top:1px solid var(--line-2); }
+  .repos a { grid-template-columns:minmax(12rem,.65fr) minmax(0,2fr) minmax(10rem,.65fr); gap:.35rem 2rem; align-items:baseline; }
+  .repos .s-meta { grid-column:3; }
+  .index-paths { display:flex; flex-wrap:wrap; gap:.8rem 1.4rem; margin-top:1.5rem; font-size:var(--t-1); }
+  @media(max-width:1000px) { .repos a { grid-template-columns:minmax(10rem,.65fr) minmax(0,2fr); } .repos .s-meta { grid-column:2; } }
+  @media(max-width:700px) { .repos a { grid-template-columns:1fr; } .repos .s-meta { grid-column:1; } }
+  .rn { font:400 var(--t0) var(--mono); color:var(--action); }
+  .repos .ln { font-weight:400; font-size:var(--t-1); color:var(--dim); }
+  .repos a:hover .rn { color:var(--ink-hi); text-decoration:underline; }
 </style>

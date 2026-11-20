@@ -1,0 +1,133 @@
+---
+title: "Where the metre enters the map"
+dek: "Matra: a mapping experiment, a depth image and the ruler hidden between them. Known geometry recovers the right scale; a different pixel then exposes what frame-wise normalization can take away."
+date: "2026-11"
+series: machines
+part: 11
+kind: project
+repo: matra
+hero: /media/archive/mapping-depth-detail.webp
+heroAlt: "Depth-panel detail from the archived V5 interface; the displayed metre label is an estimate, not a calibrated measurement"
+sources:
+  - { label: "OpenCV: essential-matrix pose recovery and triangulation", href: "https://docs.opencv.org/4.10.0/d9/d0c/group__calib3d.html" }
+  - { label: "The exact default depth checkpoint's model card", href: "https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Explore from "../../components/note/Explore.astro";
+
+The archived dashboard has people in the camera view, a coloured depth image, an occupancy grid, a bird's-eye view and a trajectory. It also has small, reassuring suffixes: `m`, `m/s`, `deg`. Those suffixes make the panels look as if they already agree about the world.
+
+My `flow_use` folder contains the work around that display: tracking versions, feature extractors, flow, depth, odometry, mapping, launchers and a later modular perception engine. **Matra — মাত্রা**, a measure or dimension, takes one question out of that larger experiment: where did its physical ruler come from?
+
+There is a positive result here, not just a warning. The preserved scale estimator recovers a known camera baseline when it receives compatible metric depth. The difficulty appears one stage earlier, where the source calls a frame-wise range conversion “metric depth.”
+
+## The dashboard is a record, not a ruler
+
+<Fig src="/media/archive/mapping-dashboard-v5.webp" alt="The historical Vision Navigation Dashboard V5 with a lab camera view, three tracked people, a depth map, occupancy grid, bird's-eye view and trajectory" caption="The supplied V5 desktop capture. It preserves what the experiment displayed, including its metre-labelled estimates. It is an earlier interface from the same archive—not a screenshot of Matra's controlled experiment, proof of metric calibration, or an exact identification of the later scale kernel's runtime." wide contain />
+
+The source tree grew wider than one pipeline. The modular engine can construct depth, detection, feature, tracking, flow and odometry components. Older directories preserve alternative trackers and dashboards rather than disappearing behind the latest filename. That context matters: a frame from V5 should not silently become evidence that every later module worked together.
+
+The new case study therefore keeps complete original depth, odometry, configuration and type modules, then isolates two numerical methods without changing their bodies. No learned model, camera, telemetry connection or physical vehicle is opened by the supported experiment.
+
+The first method estimates translation scale from depth and triangulation. The second converts a raw depth map into a configured numerical range. Their names seem compatible. Their assumptions need to be checked separately.
+
+## First, recover something known
+
+A monocular pair gives image correspondences. Under the essential-matrix model, OpenCV's pose recovery returns a rotation and a translation **direction of unit length**; the translation's physical magnitude is not recovered from those observations alone.
+
+The archived odometry code supplies projection matrices using that unit translation, triangulates the matched points and samples the previous depth image at their corresponding locations. It forms a scalar from the ratio of two medians:
+
+```text
+translation scale = median(input camera-axis depth)
+                    ÷ median(triangulated camera-axis depth)
+```
+
+That is a reasonable place for an external ruler to enter. If the input depth is compatible metric camera-axis depth, the ratio can set the reconstruction's metric scale.
+
+The controlled experiment makes those assumptions explicit: 88 exact correspondences, known intrinsics with 800-pixel focal lengths, a 640×480 image, identity relative rotation and a 0.4 m horizontal baseline. Scene depth is known because the points are constructed for the experiment. These are not the calibration parameters or measured motion of a historical camera.
+
+With that true metric depth, the original method returns **0.400000075**, approximately the known 0.4 m baseline. The tiny discrepancy belongs to this float32/float64 numerical calculation. It is not a real-camera accuracy claim.
+
+This is worth keeping. It shows that the mechanism can work under its stated geometry. The next question is whether the real pipeline supplied an equivalent ruler.
+
+## Change the ruler without changing the matches
+
+Now leave every image correspondence, intrinsic parameter, rotation and translation direction unchanged. Multiply only the depth input.
+
+| Depth input relative to the known scene | Recovered translation scale | What changed |
+| ---: | ---: | --- |
+| 0.5× | 0.200000 | Half-sized numerical ruler |
+| 1.0× | 0.400000 | The known metric ruler |
+| 2.0× | 0.800000 | Doubled numerical ruler |
+
+The scale estimate follows the depth values it is given. It does not independently establish that those values are metres.
+
+The pinhole projection explains why this ambiguity is not fixed by adding more confident labels:
+
+```text
+u = fx × X/Z + cx
+v = fy × Y/Z + cy
+```
+
+Multiply the world coordinates and camera translation by the same factor. The ratios in the image remain unchanged. Matra constructs a second world at twice the size, with a 0.8 m baseline rather than 0.4 m. Its projected second-camera points differ from the first world's by **zero pixels** in the calculation.
+
+That does not make metric prediction impossible for every monocular system. Learned models can bring metric priors; known geometry, other sensors or calibration can supply a reference. It means this triangulation step cannot choose between the two worlds from the same scale-free image observations by itself.
+
+When both input depth and scale history are absent, the archived method returns `1.0`. That is a numerical fallback, not a measurement that the cameras were one metre apart.
+
+## The conversion that came before it
+
+The depth module tries several model paths. Its default Transformers identifier is `depth-anything/Depth-Anything-V2-Small-hf`; that exact checkpoint's model card tags it as **relative depth**. Other paths attempt Depth Anything, ZoeDepth and MiDaS variants. They should not be assumed to have identical output conventions or calibration.
+
+Yet successful paths all reach the same `_to_metric_depth` conversion. It finds the minimum and maximum in the current raw image, normalizes the frame between zero and one, then maps it into configured limits:
+
+```python
+normalized = (raw - frame_min) / (frame_max - frame_min)
+output = 0.1 + normalized * (20.0 - 0.1)
+```
+
+The original additionally handles a near-zero span and applies a configurable scale factor. The default limits are 0.1 and 20.0, labelled metres in the configuration.
+
+What supplied those endpoints? Not a measurement of the nearest and farthest object in this frame. They are configured values. The mapping gives the image a convenient numerical range, but that alone does not calibrate relative depth. It also changes an already metric model output rather than preserving its distances.
+
+For a display, contrast stretching can be useful. For geometry, it makes each pixel depend on other parts of the current frame. That dependency is easy to expose without running any neural network.
+
+## One untouched pixel, two different distances
+
+Start with a 10×10 raw array spanning 4 to 8. The pixel at row 5, column 5 has a value of **6.222222**. Change only the final pixel elsewhere in the array from 8 to 80.
+
+The inspected pixel stays identical. The archived conversion changes its output from **11.155557 to 0.681871**.
+
+<Explore bench="depth-scale" n="01" title="The pixel stays put. The ruler moves." hint="Change one different pixel" fallback="The inspected raw value remains 6.222222. With a frame maximum of 8, the conversion gives about 11.156; with a different pixel at 80, it gives about 0.682. No physical distance was re-observed." caption="A numerical illustration of the archived min/max equation, rounded to three decimals—not a depth model, captured image or camera simulation. The selected raw value and frame minimum stay fixed." src="Archived method and measured experiment: <a href='https://github.com/fh1m/matra'>fh1m/matra</a>." />
+
+The effect is not mysterious once the denominator is visible. A much larger maximum compresses all the other normalized values toward the configured minimum. But if the output is subsequently treated as physical depth, a far object appearing elsewhere can alter an unchanged point's supposed distance without a corresponding local observation change.
+
+The experiment does not claim that a particular neural model would produce these exact two frames. It directly tests the conversion that every successful model path passes through. The unchanged input value and changed output establish the dependency.
+
+## Depth needs a frame as well as a unit
+
+Even a genuinely metric measurement can be the wrong input for this calculation. The triangulation uses camera-axis `Z`: distance along the optical axis. A range sensor may supply distance along the viewing ray. Those quantities agree on the axis but differ away from the image centre.
+
+Pressure depth below the water surface, altitude above the bottom and range to an object are further examples. They can all be expressed in metres without representing the same state. [The older modular workbench](/notes/the-2025-workbench/) preserves another experiment where those distinctions were not yet carried cleanly through the fusion interface.
+
+The scale method also has its own numerical gates: it samples integer pixel locations, filters accepted depth ranges, requires enough surviving samples, clips the scale and smooths it with a history median. These can make an estimate stable. They do not supply a physical meaning missing from its input.
+
+The controlled geometry deliberately avoids correspondence noise, calibration error, pure-rotation degeneracy and model error. It establishes the dependency of scale on depth units; it does not evaluate the full perception stack under those harder conditions.
+
+## A display image and a measurement should part ways
+
+The useful interface is more explicit than an array called `depth`. It distinguishes relative model output, metric camera-axis depth, slant range and a display-normalized image. The arrays may share a shape while supporting different operations.
+
+A visualizer can normalize contrast for readability without feeding that normalized result back into geometry. A metric model path can preserve its metric values. A relative model path needs an independently justified reference before it feeds metre-labelled reconstruction. If that reference is absent, the output should retain its relative meaning rather than borrowing the configured limits' unit.
+
+Those are requirements exposed by the experiments, not a claim that the historical application already implements a corrected complete pipeline. The supported research deliverable is smaller and real: [Matra's original source snapshots, numerical methods, executable experiments, results and boundary regressions](https://github.com/fh1m/matra).
+
+It belongs beside [Dhrubotara](/notes/dhrubotara/), not inside it. That case asks what an image-motion cue can support. This one asks where the metre enters a map—and whether preprocessing quietly takes it away.
+
+The same modular odometry source has another contract to examine: its velocity field is assigned a position difference without dividing by elapsed time. [Dhara](/notes/dhara/) isolates that timing error with controlled capture intervals. The metre and the second have to survive different boundaries.
+
+## Read and reproduce
+
+The [repository README](https://github.com/fh1m/matra) includes the commands, layout, source hashes and full numerical results. The experiment runs on CPU without neural weights or devices. It has also been exercised in the isolated research environment, separately from source inspection.
+
+For the underlying contracts, read [OpenCV's camera-calibration and reconstruction API](https://docs.opencv.org/4.10.0/d9/d0c/group__calib3d.html), particularly the translation returned by `recoverPose` and the projection matrices supplied to `triangulatePoints`. The [exact default checkpoint's model card](https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf) is more useful for this code path than a blanket claim about every model in the Depth Anything family.

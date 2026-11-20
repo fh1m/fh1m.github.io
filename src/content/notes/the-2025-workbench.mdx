@@ -1,0 +1,157 @@
+---
+title: "The versions between campaigns"
+dek: "The 2025 folder: a gate the detector missed, thirteen versions of a vision controller, DINO identity experiments, and the difference between a display full of numbers and a measured navigation system."
+date: "2025-11"
+series: machines
+part: 8
+kind: story
+hero: /media/archive/vision-controller-2025.webp
+heroAlt: "November 2025 controller capture: forward and downward video, detections, optical flow, PID terms and control traces"
+sources:
+  - { label: "Public research code: duburi-rnd", href: "https://github.com/fh1m/duburi-rnd" }
+  - { label: "Historical Duburi AI and machine vision experiments", href: "https://github.com/fh1m/Duburi-AI-Machine-Vision" }
+  - { label: "DINOv2, the feature model used by the archived experiment", href: "https://github.com/facebookresearch/dinov2" }
+  - { label: "OpenCV: optical flow", href: "https://docs.opencv.org/4.x/d4/dee/tutorial_optical_flow.html" }
+---
+import Fig from "../../components/note/Fig.astro";
+import Gallery from "../../components/note/Gallery.astro";
+import Pull from "../../components/note/Pull.astro";
+
+A portfolio tends to keep the final filename and lose the folder around it. Mine has `pid_v1.py` through `pid_v13.py`, backups, four versions of a Pixhawk controller, and a directory called `dino`. None of that is a release history. It is a workbench that was still being worked on.
+
+This note reads the preserved 2025 files and screenshots. The old controller has not been run on a vehicle for this article. What follows distinguishes what the code implements, what the images show, and what neither one proves.
+
+## April: a gate is there, a detection is not
+
+The April captures are useful precisely because they are not flattering. There is a gate in the video. One pane says “No detections made”; another says “No gate found.” The scene, edge image and interface disagree about whether there is a usable target.
+
+<Gallery items={[
+  { src: "/media/archive/gate-attempt-2025.webp", alt: "April 2025 capture showing a gate in video, an edge image and the message No detections made", caption: "April 2025. Video, edges, and no accepted detection." },
+  { src: "/media/archive/gate-no-detection-2025.webp", alt: "April 2025 capture with video and a processing pane reporting No gate found", caption: "Another attempt from the same archive. The frame is not an evaluation set." },
+]} credit="Original captures from Fahim Faisal's supplied work archive." />
+
+Those screenshots do not establish a failure rate. They do preserve a more useful question than whether a demo looked busy: what does the next stage do when the thing in the image does not become a detection?
+
+A gate can be visible to a person while a detector rejects it. An edge map can contain the right lines without producing a gate hypothesis. A controller cannot close that gap by being tuned harder. The representation has to reach it first.
+
+## November: one loop grows a room around it
+
+The first preserved PID version is 578 lines. Version 13 is 2,550. That is not a performance result; it is the size of the files. The later version contains much more than the controller: monocular depth, DINO features, two camera paths, optical flow, and plotting.
+
+The PID itself is still recognizable. It measures elapsed time with `time.time()`, integrates error, clips the integral, differentiates consecutive errors, and clips the final output. Version 13 exposes the proportional, integral and derivative terms separately so they can be drawn.
+
+```python
+# Simplified from the preserved controller; not a replacement implementation.
+error = setpoint - process_variable
+integral += error * delta_time
+integral = clip(integral, -windup_guard, windup_guard)
+derivative = (error - previous_error) / delta_time
+output = clip(kp * error + ki * integral + kd * derivative, -1, 1)
+```
+
+There are two separate clamps here. Limiting the accumulated error bounds one part of the controller's memory. Limiting the output bounds its request to the actuator. Neither clamp establishes that a vehicle moved as intended, and an integral clamp is not the same thing as a saturation-aware anti-windup design.
+
+<Fig src="/media/archive/vision-controller-2025.webp" alt="The November 2025 interface with forward and downward images, PID components and optical-flow traces" caption="10 November 2025, from the screenshot filename. Forward and downward camera paths, learned detections beside classical vision, controller terms and traces. Values on this display are outputs of the experiment, not independently validated navigation measurements." wide contain />
+
+The interface made internal disagreement visible. On one side, a learned detector supplies a box and target error. On the other, classical vision tracks image structure. Both can draw plausible lines while answering different questions. A feature moving in the image is not automatically the vehicle moving in the world.
+
+## A remembered object, not just a class
+
+The early `dino_idea_v1.py` combines YOLO detections with DINOv2 embeddings. YOLO proposes a crop. DINO turns that crop into a normalized feature vector. Pressing a record key stores the vector for a selected class; later crops are compared against it with cosine similarity.
+
+The archived threshold is 0.85. Above it, the display gives the object a remembered identity; below it, the display calls the object unknown. That number is a configured threshold, not a calibrated probability of identity. The memory is keyed by class name, so it does not by itself model an arbitrary number of distinct objects of the same class.
+
+This matters in slalom. Recognizing “red pipe” is different from recognizing “the red pipe already passed.” A class detector answers the first question. Identity, motion and passage state have to answer the second together.
+
+There are twelve numbered idea files. Version 12 contains a <code>RedPipe</code> data structure, an IoU/Hungarian-assignment tracker, a slalom navigator, template matching, optical flow and a video-driven application entry point. Its opening standalone visualization function is not the whole file. The development moves from remembering an object's appearance toward remembering which obstacle has already been passed; the versions preserve that progression, not twelve independently validated deployments.
+
+## Depth, flow and the temptation of a unit
+
+The late controller loads MiDaS or ZoeDepth for monocular depth. Its depth-cache age is counted in frames: the configured maximum age is five. Five frames is a count, not a fixed duration; the wall-clock age changes when the processing rate changes.
+
+The classical path uses Lucas–Kanade sparse optical flow; a downward path also uses Farnebäck dense flow. Flow is image displacement. Turning it into velocity needs a time interval and a scale model, and that model depends on camera geometry and the scene. Water adds refraction and changing visibility rather than politely preserving the assumptions of a dry camera.
+
+A display can print metres and metres per second before those quantities have been checked against independent truth. That was one reason later work put more weight on physical slide measurements, timestamps and the distinction between camera motion and target motion. The [camera-as-a-sensor note](/notes/turning-a-camera-into-a-sensor) carries the later measurement; it should not be retroactively credited to these prototypes.
+
+## The folders after the numbered scripts
+
+The archive does not end at <code>pid_v13.py</code>. It contains two modular trees, <code>perception_system</code> and <code>perception_system_v2</code>. The first separates data acquisition, learned perception, classical vision, fusion and the dashboard. The second goes deeper: tracking and temporal memory, calibration, sensor data structures, coordinate transforms, navigation helpers and separate rendering components.
+
+That is a change in the engineering question. In the numbered script, most state lives in one application. In the modular versions, the interesting work is increasingly at the boundaries: what a detector returns to a tracker, which identity the next stage receives, which clock a timestamp uses, and whether two measurements refer to the same physical quantity.
+
+The original <code>pid_v13.py</code>, its backup and <code>perception_system/pid_v13_original.py</code> are byte-identical in the supplied snapshot. They are preserved copies of a baseline, not three different implementations. Conversely, a module with a new filename is not necessarily connected to the default application. Reading the entry point and its consumers matters as much as reading the directory names.
+
+The second pipeline initializes an object detector with hybrid tracking and temporal memory, optionally attaches a DINO feature extractor, and keeps separate image-processing, PID and dashboard components. Other files explore learned trajectory prediction, additional sensor fusion and navigation. I keep those experiments distinguishable from the path the main application actually instantiates.
+
+## Remembering appearance is not remembering a passage
+
+The temporal-memory module makes the original DINO idea more explicit. It stores a feature vector, class, box, last-seen time and a bounded trajectory for each remembered object. New appearance observations update the stored vector with an exponential moving average; comparison uses cosine similarity. Candidates are restricted by class and memory age.
+
+This is a useful representation of a recurring problem: an object vanishes behind glare or occlusion, then returns with a new short-term track ID. A feature memory can reconnect those observations. But similar-looking red pipes can also resemble one another. The preserved re-identification search accepts a box argument but chooses its match by class, age and appearance similarity; it does not use that box to enforce a spatial gate.
+
+The later slalom experiment adds a different kind of state: whether a particular track has been passed. That state is only useful if the identity remains associated with the same physical pipe. The tracker, navigation decision and completion memory have to agree about identity; a good-looking feature match alone does not settle that.
+
+I exercised the original version-12 tracker class on an isolated expiration case. Track 1 was expiring at location A, while track 2 remained active at a distant location B. A new detection at A was assigned track 2. The implementation filtered expired IDs, but shortened the predicted-box list by slicing rather than filtering the corresponding pairs. The surviving ID could therefore be matched against the expired track's box.
+
+That was an offline input to the original class, without a camera, detector or vehicle. It is a concrete example of why a tracker needs transition cases, not only frames where every object remains visible. It also gives a future explainer something more useful to animate than bounding boxes moving smoothly: show the track table, its expiration, the association matrix and the identity passed to the navigation decision.
+
+The version-7 DINO tracker exposes two other identity boundaries. I isolated its unchanged Kalman tracker, feature bank, IoU calculation and assignment code from the application entry point, then supplied boxes and small explicit feature vectors. The replay uses OpenCV 4.12 and SciPy on CPU. It does **not** load YOLO or DINO weights, open a camera or evaluate learned appearance quality.
+
+| Controlled input | Observed IDs |
+|---|---|
+| 101 expires; 202 matches by IoU | match `(1, 0)`; surviving `[202]`; display match absent |
+| 101 has no feature; 202 supplies the feature match | selected 101; hits: 101 → 2, 202 → 1 |
+
+The first failure is in the display hand-off. Matching is computed against the original track list; expiration then removes an earlier member before those index pairs reach the visualizer. Its bounds check prevents an exception but silently drops the surviving track's match label. “No crash” is not the same invariant as “the label names the matched object.”
+
+The second is earlier and more consequential. `compute_similarity_matrix` skips tracks without feature history and collects `valid_track_ids`, but returns only the compressed matrix. Its caller maps row zero back through the unfiltered unmatched-track list. In the controlled case, the feature belongs to 202, yet track 101 receives the detection. Raising the cosine threshold cannot restore the row identity that the interface discarded.
+
+Both transitions need an explicit mapping, not another confidence score: preserve the matrix-row-to-track-ID relationship, and pass stable track IDs across a mutation boundary rather than reinterpreting old positions. These two probes establish bookkeeping failures in those supplied inputs—not how frequently they occurred in historical footage. The version-12 failure above is a separate implementation and should not be folded into a single invented benchmark score.
+
+
+## Three measurements that all happen to use metres
+
+The modular depth work tries to calibrate monocular output with sensor references, then refine multiple inputs. Its calibrator estimates a scale from recent reference pairs using a weighted median. On five controlled pairs where a relative value of 2 corresponds to a metric value of 4, the actual module estimates scale 2 and maps an input of 3 to 6. That checks the arithmetic of that simple scale model; it does not establish a camera calibration in water.
+
+More importantly, range to a target, pressure-derived depth below the surface, and DVL altitude above the bottom are different quantities. Sharing the unit “metres” does not make them observations of the same state.
+
+<figure class="wide">
+<svg viewBox="0 0 960 300" role="img" aria-labelledby="depth-quantities-title depth-quantities-desc">
+<title id="depth-quantities-title">Depth, altitude and target range describe different distances</title>
+<desc id="depth-quantities-desc">A vehicle between a water surface and a bottom, with one vertical distance upward to the surface, another downward to the bottom, and an oblique distance to a target. The three distances require a geometric relationship before they can constrain a shared state.</desc>
+<path d="M40 45H920M40 260H920" stroke="var(--line-2)" stroke-width="2" fill="none"/>
+<rect x="310" y="115" width="100" height="55" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>
+<circle cx="750" cy="195" r="17" fill="var(--estimate)"/>
+<path d="M270 45V141H305" fill="none" stroke="var(--instrument)" stroke-width="2" stroke-dasharray="5 4"/>
+<path d="M360 175V260" fill="none" stroke="var(--measured)" stroke-width="2" stroke-dasharray="5 4"/>
+<path d="M415 143L731 191" fill="none" stroke="var(--estimate)" stroke-width="2" stroke-dasharray="5 4"/>
+<g font-family="var(--sans)" font-size="17" fill="var(--ink)"><text x="45" y="33">surface</text><text x="45" y="287">bottom</text><text x="50" y="100">pressure depth</text><text x="385" y="225">bottom altitude</text><text x="510" y="135">range to an object</text><text x="780" y="202">target</text></g>
+</svg>
+<figcaption>Different origins and directions, even when every value is in metres. Surface reference, vehicle attitude and target geometry determine the relationships.</figcaption>
+</figure>
+
+The archived <code>DepthRefiner</code> currently averages those available inputs directly. Supplying pressure depth 2 m and bottom altitude 8 m to the original module produced about 4.492 m with a confidence value of 0.929. That number is a consequence of the configured weighting—not independent evidence that the vehicle is 4.492 m below the surface.
+
+The distinction is useful beyond this particular prototype. Calibration pairs must measure corresponding things. A fusion filter cannot repair a measurement model that identifies different physical quantities as the same variable.
+
+## A module can exist before the integration is finished
+
+There are real interfaces here, but their names should not be promoted into completed capabilities. The optional <code>MultiLayerFusion</code> module imports three quaternion helper names that the preserved quaternion file does not export. Its actual offline import fails at that boundary. The separate <code>QuaternionFusion</code> module does run: +179° and −179° interpolate near 180°, and two absent inputs return no heading.
+
+Likewise, the LSTM file defines a trajectory model and inference wrapper, but contains no training loop or checkpoint-loading path. The navigation planner's obstacle-avoidance method returns the supplied waypoints unchanged. These are meaningful records of directions I explored, not evidence of a trained trajectory model or functioning obstacle-avoidance planner.
+
+The timing interface also deserves its own experiment. <code>SensorReading</code> documents Unix timestamps in seconds, while <code>TimestampSynchronizer</code> converts its drift threshold to nanoseconds. Feeding the actual synchronizer a first sensor at 1000 s and a second sensor first observed at 1001 s maps the second observation back to 1000 s. Without an independently established clock offset, that can erase a real difference in acquisition time rather than synchronize two clocks.
+
+That is the approach in [Dhrubotara](/notes/dhrubotara/), the research case study from the neighboring visual-guidance experiments: unchanged source snapshots, a recorded-input replay, and a controlled translation that exposes a misleading depth cue. The useful story is how the interfaces evolved—not a new claim that every module in a large directory was deployed together.
+
+The separately supplied `flow_use` family now has two more focused cases: [Matra](/notes/matra/) follows metric scale through depth normalization, while [Dhara](/notes/dhara/) checks a displacement stored in a field labelled velocity. These are bounded investigations of their own source snapshots, not evidence that every older module here ran as one finished system.
+
+## What I keep from this folder
+
+Not every version deserves its own project tile. Together they preserve a period of learning that a final README cannot show: trying more signals, exposing them on screen, and eventually asking which signals deserved their units.
+
+The old code also keeps the limits visible. Wall-clock timing can jump; a frame-count cache has variable time age; a clipped PID can still be fed a bad observation; an attractive tracker display is not a ground-truth evaluation. Those are reasons to keep the archive, not reasons to pretend it was always designed this way.
+
+<Pull>The interesting part is not that there were thirteen versions. It is what the thirteenth still did not let me claim.</Pull>
+
+The same questions recur in the [frame-age problem](/notes/the-frame-age-problem), [tracking without detection](/notes/tracking-without-detection), and the [sign convention at the MAVLink boundary](/notes/the-sign-flip-at-the-mavlink-boundary). They are connected work, not independent boxes on a résumé.

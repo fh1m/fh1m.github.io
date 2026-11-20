@@ -1,5 +1,4 @@
 ---
-import { ClientRouter } from "astro:transitions";
 import "@fontsource/tiro-bangla/400.css";
 import "@fontsource/ibm-plex-sans/400.css";
 import "@fontsource/ibm-plex-sans/500.css";
@@ -10,29 +9,30 @@ import "@fontsource/ibm-plex-mono/500.css";
 import "../styles/global.css";
 import { person } from "../data/facts";
 import { elements } from "../data/elements";
+import { siteTheme } from "../data/palette";
 import ScreenBar from "../components/ScreenBar.astro";
 
 interface Props { title?: string; description?: string; bodyClass?: string; nation?: string; chrome?: boolean; crumb?: { href: string; label: string; bn?: string }; progress?: boolean }
 const { title, description = "Fahim Faisal, an engineer from Dhaka: machines that have to work alone in water, on land, in the air and on small chips, and the commits that fixed them.", bodyClass = "", nation, chrome = true, crumb, progress = false } = Astro.props;
 const fullTitle = title ? `${title} | Fahim Faisal` : "Fahim Faisal";
-const here = Astro.url.pathname;
+const here = Astro.url.pathname === "/404/" ? "/404.html" : Astro.url.pathname;
 const colour = elements.find((e) => e.id === nation)?.colour;
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" style={siteTheme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#000" />
+    {here === "/404.html" && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content={siteTheme["--page"]} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={new URL(here, Astro.site)} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL("/og.jpg", Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
-    <ClientRouter fallback="swap" />
   </head>
   <body class={bodyClass} style={colour ? `--c:${colour}` : undefined}>
     <a class="skip" href="#main">Skip to content</a>
@@ -50,7 +50,7 @@ const colour = elements.find((e) => e.id === nation)?.colour;
 </html>
 
 <style>
-  .bar-space { height: 3.4rem; }
+  .bar-space { height:var(--header-height); }
   .foot { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.6rem; padding: 4rem var(--gutter) 2.4rem; }
   .foot a { color: var(--dim); }
 </style>

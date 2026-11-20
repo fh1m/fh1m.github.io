@@ -7,7 +7,7 @@ import mongla from "./mongla.json";
 
 export type Domain = "water" | "air" | "ground" | "sight" | "time" | "workshop";
 
-export interface Media { src: string; alt: string; caption: string; tier: "Own" | "Bench" | "Sim" | "Team" | "Doc" | "Water"; wide?: boolean }
+export interface Media { src: string; alt: string; caption: string; tier: "Own" | "Bench" | "Sim" | "Team" | "Doc" | "Water" | "CAD" | "Replay"; wide?: boolean }
 export interface Split { me: string; team?: string; others?: string }
 export interface Chapter {
   id: string;
@@ -32,12 +32,24 @@ const mTests = mongla.tests.passed.toLocaleString("en-US");
 
 export const chapters: Chapter[] = [
   {
+    id:"origin", n:-1, when:"Childhood", bn:"শুরু", bnGloss:"the beginning", domain:"workshop",
+    title:"Before there was a codebase",
+    kicker:"Remote-control cars, then anything with a circuit.",
+    body:[
+      "As a kid I took apart remote-control cars and anything with electronics or circuits inside. Opening something up changes the question: not just which button makes it move, but what connects that button to the movement.",
+      "That habit stayed. The pieces now include software, sensors, protocols and control loops. I still want to understand the system before extending it. The dated record below starts with web work in 2021; the curiosity predates the repositories.",
+    ],
+    media:[],
+    notes:[{href:"/notes/workshop",label:"the tools that came later"}],
+    lesson:"Open it up. Find out what actually makes it move.",
+  },
+  {
     id: "source", n: 0, when: "2021 – 2022", bn: "উৎস", bnGloss: "the source", domain: "workshop",
     title: "The source",
     kicker: "Every river starts as something you could step over.",
     body: [
       "Mine starts in 2021 with a web internship at Thinkit: back-end code for a move to MongoDB and a pile of front-end bugs. It was the first time code I wrote ran for somebody who wasn't me, and the first time a bug of mine had a victim.",
-      "In 2022 I ran my college's ICT club, wrote scripts for my Arch machine, and built a Neovim setup I screenshotted as it grew, the way some people photograph a plant. None of that is engineering yet. It's the habit underneath it: if a tool annoys you, open it up.",
+      "In 2022 I ran my college's ICT club, wrote scripts for my Arch machine, and built a Neovim setup I screenshotted as it grew, the way some people photograph a plant. The habit was already there: if a tool annoys you, open it up.",
     ],
     media: [
       { src: "/media/notes/nvim-2022-07-05.webp", alt: "A Neovim editor in July 2022 with a file tree and a code buffer", caption: "<b>July 2022.</b> The editor, early.", tier: "Own" },
@@ -80,7 +92,7 @@ export const chapters: Chapter[] = [
     media: [
       { src: "/media/notes/green-at-depth-desk-2023-arrow.webp", alt: "A 2023 screenshot: a hollow green arrow outlined by a colour threshold, plus green reflections", caption: "<b>November 2023.</b> The file was called arrow detection. It detected green.", tier: "Own" },
       { src: "/media/notes/pareidolia-rerun.webp", alt: "A 2023 webcam frame rerun through a Haar cascade: one box on a face, one on two backpacks", caption: "My first face detector, rerun in 2026: one face, two backpacks.", tier: "Own" },
-      { src: "/media/notes/interview-bottle-dry_vs_3m.webp", alt: "Bottles with detector boxes, dry and under three metres of simulated water", caption: "The interview bottle, dry and at 3 m of simulated water.", tier: "Own" },
+      { src: "/media/notes/interview-bottle-dry_vs_3m-readable.webp", alt: "Four validation bottle photographs with prediction boxes and readable score labels, beside their synthetically transformed counterparts", caption: "The 2023 interview detector, replayed in 2026. Dataset photographs, dry and with a modeled 3 m optical water path—not an underwater trial.", tier: "Own", wide: true },
     ],
     benches: [{ key: "colour-depth", title: "Sink a colour card" }],
     notes: [
@@ -99,11 +111,11 @@ export const chapters: Chapter[] = [
     body: [
       "February 2024, a contest. The team bailed, the last servo burnt out, the cupboard was empty. What was left: a 4WD chassis, an Arduino, one ultrasonic sensor on a stalk, and a night. I named the robot after Bhapa, the campus cat, who has her own university ID and better obstacle avoidance.",
       "Two years later I read the code properly. The robot I'd demoed never turned and never reversed: both sides of the drive averaged to the same speed, and a negative speed wrapped to a polite crawl. Press <em>v1</em> on the bench and watch it find a wall and commit to it. Then press <em>v2</em>.",
-      "The same year: a laptop that narrated a bottle (<em>\"probably move to right with speed of 98.41 px/s\"</em>) and four LEDs that told a person which way to move a camera. Both turned out to be control problems in disguise. A person who obeys four LEDs perfectly, with a normal 250 ms reaction time, sails straight through the target and back, forever.",
+      "The same year: a laptop that narrated a bottle (<em>\"probably move to right with speed of 98.41 px/s\"</em>) and four LEDs that told a person which way to move a camera. Both turned out to be control problems in disguise. A later model, with an assumed 250 ms reaction delay, shows the LED-following loop hunting across the target. That is a simulated explanation, not a measurement of how people used the original rig.",
     ],
     media: [
       { src: "/media/e-bhapa/bhapa.webp", alt: "Bhapa, the BRAC University campus cat, wearing a student ID", caption: "<b>Bhapa.</b> Has her own university ID.", tier: "Own" },
-      { src: "/media/e-bhapa/e-bhapa.webp", alt: "E-Bhapa: a 4WD acrylic chassis with an ultrasonic sensor on a stalk", caption: "<b>E-Bhapa.</b> Looks identical, wow.", tier: "Own" },
+      { src: "/media/e-bhapa/robot-preview.webp", alt: "The upright E-Bhapa robot: a 4WD acrylic chassis with an ultrasonic sensor on a stalk", caption: "<b>E-Bhapa.</b> Looks identical, wow. Cropped from the 2024 photograph.", tier: "Own" },
       { src: "/media/notes/half-a-second-run-2024-1.webp", alt: "A 2024 webcam frame: a bottle in a blue tracking box with a narrated speed", caption: "<b>2024.</b> Two decimal places of confidence.", tier: "Own" },
     ],
     benches: [{ key: "ebhapa", title: "E-Bhapa in a room" }, { key: "delay", title: "Four LEDs, one person, 250 ms late" }],
@@ -119,35 +131,38 @@ export const chapters: Chapter[] = [
     title: "A rover arm that types",
     kicker: "Rovers taught me manipulation and vision.",
     body: [
-      "The University Rover Challenge asks a rover to find a keyboard and type on it, alone. With BRACU Mongol-Tori's autonomous sub-team I wrote the inverse kinematics for the 2-DOF arm, built a lightweight vision unit kept separate from the rover's main computer (so typing could never starve driving), wrote OCR to tell the keys apart, and ran the dataset pipeline.",
-      "Two links and a target is a closed-form problem: the law of cosines gives the elbow, two arctangents give the shoulder. The honest line in the solver is the one that says <em>out of reach</em> instead of stretching. Click a key on the bench; try the far corner.",
+      "From December 2024 to May 2025, I worked on BRACU Mongol-Tori's autonomous typing task: two-link arm inverse kinematics, a separate lightweight vision unit, key OCR and the dataset pipeline. The 2025 rules allowed initial manual alignment with Q, but not manual alignment to each subsequent key.",
+      "My preserved controller uses 15.5-inch and 14-inch links. Its ideal geometry, joint bounds and integer servo writes produce different answers. Compare them on the bench: a mathematically reachable target can still miss after the command is limited.",
     ],
     split: {
       me: "2-DOF arm IK, the separate vision unit, key OCR, the URC 2025 dataset pipeline, a calibration GUI and sim.",
       team: "The rover, its drive and science systems. <a href=\"https://www.bracu.ac.bd/news/brac-universitys-mongol-tori-team-ranks-among-global-top-10-university-rover-challenge-2025\">BRAC University reported</a> a global top-10 finish at URC 2025.",
     },
     media: [
-      { src: "/media/lab/detect-keyboard.webp", alt: "A keyboard with individual keys detected and boxed", caption: "Keys found, one box each.", tier: "Bench" },
-      { src: "/media/lab/sim-rover-terrain.webp", alt: "A simulated rover on dune terrain beside a mission display", caption: "A rover on simulated dunes.", tier: "Sim" },
+      { src: "/media/lab/keyboard-detail.webp", alt: "Detected keyboard keys with a threaded metal tip in front of F", caption: "The typing-task detection frame, cropped to the keyboard and mechanism.", tier: "Bench" },
     ],
-    benches: [{ key: "ik-arm", title: "Two-link IK over a keyboard" }],
+    benches: [{ key: "ik-arm", title: "Ideal geometry versus my archived commands" }],
     notes: [{ href: "/notes/rovers", label: "a rover arm that types" }],
-    lesson: "Finding the keyboard is the task. Pressing it is arithmetic.",
+    lesson: "Finding a key, reaching it and pressing it are different interfaces.",
   },
   {
     id: "current", n: 5, when: "2024 – 2026", bn: "স্রোত", bnGloss: "current", domain: "water",
     title: "Three RoboSubs",
     kicker: "Underwater vehicles taught me to trust nothing I hadn't measured.",
     body: [
-      "RoboSub happens every summer at the Woollett Aquatics Center in Irvine, California. I was there with Duburi in 2024, 2025 and 2026: first as a junior vision member, then leading the vision sub-team, then as engineering team lead for the 2026 campaign.",
-      "The vision years were a slow discovery: most published underwater-vision advice doesn't survive being measured on your own footage. On the team's 2025 competition video, all 25 archived training runs reported mAP50 = 0.995, and the gate model found the gate in <span class=\"k fail\">1.5 %</span> of real frames. The frames were 3.7× blurrier at identical brightness, and not one training config had ever shown the model a blurred image. That kind of gap became the work, and a paper with the team: <a href=\"https://openreview.net/forum?id=qiFAySNAsW\"><em>Color is Also Class Evidence</em></a>.",
-      "The score sheets below are RoboNation's, read round by round. Eighth of 58 both years; the best round went up 53 %, and both years ended under the finals wild-card line. From October 2025 to February 2026 I also worked as a junior autonomous engineer at Dubotech, on sonar firmware and navigation.",
+      "My Duburi archive spans the 2024, 2025 and 2026 campaigns: first as a junior vision member, then leading the vision sub-team, then as engineering team lead for the 2026 campaign. I left Duburi and BRAC University in August 2026; this is my archive of that time, not a current team role. RoboSub's pool is at the Woollett Aquatics Center in Irvine, California; the work around a campaign starts long before the competition week.",
+      "The vision years changed how I read a training metric. On the team's 2025 competition video, all 25 archived training runs reported mAP50 = 0.995, and the gate model found the gate in <span class=\"k fail\">1.5 %</span> of real frames. The frames were 3.7× blurrier at identical brightness, and not one training config had ever shown the model a blurred image. That kind of gap became the work, and a paper with the team: <a href=\"https://openreview.net/forum?id=qiFAySNAsW\"><em>Color is Also Class Evidence</em></a>.",
+      "The linked score sheets are RoboNation's, read round by round. In 2025 and 2026 the team placed eighth of 58; the best round went up 53 %, and both years ended under the finals wild-card line. From October 2025 to February 2026 I also worked as a junior autonomous engineer at Dubotech, on sonar firmware and navigation.",
+      "The sonar experiments had a lower-level aim: understand the Ping360 well enough to develop our own firmware. I wrote logging, visualization and detection applications and modified upstream-based helpers. The preserved work records that investigation, not a finished replacement firmware.",
     ],
     split: {
-      me: "2024: vision. 2025: vision sub-team lead. 2026: engineering team lead.",
+      me: "2024: vision. 2025: vision sub-team lead. 2026: engineering team lead, until leaving in August.",
       team: "The vehicles, mechanics, electronics and the control and mission code that flew them; the 2025 Entrepreneurship award.",
     },
     media: [
+      { src: "/media/duburi26/tent-laptops.webp", alt: "The Duburi team working at laptops under the competition tent", caption: "Between runs. The result table doesn't show this part. Photo: BRACU Duburi.", tier: "Team", wide: true },
+      { src: "/media/archive/dubomini-cutaway.webp", alt: "Dubomini CAD render with internal electronics visible through its lid", caption: "Dubomini, from the team's design archive. A render, not a photograph. Mechanical design credit: BRACU Duburi.", tier: "Team" },
+      { src: "/media/archive/duburi-pool-03.webp", alt: "The Duburi vehicle in a swimming pool during a test", caption: "Pool work from the supplied campaign archive.", tier: "Water" },
       { src: "/media/certs/robosub-2024.webp", alt: "Certificate of participation, 27th RoboSub, August 2024, Irvine", caption: "27th RoboSub, 2024.", tier: "Doc" },
       { src: "/media/certs/robosub-2025.webp", alt: "Certificate of participation, 28th RoboSub, August 2025", caption: "28th, 2025.", tier: "Doc" },
       { src: "/media/certs/robosub-2026.webp", alt: "Certificate of participation, 29th RoboSub, July 2026, Irvine", caption: "29th, 2026.", tier: "Doc" },
@@ -157,6 +172,11 @@ export const chapters: Chapter[] = [
       { href: "/notes/duburi", label: "how Duburi learned to see" },
       { href: "/notes/the-frame-age-problem", label: "the frame-age problem" },
       { href: "/notes/tracking-without-detection", label: "tracking without detection" },
+      { href: "/notes/the-2025-workbench", label: "the versions between campaigns" },
+      { href: "/notes/reading-the-ping360", label: "reading the Ping360, below the picture" },
+      { href: "/notes/dhrubotara", label: "Dhrubotara: a reference in moving water" },
+      { href: "/notes/matra", label: "Matra: where the metre enters the map" },
+      { href: "/notes/dhara", label: "Dhara: the second missing from a velocity field" },
     ],
     lesson: "Reality must take precedence over public relations.",
     heritage: { bn: "সত্যেন্দ্রনাথ বসু", who: "Satyendra Nath Bose", line: "In 1924, teaching at Dhaka University, he counted light particles a new way and posted the paper to Einstein. Every boson carries his name. Counting honestly, from Dhaka, has a precedent.", href: "https://en.wikipedia.org/wiki/Satyendra_Nath_Bose" },
@@ -172,9 +192,9 @@ export const chapters: Chapter[] = [
     ],
     split: { me: "The autonomy stack: perception, estimation, missions, tooling, the measurements.", others: "Rakibul Islam: the SROT board, Hengla firmware, Bondor ground station." },
     media: [
-      { src: "/media/mongla-docs/mongla-iso.webp", alt: "The Mongla hull CAD: red fairings over a grey pressure can", caption: "The hull, from its CAD.", tier: "Sim" },
-      { src: "/media/mongla-docs/mirpur-gate.webp", alt: "Real footage from Mirpur: a gate in hazy turquoise water, boxed by the detector", caption: "Real 2025 footage, Mirpur: the gate at 0.85.", tier: "Water" },
-      { src: "/media/lab/latency-verdict.webp", alt: "Latency table for both cameras ending in the verdict: sensor is the limit", caption: "Both cameras: the sensor is the limit.", tier: "Bench" },
+      { src: "/media/mongla/perception-preview.webp", alt: "Recorded Mirpur pool footage with a later detector overlay around a gate", caption: "Recorded in Mirpur in 2025, replayed through the detector. The displayed score is not an accuracy evaluation or an in-water Mongla trial.", tier: "Replay" },
+      { src: "/media/mongla-docs/mongla-iso.webp", alt: "Unfinished Mongla hull CAD: red fairings over a grey pressure can", caption: "Unfinished hull design, retained as CAD context—not a built or tested vehicle.", tier: "CAD" },
+      { src: "/media/lab/latency-verdict.webp", alt: "Archived camera latency report with a sensor-limit verdict", caption: "An earlier bench report. Later source entries change capture-rate advice and timestamp boundaries; its printed verdict is not a permanent system limit.", tier: "Doc" },
     ],
     benches: [{ key: "hull", title: "Take the hull apart" }],
     notes: [
@@ -191,7 +211,7 @@ export const chapters: Chapter[] = [
     title: "A camera that answers with a number",
     kicker: "A mailbox, not a queue.",
     body: [
-      "Dristy is open firmware for a Kendryte K210 camera that does the seeing itself and sends the robot four bytes (<em>target at error_x, error_y</em>) instead of a video stream. Tiny neural nets on the KPU, classical vision on two RISC-V cores, 8 MiB of SRAM placed by hand.",
+      "Dristy is open firmware for a Kendryte K210 camera that does the seeing itself and sends compact serial responses rather than a video stream. Tiny neural nets on the KPU, classical vision on two RISC-V cores, 8 MiB of SRAM placed by hand. The host still needs the packet envelope and metadata; a target coordinate is not the whole wire protocol.",
       "It's the same idea as Mongla's board split at a smaller scale: keep the heavy thinking away from the thing that has to be on time. And it carries the same rule printed on its README: keep the newest frame, throw the rest away.",
       "Every detector I ever trained is a deeper, more opaque descendant of the 2001 face detector on this bench. Step through its first nine questions, computed on my own 2023 face.",
     ],
@@ -226,7 +246,7 @@ export const chapters: Chapter[] = [
     kicker: "read. derive. build. break. repeat.",
     body: [
       "Arete is the laptop that goes out. Homie is the home PC that holds the fort. Docked, they're five panels and one keyboard: Neovim and tmux, Obsidian for derivations, ROS docs, a radio waterfall, and a custom Quickshell desktop in a great deal of hot pink. Zondo, my illustrated desk-buddy, lives in it.",
-      "The small sharp tools live here too: a new-tab page where every site I use daily is a key 1.38 characters long on average, a WebAuthn login with nothing worth stealing, a terminal chat you can watch turn into noise in Wireshark. Type into the start page's real grammar on the bench.",
+      "The small sharp tools live here too: a new-tab page with short site keys, a WebAuthn course prototype whose enrollment policy still needs work, and a terminal chat whose plaintext and encrypted traffic can be inspected in Wireshark. Type into the start page's real grammar on the bench.",
     ],
     media: [
       { src: "/media/den/den-layout.webp", alt: "The Digital Den layout: two laptop displays, the home PC display, the ScreenPad, and a pixel avatar typing", caption: "Two hosts, five panels, one keyboard.", tier: "Own", wide: true },
@@ -245,7 +265,7 @@ export const chapters: Chapter[] = [
     title: "Open water",
     kicker: "Hope is the decision to keep working on the better version while the current one is still broken.",
     body: [
-      "In 2026 I left BRAC University, on principle, and kept building. Since fall 2026 I study computer science and engineering at UIU.",
+      "I left BRAC University in August 2026, on principle, and kept building. My time in Duburi also ended that August. Since fall 2026 I study computer science and engineering at UIU.",
       "What's next is the obvious and the hard: Mongla's first dive, Rupsha's first time outdoors, and the unglamorous list in between (a depth loop that has held in water, a thruster check that can fail, a velocity estimate with somewhere to go). The flight recorder below is the last year of public commits, rebuilt every day.",
     ],
     media: [],

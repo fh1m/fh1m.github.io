@@ -24,7 +24,6 @@ async function mount(fig: HTMLElement) {
 }
 
 const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); mount(e.target as HTMLElement); } }), { rootMargin: "300px 0px" });
-// start after the page has loaded, so the first paint (cover image, text) never competes with a bench's code
-// ClientRouter swaps pages without reloading this module, so look for new figures on every page load
+// Leave the first paint to the reading content; mounts live only for this document.
 const start = () => document.querySelectorAll<HTMLElement>("figure.x:not([data-ready])").forEach((f) => io.observe(f));
-document.addEventListener("astro:page-load", () => { if (document.readyState === "complete") start(); else addEventListener("load", start, { once: true }); });
+if (document.readyState === "complete") start(); else addEventListener("load", start, { once: true });

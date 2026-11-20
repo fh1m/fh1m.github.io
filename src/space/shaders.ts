@@ -1,9 +1,8 @@
 /**
- * Planet, atmosphere and star materials. Everything is procedural (no textures to download):
- * 3D value-noise fbm on the sphere, lit by the star at the origin, with a soft terminator.
+ * Procedural materials for the fictional silicon world, atmospheres and stars.
+ * The other worlds and the Sun use the credited local surface maps in engine.ts.
  */
 import * as THREE from "three";
-import type { Surface } from "./system";
 
 const NOISE = /* glsl */ `
 float h3(vec3 p){ p = fract(p * 0.3183099 + .1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
@@ -17,26 +16,8 @@ const VERT = /* glsl */ `
 varying vec3 vObj; varying vec3 vN; varying vec3 vW;
 void main(){ vObj = normalize(position); vN = normalize(mat3(modelMatrix) * normal); vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`;
 
-const SURF: Record<Surface, string> = {
-  // banded gas giant: latitude bands, stretched turbulence
-  gas: `float b = vObj.y * 9. + fbm(vec3(vObj.x * 2., vObj.y * 14., vObj.z * 2.) + uTime * .01) * 2.2;
-        float k = .5 + .5 * sin(b); col = mix(uA, uB, k); col = mix(col, uC, smoothstep(.6, .9, fbm(vObj * 5. + 3.)) * .5);`,
-  // ocean world: deep water, a few islands, cloud wisps
-  ocean: `float land = smoothstep(.62, .66, fbm(vObj * 2.6 + 7.)); col = mix(uA, uB * .8, fbm(vObj * 6.) * .6); col = mix(col, vec3(.24,.3,.2), land);
-          float cl = smoothstep(.55, .75, fbm(vObj * 4. + vec3(uTime * .02, 0., 0.))); col = mix(col, uC, cl * .75); spec = (1. - land) * (1. - cl);`,
-  // desert world: dunes, dark basalt, polar frost
-  desert: `float n = fbm(vObj * 3.5); col = mix(uA, uB, n); col = mix(col, uC, smoothstep(.62, .75, fbm(vObj * 9. + 2.)) * .6);
-           col = mix(col, vec3(.86,.84,.8), smoothstep(.82, .9, abs(vObj.y)));`,
-  // silicon: dark plates, lit traces, warm hotspots like a chip under load
-  silicon: `vec2 g = vec2(atan(vObj.z, vObj.x) * 12., asin(vObj.y) * 12.); vec2 cc = abs(fract(g) - .5);
-            float trace = smoothstep(.47, .5, max(cc.x, cc.y)) * step(.45, fbm(floor(vec3(g, 1.)) * .7));
-            col = mix(uA, uB, fbm(vObj * 4.)); col += uC * trace * (.5 + .5 * sin(uTime * 1.5 + g.x)) * .9; emit = trace * .6;`,
-  rock: `col = mix(uA, uB, fbm(vObj * 5.));`,
-  // home: oceans, continents, cloud
-  earth: `float land = smoothstep(.5, .54, fbm(vObj * 2.2 + 11.)); col = mix(uA, uB, land); float cl = smoothstep(.55, .72, fbm(vObj * 5. + uTime * .015)); col = mix(col, uC, cl * .8); spec = (1. - land) * (1. - cl);`,
-};
 
-export function planetMaterial(surface: Surface, colours: [string, string, string]) {
+export function siliconMaterial(colours: [string, string, string]) {
   return new THREE.ShaderMaterial({
     uniforms: { uA: { value: new THREE.Color(colours[0]) }, uB: { value: new THREE.Color(colours[1]) }, uC: { value: new THREE.Color(colours[2]) }, uTime: { value: 0 } },
     vertexShader: VERT,
@@ -44,11 +25,15 @@ export function planetMaterial(surface: Surface, colours: [string, string, strin
       uniform vec3 uA, uB, uC; uniform float uTime; varying vec3 vObj; varying vec3 vN; varying vec3 vW; ${NOISE}
       void main(){
         vec3 col; float spec = 0., emit = 0.;
-        ${SURF[surface]}
+        vec2 g = vec2(atan(vObj.z, vObj.x) * 12., asin(vObj.y) * 12.);
+        vec2 cc = abs(fract(g) - .5);
+        float trace = smoothstep(.47, .5, max(cc.x, cc.y)) * step(.45, fbm(floor(vec3(g, 1.)) * .7));
+        col = mix(uA, uB, fbm(vObj * 4.));
+        col += uC * trace * (.5 + .5 * sin(uTime * 1.5 + g.x)) * .9; emit = trace * .6;
         vec3 L = normalize(-vW), V = normalize(cameraPosition - vW), N = normalize(vN);
         float d = dot(N, L), lit = smoothstep(-.15, .35, d);
         float s = pow(max(dot(reflect(-L, N), V), 0.), 40.) * spec * .6;
-        vec3 night = col * .035;
+        vec3 night = max(col * .18, vec3(.022, .025, .032));
         vec3 c = mix(night, col * (.25 + .9 * max(d, 0.)), lit) + s + col * emit;
         float rim = pow(1. - max(dot(N, V), 0.), 3.) * lit * .25; c += rim * uB;
         gl_FragColor = vec4(c, 1.);
@@ -81,17 +66,3 @@ export function starMaterial() {
 }
 
 export const rockMaterial = (colour: string) => new THREE.MeshStandardMaterial({ color: colour, roughness: 0.95, metalness: 0.05, flatShading: true });
-
-/** The star: granulated surface, darker at the limb, slowly boiling. */
-export function sunMaterial() {
-  return new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 } },
-    vertexShader: VERT,
-    fragmentShader: /* glsl */ `
-      uniform float uTime; varying vec3 vObj; varying vec3 vN; varying vec3 vW; ${NOISE}
-      void main(){ vec3 V = normalize(cameraPosition - vW); float mu = max(dot(normalize(vN), V), 0.);
-        float g = fbm(vObj * 18. + uTime * .05) * .6 + fbm(vObj * 4. - uTime * .02) * .4;
-        vec3 c = mix(vec3(1., .62, .25), vec3(1., .95, .82), g); c *= .55 + .45 * pow(mu, .45);
-        gl_FragColor = vec4(c * 1.4, 1.); }`,
-  });
-}

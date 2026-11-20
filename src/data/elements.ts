@@ -4,6 +4,8 @@
  */
 import { lessons, type Element } from "./lessons";
 import commitsData from "./commits.json";
+import { domainColours } from "./palette";
+import { hailoSharing } from "./facts";
 /** Commit counts come from the snapshot (scripts/mine-commits.mjs), never typed in. */
 export const commitCount = (key: string) => (commitsData.projects as Record<string, { commits: unknown[] }>)[key].commits.length.toLocaleString("en-US");
 
@@ -21,30 +23,30 @@ export const projects: Project[] = [
   { slug: "gimbal", element: "air", title: "A thrust-vector gimbal", years: "2024", role: "controller and code", status: "bench · re-read 2026", summary: "Two servos, one IMU, a PID loop holding a rocket motor upright, written for BRAC University's LASSET lab. The public code is two gists; reading them again in 2026 found a filter with no memory.", notes: [{ href: "/lessons/a-filter-with-no-memory", label: "LL-13: a filter with no memory" }] },
   { slug: "meghdhut", element: "air", title: "Meghdhut", years: "2026 →", role: "author", status: "private · early", private: true, summary: "GPS-denied autonomy for a drone, named for the cloud messenger. A private workspace in its first weeks: the engineering foundations and the harness, no flight yet. Described here, not linked.", notes: [] },
   // Water
-  { slug: "duburi", element: "water", title: "BRACU Duburi", years: "2023 – 2026", role: "vision → vision lead → engineering lead", status: "team · competed", repo: "fh1m/duburi-rnd", commitsKey: "duburi", summary: "Bangladesh's autonomous underwater vehicle team. I joined the vision subteam in 2023, led it, and in 2026 was Team Lead (Engineering) for a two-vehicle campaign: Duburi 4.5 and Dubomini 2.0 coordinating mid-run. 8th of 58 at RoboSub in 2025 and 2026. The research codebase for Duburi 4.2 is public.", notes: [{ href: "/notes/duburi", label: "how Duburi learned to see" }] },
+  { slug: "duburi", element: "water", title: "BRACU Duburi", years: "Sep 2023 – Aug 2026", role: "former engineering lead; previously vision lead", status: "team · competed", repo: "fh1m/duburi-rnd", commitsKey: "duburi", summary: "Bangladesh's autonomous underwater vehicle team. I joined the vision subteam in 2023, led it, and in 2026 was Team Lead (Engineering) for a two-vehicle campaign: Duburi 4.5 and Dubomini 2.0 coordinating mid-run. 8th of 58 at RoboSub in 2025 and 2026. I left BRAC University and Duburi in August 2026. The research codebase for Duburi 4.2 is public.", notes: [{ href: "/notes/duburi", label: "how Duburi learned to see" }] },
   { slug: "mongla", element: "water", title: "Mongla", years: "2026 →", role: "author (board and firmware: Rakibul Islam)", status: "bench · 0 dives", repo: "fh1m/mongla_ws", commitsKey: "mongla", summary: "An independent autonomy stack for underwater vehicles, where every number carries its measurement and the retractions stay in the ledger.", notes: [{ href: "/notes/mongla", label: "the tour" }, { href: "/notes/the-engine-room", label: "the engine room" }] },
   { slug: "mongla-sim", element: "water", title: "Mongla Sim", years: "2026", role: "author", status: "sim", repo: "fh1m/mongla_sim", commitsKey: "mongla-sim", summary: "Gazebo and ArduSub SITL with six courses, a native DVL and an operator lab; refereed against the autonomy by a contract test.", notes: [{ href: "/notes/mongla-sim", label: "the pool we built" }] },
   { slug: "green-at-depth", element: "water", title: "Green, at depth", years: "2023 → 2026", role: "author", status: "re-graded", repo: "fh1m/green-at-depth", summary: "A 2023 colour threshold, sunk metre by metre through a model of water. Its first failure is a hallucination, not blindness.", notes: [{ href: "/notes/green-at-depth", label: "the note" }] },
   { slug: "interview-bottle", element: "water", title: "The interview bottle", years: "2023 → 2026", role: "author", status: "re-graded", repo: "fh1m/interview-bottle", summary: "The team's entry task, graded properly: the test set was the training set.", notes: [{ href: "/notes/interview-bottle", label: "the note" }] },
   // Earth
   { slug: "rupsha", element: "earth", title: "Rupsha", years: "2026 →", role: "author", status: "sim · chassis in build", repo: "fh1m/rupsha_ws", commitsKey: "rupsha", summary: "A rover stack named for the river upstream of Mongla: same fundamentals, a different vehicle. Nothing is FIELD yet.", notes: [] },
-  { slug: "mongol-tori", element: "earth", title: "A rover arm that types", years: "2024 – 2025", role: "IK, vision unit, OCR, dataset", status: "team · competed", summary: "BRACU Mongol-Tori's autonomous typing task at the University Rover Challenge: find a keyboard, solve the arm, press the key.", notes: [{ href: "/notes/rovers", label: "the note" }] },
-  { slug: "e-bhapa", element: "earth", title: "E-Bhapa", years: "2024 → 2026", role: "author", status: "re-graded", repo: "fh1m/E-Bhapa", summary: "One night, one sensor, a campus cat for a role model, and a robot that never turned.", notes: [{ href: "/notes/e-bhapa", label: "the note" }] },
-  { slug: "four-leds", element: "earth", title: "Four LEDs", years: "2024 → 2026", role: "author", status: "re-graded", repo: "fh1m/four-leds", summary: "A person steering a camera by four LEDs is a control loop with a 250 ms delay, and it hunts.", notes: [{ href: "/notes/four-leds", label: "the note" }] },
+  { slug: "mongol-tori", element: "earth", title: "A rover arm that types", years: "2024 – 2025", role: "IK, vision unit, OCR, dataset", status: "team · competed", summary: "My BRACU Mongol-Tori work: key detection, OCR, a separate vision unit and two-link arm control for the URC typing task.", notes: [{ href: "/notes/rovers", label: "the note" }] },
+  { slug: "e-bhapa", element: "earth", title: "E-Bhapa", years: "2024 → 2026", role: "author", status: "re-graded", repo: "fh1m/E-Bhapa", summary: "One night, one sensor and a campus cat for a role model. The later audit finds a drive adapter that cannot command independent wheel speeds.", notes: [{ href: "/notes/e-bhapa", label: "the note" }] },
+  { slug: "four-leds", element: "earth", title: "Four LEDs", years: "2024 → 2026", role: "author", status: "re-graded", repo: "fh1m/four-leds", summary: "A 2024 camera-and-Arduino rig, revisited as a delayed control loop. The later model asks what binary direction lights leave for the person to figure out.", notes: [{ href: "/notes/four-leds", label: "the note" }] },
   // Fire
   { slug: "dristy", element: "fire", title: "Dristy", years: "2026", role: "author", status: "bench · paused", repo: "fh1m/Dristy", commitsKey: "dristy", summary: "Open firmware for a K210 camera that answers with a number, not a video stream. 8 MiB of SRAM, placed by hand.", notes: [{ href: "/notes/dristy", label: "the note" }] },
   { slug: "den", element: "fire", title: "The Den", years: "always", role: "author", status: "in use daily", repo: "fh1m/.dotfiles", commitsKey: "den", summary: "Two machines, five panels, one keyboard: the workstation everything else is built on, kept in version control.", notes: [{ href: "/notes/workshop", label: "the workshop" }] },
   { slug: "pareidolia", element: "fire", title: "Pareidolia", years: "2023 → 2026", role: "author", status: "re-graded", repo: "fh1m/pareidolia", summary: "What a 2001 face detector actually looks at: nine rectangles, and two backpacks.", notes: [{ href: "/notes/pareidolia", label: "the note" }] },
   { slug: "half-a-second", element: "fire", title: "Half a second", years: "2024 → 2026", role: "author", status: "re-graded", repo: "fh1m/half-a-second", summary: "A tracker that narrated a bottle with two decimal places of confidence, measured against a Kalman filter.", notes: [{ href: "/notes/half-a-second", label: "the note" }] },
   { slug: "trust-issues", element: "fire", title: "Trust issues", years: "2023 → 2026", role: "author", status: "re-graded", repo: "fh1m/trust-issues", summary: "How many lying readings a calibration survives: least squares leaves on the first lie.", notes: [{ href: "/notes/trust-issues", label: "the note" }] },
-  { slug: "tools", element: "fire", title: "Small sharp tools", years: "2023 – 2026", role: "author", status: "in use", summary: "A start page, a WebAuthn login with nothing worth stealing, a terminal chat you can watch turn into noise.", notes: [{ href: "/notes/passless", label: "passless" }, { href: "/notes/secure-p2p-chat", label: "what Wireshark sees" }] },
+  { slug: "tools", element: "fire", title: "Small sharp tools", years: "2023 – 2026", role: "author", status: "tools + course prototypes", summary: "A start page, a WebAuthn course prototype, and a terminal chat whose plaintext and encrypted traffic can be inspected.", notes: [{ href: "/notes/passless", label: "passless" }, { href: "/notes/secure-p2p-chat", label: "what Wireshark sees" }] },
 ];
 
 /** Numbers copied from sources (mongla.json, READMEs, the TRUTH ledger); galleries are real media only. */
-const extra: Record<string, Pick<Project, "place" | "figures" | "gallery" | "hero" | "heroAlt">> = {
+const extra: Record<string, Pick<Project, "place" | "figures" | "gallery">> = {
   mongla: { place: "mongla",
-    figures: [["500 Hz", "board loop"], ["53.9 Hz", "detection"], ["18.0 ms", "photon to detection"], ["4,742", "tests passing"], ["5", "thrusters"], ["0", "dives, so far"]],
-    gallery: [["/media/mongla-docs/mongla-plan.webp", "From above. The CAD is real; the water isn't, yet."], ["/media/mongla-docs/mirpur-gate.webp", "Mirpur, 2025: real pool footage replayed into today's detector. shark_gate, 0.85."], ["/media/mongla-docs/hud_murky.webp", "The operator display on a murky frame: four detections, the gate still held at 0.98."], ["/media/mongla/flow-lab.webp", "The flow lab: the floor as a speedometer."]] },
+    figures: [["500 Hz", "board loop"], [`${hailoSharing.requestedDetectorHz} + ${hailoSharing.requestedDetectorHz} Hz`, "two detector workers; repeated-frame bench"], [`${hailoSharing.requestedXfeatHz} Hz`, "XFeat alongside; bench 2026-11-19"], ["4,742", "tests at archived checkpoint"], ["5", "thrusters, in the design"], ["0", "water trials"]],
+    gallery: [["/media/mongla/perception-preview.webp", "Recorded Mirpur pool footage with a later Mongla detector overlay; not an in-water Mongla trial."], ["/media/mongla-docs/hud_murky.webp", "An archived operator display on a murky replay frame. Displayed confidence is not an accuracy evaluation."], ["/media/mongla/flow-lab.webp", "The optical-flow lab: bench investigation, not an underwater DVL validation."], ["/media/mongla-docs/mongla-plan.webp", "Unfinished hull CAD, retained as design context rather than the project preview."]] },
   duburi: { place: "irvine",
     figures: [["8th / 58", "RoboSub 2025"], ["8th / 58", "RoboSub 2026"], ["4,083 → 6,234", "best round, points"], ["Sep 2023", "joined, junior AI & MV"]],
     gallery: [["/media/mongla-docs/team-bd-flag.webp", "Walking in with the flag of Bangladesh."], ["/media/mongla-docs/robosub-tent.webp", "The pit. Most of RoboSub happens under a tent."], ["/media/mongla-docs/pool-dual-auvs.webp", "Two vehicles in the pool. Both the programme's."], ["/media/mongla-docs/robosub-torpedo.webp", "The vehicle's own camera at RoboSub, facing the torpedo board. The boxes and the display are today's Mongla detector, run on that footage later."], ["/media/mongla-docs/robosub-octagon.webp", "The same camera looking up at the octagon. Today's detector finds it at 0.91."], ["/media/duburi/pool-test.webp", "On the deck, dry, which is where vehicles spend most of their lives."], ["/media/duburi26/dubomini-render.webp", "Dubomini, the team's small second vehicle: eight T200s around a rectangular hull. Render: BRACU Duburi."], ["/media/duburi26/team-flag.webp", "BRACU Duburi with the flag. Photo: BRACU Duburi."], ["/media/duburi26/tent-brief.webp", "Under the tent at RoboSub 2026, before a run. Photo: BRACU Duburi."]] },
@@ -65,7 +67,7 @@ const extra: Record<string, Pick<Project, "place" | "figures" | "gallery" | "her
     gallery: [["/media/e-bhapa/e-bhapa-upright.webp", "E-Bhapa. One sensor, a lot of confidence."], ["/media/notes/e-bhapa-three-minutes.webp", "Three simulated minutes: as flashed, wiring fixed, everything fixed."]] },
   aerd: { place: "dhaka",
     gallery: [["/media/aerd/mou-03.webp", "The day the lab signed on."]] },
-  "mongol-tori": { place: "dhaka", hero: "/media/lab/detect-keyboard.webp", heroAlt: "Keys detected and labelled on a keyboard" },
+  "mongol-tori": { place: "dhaka" },
   "green-at-depth": { place: "dhaka",
     gallery: [["/media/notes/green-at-depth-desk-2023-arrow.webp", "2023, on a desk: it works."], ["/media/notes/green-at-depth-detect_2m.webp", "2 m of water later."], ["/media/notes/green-at-depth-iou_vs_depth.webp", "Where it stops working."]] },
   "interview-bottle": { place: "dhaka",
@@ -79,21 +81,21 @@ const extra: Record<string, Pick<Project, "place" | "figures" | "gallery" | "her
   "trust-issues": { place: "dhaka",
     gallery: [["/media/notes/trust-issues-2023.webp", "2023: one straight line, believed."], ["/media/notes/trust-issues-breakdown.webp", "How many liars each fit survives."]] },
   tools: { place: "dhaka",
-    gallery: [["/media/notes/passless-ceremony.webp", "Passless: a login with nothing worth stealing."], ["/media/securechat/wireshark-clear.webp", "What Wireshark sees in clear."], ["/media/securechat/wireshark-sec.webp", "What it sees now."]] },
+    gallery: [["/media/notes/passless-ceremony.webp", "Passless course prototype: registration and stored credential metadata."], ["/media/securechat/stream-clear-detail.webp", "The original cleartext TCP stream, with its message readable."], ["/media/securechat/stream-sec-detail.webp", "Encrypted-session stream: the outer JSON and metadata remain readable."]] },
 };
 /** The lead photo per project, chosen by looking at each image (see DESIGN.md). */
 const heroes: Record<string, [string, string]> = {
-  mongla: ["/media/mongla-docs/mongla-iso.webp", "The Mongla hull, from its CAD"],
+  mongla: ["/media/mongla/perception-preview.webp", "Mongla's detector on replayed Mirpur pool footage, not an in-water Mongla trial"],
   duburi: ["/media/mongla-docs/robosub-deploy.webp", "Deploying the vehicle at RoboSub"],
   "mongla-sim": ["/media/mongla/sim-gate-course.webp", "The simulated gate course"],
   rupsha: ["/media/rupsha/rupsha-approach.svg", "Where the camera stops: side view of the rover approaching a tag"],
   dristy: ["/media/dristy/object.webp", "On-device detection on the K210's LCD: tvmonitor 61%"],
   den: ["/media/den/arete-main.webp", "The main screen of Arete, the laptop"],
-  "e-bhapa": ["/media/e-bhapa/bhapa.webp", "Bhapa, the campus cat E-Bhapa was modelled on"],
+  "e-bhapa": ["/media/e-bhapa/robot-preview.webp", "The real 2024 E-Bhapa robot: ultrasonic head and four-wheel chassis"],
   aerd: ["/media/aerd/cover.webp", "The AERD team outdoors with a balloon"],
-  "mongol-tori": ["/media/lab/detect-keyboard.webp", "Keys detected and labelled on a keyboard"],
+  "mongol-tori": ["/media/lab/keyboard-detail.webp", "Detected keyboard keys and the typing mechanism's threaded tip"],
   "green-at-depth": ["/media/notes/green-at-depth-filmstrip.webp", "The green arrow, sunk metre by metre"],
-  "interview-bottle": ["/media/notes/interview-bottle-dry_vs_3m.webp", "Bottles dry and through 3 m of water"],
+  "interview-bottle": ["/media/notes/interview-bottle-dry_vs_3m-readable.webp", "Original bottle detector on validation photographs and a modeled 3 m optical water path"],
   "four-leds": ["/media/notes/four-leds-one_try.webp", "Bang-bang versus proportional, error over time"],
   pareidolia: ["/media/notes/pareidolia-rerun.webp", "The 2023 detector re-run on a webcam frame"],
   "half-a-second": ["/media/notes/half-a-second-run-2024-1.webp", "A tracked bottle, 2024"],
@@ -103,8 +105,8 @@ const heroes: Record<string, [string, string]> = {
 /** The live instrument on each project page: [bench id, title, hint]. */
 const benches: Record<string, [string, string, string]> = {
   gimbal: ["gimbal", "Hold a rocket upright against the wind", "push the wind, tune the gains"],
-  "mongol-tori": ["ik-arm", "The arm solves for the key you pick", "click a key, or use the arrows"],
-  "e-bhapa": ["ebhapa", "E-Bhapa as flashed in 2024, and as fixed", "watch both run"],
+  "mongol-tori": ["ik-arm", "Ideal geometry versus archived servo commands", "select a target; compare the two modes"],
+  "e-bhapa": ["ebhapa", "E-Bhapa: original, corrected drive and revised policy", "compare three controller variants"],
   "four-leds": ["delay", "A delayed human following four LEDs", "drag the delay"],
   "trust-issues": ["liars", "A calibration with lying readings", "add liars, compare the fits"],
   pareidolia: ["haar", "The nine features a 2001 face detector checks first", "hover a feature"],
@@ -118,15 +120,15 @@ const tracks: Record<string, [string, string]> = {
   aerd: ["Rockets: the only place a bug becomes a debris field.", "2023–25"],
   gimbal: ["A filter with no memory, holding a rocket upright. Mostly.", "2 gists"],
   meghdhut: ["GPS-denied, named for a cloud messenger. Not flying yet.", "private"],
-  duburi: ["Three trips to Irvine to learn that water grades on a curve.", "8th / 58, twice"],
+  duburi: ["From vision subteam to engineering lead. Water grades on a curve.", "8th / 58, twice"],
   mongla: ["4,742 tests. 0 dives. Nobody has told the ocean yet.", `${commitCount("mongla")} commits`],
   "mongla-sim": ["A pool that never closes, refereed by a contract test.", "6 courses"],
   "green-at-depth": ["Sink a green arrow until the threshold starts seeing things.", "re-graded"],
   "interview-bottle": ["The test set was the training set. I graded myself and passed.", "re-graded"],
   rupsha: ["A rover that has only ever driven inside a computer. It says so on the label.", "0 FIELD claims"],
-  "mongol-tori": ["Finding the key is the task. Pressing it is arithmetic.", "URC 2025"],
-  "e-bhapa": ["Built in one night, modelled on a cat. Never once turned.", "−255 → 1"],
-  "four-leds": ["A human in the loop is a 250 ms delay with opinions.", "250 ms"],
+  "mongol-tori": ["A key label is not a coordinate. A coordinate is not a keypress.", "URC 2025"],
+  "e-bhapa": ["Built in one night. The drive adapter had other plans.", "−255 → 1"],
+  "four-leds": ["Four directions. The person supplies the brakes.", "250 ms assumed"],
   dristy: ["A camera that answers with a number, in 8 MiB.", "8 MiB"],
   den: ["Two machines, five panels, one keyboard. Where everything else happens.", `${commitCount("den")} commits`],
   pareidolia: ["A 2001 face detector checks nine rectangles. Two backpacks passed.", "9 features"],
@@ -152,9 +154,9 @@ const meta: Record<Element, Omit<ElementInfo, "projects" | "lessonCount" | "id" 
   fire: { name: "Fire", force: "heat", nature: "Every operation costs energy. I always collect.", glyph: G.fire, intro: "Fire is the energy we make and spend: firmware on tiny chips, neural accelerators, the machine I work on. It's where I learned that shared silicon is a schedule, and freshness beats throughput." },
 };
 
-/** The four nations: the only colour on the site. */
+/** Coordinated domain accents from the selected site palette. */
 const nation: Record<Element, { bn: string; colour: string }> = {
-  water: { bn: "জল", colour: "#4f8fe0" }, earth: { bn: "মাটি", colour: "#79b35f" }, fire: { bn: "আগুন", colour: "#e5533d" }, air: { bn: "বাতাস", colour: "#eaa63b" },
+  water:{bn:"জল",colour:domainColours.water}, earth:{bn:"মাটি",colour:domainColours.earth}, fire:{bn:"আগুন",colour:domainColours.fire}, air:{bn:"বাতাস",colour:domainColours.air},
 };
 export const elements: ElementInfo[] = (["air", "water", "earth", "fire"] as Element[]).map((id) => ({
   id, layer: id, ...meta[id], ...nation[id], projects: projects.filter((p) => p.element === id), lessonCount: lessons.filter((l) => l.element === id).length,

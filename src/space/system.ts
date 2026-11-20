@@ -18,7 +18,7 @@ export interface Body {
 const firstYear = (y: string) => (/\d{4}/.test(y) ? +y.match(/\d{4}/)![0] : 2021);
 
 export const PLANETS: Body[] = [
-  { id: "air", label: "Air", kind: "planet", orbit: 34, size: 4.2, speed: 0.020, phase: 0.6, tilt: 0.18, surface: "gas", colours: ["#c99a5b", "#e9d2a6", "#8a5a33"], year: 2023, zone: "air" },
+  { id: "air", label: "Air", kind: "planet", orbit: 34, size: 4.2, speed: 0.020, phase: 0.6, tilt: 0.47, surface: "gas", colours: ["#c99a5b", "#e9d2a6", "#8a5a33"], year: 2023, zone: "air" },
   { id: "water", label: "Water", kind: "planet", orbit: 54, size: 3.6, speed: 0.014, phase: 2.4, tilt: 0.3, surface: "ocean", colours: ["#14345c", "#2f6fa8", "#d9e6ef"], year: 2023, zone: "water" },
   { id: "earth", label: "Land", kind: "planet", orbit: 76, size: 3.0, speed: 0.010, phase: 4.1, tilt: 0.1, surface: "desert", colours: ["#7a4a2e", "#b98552", "#d9b98a"], year: 2024, zone: "earth" },
   { id: "fire", label: "Silicon", kind: "planet", orbit: 98, size: 3.3, speed: 0.008, phase: 5.4, tilt: 0.22, surface: "silicon", colours: ["#14161c", "#2a2f3a", "#e0864a"], year: 2021, zone: "fire" },
@@ -30,14 +30,14 @@ export const MOONS: Body[] = projects.map((p, i, all) => {
   const planet = PLANETS.find((x) => x.id === p.element)!;
   return {
     id: p.slug, label: p.title, kind: "moon", parent: planet.id,
-    orbit: planet.size + 2.6 + k * 1.9, size: 0.42 + ((i * 37) % 5) * 0.06, speed: 0.22 / (1 + k * 0.5), phase: k * 2.1 + i,
+    orbit: planet.size * (planet.surface === "gas" ? 2.2 : 1) + 2.6 + k * 1.9, size: 0.42 + ((i * 37) % 5) * 0.06, speed: 0.22 / (1 + k * 0.5), phase: k * 2.1 + i,
     surface: "rock", year: firstYear(p.years), zone: planet.zone,
   } as Body;
 });
 
 export const STATIONS: Body[] = [
   { id: "library", label: "The library (notes)", kind: "station", orbit: 21, size: 0.9, speed: 0.03, phase: 1.2, year: 2026 },
-  { id: "cv", label: "CV", kind: "station", orbit: 23, size: 0.8, speed: 0.028, phase: 3.9, year: 2023 },
+  { id: "cv", label: "Work & evidence", kind: "station", orbit: 23, size: 0.8, speed: 0.028, phase: 3.9, year: 2021 },
   { id: "timemachine", label: "The time machine", kind: "station", orbit: 115, size: 1.1, speed: 0.004, phase: 2.0, year: 2021 },
   { id: "teahouse", label: "The tea house", kind: "station", orbit: 66, size: 0.7, speed: 0.012, phase: 0.2, year: 2021 },
 ];

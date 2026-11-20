@@ -11,6 +11,7 @@ heroAlt: "Four decision-region paintings: depth 1, pruned, depth 8 and unlimited
 heroPlot: true
 sources:
   - { label: "happy-little-trees: the depth study and the C exporter", href: "https://github.com/fh1m/happy-little-trees" }
+  - { label: "scikit-learn: decision trees and minimal cost-complexity pruning", href: "https://scikit-learn.org/stable/modules/tree.html#minimal-cost-complexity-pruning" }
 ---
 import Fig from "../../components/note/Fig.astro";
 import Pull from "../../components/note/Pull.astro";
@@ -21,13 +22,42 @@ A decision tree takes that literally. Give it enough depth and it will paint a l
 
 In November 2023 my decision-tree script scored **100 %** on the Iris dataset, printed the report and stopped. The README called decision trees "awesome and scary". I was pleased with myself. Of everything in that sentence, *scary* aged best.
 
-<Fig src="/media/notes/happy-little-trees-iris-2023.webp" alt="The 2023 terminal output: accuracy 1.0, every precision and recall 1.00" caption="<b>November 2023.</b> Forty-five test flowers, forty-five right. A perfect score is the scary part." wide />
+<Fig src="/media/notes/happy-little-trees-iris-2023.webp" alt="The 2023 terminal output: accuracy 1.0, every precision and recall 1.00" caption="<b>November 2023.</b> Forty-five test flowers, forty-five right. A legitimate result on that split—not a measurement of how the tree behaves as its complexity changes." wide />
 
-It also taught me nothing, because Iris is too polite to overfit. So the rewrite gives the tree a canvas with real accidents on it: two interleaved half-moons, a little smudged, with **10 % of the labels flipped on purpose**. No model can honestly beat about 90 % here. Anything above that is memory, not skill.
+That result answered a small question: did this fitted tree classify those 45 held-out flowers? It did. It did not tell me how sensitive the result was to the split, how much complexity I needed, or what would happen when the labels were unreliable. Iris can be overfit too; a neat report does not make a dataset immune.
+
+## A canvas with known accidents
+
+The later experiment changes the question rather than trying to invalidate the old score. `make_moons` generates **600 points**, with coordinate noise of **0.20**. Two curved classes overlap enough to make straight cuts imperfect. A separate random draw flips each binary label with **probability 0.10**, and then a fixed split leaves **360 training points and 240 test points**. The generator, label-noise draw and split all use seed 11.
+
+The two kinds of noise do different jobs. Coordinate noise moves a point around its underlying crescent. Label noise can give that point the opposite class even if its position is otherwise typical. The classifier sees only the resulting coordinates and corrupted training labels, not a flag identifying the accidents.
+
+Replaying the code reveals why “10% noise” needs care:
+
+| split | points | labels actually flipped |
+|---|---:|---:|
+| training | 360 | 36 |
+| test | 240 | 31 |
+| complete generated set | 600 | 67 |
+
+The probability is 10%; the realised fraction is not guaranteed to be exactly 10%. In this split, 31 of 240 test labels—about 12.9%—were changed.
+
+An earlier version of this page said no honest model could beat 90%, and that anything above it must be memorisation. **That was too strong.** Under independent binary label flips with probability 0.10, a fixed predictor's expected noisy-label accuracy is:
+
+```text
+a = clean-label accuracy
+E[noisy] = 0.10 + 0.80 × a
+```
+
+The predictor keeps a correct clean-label answer when the label is not flipped, with probability 0.90. It can also get a previously incorrect answer right when the label is flipped, with probability 0.10. Combining those cases gives the expression above.
+
+Even a rule that perfectly recovered the clean labels would score 90% **in expectation**, not necessarily on every finite test sample. On this particular sample, comparing the generator's clean test labels with the corrupted labels gives **209/240, or 87.08%**. That is a diagnostic using information available inside the synthetic generator, not an achieved model score or a second learned classifier. It is not a new hard ceiling either: some model mistakes against the clean labels can accidentally agree with a flipped label.
+
+The overlapping, perturbed coordinates also make perfectly recovering the clean labels an idealisation. The thin 90% line in the plot is therefore a conditional population reference—not a pass/fail threshold and not a way to accuse a high-scoring model of cheating.
 
 ## Watching it memorise
 
-<Fig src="/media/notes/happy-little-trees-learning_vs_memorising.webp" alt="Training accuracy climbing to 1.0 with depth while test accuracy plateaus around 0.8" caption="Training accuracy climbs to a perfect 1.0. Test accuracy stops caring after depth 2." plot />
+<Fig src="/media/notes/happy-little-trees-learning_vs_memorising.webp" alt="Training accuracy reaches 1.0 as depth increases, while test accuracy varies between roughly 0.77 and 0.81 after depth 2" caption="Twenty depth settings on the same fixed split. The 90% line is an ideal-signal expectation under independent label noise, not a ceiling on a finite test score." plot />
 
 | tree | leaves | train | test |
 |---|---:|---:|---:|
@@ -37,15 +67,42 @@ It also taught me nothing, because Iris is too polite to overfit. So the rewrite
 | unlimited | 72 | **1.000** | 0.783 |
 | **pruned (ccp α = 0.0129, chosen by 5-fold CV)** | **4** | 0.858 | **0.787** |
 
-- **Training accuracy is a liar with a perfect score.** The unlimited tree is right about every training point and wrong about one test point in five. The 23 leaves it grows past depth 8 are portraits of individual flipped labels.
-- **The test curve barely moves.** After depth 2 it wanders between 0.77 and 0.81 while the leaf count grows eighteenfold. Depth 8 edges ahead on this split, which is exactly the kind of win that disappears with a different seed.
-- **The palette knife is the honest tool.** Cost-complexity pruning, its strength picked by cross-validation on training data only, cuts the tree to **4 leaves**. It matches the 72-leaf tree on test, and it's an object a person can read and check.
+- **Training fit and generalisation are different measurements.** The unlimited tree classifies all 360 training points correctly, but only 188 of the 240 test points. Its 72 leaves describe a much more detailed partition than the four-leaf tree. The count alone cannot tell us which extra leaves isolate flipped labels rather than genuine local structure.
+- **A small apparent win remains small.** Depth 8 gets 195 test points right; the pruned tree gets 189 and the unlimited tree 188. Depth 8 wins on this split, but this experiment does not establish that the ordering survives another sample or random seed. One additional correct answer changes accuracy by about 0.42 percentage points.
+- **Pruning makes the tradeoff inspectable.** Training-only, five-fold cross-validation chooses `ccp_alpha ≈ 0.0129`, leaving four leaves. It uses far fewer branches than the unlimited tree and gets one more test answer right here. That is a measured complexity–accuracy tradeoff, not evidence that four leaves is universally optimal.
 
-<Fig src="/media/notes/happy-little-trees-four_canvases.webp" alt="Decision regions at depth 1, pruned by cross-validation, depth 8 and unlimited" caption="Left to right: depth 1, pruned by CV, depth 8, unlimited. The last canvas has a tiny island around every mistake." wide plot />
+<Fig src="/media/notes/happy-little-trees-four_canvases.webp" alt="Decision regions at depth 1, pruned by cross-validation, depth 8 and unlimited" caption="Left to right: depth 1, pruned by CV, depth 8, unlimited. The small regions show the added flexibility. Their appearance alone does not identify which training labels were corrupted." wide plot />
+
+## Why the picture becomes rectangles
+
+At each internal node, this classifier chooses a feature and a threshold. In two dimensions that means a horizontal or vertical cut. Repeating those cuts can approximate a crescent with a staircase; enough cuts can also carve a small island around an inconvenient training point.
+
+The default classification criterion is **Gini impurity**. For class proportions `p(k)` in a node, it is `1 − sum(p(k)²)`: zero for a pure node, 0.5 for an even mix of two classes. A candidate cut is judged by the sample-weighted impurities of its two children. The algorithm chooses the best local reduction, then continues recursively.
+
+That is a greedy procedure, not a search over every possible whole tree. A locally helpful split can enable a complicated downstream partition. A training score of 1.0 says the final leaves are pure enough to reproduce these labels; it does not say the boundaries represent the process that generated new points.
+
+Maximum depth is a blunt constraint: stop every branch after a prescribed number of decisions. `min_samples_leaf` would instead require evidence for every terminal region. Neither setting was separately tuned in this study; they are different ways to constrain the same tendency, not additional benchmark results.
+
+## What the palette knife actually removes
+
+Cost-complexity pruning starts with a grown tree and asks whether a branch earns its keep. The objective trades off training impurity and the number of terminal regions:
+
+```text
+cost(T) = R(T) + α × leaves(T)
+```
+
+In scikit-learn, `R(T)` is the total sample-weighted impurity of the leaves—not the test error. As `alpha` increases, an extra leaf needs a larger impurity reduction to justify its cost. The pruning path supplies candidate values at which branches can be removed.
+
+The script excludes the final root-only candidate, scores the remaining candidates with five-fold cross-validation on the training set, chooses the first best mean score, and refits that choice on all 360 training points. The test labels do not choose its `alpha`.
+
+There are still boundaries around that statement. The candidate path is built from the complete training set before the folds are scored, so these CV scores are a model-selection aid, not a nested, unbiased estimate of future accuracy. And the depth-sweep plot repeatedly exposes the same test set: choosing depth 8 because it looks best here would turn that set into development data. A final comparison after such a choice needs a fresh holdout.
+
+The useful outcome is not “the simplest tree always wins”. It is that I can state the selection procedure, show what complexity buys on the same sample, and keep a six-point difference from becoming a grand claim about generalisation.
+
 
 ## The napkin
 
-If a model has to be explained to a robot's safety reviewer, it had better fit on a napkin. So `python -m happytrees.export` writes the pruned tree as a C function: no Python, no NumPy, no model file. It drops straight into an Arduino sketch.
+A small tree also offers something a neural-network benchmark does not: I can follow every decision. `python -m happytrees.export` turns the fitted, CV-pruned tree into a C function. The generated inference function needs no Python runtime, NumPy or model loader; it is a candidate for a small embedded program, not evidence that I deployed this model on a robot.
 
 ```c
 /* 4 leaves, depth 2; generated by happytrees.export */
@@ -66,8 +123,23 @@ static inline int predict(const float *x) {
 }
 ```
 
-A test compiles that C with gcc and checks it agrees with scikit-learn on all 600 points, for trees of depth 2, 4 and unlimited.
+The existing test compiles generated C with gcc and compares it with scikit-learn on all 600 generated points, for depth 2, depth 4 and unlimited trees. That checks the observed inputs through an actual compiler, rather than comparing two copies of a formula. It does **not** prove equivalence at every floating-point threshold, on missing values, or for every possible trained classifier; nor is it an Arduino timing, memory or hardware test.
 
 <Pull>An exporter that's almost right is a bug with good manners.</Pull>
 
 The 2023 script still lives in the repo, scoring its 100 % on Iris, forever pleased with itself. I kept it there as a reminder of what a perfect score feels like from the inside.
+
+## What I would ask of it next
+
+For a real sensor classifier, a random point split would be only the beginning. Consecutive frames or readings from one run are related. I would separate acquisition sessions or devices before fitting, keep an independent final test, and report mistakes by operating condition rather than only one aggregate score. Those are proposed requirements, not experiments already performed by this repository.
+
+For the exporter, threshold-boundary inputs deserve special attention: Python's model representation and a C `float` comparison need not round numbers identically. The 600-point agreement is useful evidence within its tested domain, not permission to skip that check before deployment.
+
+The lesson I take back to the 2023 terminal is smaller and more useful than distrusting every perfect result. Keep the result. Then ask what it measured, what information chose the model, and whether a much smaller object would answer the same question.
+
+## Follow the experiment
+
+- [The preserved 2023 Iris submission and screenshot](https://github.com/fh1m/happy-little-trees): the original result remains in `origin/` and `README-2023.md`.
+- [The current depth study and C exporter](https://github.com/fh1m/happy-little-trees): `happytrees/run.py` defines the data, split, sweep and pruning selection; `tests/test_export.py` defines the compiler comparison's actual coverage.
+- [scikit-learn's decision-tree guide](https://scikit-learn.org/stable/modules/tree.html): axis-aligned splits, Gini impurity, instability and implementation details.
+- [Minimal cost-complexity pruning](https://scikit-learn.org/stable/modules/tree.html#minimal-cost-complexity-pruning): the objective and weakest-link pruning, including scikit-learn's impurity-based definition of `R(T)`.

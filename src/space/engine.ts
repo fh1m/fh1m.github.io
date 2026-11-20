@@ -3,13 +3,15 @@
  * stations, the pale blue dot, and Voyager at the edge. Bunnu flies a small ship to whatever
  * you choose. Same World interface as before, so every panel, plate and mission keeps working.
  *
- * Kept deliberately light: no shadow maps, one instanced draw for the belt dust, shader-lit
- * planets (no textures to download), pixel ratio capped at 1.5, and the loop sleeps when hidden.
+ * Kept deliberately light: no shadow maps, one instanced draw for the belt dust, shared local
+ * surface maps, adaptive pixel ratio capped at 1.5, and a loop that sleeps when hidden.
  */
 import * as THREE from "three";
-import { ALL, PLANETS, MOONS, STATIONS, ROCKS, HOME, PROBE, byId, type Body } from "./system";
-import { planetMaterial, atmosphere, starMaterial, rockMaterial, sunMaterial } from "./shaders";
+import { ALL, PLANETS, MOONS, STATIONS, ROCKS, HOME, PROBE, byId } from "./system";
+import { siliconMaterial, atmosphere, starMaterial, rockMaterial } from "./shaders";
 import { createSound, type Sound } from "../game/audio";
+import { createArtefactFactory } from "./artefacts";
+import { oxocarbon } from "../data/palette";
 
 export type ZoneId = "air" | "water" | "earth" | "fire";
 export type Mode = "idle" | "fail" | "wrong" | "fixed";
@@ -36,6 +38,24 @@ export function start(canvas: HTMLCanvasElement): World {
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   const scene = new THREE.Scene(); scene.background = new THREE.Color("#020306");
   const cam = new THREE.PerspectiveCamera(40, 1, 0.1, 6000);
+  // A soft viewing light makes engineering artefacts readable without relighting the worlds.
+  const inspectionLight = new THREE.PointLight("#e2edff", 0, 0, 0);
+  inspectionLight.position.set(0, 4, 0);
+  cam.add(inspectionLight); scene.add(cam);
+
+  const loader = new THREE.TextureLoader(), textures = new Map<string, THREE.Texture>();
+  const texture = (name: string) => {
+    let map = textures.get(name);
+    if (!map) {
+      map = loader.load(`/media/space/${name}.webp`);
+      map.colorSpace = THREE.SRGBColorSpace;
+      map.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+      textures.set(name, map);
+    }
+    return map;
+  };
+  const backdrop = texture("milky-way"); backdrop.mapping = THREE.EquirectangularReflectionMapping;
+  scene.background = backdrop; scene.backgroundIntensity = 0.65;
 
   // the sky: three star layers with real-looking colour spread, and a faint galactic band
   const sky = new THREE.Group(); scene.add(sky);
@@ -57,41 +77,58 @@ export function start(canvas: HTMLCanvasElement): World {
 
   // the star at the centre: a hot core and a soft corona
   const sun = new THREE.Group(); scene.add(sun);
-  const sunMat = sunMaterial(); sun.add(new THREE.Mesh(new THREE.SphereGeometry(7, 64, 48), sunMat));
-  const corona = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: "#ffcf8a", transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-  corona.scale.setScalar(46); sun.add(corona);
-  const light = new THREE.PointLight("#fff1dc", 3.2, 0, 0); sun.add(light);
-  scene.add(new THREE.AmbientLight("#1a2233", 0.35));
+  const sunMat = new THREE.MeshBasicMaterial({ map: texture("sun"), toneMapped: false });
+  sun.add(new THREE.Mesh(new THREE.SphereGeometry(7, 64, 48), sunMat));
+  const corona = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: "#ffc285", opacity: 0.38, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  corona.scale.setScalar(31); sun.add(corona);
+  const light = new THREE.PointLight("#fff1dc", 2.5, 0, 0); sun.add(light);
+  scene.add(new THREE.HemisphereLight("#b4c7e4", "#242936", 0.55));
   sun.userData.obj = "fh1m";
 
   // bodies
-  const nodes = new Map<string, THREE.Object3D>(), pickables: THREE.Object3D[] = [], shaderMats: THREE.ShaderMaterial[] = [sunMat];
+  const nodes = new Map<string, THREE.Object3D>(), pickables: THREE.Object3D[] = [], shaderMats: THREE.ShaderMaterial[] = [];
+  const visuals = new Map<string, THREE.Object3D>(), radii = new Map<string, number>(), centres = new Map<string, THREE.Vector3>();
+  const overviewOrbits = new THREE.Group(); scene.add(overviewOrbits);
+  const moonOrbits: { line: THREE.Line; parent: string }[] = [];
+  const contextVisible = new Set(ALL.map(body => body.id));
   const orbitLine = (r: number, opacity = 0.12) => {
     const pts = Array.from({ length: 257 }, (_, i) => { const a = (i / 256) * Math.PI * 2; return new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r); });
     return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: "#8fa3c4", transparent: true, opacity }));
   };
   const pivots = new Map<string, THREE.Object3D>(); // the thing that orbits (holds the body)
   for (const p of PLANETS) {
-    scene.add(orbitLine(p.orbit));
+    overviewOrbits.add(orbitLine(p.orbit));
     const pivot = new THREE.Group(); scene.add(pivot); pivots.set(p.id, pivot);
-    const mat = planetMaterial(p.surface!, p.colours!); shaderMats.push(mat);
+    const visual = new THREE.Group(); visual.rotation.z = p.tilt ?? 0; pivot.add(visual); visuals.set(p.id, visual);
+    const mat = p.surface === "silicon"
+      ? siliconMaterial(p.colours!)
+      : new THREE.MeshStandardMaterial({ map: texture(p.surface === "gas" ? "saturn" : p.surface === "desert" ? "mars" : "earth"), roughness: 0.88, metalness: 0 });
+    if (mat instanceof THREE.ShaderMaterial) shaderMats.push(mat);
     const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 64, 48), mat);
-    mesh.rotation.z = p.tilt ?? 0; mesh.userData.obj = p.id; pivot.add(mesh);
-    const atm = atmosphere(p.size * 1.12, p.surface === "silicon" ? "#e0864a" : p.surface === "gas" ? "#f2d3a1" : p.surface === "desert" ? "#e8b07a" : "#7fb6ff"); shaderMats.push(atm.material as THREE.ShaderMaterial);
-    pivot.add(atm);
-    if (p.surface === "gas") { // a thin ring, tilted
-      const ring = new THREE.Mesh(new THREE.RingGeometry(p.size * 1.5, p.size * 2.2, 96), new THREE.MeshBasicMaterial({ color: "#d9c19a", transparent: true, opacity: 0.28, side: THREE.DoubleSide, depthWrite: false }));
-      ring.rotation.x = Math.PI / 2 - 0.35; pivot.add(ring);
+    mesh.userData.obj = p.id; visual.add(mesh);
+    const atm = atmosphere(p.size * 1.055, p.surface === "silicon" ? "#e0864a" : p.surface === "gas" ? "#d6bb86" : p.surface === "desert" ? "#cd8e66" : "#7fb6ff");
+    visual.add(atm);
+    radii.set(p.id, p.size * (p.surface === "gas" ? 2.2 : 1.055));
+    if (p.surface === "gas") {
+      const inner = p.size * 1.4, outer = p.size * 2.2;
+      const geometry = new THREE.RingGeometry(inner, outer, 128);
+      const positions = geometry.getAttribute("position"), uv = geometry.getAttribute("uv");
+      for (let i = 0; i < positions.count; i++) uv.setXY(i, (Math.hypot(positions.getX(i), positions.getY(i)) - inner) / (outer - inner), 0.5);
+      const ring = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture("saturn-rings"), roughness: 1, transparent: true, opacity: 0.92, side: THREE.DoubleSide, depthWrite: false }));
+      ring.userData.obj = p.id; pickables.push(ring);
+      ring.rotation.x = Math.PI / 2; visual.add(ring);
     }
     nodes.set(p.id, mesh); pickables.push(mesh);
   }
   const rockGeo = (seed: number) => { const g = new THREE.IcosahedronGeometry(1, 2); const a = g.getAttribute("position") as THREE.BufferAttribute; const v = new THREE.Vector3(); for (let i = 0; i < a.count; i++) { v.fromBufferAttribute(a, i); const n = 1 + 0.18 * Math.sin(v.x * 3 + seed) * Math.cos(v.y * 4 - seed) + 0.08 * Math.sin(v.z * 7 + seed * 2); v.multiplyScalar(n); a.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals(); return g; };
+  const artefact = createArtefactFactory();
   for (const m of MOONS) {
     const host = pivots.get(m.parent!)!;
     const ringLine = orbitLine(m.orbit, 0.08); host.add(ringLine);
+    moonOrbits.push({ line: ringLine, parent: m.parent! });
     const pivot = new THREE.Group(); host.add(pivot); pivots.set(m.id, pivot);
-    const mesh = new THREE.Mesh(rockGeo(m.phase), rockMaterial(m.zone === "fire" ? "#5a5550" : m.zone === "water" ? "#8a9098" : m.zone === "air" ? "#a08c72" : "#8c6d55"));
-    mesh.scale.setScalar(m.size); mesh.userData.obj = m.id; pivot.add(mesh);
+    const mesh = artefact(m.id);
+    mesh.scale.setScalar(m.size); pivot.add(mesh);
     nodes.set(m.id, mesh); pickables.push(mesh);
   }
   for (const s of STATIONS) {
@@ -117,10 +154,11 @@ export function start(canvas: HTMLCanvasElement): World {
   }
   // home: a small blue world, far out, with a thin atmosphere
   {
-    const pivot = new THREE.Group(); scene.add(pivot); pivots.set(HOME.id, pivot); scene.add(orbitLine(HOME.orbit, 0.07));
-    const mat = planetMaterial("earth", ["#0f2f5a", "#2e6f3a", "#e9eef2"]); shaderMats.push(mat);
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(HOME.size, 48, 32), mat); mesh.userData.obj = HOME.id; pivot.add(mesh);
-    const atm = atmosphere(HOME.size * 1.14, "#8cc4ff"); shaderMats.push(atm.material as THREE.ShaderMaterial); pivot.add(atm);
+    const pivot = new THREE.Group(); scene.add(pivot); pivots.set(HOME.id, pivot); overviewOrbits.add(orbitLine(HOME.orbit, 0.07));
+    const visual = new THREE.Group(); visual.rotation.z = 0.409; pivot.add(visual); visuals.set(HOME.id, visual);
+    const mat = new THREE.MeshStandardMaterial({ map: texture("earth"), roughness: 0.85, metalness: 0 });
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(HOME.size, 48, 32), mat); mesh.userData.obj = HOME.id; visual.add(mesh);
+    visual.add(atmosphere(HOME.size * 1.055, "#8cc4ff")); radii.set(HOME.id, HOME.size * 1.055);
     nodes.set(HOME.id, mesh); pickables.push(mesh);
   }
   // Voyager 1: dish, bus, booms, still going
@@ -133,24 +171,63 @@ export function start(canvas: HTMLCanvasElement): World {
     v.traverse((o) => (o.userData.obj = PROBE.id)); pivot.add(v); nodes.set(PROBE.id, v); pickables.push(v);
   }
   pickables.push(sun.children[0]); sun.children[0].userData.obj = "fh1m"; nodes.set("fh1m", sun.children[0]);
+  // Bounds are measured once, outside the render loop. Keep off-centre booms and noses in frame.
+  const bounds = new THREE.Box3(), sphere = new THREE.Sphere();
+  for (const [id, node] of nodes) {
+    bounds.setFromObject(node).getBoundingSphere(sphere);
+    centres.set(id, node.worldToLocal(sphere.center.clone()));
+    if (!radii.has(id)) radii.set(id, sphere.radius);
+  }
+  // A domain is its projects as well as its planet. Fit that neighbourhood on entry.
+  const neighbourhoodRadii = new Map<string, number>();
+  for (const planet of PLANETS) neighbourhoodRadii.set(planet.id, radii.get(planet.id)!);
+  for (const moon of MOONS) {
+    const parent = moon.parent!;
+    neighbourhoodRadii.set(parent, Math.max(neighbourhoodRadii.get(parent)!, moon.orbit + radii.get(moon.id)!));
+  }
 
   // Bunnu's ship: small, quick, a little cat in the canopy; she flies to whatever you choose
   const ship = buildShip(); scene.add(ship.group);
+  pickables.push(ship.group);
   const shipPos = new THREE.Vector3(20, 6, 20), shipVel = new THREE.Vector3();
 
   // camera: a state (target, distance, yaw, pitch) with eased flights; drag to orbit, wheel to zoom
   const look = new THREE.Vector3(), camState = { dist: 260, yaw: 0.6, pitch: 0.55 };
   let flight: { fromLook: THREE.Vector3; toId: string | null; toLook: THREE.Vector3; d0: number; d1: number; p0: number; p1: number; y0: number; y1: number; t: number; dur: number } | null = null;
   let follow: string | null = null;
-  const worldPos = (id: string, out = new THREE.Vector3()) => (nodes.get(id) ? nodes.get(id)!.getWorldPosition(out) : out.set(0, 0, 0));
-  const sizeOf = (id: string) => (id === "fh1m" ? 7 : byId[id]?.size ?? 1) * (byId[id]?.kind === "moon" || byId[id]?.kind === "rock" ? 1 : 1);
+  const worldPos = (id: string, out = new THREE.Vector3()) => {
+    const node = nodes.get(id), centre = centres.get(id);
+    return node && centre ? node.localToWorld(out.copy(centre)) : out.set(0, 0, 0);
+  };
+  const sizeOf = (id: string) => radii.get(id) ?? 1;
   function flyTo(id: string | null, dist?: number, dur = 1.8) {
     const toLook = id ? worldPos(id) : new THREE.Vector3();
-    const d1 = dist ?? (id ? Math.max(9, sizeOf(id) * (byId[id]?.kind === "planet" ? 5.2 : 9)) : 260);
+    const halfVertical = THREE.MathUtils.degToRad(cam.fov / 2);
+    const freeAspect = cam.aspect * (canvas.clientWidth > 900 ? 0.62 : 0.9);
+    const fitAngle = Math.min(halfVertical, Math.atan(Math.tan(halfVertical) * freeAspect));
+    const body = id ? byId[id] : undefined;
+    const viewRadius = id ? (body?.kind === "planet" ? neighbourhoodRadii.get(id)! : sizeOf(id)) : 0;
+    const d1 = dist ?? (id ? Math.max(2, viewRadius / Math.sin(fitAngle) * 1.3) : 260);
     // look at a body from its sunlit side (the star is at the origin), a little off-axis
     let y1 = camState.yaw;
-    if (id && id !== "fh1m" && toLook.lengthSq() > 1) { const want = Math.atan2(toLook.z, toLook.x) + Math.PI - 0.55; y1 = camState.yaw + Math.atan2(Math.sin(want - camState.yaw), Math.cos(want - camState.yaw)); }
-    flight = { fromLook: look.clone(), toId: id, toLook, d0: camState.dist, d1, p0: camState.pitch, p1: id ? 0.32 : 0.55, y0: camState.yaw, y1, t: 0, dur: reduce ? 0.01 : dur };
+    const overview = !id || id === "timemachine";
+    contextVisible.clear();
+    for (const candidate of ALL) if (overview || candidate.id === id || (body?.kind === "planet" && candidate.parent === id)) contextVisible.add(candidate.id);
+    overviewOrbits.visible = overview;
+    for (const orbit of moonOrbits) orbit.line.visible = overview || orbit.parent === id;
+    pivots.get("belt")!.visible = overview || body?.kind === "rock";
+    nodes.get("fh1m")!.visible = overview || id === "fh1m"; corona.visible = overview || id === "fh1m";
+    inspectionLight.intensity = !overview && id !== "fh1m" && body?.kind !== "planet" && body?.kind !== "home" ? 1.25 : 0;
+    if (body?.parent) {
+      const outward = toLook.clone().sub(worldPos(body.parent));
+      const want = Math.atan2(outward.z, outward.x) + 0.25;
+      y1 = camState.yaw + Math.atan2(Math.sin(want - camState.yaw), Math.cos(want - camState.yaw));
+    } else if (id && id !== "fh1m" && toLook.lengthSq() > 1) {
+      const want = Math.atan2(toLook.z, toLook.x) + Math.PI - 0.55;
+      y1 = camState.yaw + Math.atan2(Math.sin(want - camState.yaw), Math.cos(want - camState.yaw));
+    }
+    flight = { fromLook: look.clone(), toId: id, toLook, d0: camState.dist, d1, p0: camState.pitch, p1: body?.kind === "planet" ? 0.75 : body?.kind === "moon" ? 0.65 : id ? 0.32 : 0.55, y0: camState.yaw, y1, t: 0, dur: reduce ? 0.01 : dur };
+    canvas.setAttribute("aria-busy", "true");
     follow = id;
   }
 
@@ -160,6 +237,11 @@ export function start(canvas: HTMLCanvasElement): World {
 
   // input
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const hits: THREE.Intersection[] = [];
+  const visibleInScene = (node: THREE.Object3D) => {
+    for (let ancestor: THREE.Object3D | null = node; ancestor; ancestor = ancestor.parent) if (!ancestor.visible) return false;
+    return true;
+  };
   let drag: { x: number; y: number; moved: boolean } | null = null;
   canvas.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, moved: false }; canvas.setPointerCapture(e.pointerId); });
   canvas.addEventListener("pointermove", (e) => {
@@ -176,8 +258,13 @@ export function start(canvas: HTMLCanvasElement): World {
   function pick(e: PointerEvent | MouseEvent) {
     const r = canvas.getBoundingClientRect(); ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, cam);
-    const hit = ray.intersectObjects([...pickables, ship.group], true).find((h) => h.object.visible && (h.object.userData.obj || h.object.userData.ship));
-    return hit ? (hit.object.userData.ship ? "bunny-ship" : (hit.object.userData.obj as string)) : null;
+    hits.length = 0; ray.intersectObjects(pickables, true, hits);
+    for (const hit of hits) {
+      if (!visibleInScene(hit.object)) continue;
+      if (hit.object.userData.ship) return "bunny-ship";
+      if (hit.object.userData.obj) return hit.object.userData.obj as string;
+    }
+    return null;
   }
   // panels that live somewhere without being a body of their own
   const ALIAS: Record<string, string> = { graveyard: ROCKS[0].id, "heritage-jcbose": HOME.id, "heritage-snbose": HOME.id, "heritage-frkhan": HOME.id, "heritage-jrc": HOME.id };
@@ -199,25 +286,35 @@ export function start(canvas: HTMLCanvasElement): World {
 
   // labels: planets always; a world's moons when you are at that world; the star and stations when zoomed out
   const labelled = [...PLANETS.map((p) => p.id), ...STATIONS.map((s) => s.id), HOME.id, PROBE.id, "fh1m", ...MOONS.map((m) => m.id)];
-  const screen = new Map<string, { x: number; y: number; z: number; r: number; visible: boolean }>();
-  const v3 = new THREE.Vector3();
+  const screen = new Map(labelled.map(id => [id, { x: 0, y: 0, z: 0, r: 0, visible: false }]));
+  const v3 = new THREE.Vector3(), shipTarget = new THREE.Vector3(), shipOffset = new THREE.Vector3(), shipJitter = new THREE.Vector3();
 
-  let last = performance.now(), running = true, tAcc = 0, frameMs = 16, frameN = 0;
+  let last = performance.now(), running = true, tAcc = 0, orbitT = 0, firstFrame = true, frameMs = 16, frameN = 0;
   function tick(now: number) {
     if (!running) return;
     const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = (tAcc += reduce ? 0 : dt);
-    // orbits (paused while flying, so the target holds still under the camera)
+    // Hold the map steady for close inspection; resume its orbits in the whole-system view.
+    const moveOrbits = firstFrame || (!reduce && !follow); firstFrame = false;
+    if (moveOrbits && !reduce) orbitT += dt;
     for (const b of ALL) {
       const pv = pivots.get(b.id); if (!pv) continue;
-      const a = b.phase + t * b.speed;
-      if (b.kind === "rock") pv.position.set(Math.cos(a) * b.orbit, Math.sin(a * 3) * 0.6, Math.sin(a) * b.orbit);
-      else pv.position.set(Math.cos(a) * b.orbit, 0, Math.sin(a) * b.orbit);
-      const n = nodes.get(b.id); if (n) n.rotation.y += dt * (b.kind === "planet" ? 0.05 : 0.2);
-      // time: things that didn't exist yet are not there
-      const on = year === null || b.year <= year;
-      if (n) { const s = n.userData.base ?? (n.userData.base = n.scale.x); const k = THREE.MathUtils.damp(n.scale.x / s, on ? 1 : 0.001, 6, dt); n.scale.setScalar(s * k); n.visible = k > 0.01; }
+      if (moveOrbits) {
+        const a = b.phase + orbitT * b.speed;
+        if (b.kind === "rock") pv.position.set(Math.cos(a) * b.orbit, Math.sin(a * 3) * 0.6, Math.sin(a) * b.orbit);
+        else pv.position.set(Math.cos(a) * b.orbit, 0, Math.sin(a) * b.orbit);
+        if (b.kind === "moon") pv.rotation.y = Math.PI / 2 - a;
+      }
+      const n = nodes.get(b.id);
+      if (n && !reduce && (b.kind === "planet" || b.kind === "home")) n.rotation.y += dt * 0.025;
+      // Fade the whole visual, including a planet's atmosphere and rings, not its orbit hierarchy.
+      const on = (year === null || b.year <= year) && contextVisible.has(b.id), visual = visuals.get(b.id) ?? n;
+      if (visual) {
+        const base = visual.userData.base ?? (visual.userData.base = visual.scale.x);
+        const k = THREE.MathUtils.damp(visual.scale.x / base, on ? 1 : 0.001, 6, dt);
+        visual.scale.setScalar(base * k); visual.visible = k > 0.01;
+      }
     }
-    pivots.get("belt")!.rotation.y = t * 0.004;
+    if (moveOrbits) pivots.get("belt")!.rotation.y = orbitT * 0.004;
     for (const m of shaderMats) if (m.uniforms.uTime) m.uniforms.uTime.value = t;
     corona.material.rotation = t * 0.02;
 
@@ -229,22 +326,27 @@ export function start(canvas: HTMLCanvasElement): World {
       camState.dist = Math.exp(Math.log(flight.d0) + (Math.log(flight.d1) - Math.log(flight.d0)) * k);
       camState.pitch = flight.p0 + (flight.p1 - flight.p0) * k;
       camState.yaw = flight.y0 + (flight.y1 - flight.y0) * k;
-      if (flight.t >= 1) flight = null;
+      if (flight.t >= 1) { flight = null; canvas.setAttribute("aria-busy", "false"); }
     } else if (follow) look.lerp(worldPos(follow, v3), 1 - Math.exp(-dt * 8));
-    if (!drag && !flight && !reduce) camState.yaw += dt * (follow ? 0.03 : 0.012); // a slow drift, never still
+    if (!drag && !flight && !follow && !reduce) camState.yaw += dt * 0.005;
     cam.position.set(look.x + Math.cos(camState.yaw) * Math.cos(camState.pitch) * camState.dist, look.y + Math.sin(camState.pitch) * camState.dist, look.z + Math.sin(camState.yaw) * Math.cos(camState.pitch) * camState.dist);
     cam.lookAt(look);
 
     // Bunnu: spring toward a point beside the target, a little bob, banks into turns
-    const target = (follow ? worldPos(follow, new THREE.Vector3()) : new THREE.Vector3(0, 0, 0)).add(new THREE.Vector3(Math.cos(t * 0.7), 0.6 + Math.sin(t * 1.3) * 0.25, Math.sin(t * 0.7)).multiplyScalar(follow ? sizeOf(follow) * 1.8 + 1.5 : 16));
-    const acc = target.sub(shipPos).multiplyScalar(4).addScaledVector(shipVel, -2.6);
-    if (mode === "fail" || mode === "wrong") acc.add(new THREE.Vector3(Math.sin(t * 9), Math.cos(t * 7), Math.sin(t * 11)).multiplyScalar(mode === "wrong" ? 18 : 9));
-    shipVel.addScaledVector(acc, dt); shipPos.addScaledVector(shipVel, dt);
+    if (follow) worldPos(follow, shipTarget); else shipTarget.set(0, 0, 0);
+    shipOffset.set(Math.cos(t * 0.7), 0.6 + Math.sin(t * 1.3) * 0.25, Math.sin(t * 0.7)).multiplyScalar(follow ? sizeOf(follow) * 1.7 + 0.15 : 16);
+    shipTarget.add(shipOffset);
+    if (reduce) { shipPos.copy(shipTarget); shipVel.set(0, 0, 0); }
+    else {
+      const acc = shipTarget.sub(shipPos).multiplyScalar(4).addScaledVector(shipVel, -2.6);
+      if (mode === "fail" || mode === "wrong") acc.add(shipJitter.set(Math.sin(t * 9), Math.cos(t * 7), Math.sin(t * 11)).multiplyScalar(mode === "wrong" ? 18 : 9));
+      shipVel.addScaledVector(acc, dt); shipPos.addScaledVector(shipVel, dt);
+    }
     ship.group.position.copy(shipPos);
     if (shipVel.lengthSq() > 0.01) ship.group.lookAt(v3.copy(shipPos).add(shipVel));
     ship.group.rotateZ(THREE.MathUtils.clamp(-shipVel.x * 0.02, -0.5, 0.5));
     ship.flame.scale.z = 0.6 + Math.min(2, shipVel.length() * 0.08) + Math.sin(t * 40) * 0.08;
-    ship.group.scale.setScalar(follow ? Math.max(0.35, sizeOf(follow) * 0.18) : 1.2);
+    ship.group.scale.setScalar(follow ? THREE.MathUtils.clamp(sizeOf(follow) * 0.13, 0.12, 0.9) : 0.8);
     modeT += dt; if (mode === "fixed" && modeT > 3) mode = "idle";
 
     renderer.render(scene, cam);
@@ -260,11 +362,13 @@ export function start(canvas: HTMLCanvasElement): World {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     for (const id of labelled) {
       const n = nodes.get(id); if (!n) continue;
-      n.getWorldPosition(v3); const d = v3.distanceTo(cam.position); v3.project(cam);
+      worldPos(id, v3); const d = v3.distanceTo(cam.position); v3.project(cam);
       const b = byId[id];
-      const near = b?.kind === "moon" ? zone === b.zone && d < 140 : b?.kind === "station" || id === "fh1m" ? camState.dist > 60 || follow === id : true;
+      const near = b?.kind === "moon" ? follow === id || (zone === b.zone && d < 140) : b?.kind === "station" || id === "fh1m" ? camState.dist > 60 || follow === id : true;
       const r = (sizeOf(id) / d) * (h / 2) / Math.tan((cam.fov * Math.PI) / 360);
-      screen.set(id, { x: (v3.x * 0.5 + 0.5) * w, y: (-v3.y * 0.5 + 0.5) * h, z: d, r, visible: v3.z < 1 && n.visible && near });
+      const projected = screen.get(id)!;
+      projected.x = (v3.x * 0.5 + 0.5) * w; projected.y = (-v3.y * 0.5 + 0.5) * h;
+      projected.z = d; projected.r = r; projected.visible = v3.z > -1 && v3.z < 1 && visibleInScene(n) && near;
     }
     frameCbs.forEach((f) => f(screen));
     requestAnimationFrame(tick);
@@ -275,7 +379,7 @@ export function start(canvas: HTMLCanvasElement): World {
   return {
     sound,
     go,
-    fallIn: () => { camState.dist = 900; camState.pitch = 0.9; flyTo(null, 230, 4.5); },
+    fallIn: () => { flyTo(null, 230, 0.8); },
     focus: (id) => choose(id),
     setMode: (m) => { mode = m; modeT = 0; if (m === "fixed") sound.chime(); else if (m === "wrong") sound.pluck(220); else if (m === "fail") sound.pluck(330); },
     setYear: (y) => { year = y; },
@@ -322,8 +426,16 @@ function buildShip() {
   const hull = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 1.1, 6, 12), m("#e8e6e1")); hull.rotation.x = Math.PI / 2; group.add(hull);
   const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: "#9fd0ff", roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.7 }));
   canopy.position.set(0, 0.22, 0.25); group.add(canopy);
-  for (const s of [-1, 1]) { const ear = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 4), m("#2a2730")); ear.position.set(s * 0.12, 0.47, 0.22); group.add(ear); }
-  for (const s of [-1, 1]) { const fin = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.04, 0.4), m("#ff4f8b")); fin.position.set(s * 0.45, 0, -0.3); fin.rotation.z = s * 0.25; group.add(fin); }
+  const catMaterial = m("#2a2730"), earGeometry = new THREE.ConeGeometry(0.055, 0.12, 4);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), catMaterial);
+  head.position.set(0, 0.33, 0.25); group.add(head);
+  const eyeGeometry = new THREE.SphereGeometry(0.025, 8, 6), eyeMaterial = new THREE.MeshBasicMaterial({ color: oxocarbon.cyan });
+  const finGeometry = new THREE.BoxGeometry(0.7, 0.04, 0.4), finMaterial = m(oxocarbon.pink);
+  for (const side of [-1, 1]) {
+    const ear = new THREE.Mesh(earGeometry, catMaterial); ear.position.set(side * 0.095, 0.435, 0.25); group.add(ear);
+    const eye = new THREE.Mesh(eyeGeometry, eyeMaterial); eye.position.set(side * 0.055, 0.35, 0.374); group.add(eye);
+    const fin = new THREE.Mesh(finGeometry, finMaterial); fin.position.set(side * 0.45, 0, -0.3); fin.rotation.z = side * 0.25; group.add(fin);
+  }
   const flame = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.7, 10), new THREE.MeshBasicMaterial({ color: "#7fd3ff", transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
   flame.rotation.x = -Math.PI / 2; flame.position.z = -0.95; group.add(flame);
   group.traverse((o) => (o.userData.ship = true));

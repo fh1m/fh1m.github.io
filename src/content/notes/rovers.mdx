@@ -1,71 +1,141 @@
 ---
 title: "A rover arm that types"
-dek: "The University Rover Challenge asks a rover to find a keyboard and type on it, alone. Inverse kinematics, a separate vision unit, and a dataset pipeline."
+dek: "My Mongol-Tori work: key detection, OCR, a separate vision unit and a two-link arm. The preserved controller makes the distance between solving a triangle and pressing a key unusually clear."
 date: "2025-05"
 series: machines
 part: 3
 kind: story
-hero: /media/lab/sim-rover-terrain.webp
-heroAlt: "A simulated rover on dune terrain beside a mission control display"
+hero: /media/lab/keyboard-detail.webp
+heroAlt: "The typing-task keyboard, detected keys and threaded arm tip"
 sources:
+  - { label: "URC 2025: official equipment-servicing questions and answers", href: "https://urc.marssociety.org/home/about-urc/history/urc2025/urc2025-qa" }
+  - { label: "URC 2025: requirements and guidelines", href: "https://urc.marssociety.org/home/about-urc/history/urc2025/urc2025-requirements-guidelines" }
   - { label: "BRAC University: Mongol-Tori in the URC 2025 global top 10", href: "https://www.bracu.ac.bd/news/brac-universitys-mongol-tori-team-ranks-among-global-top-10-university-rover-challenge-2025" }
   - { label: "BRAC University: first runner-up, Bangladesh ICT & Innovation Awards 2025", href: "https://www.bracu.ac.bd/news/bracu-mongol-tori-first-runner-bangladesh-ict-and-innovation-awards-2025" }
   - { label: "BRACU Mongol-Tori", href: "https://www.bracu-mongoltori.com" }
-  - { label: "University Rover Challenge", href: "https://urc.marssociety.org/" }
+  - { label: "Modern Robotics: inverse kinematics", href: "https://modernrobotics.northwestern.edu/nu-gm-book-resource/6-1-inverse-kinematics/" }
 ---
 import Fig from "../../components/note/Fig.astro";
-import Pull from "../../components/note/Pull.astro";
-import Stats from "../../components/note/Stats.astro";
+import Explore from "../../components/note/Explore.astro";
 
-The University Rover Challenge is a Mars-analogue competition. One of its tasks asks a rover to do something that sounds like a joke and isn't: find a keyboard and type on it, without a human. From December 2024 to May 2025 I worked on that task with BRACU Mongol-Tori's autonomous sub-team.
+From December 2024 to May 2025 I worked with BRACU Mongol-Tori's autonomous sub-team. My part was the typing task: inverse kinematics for a two-degree-of-freedom arm, a lightweight vision unit, OCR and image processing for key identification, the URC 2025 dataset pipeline, and a GUI and simulation environment for testing and calibration.
 
-The task decomposes into three problems that each look easy alone: *where's the keyboard*, *where's each key*, and *how do I put the arm's tip there*. None of them is easy while a rover is parked on uneven ground.
+Underwater vision had already made me think about whether a target was visible. This task added a more physical question: even after finding it, where does the end of the mechanism actually go? A correctly labelled **F** is not yet a coordinate the arm can use—and arriving above F is not yet pressing it.
 
-## Where's each key
+<div class="arm-opening wide">
+<Fig src="/media/lab/keyboard-detail.webp" alt="Individual keyboard keys boxed by the detector, with a threaded metal tip in front of the F key" caption="The preserved keyboard-detection frame, cropped only to remove its empty upper area. <a href='/media/lab/detect-keyboard.webp' target='_blank' rel='noreferrer'>Inspect the uncropped frame.</a>" contain />
+<aside class="arm-record">
+<h2>One task, several interfaces</h2>
+<dl>
+<dt>Perception</dt><dd>Find the keyboard and identify individual keys.</dd>
+<dt>Calibration</dt><dd>Relate image locations to the arm's coordinate frame.</dd>
+<dt>Manipulation</dt><dd>Turn a requested point into bounded servo commands.</dd>
+<dt>Physical result</dt><dd>Reach the right location, make contact, release, and verify the input.</dd>
+</dl>
+<p>The local archive includes my <code>Mini_Arm_IK_ESP.ino</code>. Its link lengths are <strong>15.5 inches and 14 inches</strong>; the units are mine, not an estimate from the photograph.</p>
+</aside>
+</div>
 
-I built a standalone, lightweight vision unit for alignment and key detection, deliberately separate from the rover's main computer, so typing couldn't starve navigation and navigation couldn't stall typing. Custom OCR and image processing told the keys apart and located each one.
+## What the competition actually asked
 
-<Fig src="/media/lab/detect-keyboard.webp" alt="A keyboard with individual keys detected and boxed" caption="Keyboard and individual keys, detected for the typing task." contain />
+The distinction between autonomous navigation and autonomous typing matters. In the [official 2025 equipment-servicing Q&A](https://urc.marssociety.org/home/about-urc/history/urc2025/urc2025-qa), teams could manually align with **Q** initially, without pressing it. After that alignment, typing had to proceed autonomously: no manual repositioning to the other keys. The keyboard itself could serve as the fiducial; a team could not place convenient markers beside it.
 
-I also ran the dataset pipeline for URC 2025: the labelled images that taught the detector what a key looks like at rover distance and at an angle.
+That is a more specific problem than “find any keyboard anywhere, with no human involvement.” It still leaves the difficult part: preserve a useful relationship between the camera, the key layout and the arm as the task progresses. The same Q&A says holding a key does not auto-repeat. Another occurrence needs a release and another press. Position, contact and sequencing are separate requirements.
 
-## Where's the tip
+## From a box in an image to a key on the plane
 
-The arm had two joints that mattered for reaching. A two-link arm has a closed-form inverse: given where the tip should go, the elbow angle comes from the law of cosines and the shoulder from two arctangents.
+I built the lightweight vision unit separately from the rover's main computer. That separated the typing workload from the main computing arrangement; it was not a proof that contention or integration failures were impossible. Custom OCR and image processing handled key identification, and I managed the dataset pipeline for the 2025 task.
+
+The detection image shows why identifying the keyboard alone is insufficient. Individual keys occupy different parts of a perspective-distorted plane. Function keys, letters and the space bar are different shapes. Neighbouring boxes can overlap, and a large printed character is not necessarily the centre of the surface that should be contacted. The values beside those boxes are **detector confidence scores**, not measured positional accuracy or a probability that the arm will press successfully.
+
+A useful calibration separates three coordinate systems:
+
+1. **Image pixels.** A detected key provides a location in the camera image, with uncertainty from the box, viewing angle and identification.
+2. **Keyboard coordinates.** A planar mapping can rectify the view into a consistent layout. A homography needs enough independent correspondences; it does not magically provide scale in inches.
+3. **Arm coordinates.** The mechanism needs a metric target relative to its base, including the relationship between the camera and that base. Moving either invalidates assumptions in the mapping.
+
+This is the reasoning behind the calibration GUI and simulation work. The preserved Arduino sketch starts at the third interface: it accepts X/Y values over Serial. It contains neither OCR nor the competition task sequencer. Treating that file as the complete autonomous typing system would hide most of the integration work.
+
+## The geometry inside my controller
+
+The two planar links are 15.5 in and 14 in. Ignoring joint limits, their tip can reach an annulus: the outer radius is **29.5 in**, and the inner hole has radius **1.5 in**. A point inside the outer circle can still be unreachable because the links cannot fold short enough.
+
+For a target at distance r, the law of cosines gives the relative elbow angle q2. The shoulder q1 follows by subtracting the triangle's internal direction from the target direction. There are generally two geometric branches; this controller selects one. A real joint's zero and direction are not necessarily the mathematical angle's zero and direction.
 
 <figure class="wide">
-<svg viewBox="0 0 900 300" role="img" aria-labelledby="ik-t">
-  <title id="ik-t">Two-link inverse kinematics: shoulder at the origin, link lengths L1 and L2, target at distance d. The elbow angle q2 equals arccos of (d squared minus L1 squared minus L2 squared) over (2 L1 L2). The shoulder angle q1 equals atan2 of the target minus atan2 of L2 sin q2 over L1 plus L2 cos q2.</title>
-  <style>{`.l{stroke:var(--chalk);stroke-width:3;stroke-linecap:round}.g{stroke:#2c333a;stroke-dasharray:4 4}.t{font:14px var(--mono);fill:var(--dim)}.m{font:15px var(--mono);fill:var(--chalk)}`}</style>
-  <line class="g" x1="60" y1="240" x2="400" y2="240" />
-  <line class="g" x1="60" y1="240" x2="330" y2="110" />
-  <line class="l" x1="60" y1="240" x2="210" y2="80" />
-  <line class="l" x1="210" y1="80" x2="330" y2="110" />
-  <circle cx="60" cy="240" r="6" fill="var(--measured)" /><circle cx="210" cy="80" r="6" fill="var(--measured)" /><circle cx="330" cy="110" r="6" fill="var(--estimate)" />
-  <text x="112" y="150" class="t">L1</text><text x="272" y="84" class="t">L2</text><text x="200" y="196" class="t">d</text>
-  <text x="96" y="232" class="t">q1</text><text x="222" y="104" class="t">q2</text><text x="342" y="114" class="t">key</text>
-  <text x="450" y="110" class="m">cos q2 = (d² − L1² − L2²) / (2·L1·L2)</text>
-  <text x="450" y="150" class="m">q1 = atan2(y, x) − atan2(L2·sin q2, L1 + L2·cos q2)</text>
-  <text x="450" y="200" class="t">|cos q2| > 1  →  the key is out of reach.</text>
-  <text x="450" y="226" class="t">Say so; don't stretch.</text>
+<svg viewBox="0 0 1000 340" role="img" aria-labelledby="arm-geometry-title arm-geometry-desc">
+<title id="arm-geometry-title">Two-link geometry and the archived servo mapping</title>
+<desc id="arm-geometry-desc">A two-link schematic beside the equations. The source uses mirrored X coordinates, then subtracts 60 degrees from the shoulder and adds 10 degrees to the relative elbow angle. Ideal radial reach is 1.5 to 29.5 inches, before command limits.</desc>
+<g fill="none" stroke="var(--line-2)" stroke-width="1.5"><path d="M340 260H435M340 260V65"/><path d="M340 260L83 94" stroke-dasharray="5 5"/></g>
+<g fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"><path d="M340 260L250 96L83 94"/></g>
+<g fill="var(--accent)"><circle cx="340" cy="260" r="6"/><circle cx="250" cy="96" r="6"/></g><circle cx="83" cy="94" r="7" fill="var(--estimate)"/>
+<g fill="var(--ink)" font-family="var(--mono)" font-size="15"><text x="310" y="169">15.5 in</text><text x="133" y="77">14 in</text><text x="53" y="124">target</text><text x="441" y="266">X</text><text x="334" y="57">Y</text><text x="216" y="206">r</text></g>
+<g fill="var(--ink)" font-family="var(--sans)" font-size="18" font-weight="600"><text x="20" y="29">Two-link schematic</text><text x="480" y="29">Source coordinates → servo angles</text></g>
+<g fill="var(--ink)" font-family="var(--mono)" font-size="15"><text x="480" y="66">X = −x; Y = y; r² = x² + y²</text><text x="480" y="102">cos q2 = (r² − L1² − L2²) / (2 L1 L2)</text><text x="480" y="138">q1 = atan2(y, −x)</text><text x="525" y="168">− atan2(L2 sin q2, L1 + L2 cos q2)</text><text x="480" y="214">servo1 = q1 − 60°; servo2 = q2 + 10°</text></g>
+<g fill="var(--dim)" font-family="var(--sans)" font-size="16"><text x="480" y="258">Ideal radial reach: 1.5–29.5 in</text><text x="480" y="286">Then apply the source's joint limits and integer writes.</text><text x="20" y="321">Planar position only—not contact, stiffness or a verified keypress.</text></g>
 </svg>
-<figcaption>Two-link IK, elbow up. The interesting line is the last one: an unreachable key is an answer, not an exception.</figcaption>
+<figcaption>The equations use the file's reflected-X convention. The sketch's internal triangle angle is converted into the relative elbow angle shown here. Schematic, not a dimensioned mechanical drawing.</figcaption>
 </figure>
 
-An in-house GUI and simulation environment made calibration possible before the hardware existed. A laptop is the cheapest place to find a failure.
+The implementation uses <code>atan2(y, -x)</code>, normalizes a negative direction into 0–360°, then applies offsets of −60° and +10°. Its command bounds are **30–135° for servo 1** and **10–135° for servo 2**. Those bounds are applied independently, after the inverse calculation.
 
-You can drive the arm in [the ground arena](/#ground): click a key, or use the arrow keys, and it solves for the joint angles live. Push it to the far corner of the keyboard and it tells you it can't reach, with the distance.
+That ordering matters. Clamping an angle does not preserve the requested tip position. In this mapping, the allowed relative elbow angle is 0–125°, which alone raises the smallest nominal reachable radius to about **13.686 in**. The shoulder bound also restricts which directions are reachable. The blue region in the instrument is the image of those command bounds—not the entire ideal annulus and not a measured physical workspace.
 
-<Fig src="/media/lab/sim-rover-terrain.webp" alt="A simulated rover on dune terrain beside the mission control display" caption="A rover on simulated dunes, with the mission HUD alongside." wide contain />
+## What the preserved sketch really does at the edges
 
-## How it went
+The original function does not reject every unreachable request. For a target beyond the total link length, it requests a straight arm in that direction and returns. Later joint limits can change that direction further. For a point inside the inner hole, it still evaluates the inverse-cosine expressions. At the base, one expression also divides by zero. These cases can produce non-finite angles; they are not useful servo commands.
 
-<Stats items={[
-  { v: "global top 10", l: "Mongol-Tori at URC 2025" },
-  { v: "1st runner-up", l: "Bangladesh ICT & Innovation Awards 2025" },
-  { v: "2-DOF", l: "arm, solved in closed form" },
-]} src="BRAC University news, linked in the sources." />
+A short excerpt captures the distinction between requesting an angle and writing it:
 
-<Pull>The keyboard is the easy part. Finding the keyboard is the task.</Pull>
+```cpp
+// Constants in my archived sketch; lengths are inches.
+const double len1 = 15.5, len2 = 14;
+const int LIMIT1[] = {30, 135}, LIMIT2[] = {10, 135};
 
-The rover arm taught the same lesson as the underwater vehicle, from the other side: perception is where the uncertainty lives, and control is only as good as the coordinates it's handed.
+// After setIK(), constrain() and the smoothing step:
+sg1.write(int(cAng1));
+sg2.write(int(cAng2));
+```
+
+The smoothing moves each current command toward its target by 2° per loop, followed by a 15 ms delay. That is not a guaranteed update rate: computation and Serial parsing also take time, and reading an incomplete line can block. The two axes may finish at different times. A point-to-point position solution says nothing about whether the swept path clears the keyboard or surrounding structure.
+
+Integer writes introduce a further difference even without a joint-limit violation. To make that visible, I compiled the original <code>setIK</code> function in a host-side numerical probe, then applied the source's limits, integer conversion and nominal forward kinematics. These are **computed positions assuming perfect realization of the commands**, not measurements from the arm.
+
+| Requested X/Y, in | Written servo angles | Nominal settled tip, in | Position miss |
+|---|---|---|---|
+| 21.4 / 13.8—the source's starting target | 58° / 70° | 21.268 / 14.174 | 0.397 in |
+| 10 / 10—geometrically reachable, command limited | 30° / 132° | 11.873 / 8.081 | 2.681 in |
+| 40 / 0—beyond the link lengths | 120° / 10° | 29.500 / 0.000 | 10.500 in |
+| 1 / 0—inside the inner hole | Non-finite inverse result | No valid pose | Not defined |
+| 0 / 0—at the base | Non-finite inverse result | No valid pose | Not defined |
+
+The starting target's roughly 0.4 in nominal discrepancy is a consequence of this particular geometry and integer conversion. It is not an accuracy specification for the physical servos. Backlash, calibration, compliance and load would add their own effects.
+
+<Explore bench="ik-arm" title="Ideal reach versus my archived commands" caption="Lengths in inches. Select a boundary case, compare the modes, then move the target. The plot shows settled nominal geometry; it does not simulate the smoothing trajectory or press a key." />
+
+## Reaching is not pressing
+
+Two joint variables position a tip in a plane. They do not independently specify an arbitrary 3D location and tool orientation. A typing mechanism still needs a consistent relationship to the keyboard surface, appropriate contact travel and a way to withdraw. Neither the diagram nor the two-servo archive models a contact force, key stroke or successful electrical input.
+
+That makes the complete task a chain of checks rather than one inverse formula: identify the intended key, obtain a usable coordinate, reject or handle an infeasible request, move without an unwanted collision, make contact, release, and establish that the expected input occurred. Repeating a character requires that release/press transition; the official keyboard's no-auto-repeat behavior makes the distinction explicit.
+
+The lesson I take from this work is not that manipulation becomes easy once perception works. It is that **each interface needs a meaning both sides can honour**. A key label is not a coordinate. A coordinate is not a feasible joint command. A command is not a measured tip position. A tip position is not a completed keystroke.
+
+## The team result belongs to the team
+
+BRAC University reported [Mongol-Tori's global top-10 finish at URC 2025](https://www.bracu.ac.bd/news/brac-universitys-mongol-tori-team-ranks-among-global-top-10-university-rover-challenge-2025), and [first runner-up at the Bangladesh ICT & Innovation Awards 2025](https://www.bracu.ac.bd/news/bracu-mongol-tori-first-runner-bangladesh-ict-and-innovation-awards-2025). Those reports belong here alongside the engineering, rather than disappearing because they are news coverage.
+
+They describe the team's achievement across a rover programme. My contribution was the autonomous typing work described above—not the entire vehicle, its drive system or its science mission. The surviving sketch and detection frame make one part of that contribution inspectable; they do not establish a typing success rate at the competition.
+
+## Read the interfaces, not just the formula
+
+Start with the [2025 task Q&A](https://urc.marssociety.org/home/about-urc/history/urc2025/urc2025-qa): it changes what “autonomous” means in this specific task. For the general mathematical treatment, [Modern Robotics' inverse-kinematics material](https://modernrobotics.northwestern.edu/nu-gm-book-resource/6-1-inverse-kinematics/) separates a desired pose from the joint variables that can realize it.
+
+For the perception side of my own work, [Duburi](/notes/duburi/) is the longer history, and [Half a second](/notes/half-a-second/) looks at the difference between an estimate and where the target actually is. [Rupsha](/projects/rupsha/) returns to ground vehicles with a different set of constraints. They share the same habit: keep the observations, model and physical claims distinguishable.
+
+<style>{`
+.arm-opening{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(1rem,3vw,2.5rem);align-items:start;margin:1.4rem 0}
+.arm-opening figure{margin:0}.arm-opening img{max-height:36rem;width:auto;max-width:100%;height:auto}
+.arm-record{border-top:2px solid var(--accent);padding-top:.8rem}.arm-record h2{margin:0 0 1rem}.arm-record dl{margin:0}.arm-record dt{font:500 .8rem var(--mono);color:var(--accent);margin-top:.9rem}.arm-record dd{margin:.25rem 0 0}.arm-record p{margin-top:1.2rem}
+@media(max-width:700px){.arm-opening{grid-template-columns:1fr}.arm-opening img{max-height:32rem}.arm-record h2{margin-top:0}}
+`}</style>

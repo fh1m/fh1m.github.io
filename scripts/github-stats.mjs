@@ -1,20 +1,16 @@
 // Build-time GitHub stats. Run before `astro build` (CI does it daily).
 // Writes src/data/github.json. Nothing on the site hardcodes these numbers.
 //
-// Token: GITHUB_TOKEN (CI) or `gh auth token` (local). Public data only.
+// Uses `gh api graphql`: GITHUB_TOKEN (CI) or the existing gh login (local).
 // If the API is unreachable, the previous file is kept and the build goes on;
 // the page shows the timestamp of the data it actually has.
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 const OUT = new URL("../src/data/github.json", import.meta.url);
 const LOGIN = "fh1m";
 
-let token = process.env.GITHUB_TOKEN;
-if (!token) {
-  try { token = execSync("gh auth token", { encoding: "utf8" }).trim(); } catch { /* no gh */ }
-}
 
 const query = `query($login: String!, $after: String) {
   user(login: $login) {
@@ -42,19 +38,14 @@ const query = `query($login: String!, $after: String) {
 }`;
 
 async function gql(variables) {
-  const res = await fetch("https://api.github.com/graphql", {
-    method: "POST",
-    headers: { Authorization: `bearer ${token}`, "Content-Type": "application/json", "User-Agent": "fh1m-site-build" },
-    body: JSON.stringify({ query, variables }),
-  });
-  if (!res.ok) throw new Error(`GitHub GraphQL ${res.status}`);
-  const body = await res.json();
+  const body = JSON.parse(execFileSync("gh", ["api", "graphql", "--input", "-"], {
+    input: JSON.stringify({ query, variables }), encoding: "utf8", maxBuffer: 8 * 1024 * 1024,
+  }));
   if (body.errors) throw new Error(body.errors.map((e) => e.message).join("; "));
   return body.data.user;
 }
 
 async function main() {
-  if (!token) throw new Error("no GITHUB_TOKEN and no gh auth");
   let after = null, user, repos = [];
   do {
     user = await gql({ login: LOGIN, after });
@@ -92,8 +83,8 @@ async function main() {
     busiestDay: days.reduce((m, d) => (d[1] > m[1] ? d : m), ["", 0]),
     days,
     languages,
-    repos: own.map((r) => ({
-      name: r.name, description: r.description, url: r.url, archived: r.isArchived,
+    repos: repos.map((r) => ({
+      name: r.name, description: r.description, url: r.url, archived: r.isArchived, isFork: r.isFork,
       stars: r.stargazerCount, forks: r.forkCount, pushedAt: r.pushedAt, createdAt: r.createdAt,
       language: r.primaryLanguage?.name ?? null, color: r.primaryLanguage?.color ?? null,
       topics: r.repositoryTopics.nodes.map((t) => t.topic.name),

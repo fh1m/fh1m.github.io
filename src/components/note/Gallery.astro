@@ -1,22 +1,31 @@
 ---
-/** Several real images side by side, each with its caption. Always full width. */
+import { dims } from "../../data/media";
+/** Authored comparisons stay together; native aspect ratios align their image baselines. */
 interface Item { src: string; alt: string; caption?: string }
 interface Props { items: Item[]; credit?: string }
 const { items, credit } = Astro.props;
+const panels = items.map((item) => ({ ...item, ...dims(item.src) }));
+const groups: (typeof panels)[] = [];
+for (let index = 0; index < panels.length; index += 3) groups.push(panels.slice(index, index + 3));
 ---
-<div class="gallery wide" style={`--n:${Math.min(items.length, 3)}`}>
-  {items.map((it) => (
-    <figure>
-      <img src={it.src} alt={it.alt} loading="lazy" decoding="async" />
-      {it.caption && <figcaption set:html={it.caption} />}
-    </figure>
-  ))}
+<div class="gallery wide">
+  {groups.map((group) => <div class="gallery-row" style={`--columns:${group.map((item) => `minmax(0,${item.w / item.h}fr)`).join(" ")}`}>
+    {group.map((it) => (
+      <figure>
+        <a class="image-view" href={it.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${it.alt}`}><img src={it.src} alt={it.alt} width={it.w} height={it.h} loading="lazy" decoding="async" /></a>
+        <figcaption>{it.caption && <span set:html={it.caption} />}<span class="image-hint">Open image to inspect at full size.</span></figcaption>
+      </figure>
+    ))}
+  </div>)}
   {credit && <p class="src gcredit">{credit}</p>}
 </div>
 <style>
-  .gallery { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 1.2rem; margin: 2.4rem 0; }
-  .gallery figure { margin: 0; }
-  .gallery img { aspect-ratio: 4 / 3; object-fit: cover; }
+  .gallery { display:grid; gap:1.2rem; margin:1.2rem 0; }
+  .gallery-row { display:grid; grid-template-columns:var(--columns); gap:1.2rem; min-width:0; }
+  .gallery figure { margin:0; min-width:0; }
+  .gallery img { display:block; width:100%; height:auto; max-height:70svh; object-fit:contain; }
+  .image-view { display:block; border-radius:var(--r-2); }
+  .image-hint { display:block; color:var(--action); font-size:.8rem; margin-top:.4rem; }
   .gcredit { grid-column: 1 / -1; margin: 0; }
-  @media (max-width: 760px) { .gallery { grid-template-columns: 1fr; } }
+  @media(max-width:760px) { .gallery-row { grid-template-columns:minmax(0,1fr); } }
 </style>

@@ -1,35 +1,39 @@
 ---
 title: "The engine room"
-dek: "Four measurements from inside Mongla's perception path: the reflex split, zero wasted decodes, a lock nobody may hold, and the moment the sensor became the limit."
+dek: "Separate deadlines, decode only what a consumer needs, and check the instrument before trusting its verdict. Reading an earlier perception report against the later code and retractions."
 date: "2026-09"
 series: build
 part: 6
 kind: essay
 repo: mongla_ws
-hero: /media/lab/gil-audit.webp
-heroAlt: "A table ranking each perception stage by how long it holds Python's global lock"
 sources:
-  - { label: "mongla_ws (tools/gil_audit.py)", href: "https://github.com/fh1m/mongla_ws" }
+  - { label: "Pinned GIL audit: controls, sampler and rate calculation", href: "https://github.com/fh1m/mongla_ws/blob/c957ba915e6f0574eff244c3e27eca42fa5fae9a/tools/bench/gil_audit.py" }
   - { label: "The Shift: the architecture from first principles", href: "https://fh1m.github.io/mongla_ws/the-shift.html" }
+  - { label: "Camera report: capture ownership, decode policy and reverted scheduler experiment", href: "https://github.com/fh1m/mongla_ws/blob/c957ba915e6f0574eff244c3e27eca42fa5fae9a/.claude/context/perception/camera-latency.md" }
+  - { label: "Measured ledger: later contention experiments and corrections", href: "https://github.com/fh1m/mongla_ws/blob/c957ba915e6f0574eff244c3e27eca42fa5fae9a/.claude/context/measured-bars.md" }
 ---
 import Fig from "../../components/note/Fig.astro";
 import Bars from "../../components/note/Bars.astro";
 import Stats from "../../components/note/Stats.astro";
 import Pull from "../../components/note/Pull.astro";
 
-The [Mongla](/notes/mongla) note is the tour. This is the engine room: four places where the architecture was measured rather than argued.
+The [Mongla](/notes/mongla/) note is the tour. This is a closer reading of an earlier perception report: what its counters actually establish, what the audit tool measures, and which conclusions the later record no longer supports.
 
-## 1 · Control costs vision nothing
+The report is useful partly because its language is too confident. “Nothing holds the lock” and “the sensor is the limit” sound like the end of an investigation. The implementation and later measurements leave more specific, more useful boundaries.
 
-The board runs a 500 Hz loop on one ESP32 core: sensors, control, motor commands. The Pi does nothing but see. The split isn't tidiness; it's that a controller must never be late, and a neural net sometimes is.
+## 1 · Give control its own deadline
 
-<Fig src="/media/mongla-docs/cores.webp" alt="The board's timetable: core 1 runs sensors, control and DShot at 500 Hz; core 0 runs MAVLink at 100 Hz, display at 30 Hz, radio and SD at 20 Hz" caption="Two cores that never share a desk. Nothing a human might wait on is allowed onto core 1." wide contain />
+Rakibul Islam's board and firmware run the low-level 500 Hz sensor/control/motor loop on an ESP32 core. The Pi hosts perception and mission-level software. Separating those tasks keeps a Python inference call out of the board's control task; it does not mean perception costs nothing or that the vehicle has no other communication and scheduling delays.
 
-The payoff is a reading off the running system: control-loop jitter unchanged under full vision load. When vision spikes, control doesn't.
+<Fig src="/media/mongla-docs/cores.webp" alt="Documented ESP32 task split: sensors, control and DShot at 500 Hz on core 1, with MAVLink, display, radio and SD tasks on core 0" caption="The board's documented task budgets. Separate cores still share a chip and resources; this diagram alone does not prove a worst-case deadline or unchanged jitter under every load. Board and firmware: Rakibul Islam." wide contain />
 
-## 2 · Zero wasted decodes
+There are two different questions: did the board's loop meet its deadline, and how old was the observation used to generate a request? A controller can tick regularly while acting on stale vision. Keeping one clock regular does not establish the age or correctness of the other input.
 
-The Hailo-8 has a scarce budget. So the camera only decodes a frame when the inference worker is idle, and the chip never spends compute on a frame already superseded. The instrumentation says so every ten seconds.
+## 2 · Choose what to decode
+
+The camera pump copies compressed bytes into an owned latest-frame slot and returns driver storage promptly. JPEG decoding happens on demand. This avoids decoding every captured frame merely because a camera can produce it, while preserving the payload, timestamp and sequence as one observation.
+
+The [archived instrument report](/media/lab/gil-audit.webp) prints the following window:
 
 <Stats items={[
   { v: "778", l: "inferences in the window" },
@@ -38,33 +42,52 @@ The Hailo-8 has a scarce budget. So the camera only decodes a frame when the inf
   { v: "0", l: "frames decoded and never inferred", tone: "measured" },
 ]} />
 
-## 3 · Nothing in the hot path holds the lock
+Zero decoded-but-never-inferred frames is a useful counter for that window. It does not mean every captured frame was processed, every detection was correct, or an inference result can never be superseded while the accelerator is working. An age measured **at inference start** also excludes the inference and downstream delivery that have not happened yet.
 
-Python has one global lock. On a vehicle, a stage that holds it while working freezes everything else. So every stage was audited by *hold × rate*: the fraction of wall time the process is frozen.
+## 3 · A long call is not necessarily a long lock hold
 
-<Bars title="duty of each hot-path stage" unit=" %" rows={[
-  { label: "hailo run_async", v: 78.3, tone: "measured", note: "frees the lock (was: held)" },
-  { label: "cv2.imdecode", v: 32.0, tone: "measured", note: "frees" },
-  { label: "letterbox", v: 2.0, tone: "measured", note: "frees" },
-  { label: "pyserial (board link)", v: 0.1, tone: "measured", note: "frees" },
-  { label: "cv_bridge", v: 0.1, tone: "estimate", note: "holds; viewer only" },
-]} src="The only holder left is off the mission path." />
+In a GIL-enabled CPython process, a C extension that keeps the interpreter lock can delay other Python threads in that process. An extension that releases it can spend a long time working while those threads proceed. Neither case freezes every process on the Pi or the separate ESP32.
 
-Cumulatively that session took the vision pipeline from about 28 ms to 18 ms, removed about 6.5 ms of control-loop poll wait, and took detections from 36.5 Hz to 77 Hz at roughly 30 % less CPU.
+The audit ranks **call duration × configured rate**. For a call taking 10 ms at 77 calls/s, the product is 0.77 s/s, or 77%. That is a call-time demand proxy. It is only an interpreter-blocking fraction if the call actually holds the lock for that duration; a releasing call does not freeze Python for 77% of the second.
+
+<Bars title="archived call-duration × configured-rate proxy" unit=" %" rows={[
+  { label: "hailo run_async", v: 78.3, tone: "measured", note: "report: releases GIL" },
+  { label: "cv2.imdecode", v: 32.0, tone: "measured", note: "report: releases" },
+  { label: "letterbox", v: 2.0, tone: "measured", note: "report: releases" },
+  { label: "pyserial", v: 0.1, tone: "measured", note: "report: releases" },
+  { label: "cv_bridge", v: 0.1, tone: "estimate", note: "archived viewer row" },
+]} src="Values transcribed from the archived report. These are neither current throughput measurements nor percentages of time every other thread is blocked; do not sum overlapping call-time proxies into a CPU budget." />
+
+The pinned tool estimates call duration from the requested run duration divided by completed calls. It supplies configured rates—77 Hz for inference, decode and letterbox, 10 Hz for the viewer conversion and 200 Hz for serial. Those are assumptions for ranking calls, not measurements that all of those rates occur together in a current ROS graph.
+
+### The sampler has to pass its own test
+
+The first probe used a spinning observer, which competed for the lock it was trying to investigate. It reported zero median delay for a known lock holder. That instrument could not distinguish its own controls.
+
+The preserved replacement uses a sleeping sampler and prints two controls first: a sleep that releases the lock and a Python spin that holds it. If those do not separate, the tool says the run is void. For the tested calls it reports the other thread's lateness distribution, then classifies the median against a threshold.
+
+That is a scheduling probe, not a direct trace of every acquire/release event. Machine load, the interpreter build and the binding implementation matter. The archived summary is not a substitute for its raw control output, and a verdict for one call does not certify the wrapper, callbacks and later code around it.
+
+### A synthetic scheduler win was taken back
+
+The camera report also preserves a useful reversal. Reducing `sys.setswitchinterval` from CPython's 5 ms default to 0.1 ms helped a synthetic Python-thread workload. With the real board and JPEG workload, the extra switching was overhead; the change was reverted.
+
+That distinction keeps the experiment from becoming a tuning superstition. A benchmark can be correct about the artificial workload it ran and still recommend the wrong setting for the application. No hardware or serial-port test has been rerun for this article.
 
 <Pull>A parameter that's read, logged and then ignored is worse than one that's unsupported. Every log says it worked.</Pull>
 
-## 4 · The sensor is the limit
+## 4 · A verdict is not a latency boundary
 
-The goal of optimising a pipeline isn't "fast". It's to make the software vanish as a source of delay, so what's left is the camera.
+The earlier report below prints full configured authority at p99 and concludes “sensor is the limit.” Full authority is the output of a policy with particular thresholds. It does not mean the software takes zero time, the frame is physically the freshest possible exposure, or the vehicle navigates accurately.
 
-| | forward | downward |
-|---|---:|---:|
-| rate | 73.4 Hz | 27.6 Hz |
-| pipeline age, median / p99 | 21.86 / 29.58 ms | 46.94 / 52.44 ms |
-| frame interval, median | 12.01 ms | 32.01 ms |
-| authority at p99 | **1.000** | **1.000** |
+<Fig src="/media/lab/latency-verdict.webp" alt="Archived report with camera rates, pipeline ages and full configured authority, ending in a sensor-limit verdict" caption="Preserved report, not a current performance guarantee. Its non-zero ages and configured authority describe different quantities; later entries change capture-rate advice and correct timestamp propagation." wide contain />
 
-Authority 1.000 at p99 means that 99 % of the time, the controller acts on the freshest frame the sensor could possibly have provided. There is no software latency left to remove.
+The older page also chained roughly 28-to-18 ms pipeline timing, a removed poll wait and changed detector rates into a session-wide improvement. That is not retained as a current photon-to-command claim. The [frame-age investigation](/notes/the-frame-age-problem/) names the clock and observation boundaries; the [Mongla article](/notes/mongla/) explains why the B-61 headline needs remeasurement and why unmatched configurations cannot establish a ROS overhead percentage.
 
-<Fig src="/media/lab/latency-verdict.webp" alt="The latency verdict table for both cameras: sensor is the limit" caption="Verified on live hardware, both cameras. The verdict you want: the sensor is the limit." wide contain />
+The later accelerator-sharing record is more specific than “software vanished.” Its 19 November stage probe measures increased chip-stage and total-call time when detector workers share the device. Its initial requested 30/60 Hz workload fails, while a separate 30/30 Hz detector workload with 3 Hz XFeat holds its revised rates in a short, repeated-frame bench. That is contention evidence under stated conditions—not an exposure-to-thrust measurement.
+
+## What survives the reread
+
+The mechanisms are still useful: isolate deadlines, return capture buffers promptly, decode for a consumer, preserve observation identity and audit expensive extension calls. Their value does not depend on declaring the system finished.
+
+The stronger habit is to keep the failed controls, the reversed tuning decision and the workload that missed its bar beside the result that passed. Otherwise a report's last sentence becomes more durable than the experiment it was supposed to describe.

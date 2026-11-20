@@ -6,75 +6,167 @@ series: build
 part: 1
 kind: regrade
 repo: E-Bhapa
-hero: /media/e-bhapa/e-bhapa.webp
-heroAlt: "E-Bhapa: a four-wheel acrylic chassis with an ultrasonic sensor on a stalk for a head"
+hero: /media/e-bhapa/robot-preview.webp
+heroAlt: "The real 2024 E-Bhapa: upright, with its ultrasonic head, acrylic chassis and four wheels visible"
 sources:
   - { label: "E-Bhapa: v1, v2 and the simulator", href: "https://github.com/fh1m/E-Bhapa" }
+  - { label: "The original 2024 sketch", href: "https://github.com/fh1m/E-Bhapa/blob/main/e_bhapa/e_bhapa.ino" }
+  - { label: "The corrected drive adapter and behaviour", href: "https://github.com/fh1m/E-Bhapa/blob/main/e_bhapa_v2/e_bhapa_v2.ino" }
+  - { label: "The Python model and metric definitions", href: "https://github.com/fh1m/E-Bhapa/blob/main/sim/run.py" }
+  - { label: "Adafruit: DC motor speed and direction are separate controls", href: "https://learn.adafruit.com/adafruit-motor-shield/using-dc-motors" }
+  - { label: "C++ integral conversion rules", href: "https://eel.is/c++draft/conv.integral" }
+  - { label: "Modern Robotics, chapter 13: wheeled mobile robots", href: "https://modernrobotics.northwestern.edu/chapters/chapter13/" }
 ---
 import Fig from "../../components/note/Fig.astro";
 import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
-import Stats from "../../components/note/Stats.astro";
+import Explore from "../../components/note/Explore.astro";
+
+February 2024, a university robotics contest. The team bailed, the last servo burnt out and the components cupboard was empty. What was left: a four-wheel acrylic chassis, an Arduino Uno with an L293D motor shield, an HC-SR04 ultrasonic sensor on a stalk, about four coffees and one night.
+
+I named the robot after **Bhapa**, the campus cat. Bhapa has her own university ID and considerably better obstacle avoidance. The resemblance was, obviously, uncanny.
 
 <Gallery items={[
-  { src: "/media/e-bhapa/bhapa.webp", alt: "Bhapa, the BRAC University campus cat, wearing her student ID", caption: "<b>Bhapa.</b> Campus cat. Has her own university ID." },
-  { src: "/media/e-bhapa/e-bhapa.webp", alt: "E-Bhapa: a 4WD acrylic chassis with an HC-SR04 sensor on a stalk", caption: "<b>E-Bhapa.</b> Looks identical, wow." },
+  { src:"/media/e-bhapa/bhapa.webp", alt:"Bhapa, the BRAC University campus cat, wearing her student ID", caption:"<b>Bhapa.</b> The original. Has her own university ID." },
+  { src:"/media/e-bhapa/robot-preview.webp", alt:"The upright E-Bhapa robot, with an ultrasonic sensor above its four-wheel chassis", caption:"<b>E-Bhapa.</b> Looks identical, wow. A crop of the actual 2024 photograph." },
 ]} />
 
-February 2024, a university robotics contest. The team bailed, the last servo burnt out and the components cupboard was empty. What was left: a 4WD acrylic chassis, an Arduino Uno with an L293D motor shield, an HC-SR04 ultrasonic sensor on a stalk, and one night. The robot was named after **Bhapa**, the campus cat, who has better obstacle avoidance and a better attitude.
+The README written that night promised intelligent object following, dynamic obstacle avoidance, enhanced exploration, and proportional *and* adaptive speed control. The code had functions with names to match. Two years later I checked what those functions actually asked the motor shield to do.
 
-The 2024 README promised intelligent object following, dynamic obstacle avoidance, enhanced exploration, and proportional *and* adaptive speed control. It was written at hour five. Two years later I read the code properly, found out what the robot had actually been doing, and fixed it.
+There were two different problems. The drive adapter did not implement the left/right commands its callers thought they were sending. Even after correcting that adapter, the behaviour still treated a nearby obstacle as something to approach. Fixing the first problem could not make the second one a good policy.
 
-## What v1 really did
+## Four motors do not automatically make two sides
 
-| the 2024 README said | the code actually did | why |
-|---|---|---|
-| turns, backs up | **never turned, never reversed** | `adjustMotorSpeed(left, right)` sent `left` to motors 1 *and* 2 (front-left and front-right) and `right` to the rear pair. Each side averages front and rear, so both sides always match. |
-| "move backward" | moved forward, slowly | AFMotor's `setSpeed()` takes a `uint8_t`. −255 becomes **1**, −200 becomes **56**. And every `run()` said `FORWARD` anyway. |
-| follows objects at a safe distance | **drove into them, politely** | Within 25 cm, closer meant slower, but never stop. |
-| dynamic obstacle avoidance | in a 5 cm band | Avoidance only ran between 25 and 30 cm. Anything nearer got "followed". |
-| five exploration behaviours | five, half the time | `random(0, 10)`, with cases 0–4 only. |
-| — | froze for up to a second | `pulseIn()` without a timeout waits a full second for an echo that isn't coming. |
+The original sketch labels motor 1 left-front, 2 right-front, 3 left-rear and 4 right-rear. But `adjustMotorSpeed(leftSpeed, rightSpeed)` sends the first argument to motors **1 and 2**, and the second to **3 and 4**. The names say left and right; the routing says front and rear.
 
-So the 2024 robot was, in effect, a very determined forward-only cart. Every behaviour in the README existed in the source and nowhere else.
+In the simulator's symmetric drive approximation, each physical side therefore receives the same average: one front-wheel request and one rear-wheel request. If those requests are `a` and `b`, both side averages are `(a + b) / 2`.
 
-## v2: same robot, same single sensor
+For an ideal differential-drive model, forward speed is `(v_left + v_right) / 2`, while yaw rate is `(v_right − v_left) / track_width`. Equal side speeds give zero commanded yaw. Asking the function to turn harder does not change that equality.
 
-The new firmware compiles for an Uno at 5,030 bytes.
+The physical chassis is four-wheel skid-steer, so a perfect no-slip model is only an approximation. Unequal motors, contact forces and slipping tyres can make a real cart drift. That is different from having a controllable left/right turning command.
 
-1. **Wiring:** left is motors 1 + 3, right is 2 + 4.
-2. **Signs:** `setSpeed(|pwm|)`, and `run(FORWARD | BACKWARD)` from the sign.
-3. **Sonar:** a 25 ms timeout, about 4 m. No echo means *nothing there*, not *freeze*.
-4. **Following holds a distance instead of closing it.** Proportional on the error to 30 cm, with a ±4 cm dead band.
-5. **Walls are boring.** One forward ray can't tell a cat from a wall, but *time* can: a wall's distance never changes. If the reading stays within 3 cm for 2.5 s, it's furniture. Turn away, find something that moves.
+## Reverse, represented as a very small forward
 
-## Three robots, one room, one cat
+There was a second error at the library boundary. Adafruit's `AF_DCMotor::setSpeed()` takes a **`uint8_t` magnitude**. Direction is a separate `run()` request. The original code passes signed negative numbers to `setSpeed()`, then calls `run(FORWARD)` for every motor.
 
-A simulator runs the sketches line for line in a 3 × 3 m room: same thresholds, same random draws, same `delay()`s, with v1's hardware quirks switched on. A simulated Bhapa wanders at 0.15 m/s and stops whenever she feels like it, which is accurate.
+Converting an integer to an unsigned eight-bit value wraps modulo 256. So −255 becomes 1, and −200 becomes 56. Neither becomes a reverse command.
 
-<Fig src="/media/notes/e-bhapa-three-minutes.webp" alt="Three top-down room traces after three minutes. v1 as flashed: one straight line into the far wall. v1 rewired: a short scribble near its start. v2: a path criss-crossing the whole room past the cat." caption="Three minutes each. <b>v1 as flashed</b> drives one straight line and stays at the wall. <b>Rewired</b> turns but gets stuck nearby. <b>v2</b> explores, and visits the cat." wide plot />
+Take the intended pivot request `(-200, +200)`. In the old adapter, both front motors get magnitude 56, both rear motors get 200, and all four are told to go forward. Under the model, the physical sides each average 128. In the corrected adapter, the left pair can actually run backward while the right pair runs forward.
 
-| ten runs × 3 min | pinned against something | room visited | time near the cat |
+<figure class="wide">
+<svg viewBox="0 0 1000 380" role="img" aria-labelledby="eb-drive-title eb-drive-desc">
+  <title id="eb-drive-title">The same pivot request through the original and corrected motor adapters</title>
+  <desc id="eb-drive-desc">With left minus 200 and right plus 200, the original routes a wrapped 56 forward to motors 1 and 2, and 200 forward to motors 3 and 4. Each physical side averages 128 forward. The corrected adapter routes magnitude 200 backward to motors 1 and 3, and magnitude 200 forward to motors 2 and 4. This is a schematic of the declared motor mapping, not a measured trajectory.</desc>
+  <defs><marker id="eb-drive-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="context-stroke" /></marker></defs>
+  <style>{`.eb-label{font:15px var(--mono);fill:var(--ink)}.eb-title{font:600 18px var(--display);fill:var(--ink-hi)}.eb-frame{fill:var(--surface);stroke:var(--line)}.eb-wheel{fill:var(--raised);stroke:var(--ink)}.eb-motion{fill:none;stroke-width:3;marker-end:url(#eb-drive-arrow)}`}</style>
+  {[0,500].map((offset, version) => <g transform={`translate(${offset} 0)`}>
+    <text x="20" y="28" class="eb-title">{version === 0 ? "Original adapter" : "Corrected adapter"}</text>
+    <text x="20" y="57" class="eb-label" style="fill:var(--instrument)">A = −200</text>
+    <text x="250" y="57" class="eb-label" style="fill:var(--action)">B = +200</text>
+    <rect x="168" y="103" width="124" height="200" rx="8" class="eb-frame" />
+    <text x="230" y="132" text-anchor="middle" class="eb-label">front ↑</text>
+    <text x="230" y="208" text-anchor="middle" class="eb-label">chassis</text>
+    {version === 0 ? <g fill="none" stroke-width="2"><path d="M126 146H336" stroke="var(--instrument)" /><path d="M126 260H336" stroke="var(--action)" /></g> : <g fill="none" stroke-width="2"><path d="M109 146H90V260H109" stroke="var(--instrument)" /><path d="M353 146H372V260H353" stroke="var(--action)" /></g>}
+    {[[126,146,"M1"],[336,146,"M2"],[126,260,"M3"],[336,260,"M4"]].map(([x,y,name], index) => {
+      const backward = version === 1 && index % 2 === 0;
+      const value = version === 0 && index < 2 ? 56 : 200;
+      const colour = (version === 0 ? index < 2 : index % 2 === 0) ? "var(--instrument)" : "var(--action)";
+      return <g><rect x={Number(x)-17} y={Number(y)-27} width="34" height="54" rx="5" class="eb-wheel" /><text x={Number(x)} y={Number(y)-37} text-anchor="middle" class="eb-label">{name}</text><path d={`M${x} ${Number(y)+(backward ? -12 : 12)}V${Number(y)+(backward ? 12 : -12)}`} stroke={colour} class="eb-motion" /><text x={Number(x)} y={Number(y)+49} text-anchor="middle" class="eb-label">{value}</text></g>;
+    })}
+    <text x="230" y="350" text-anchor="middle" class="eb-label">{version === 0 ? "Both sides: 128 forward" : "Left back · right forward"}</text>
+  </g>)}
+</svg>
+<figcaption>One requested pivot, two mappings. Colours identify the input arguments; arrows show the commanded direction.</figcaption>
+</figure>
+
+This is why the fix separates magnitude and direction. It constrains a signed request to ±255, sends its absolute value to `setSpeed()`, and chooses `FORWARD`, `BACKWARD` or `RELEASE` from its sign. It also groups motors 1 + 3 on the left and 2 + 4 on the right.
+
+The type conversion is defined behaviour, not random corruption. The compiler can accept it and the motor library can do exactly what it was asked. The mistake lives in the meaning assigned to the number.
+
+## The wall was being followed successfully
+
+The original loop has three regions. A positive distance below 25 cm selects `followObject()`. From 25 to just under 30 cm it selects obstacle avoidance. Everything else selects exploration.
+
+Inside `followObject()`, distance is mapped from 0–25 cm to PWM 100–255. Getting closer reduces the command, but never asks for zero or reverse. A wall inside the following region is therefore not an obstacle according to this policy. It is a target being approached at a smaller, still positive speed.
+
+That is a design error even with perfectly routed motors. The five-centimetre avoidance band does not rescue a cart that has already entered the “follow” region. A plausible function name is not an argument that its conditions match the intended behaviour.
+
+Exploration adds a quieter state bug. It chooses `random(0, 10)`, but the switch defines only cases 0–4. The other five choices do not necessarily mean rest: they issue no new motor command, so the previous command can remain active.
+
+## A distance is not an identity
+
+The HC-SR04 estimates range from an acoustic round trip. With the v2 conversion, `distance_cm = echo_microseconds × 0.0343 / 2`. The factor of two accounts for travelling to the reflecting surface and back.
+
+A single reading does not contain the word *cat*. A wall, a chair leg and Bhapa can all return a similar range. Nor is a real ultrasonic sensor an infinitely thin ray: beam width, surface angle and reflectivity affect which echo returns.
+
+The v2 “boring” rule is a small amount of temporal memory. It remembers a reference distance and time; a change greater than 3 cm resets that reference. If the reading remains within that tolerance for more than 2.5 seconds, the robot turns away.
+
+That is **stagnation detection**, not object recognition. A stationary cat can be boring by this definition. A moving robot can change its distance to a stationary wall. The rule is useful because it gives the controller an exit from a persistent situation, not because time has solved semantic classification.
+
+Bhapa remains the more sophisticated system.
+
+## Holding a gap instead of closing it
+
+The corrected following policy aims for 30 cm, with a ±4 cm acceptance band. Its error is `distance − 30`: positive means the object is farther away than the desired gap, negative means it is too close.
+
+Outside the band, the proportional term is 9 PWM units per centimetre. The code imposes a minimum magnitude of 90 to avoid asking the geared motors for a duty at which they merely hum, and clamps the final request to 255. Inside the band it commands zero.
+
+This is not a perfectly linear proportional controller. At 35 cm, the five-centimetre error would give 45 PWM, but the floor raises it to 90. At 34 cm, the four-centimetre band asks for zero. That discontinuity matters if noisy measurements repeatedly cross the threshold.
+
+The too-close branch has priority below 12 cm: back away for 300 ms, then turn. Between 12 and 60 cm the controller can hold a gap or abandon a stagnant reading. Beyond that it explores, this time selecting only behaviours that exist.
+
+The actuator adapter and the policy are now separate enough to reason about. One says how a signed side request reaches four motor ports; the other says which side requests make sense for the observed situation.
+
+## A timeout is not evidence of free space
+
+The old call omits the third argument to `pulseIn()`. Arduino's AVR C++ declaration defaults to 1,000,000 microseconds. In the exploration path the sketch measures again, so a missing echo can make two successive reads wait before that loop finishes.
+
+During those waits, the old motor request does not automatically disappear. The random pauses, turns and loop delays add their own blind intervals. A convenient `delay()` is also time in which the controller is not taking a new decision.
+
+v2 supplies a 25 ms pulse timeout. That bounds one wait, but its return policy is still a tradeoff: zero echo duration becomes the sentinel 400 cm, which the behaviour treats as far away. No echo can also mean a poor reflector, an angled surface or a sensor problem. “Unknown” and “clear” are different states.
+
+The new sketch also retains blocking exploration, reverse and turn actions. Its final 50 ms sleep is not a guarantee of a 20 Hz sensing loop. The timeout and drive fixes improve specific faults; they do not establish a safety-rated obstacle-avoidance controller.
+
+## Three versions in a room with a model cat
+
+The later Python study is a **transcription of the firmware's branches and waiting periods**, not compiled Arduino firmware running inside a physics simulator.
+
+Its assumptions are explicit: a 3 × 3 m room, 10 ms integration steps, a circular 9 cm robot radius, a 14 cm track width and a maximum ideal speed of 0.45 m/s. The model cat has a 12 cm radius, walks at 0.15 m/s and pauses according to its own seeded random process. The range sensor is a forward ray intersecting the room or the cat.
+
+Three drive/behaviour combinations run with seeds 0–9 for nominally three minutes each. The middle case is labelled “v1, wiring fixed” in the archived plot, but `Bot.drive()` actually fixes **both routing and signed drive representation**. Its high-level v1 policy is unchanged. Calling it a wiring-only experiment would overstate what was isolated.
+
+<Fig src="/media/notes/e-bhapa-three-minutes.webp" alt="Three simulated paths in the same room: the original drive adapter, v1 with corrected signed side drive, and the v2 policy" caption="One illustrative seed per variant. The middle plot's historical label means the corrected drive adapter, including signs—not a wiring-only change." wide plot />
+
+| Mean of ten simulated runs | Pinned while commanding translation | Robot-centre grid cells occupied | Time within 60 cm of the model cat |
 |---|---:|---:|---:|
-| v1, as flashed in 2024 | 87 % | 6 % | 7 % |
-| v1, wiring fixed | 69 % | 4 % | 5 % |
-| **v2** | **1 %** | **23 %** | **14 %** |
+| v1 with original drive faults | 86.6 % | 5.8 % | 7.1 % |
+| v1 with corrected signed side drive | 69.3 % | 4.4 % | 5.3 % |
+| v2 drive and policy | 0.9 % | 23.0 % | 14.0 % |
 
-<Stats items={[
-  { v: "87 %", l: "of the time the 2024 robot spent pinned against something", tone: "failure" },
-  { v: "1 %", l: "for v2, same chassis, same sensor", tone: "measured" },
-  { v: "5,030 B", l: "v2 firmware on an Arduino Uno" },
-]} />
+These values were reproduced from the published Python source. “Pinned” means the model attempted translation that a collision blocked; a deliberate pause is not penalized as pinning. Coverage counts which cells of a 20 × 20 grid the robot's **centre** entered, not the percentage of the floor surveyed or seen by a sensor. “Near the cat” is proximity, not proof of recognizing or continuously following her.
 
-Rewiring alone doesn't save v1. It turns now, but the follow rule still drives it into the first wall it meets.
+The model has instantaneous commanded wheel response and simplified collision handling. It does not reproduce motor curves, skid, an ultrasonic beam, missing echoes or the real cost of a sonar read. Those are boundaries of the question it answers.
+
+Within that question, the result is useful: correcting the drive adapter is necessary, but the old policy still spends most of its time pushing against something. The behaviour change matters separately.
+
+<Explore bench="ebhapa" title="Let each controller loose in the room" hint="Compare v1, corrected drive and v2" caption="An illustrative empty-room run at 4× time, with a fixed starting pose and seed. Reduced motion shows a static 60 s snapshot. No model cat, sonar noise or motor lag; the table above comes from the separate published Python study." fallback="The original adapter cannot command a left/right speed difference. Correcting the drive permits turning, but the old follow rule still approaches walls. The revised policy can hold a gap and leave a stagnant situation." />
 
 <Pull>Wiring was the bug. The rule was the design mistake.</Pull>
 
-## Lessons, paid for in one night
+## What stayed after the contest
 
-- **Read the library's types.** A `uint8_t` parameter turns a negative speed into a polite crawl, and the compiler doesn't argue.
-- **Label your wires the way your code names them.** "Left" in a comment is not left in copper.
-- **A sensor reading is a number. Behaviour needs a rule about *change*.** One ultrasonic ray will never tell a cat from a wall. A few seconds of memory will.
-- **Never block on a sensor without a timeout.** The world is allowed not to answer.
+The story is not that six hours produced an intelligent companion. It produced a real little machine, an ambitious README, and enough preserved code to ask better questions later.
 
-Both firmware versions run live at [bench zero](/#bench-zero). Press v1 and watch it find a wall and commit to it.
+The motor-port mismatch is a small version of the later [sign error at a MAVLink boundary](/notes/the-sign-flip-at-the-mavlink-boundary): a number only means something inside an agreed coordinate and command convention. The missing echo belongs beside the [Four LEDs freshness problem](/notes/four-leds): a last command is not necessarily a current instruction.
+
+The useful habit is to separate the layers before adding sophistication. First establish that a requested reverse really reverses, and a requested turn really creates a side difference. Then inspect what the behaviour asks for near an obstacle. Only then does a nicer sensor or a more elaborate planner have a coherent system to improve.
+
+Bhapa supplied the name. The rest needed debugging.
+
+## Follow the actual interfaces
+
+Start with [`adjustMotorSpeed()` and the v1 branch conditions](https://github.com/fh1m/E-Bhapa/blob/main/e_bhapa/e_bhapa.ino), then compare [`side()`, `drive()`, `hold()` and `isBoring()`](https://github.com/fh1m/E-Bhapa/blob/main/e_bhapa_v2/e_bhapa_v2.ino). The distinction between a drive adapter and a behaviour is visible there without trusting a result table.
+
+[Adafruit's motor guide](https://learn.adafruit.com/adafruit-motor-shield/using-dc-motors) explains why speed magnitude and direction are separate calls. The [C++ integral-conversion rule](https://eel.is/c++draft/conv.integral) explains the modulo wrap. For the chassis model, [Modern Robotics chapter 13](https://modernrobotics.northwestern.edu/chapters/chapter13/) develops wheeled-robot kinematics, constraints, feedback and odometry.
+
+For the experiment, read [`drive()`, `wait()` and `coverage()`](https://github.com/fh1m/E-Bhapa/blob/main/sim/run.py) before interpreting “room visited.” The [uncropped upright photograph](/media/e-bhapa/e-bhapa-upright.webp) remains available alongside the original code and the original 2024 README.

@@ -8,7 +8,7 @@ const { lines, title } = Astro.props;
   <pre>{lines.join("\n")}</pre>
 </figure>
 <style>
-  .term { margin: 2rem 0; background: #030405; border: 1px solid var(--line); border-radius: var(--r-1); overflow: hidden; }
+  .term { margin:2rem 0; background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r-1); overflow:hidden; }
   .tt { margin: 0; padding: 0.45rem 0.9rem; border-bottom: 1px solid var(--line); color: var(--faint); }
   pre { margin: 0; padding: 1rem 0.9rem; font: 400 0.8rem/1.6 var(--mono); color: var(--measured); overflow-x: auto; }
 </style>

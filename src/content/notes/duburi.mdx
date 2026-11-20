@@ -1,6 +1,6 @@
 ---
 title: "How Duburi learned to see"
-dek: "Bangladesh's autonomous underwater vehicle team, three RoboSubs, and the slow discovery that most underwater-vision advice doesn't survive your own footage."
+dek: "My Duburi years, September 2023–August 2026: from the vision sub-team to engineering lead, underwater perception, two vehicles and the difference between a convincing display and a usable measurement."
 date: "2026-09"
 series: machines
 part: 1
@@ -9,6 +9,7 @@ hero: /media/duburi/pool-test.webp
 heroAlt: "A Duburi vehicle on the pool deck, cables and thrusters exposed"
 sources:
   - { label: "BRACU Duburi", href: "https://bracuduburi.com" }
+  - { label: "RoboNation: Duburi's 2025 technical design report", href: "https://robonation.org/app/uploads/sites/4/2025/07/RS25_TDR_BRAC-University-Duburi_compressed.pdf" }
   - { label: "TBS: two vehicles to the RoboSub 2026 semi-finals", href: "https://www.tbsnews.net/economy/corporates/bracu-duburi-qualifies-two-underwater-vehicles-robosub-2026-semi-finals-1467436" }
   - { label: "TBS: direct qualification for the RoboSub 2025 semi-final", href: "https://www.tbsnews.net/graduates/bracu-duburi-qualifies-directly-robosub-2025-semi-final-1202131" }
   - { label: "BRAC University: the Entrepreneurship award, 2025", href: "https://www.bracu.ac.bd/news/bracu-duburi-wins-special-entrepreneurship-award-robosub-2025" }
@@ -20,18 +21,19 @@ import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
 import Stats from "../../components/note/Stats.astro";
 import Explore from "../../components/note/Explore.astro";
+import ArchiveFilm from "../../components/ArchiveFilm.astro";
 
-BRACU Duburi was founded at BRAC University in 2017: Bangladesh's autonomous underwater vehicle team. I joined its vision sub-team in September 2023, and two months later had written forty lines of OpenCV that [found green](/notes/green-at-depth). I left in 2026 as engineering team lead, with three RoboSub participation certificates in a folder and a much lower opinion of colour thresholds.
+BRACU Duburi was founded at BRAC University in 2017. I joined its AI and machine-vision sub-team in September 2023, led the vision sub-team for the 2025 campaign, and led engineering in 2026. I left Duburi and BRAC University in August 2026. The archive runs from a small [green-threshold experiment](/notes/green-at-depth/) to a two-vehicle programme. It also contains the part a competition result cannot show: the training data, development tools, failed assumptions and work between pool sessions.
 
 <Gallery items={[
   { src: "/media/duburi/v1.webp", alt: "An early Duburi vehicle: an open frame with a clear tube and exposed electronics", caption: "An early generation." },
   { src: "/media/duburi/v2.webp", alt: "A later Duburi vehicle on the pool edge with a black frame", caption: "A later one, on the pool edge." },
-  { src: "/media/duburi/auv42.webp", alt: "A render of Duburi 4.2: a dark frame with an octagonal pressure hull", caption: "Duburi 4.2, the current line." },
+  { src: "/media/duburi/auv42.webp", alt: "A render of Duburi 4.2: a dark frame with an octagonal pressure hull", caption: "Duburi 4.2, the 2025 vehicle—not the later 4.5." },
 ]} credit="Vehicle images from bracuduburi.com." />
 
 ## Rebuilt, not patched
 
-The vehicle line runs from 1.0 to 4.5, plus a mini-AUV, Dubomini. Every generation re-opened the architecture instead of bolting onto the last one, which is the instinct Jim Keller describes for chips: every few years, design it again rather than patch it. Mechanical, electrical and software sub-teams move together, because the machine is one system and the water doesn't care which sub-team a problem belongs to.
+The vehicle line runs from 1.0 to 4.5, alongside the smaller Dubomini. A new generation does not mean every part was discarded: the 2026 technical report explicitly retains the 4.2 hull in 4.5 and the established Pixhawk inner loop. Mechanical, electrical and software changes have to meet at the same vehicle. Retaining a known interface can be as important as redesigning a weak one.
 
 <Gallery items={[
   { src: "/media/duburi/cfd.webp", alt: "A CFD render: flow streamlines coloured by velocity around the vehicle", caption: "CFD around the hull." },
@@ -41,17 +43,65 @@ The vehicle line runs from 1.0 to 4.5, plus a mini-AUV, Dubomini. Every generati
 
 ## The vision years
 
-Underwater, everything Duburi does (find the gate, align, fire, surface) it decides from the inside, from a camera, an IMU and pressure. So vision isn't a feature; it's the vehicle's whole idea of where it is.
+The camera gives the vehicle observations of task props; it is not the whole navigation system. Attitude, pressure and, on the main vehicle, a Doppler Velocity Log contribute different information. A detector can identify the gate without telling us the vehicle's complete pose. A stable depth reading cannot tell us whether we chose the right side of that gate.
 
-I rebuilt the team's perception on modern CNN detectors with a custom dataset pipeline, then added domain-specific pretraining and source-free domain adaptation, so a model trained in one pool would survive water it had never seen. Then it went onto edge hardware on the vehicle, and everything got wrapped in tooling so the team could train, deploy and debug without me in the loop. That last part mattered most. A capability one person can operate is a capability with a bus factor of one.
+My work rebuilt perception around CNN detectors, a custom dataset pipeline, domain-specific pretraining and source-free domain adaptation. I deployed inference on edge hardware and built the development and deployment tooling around it. Training, moving a model onto the vehicle and making its outputs useful to another subsystem were connected responsibilities—not one model-training step.
+
+The first challenge was deciding what a useful example looked like. Adjacent frames from one pool video are highly correlated. A random image split can let nearly identical backgrounds, lighting and viewpoints appear on both sides of an evaluation. Holding out a recording session or a water condition asks a harder question: has the model learned the task object, or has it learned that particular afternoon? That distinction is why the [interview-bottle retrospective](/notes/interview-bottle/) keeps the original training history beside the later evaluation.
+
+Underwater domain shift is not just a blue filter. Wavelength-dependent attenuation changes colour with distance; scattering lowers contrast and adds a veil; suspended particles, reflections and occlusion change the evidence from frame to frame. Enhancing the image can help a human inspect it while also changing the distribution seen by the detector. The useful question is not “does this frame look cleaner?” but “does the complete perception-to-action path behave better on footage it did not train on?”
 
 <Fig src="/media/lab/mission-control.webp" alt="The mission control HUD: gate detected, alignment error, depth and mode on one screen" caption="Mission control: the gate-alignment HUD. Detection, error, depth and mode on one screen." wide contain />
 
-Two cameras beat one. Instead of choosing which camera to trust, both run: a forward gate detector and a downward bin detector, each with its own controller, fused into one heading by how much each should be believed right now.
+## The detector is only one stage
 
-<Fig src="/media/lab/dualcam-fusion.webp" alt="Two camera views, forward and down, with detections and a fused heading readout" caption="Front + down, fused: heading +94.0° with weights 0.36 and 0.49. When you can't pick a threshold, run both and let the consumer decide." wide contain />
+The 2025 technical design report names YOLOv11 for Duburi 4.2. The supplied 2026 report describes YOLO26 on the Jetson Orin Nano and ByteTrack for maintaining identities across frames. Those are campaign-specific choices, not interchangeable labels for every screenshot in this archive.
 
-The research side of this became a paper with the team: *Color is Also Class Evidence: Re-evaluating Domain Generalization for Underwater Object Detection* (OpenReview, 2025), tested against our RoboSub 2025 and 2026 footage. Its argument is in the title. The standard move is to treat underwater colour shift as noise and normalise it away. Sometimes the colour *is* the class.
+A detection supplies a class, a box and a score for one observation. Tracking tries to associate that observation with an existing identity. It does not turn confidence into certainty. A track predicted through an occlusion is not a fresh detection, and a high-scoring box can still refer to the wrong object. The consumer needs to know what the output represents and how old it is.
+
+For visual alignment, a simple starting error is the difference between the target centre and image centre. That is measured in pixels. Turning it into a yaw, lateral or depth request requires camera geometry, a sign convention and controller tuning. Apparent box size can be a distance cue only under assumptions about the object and view; a monocular model's relative depth is not automatically a metric range sensor. Putting “metres” beside an arbitrary scale does not calibrate it.
+
+This was also a tooling problem. An operator needs to see the selected target, its error, the requested correction and the vehicle's state together. Otherwise a correct detector and an incorrect command sign can produce a very convincing dashboard while the vehicle moves the wrong way.
+
+## A dual-camera prototype, read more carefully
+
+The archive includes a front/down experiment and its <code>pid_v13.py</code> implementation. It combines learned detection with classical image cues. The heading panel is more specific—and more limited—than the phrase “two detectors fused into one heading” suggests.
+
+<Fig src="/media/lab/dualcam-fusion.webp" alt="Front and downward camera views alongside a fused-heading display" caption="The archived dual-camera prototype. The heading readout is a visualization of image-derived cues, not proof of a calibrated navigation estimate or a completed autonomous run." wide contain />
+
+In that file, the front cue is the negative dominant line angle found in the image. Its weight is based on the number of detected line segments. The downward cue comes from Farneback optical flow: select motion above the 75th-percentile magnitude, average the selected vectors, then take their direction. Its weight compares their average magnitude with the frame's maximum. These are **heuristics**, not calibrated covariance estimates.
+
+The fusion panel converts the candidate angles into yaw-only quaternions and interpolates them, using the relative weights. Quaternions avoid the obvious problem of interpolating directly from +179° to −179° through zero. They cannot make two physically different quantities equivalent: a line's orientation, the direction of apparent ground motion and the vehicle's absolute yaw need a defined frame relationship and an observation model.
+
+There is a useful concrete edge case in the preserved code. Before quaternion interpolation, it takes an arithmetic mean of the last five downward angles. I ran the original quaternion helper methods in isolation, without loading cameras, model weights or vehicle interfaces:
+
+| Calculation | Result |
+|---|---|
+| Archived quaternion midpoint of +179° and −179° | 180° |
+| Arithmetic mean of those same two downward samples | 0° |
+| Equal quaternion blend of front +179° with that already-averaged 0° | 89.5° |
+
+The interpolation handles wrapping; the earlier average has already destroyed the information. A circular mean would preserve the direction for this example, but that alone would not calibrate the cameras or validate the estimate. The example is an offline numerical probe of an archived prototype, not a measured pool failure.
+
+The function draws the resulting heading in its panel. The separate <code>compute_control_signals</code> path computes corrections from target-centre error and either a depth output or apparent target size; the displayed fused heading is not used there. Keeping that distinction visible is better than retroactively presenting every promising experiment as a deployed controller.
+
+## From one vehicle to two
+
+In 2026 the programme paired Duburi 4.5 with Dubomini 2.0. The main vehicle carried the richer sensor and actuator package for precision work; the smaller vehicle was assigned manoeuvre-dominant tasks. The report describes a shared ROS 2 codebase with platform-specific configuration, and an inter-vehicle release signal represented as a mission-state transition.
+
+The architectural split is worth explaining. The Pixhawk/ArduSub side owns stabilization, depth hold and thrust allocation. The Jetson/ROS 2 side owns higher-level perception and mission requests. The mission planner should be able to change task order without rewriting the stabilizer. Likewise, a detector should not have to know the full competition sequence to publish a usable target.
+
+The two-vehicle handoff adds another dependency: what happens if the release message never arrives? The 2026 report specifies a bounded wait and a fallback transition for Dubomini. That is the design described in the report, not a claim that every possible acoustic-channel failure was eliminated. A shared stack reduces duplicated software; it does not erase the different sensor capabilities or failure modes of the two vehicles.
+
+As engineering lead, the scope was wider than the vision model. Subsystems had to agree on what commands and observations meant, and the team needed to diagnose the machine as an integrated system. The hull, power distribution, payload mechanisms and other members' implementations remain team work. My role does not turn their contributions into mine.
+
+## Research, and what can be concluded from it
+
+I am a co-author of *[Color is Also Class Evidence: Re-evaluating Domain Generalization for Underwater Object Detection](https://openreview.net/forum?id=qiFAySNAsW)*, listed in my CV as an OpenReview 2025 publication. The question connects directly to this work: removing an underwater colour shift may also remove information that distinguishes the task classes.
+
+That is not a universal argument against colour correction. It is a reason to evaluate the preprocessing, training distribution and class definitions together. I keep the publication record separate from the later campaign footage and later [Mongla experiments](/notes/mongla/); a year on a publication entry does not establish that it evaluated a subsequent year's competition.
+
+For the implementation history, the [2025 team technical report](https://robonation.org/app/uploads/sites/4/2025/07/RS25_TDR_BRAC-University-Duburi_compressed.pdf) provides the vehicle architecture and planned task sequence. The supplied 2026 report provides the later platform split. A technical design report records a team's design and testing account; the competition score sheets answer the narrower question of what earned points in the run.
 
 ## The record
 
@@ -62,15 +112,25 @@ The research side of this became a paper with the team: *Color is Also Class Evi
 ]} src="Placings and points read from RoboNation's published score sheets; press linked in the sources." />
 
 <Gallery items={[
-  { src: "/media/certs/robosub-2024.webp", alt: "RoboSub 2024 certificate of participation, 27th RoboSub, Irvine", caption: "27th RoboSub, August 2024, Irvine." },
+  { src: "/media/certs/robosub-2024.webp", alt: "RoboSub 2024 certificate of participation, 27th RoboSub, Irvine", caption: "2024 participation certificate. The 2025 team report separately records that national emergencies prevented the 2024 deployment; the certificate is not evidence that I travelled." },
   { src: "/media/certs/robosub-2025.webp", alt: "RoboSub 2025 certificate of participation, 28th RoboSub", caption: "28th RoboSub, August 2025." },
   { src: "/media/certs/robosub-2026.webp", alt: "RoboSub 2026 certificate of participation for Muhammad Fahim Faisal, BRACU Duburi", caption: "29th RoboSub, July 2026, Irvine, California." },
 ]} />
 
 <Explore id="robosub" n="fig 1" title="Where the points came from" hint="pick a year, point at a bar" caption="RoboNation's published score sheets, read round by round by a script in mongla_ws, never typed in." />
 
-Same placing both years, 53 % more points on the best round. I led the 2025 vision sub-team and the 2026 engineering. Both years we finished short of the finals wild-card line. That gap, and a 20 Hz control loop steering a box we weren't allowed inside, are what [Mongla](/notes/mongla) was built to answer.
+Same placing in 2025 and 2026, roughly 53% more points in the best round. I led the 2025 vision sub-team and the 2026 engineering team. Both campaigns finished short of the finals wild-card line. A placing describes the result of the whole team and competition field; it does not isolate the effect of a detector, a controller or one person's work.
 
 <Pull>A vehicle that cannot measure its own motion must not claim it did not move.</Pull>
 
 In 2026 I left the university, on principle. The vehicles, the team and the name stayed with the programme, where they belong. What I took was what the water taught.
+
+## The work between the photographs
+
+The [2025 workbench record](/notes/the-2025-workbench/) brings the supplied team films and working footage into this story: dataset work with teammates, the control display and the vehicle between runs. Those are not decorations around the score. They are evidence of the day-to-day work that made a campaign possible.
+
+<ArchiveFilm name="vision-lab" caption="A 2025 team-film excerpt: dataset work with teammates. The original on-screen captions are retained; this is working footage, not an autonomous-run recording." />
+
+What carries into [Mongla](/notes/mongla/) is the habit of inspecting the entire interface, including its awkward cases. [The frame-age problem](/notes/the-frame-age-problem/) asks whether a new message can contain an old observation. [Tracking without detection](/notes/tracking-without-detection/) separates identity maintenance from fresh visual evidence. [Green, at depth](/notes/green-at-depth/) returns to the small threshold that started my vision work and asks where its apparent success stops.
+
+For a deeper technical route, the [ByteTrack paper](https://arxiv.org/abs/2110.06864) explains association through lower-confidence detections; [ROS 2 Humble's documentation](https://docs.ros.org/en/humble/) supplies the communication and execution model behind the vehicle architecture. Neither a tracking algorithm nor a middleware choice validates a vehicle by itself. That proof has to survive the timing, calibration and conditions of the machine using it.

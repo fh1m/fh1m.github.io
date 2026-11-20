@@ -5,11 +5,11 @@
 export interface Anecdote { line: string; src: string }
 
 export const ANECDOTES: Anecdote[] = [
-  { line: "November 2025: he rewrote one vision-tracking PID thirteen times in three days. Version 1 was 578 lines; version 13 was 2,550. The robot was not impressed until about version 9.", src: "local code folder, pid_v1.py to pid_v13.py" },
-  { line: "He tried to make a DINO feature matcher recognise things underwater twelve times between August and November 2025. The folder is called dino_idea. It stayed an idea, and taught him why learned detectors won.", src: "local code folder, dino/dino_idea_v1 to v12" },
+  { line: "The 2025 folder has thirteen numbered versions of a vision-tracking controller. The first is 578 lines; the thirteenth is 2,550. More code, more things to question. The workbench note opens the folder.", src: "preserved pid_v1.py and pid_v13.py; source inspection" },
+  { line: "The folder called dino has twelve numbered idea files. Early versions remember a YOLO crop with a DINO embedding; version twelve combines pipe tracking, templates, flow and slalom decisions in a video application. The folder records how the question changed.", src: "preserved dino_idea_v1.py through dino_idea_v12.py; full source inventory" },
   { line: "One commit fixed seven bugs at once: derivative kick, a yaw speed that was ignored, teleop that flooded stop commands, a sleep that blocked its own callback, two yaw sources, and integral windup. It was a Sunday.", src: "duburi-rnd, 8 Mar 2026" },
   { line: "The Duburi vision node went from 5 to 25 frames a second in one afternoon, mostly by not doing work twice.", src: "duburi-rnd, 'vision: Phase 1-3 perf (5→25 fps)'" },
-  { line: "The vehicle kept arming and disarming by itself. BlueOS was forwarding heartbeats from things that weren't the vehicle, and the stack believed all of them.", src: "duburi-rnd, 29 Mar 2026" },
+  { line: "BlueOS forwarded heartbeats from things that weren't the vehicle. The displayed armed and mode state could flap because the stack believed the wrong sender. The repair started by asking who was speaking.", src: "duburi-rnd, 29 Mar 2026" },
   { line: "His name is in the credits of the Duburi team website, which has won RoboSub's website design award two years running. Then he went back to the pool.", src: "bracuduburi.com meta author; RoboSub website awards 2024 and 2025" },
   { line: "At RoboSub 2026 Duburi fielded two vehicles that talk to each other underwater. The small one waits for a release signal from the big one, and if the signal never comes, it gets on with its own job anyway.", src: "BRACU Duburi TDR 2026" },
   { line: "The first time the heading lock held in the pool, someone filmed it. The file is still called headlock_1st_time.mp4.", src: "local clips" },

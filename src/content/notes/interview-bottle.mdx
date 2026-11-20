@@ -1,34 +1,60 @@
 ---
 title: "The interview bottle"
-dek: "My entry task for an underwater robotics team, December 2023, graded properly three years later. The test set was the training set."
+dek: "The 2023 entry task, re-opened in 2026: a bottle detector, a duplicated test split, and what confidence, box overlap and simulated water actually let me claim."
 date: "2026-11"
 series: water
 part: 4
 kind: regrade
 repo: interview-bottle
-hero: /media/notes/interview-bottle-dry_vs_3m.webp
-heroAlt: "Four validation bottles with the detector's boxes, dry and under 3 m of simulated water"
+hero: /media/notes/interview-bottle-dry_vs_3m-readable.webp
+heroAlt: "Four validation bottles with the detector's boxes, dry and after a simulated 3 m optical water path"
 sources:
-  - { label: "interview-bottle: the re-grade and the fixed config", href: "https://github.com/fh1m/interview-bottle" }
-  - { label: "Goyal et al. (2017), the linear learning-rate scaling rule", href: "https://arxiv.org/abs/1706.02677" }
+  - { label: "The original 2023 submission README", href: "https://github.com/fh1m/interview-bottle/blob/master/README-2023.md" }
+  - { label: "The actual re-grade evaluator", href: "https://github.com/fh1m/interview-bottle/blob/master/firstbottle/evaluate.py" }
+  - { label: "TensorFlow's original model-zoo configuration", href: "https://github.com/tensorflow/models/blob/master/research/object_detection/configs/tf2/ssd_mobilenet_v2_320x320_coco17_tpu-8.config" }
+  - { label: "Goyal et al. (2017): linear learning-rate scaling and warm-up", href: "https://arxiv.org/abs/1706.02677" }
 ---
 import Fig from "../../components/note/Fig.astro";
 import Pull from "../../components/note/Pull.astro";
-import Stats from "../../components/note/Stats.astro";
 
-December 2023. The BRACU Duburi team gave applicants a task: train an object detector. I took a Kaggle water-bottle dataset, labelled it by hand in LabelImg, fine-tuned **SSD MobileNet v2 320×320** with the TensorFlow Object Detection API, and sent in screenshots like this one.
+The screenshots are dated 3 December 2023. They come from my object-detection task for BRACU Duburi: take a water-bottle dataset, label it, train a detector, and show it working. I used Kaggle photographs, LabelImg and SSD MobileNet v2 through the TensorFlow Object Detection API. The original README says I “followed all the instructions,” then shows seven screenshots.
 
-<Fig src="/media/notes/interview-bottle-2023-shot.webp" alt="2023 screenshot: the detector boxing a Winner water bottle at 0.88 confidence, the box much wider than the bottle" caption="<b>December 2023.</b> Bottle: 0.88. Very pleased. Look how much wider than the bottle that box is. That's not an accident; it's the subject of this note." />
+<Fig src="/media/notes/interview-bottle-2023-shot.webp" alt="2023 screenshot: the detector boxing a Winner water bottle at 0.88 confidence, the box much wider than the bottle" caption="<b>December 2023.</b> Bottle: 0.88. The confidence in the label is not a measure of the box's overlap. The extra background is the subject of this note." />
 
-Three years later the 2023 workspace was still on disk, complete with TensorBoard logs, the exported model and the TFRecords. So I re-opened the box.
+Nearly three years later, the workspace was still there: TensorBoard event files, TFRecords, checkpoints and an exported model. That is much more useful than a screenshot on its own. The image records what looked convincing; the files let the experiment be questioned.
 
-## What the logs remember
+This re-analysis runs the preserved model, not a replacement trained with hindsight. The current replay reproduces the published scores. It also exposes details that the short version of the story had blurred: the model configuration's actual image size, the evaluator protocol, and the difference between a plausible diagnosis and a demonstrated fix.
+
+## A model name is not its configuration
+
+The old README calls the model **SSD MobileNet v2 320×320**. The upstream TensorFlow recipe has that name too. Its fixed-shape resizer, and both preserved training and export configurations, actually specify **300×300**. The recipe name is not being used here as evidence of a different declared input size.
+
+SSD predicts object scores and box offsets around default boxes at several feature-map scales. MobileNet supplies the feature extractor. The preserved configuration has six anchor layers, a one-class head, a focal classification loss and a smooth-L1 localization loss. A class score and a well-fitted rectangle are related training objectives, not the same output.
+
+That is why “Bottle: 0.88” is not an overlap score. It does not say that the predicted rectangle agrees with the annotation by 88%, nor establish an 88% chance that the whole detection is correct. The attractive number in the screenshot is not a substitute for evaluating its box.
+
+## What the logs remember—and what they do not
 
 <Fig src="/media/notes/interview-bottle-training_2023.webp" alt="Training losses and learning rate read back from the 2023 event files: learning rate warms up to 0.8; regularisation loss jumps and stays high" caption="Read back from the 2023 event files. The learning rate climbs to 0.8, and the regularisation loss jumps with it." wide plot />
 
-- **15 training images.** Ten for validation. That's the whole dataset.
-- **4,200 of 50,000 steps.** The run was stopped about 8 % of the way in.
-- **A learning rate meant for someone else's computer.** The config came from the model zoo, where `learning_rate_base: 0.8` is tuned for a **batch of 512 on TPUs**. Mine was **8**. The linear scaling rule says it should have been about 0.8 × 8 / 512 ≈ **0.0125**. The weights were being shoved around by steps 64 times too big.
+- **15 training images and 10 validation images** in the preserved records. The additional 15-image file called “test” does not add 15 independent examples.
+- **4,200 steps in the top-level loss trace**, against 50,000 configured. A later nested `train/train` trace reaches 1,200 steps. These are surviving attempts, not a single clean experiment manifest proving every step that ran.
+- **A schedule copied across a large change in batch size.** The upstream recipe pairs a base learning rate of 0.8 with a batch of 512 and eight replicas. My configuration uses a batch of eight while retaining the schedule and replica settings.
+
+Applying the linear batch-scaling heuristic gives `0.8 × 8 / 512 = 0.0125`. That is a candidate to investigate, not proof that every update was exactly 64 times too large. The rule was established in a particular large-batch training setting; fine-tuning, normalization, momentum and the data can change what works.
+
+The actual replay reads a final logged learning rate of 0.796 and regularization loss rising from about 0.320 to 0.934. Those are observations. Their timing makes the inherited schedule worth investigating, but it does not isolate the learning rate as the cause of the validation result. A controlled retraining comparison has not been performed.
+
+## Look at the data before the score
+
+The complete contact sheet is more useful than one selected overlay. Most training bottles are upright and prominent, but the backgrounds are not uniformly white: there are domestic photographs, black and checkerboard backgrounds, and an outdoor desert image. Validation includes a bottle lying horizontally. That is a condition worth examining—not an isolated rotation experiment establishing what caused one error.
+
+<details class="wide" style="border-block:1px solid var(--line-2);padding:.5rem 0;">
+<summary style="cursor:pointer;color:var(--instrument);padding:.7rem 0;min-height:44px;font-weight:500;">Inspect all 15 training and 10 validation images</summary>
+<Fig src="/media/notes/interview-bottle-splits.webp" alt="All 25 decoded dataset records: three rows of training images and two rows of validation images, with their stored annotation boxes in teal" caption="Every preserved training and validation record, in split order. Teal boxes are stored annotations, not predictions. The photographs come from the original Kaggle collection; this new contact sheet is generated directly from the TFRecords without loading the detector." contain />
+</details>
+
+Some product images look closely related. An exact-pixel audit does not rule out resized, recropped or visually similar examples. Ten validation records should not be silently promoted into ten independent environments.
 
 ## The grade
 
@@ -36,40 +62,98 @@ The re-grade's first finding came before any model ran:
 
 <Pull>test.tfrecord is a byte-for-byte copy of train.tfrecord.</Pull>
 
-All 15 "test" images are training images. On them, the model scores AP@0.5 = 1.000. Memory, not skill. The honest held-out set is the 10 validation images:
+All 15 “test” images also occur in training. The current audit confirms identical TFRecord file hashes and identical decoded pixels. The model scores AP@0.5 = 1.000 on that file. That is in-sample performance, not a generalization test; the number alone does not prove which internal shortcut the network learned.
 
-| what | AP@0.5 |
-|---|---:|
-| "test" split (= training images) | 1.000 |
-| **validation, never trained on** | **0.405** |
-| logged by the 2023 eval job (validation, step 4000) | 0.506 |
+The ten validation images have no exact decoded-pixel matches in the training set. That makes them a better held-out check, though exact deduplication does not establish different scenes, products or acquisition conditions.
 
-Why so low, when the boxes *look* right? A habit:
+| Evaluation record | AP@0.5 | What it establishes |
+| --- | ---: | --- |
+| Re-grade on the duplicated “test” file | 1.000 | Performance on training images |
+| Re-grade on the ten validation images | 0.405 | Held-out image performance under the current evaluator |
+| Historical evaluation log at step 4000 | 0.506 | A recorded COCO-evaluator result, not an interchangeable rerun |
 
-<Stats items={[
-  { v: "72 %", l: "median share of the frame covered by the model's top box", tone: "failure" },
-  { v: "31 %", l: "covered by the real bottle, validation images" },
-  { v: "51 %", l: "covered by the real bottle, training images" },
-]} />
+The distinction in the final row matters. The preserved training configuration selects the TensorFlow Object Detection API's COCO metrics. The re-grade computes **VOC-style all-point interpolated AP at IoU 0.5**. A checkpoint called `ckpt-5` carries training step 4000, while the exported checkpoint has no step variable. Without reconciling the exact evaluated weights and protocol, the difference between 0.506 and 0.405 is not a measured deterioration over time.
 
-Every training image is one product-shot bottle, front and centre, filling half the frame. Fifteen times. The cheapest correct answer the network could learn was *a big box in the middle*, and it learned that very well.
+## The box is allowed to be wrong
+
+The dry-image coverage audit explains why the screenshot deserves a closer look:
+
+| Box population | Median share of image area |
+| --- | ---: |
+| Top predicted box on validation images | 72% |
+| Largest annotated bottle box on validation images | 31% |
+| Largest annotated bottle box on training images | 51% |
+
+These are separate medians, not the overlap of a particular pair of boxes. They are consistent with a broad-box or framing bias. They do not, by themselves, prove that the network solved the task by memorizing a central rectangle.
+
+Intersection over union gives a concrete reason to care about the extra background:
+
+```text
+IoU = area(prediction ∩ annotation)
+      ÷ area(prediction ∪ annotation)
+```
+
+Consider an illustrative case where a 31%-area annotation lies entirely inside a 72%-area prediction. The intersection is 31% and the union 72%, giving an IoU of about **0.431**. The real `iou` function reproduces that calculation on constructed boxes. This is not a newly measured median IoU for the dataset; it is geometry showing how a box can contain the bottle and still fail a 0.5 overlap requirement.
+
+There are also several different uses of IoU in this pipeline:
+
+| Stage | Preserved threshold | What is compared |
+| --- | ---: | --- |
+| Training anchor matcher | 0.5 | Default boxes and annotations |
+| Non-maximum suppression | 0.6 | Competing predicted boxes |
+| Re-grade match acceptance | 0.5 | A prediction and an annotation |
+
+The training matcher additionally forces a match for each annotated object, so its threshold is not the complete assignment rule. NMS removes competing predictions; it does not compare them with ground truth and cannot certify that the surviving rectangle is accurate.
+
+## What AP counts that a screenshot does not
+
+The re-grade collects detections down to a score of 0.01, sorts them by score and matches each accepted prediction to an annotation at IoU 0.5. A matched object cannot be counted again. Cumulative true and false positives form a precision–recall curve; the evaluator integrates its interpolated envelope.
+
+A second box on an already matched bottle can therefore be a false positive, even if it looks plausible. A missing low-scoring bottle costs recall. A high-scoring but oversized box can be wrong before any later correct box is considered.
+
+The illustrative dry/wet image sheet uses a different display cutoff: it draws the top box only above 0.3. That is a visualization choice, not the AP evaluator's inclusion threshold. Looking at the visible boxes alone does not reconstruct the metric.
+
+The annotated training boxes cover a larger median fraction of the frame than the validation boxes in this audit. That makes scale and position diversity worth testing; it is not a controlled isolation of composition or rotation. A detector that works on large centred bottles has not thereby learned to find a small, partly hidden object elsewhere. The proposed padding and augmentation changes target that hypothesis; their benefit still needs a new experiment.
 
 ## Would it have survived the pool?
 
-This was an interview for an *underwater* team, so the last question is obvious. The validation images go through the same water model as [green, at depth](/notes/green-at-depth).
+The task belonged to an underwater team, so the next question concerns the image domain. The validation photographs pass through the same defined RGB attenuation-and-veil transform used in [Green, at depth](/notes/green-at-depth/):
 
-<Fig src="/media/notes/interview-bottle-ap_vs_depth.webp" alt="AP at 0.5 IoU against simulated water depth, falling from 0.4 to about 0.1 by 8 m" caption="AP@0.5 against water path. The bump at 1 m is ten images being ten images." plot />
+```text
+I(channel, d) = J(channel) × exp(−k(channel) × d)
+                + A(channel) × (1 − exp(−k(channel) × d))
+```
+
+`J` is the input image, `k` a per-channel attenuation coefficient, `A` the veil colour and `d` the modeled optical water path. In the source, the pure-water absorption coefficients are multiplied by four. Red-channel transmission falls faster than blue in this construction.
+
+The path is **camera-to-object water distance**, not automatically the vehicle's depth below the surface. The code operates on ordinary encoded RGB values, without a calibrated camera-radiance model. It does not reproduce refraction, bubbles, motion blur, spatially varying illumination or the complete scattering of a real pool. This is a controlled image stress test—not evidence that these photographs were taken underwater.
 
 | water path | 0 m | 1 m | 2 m | 3 m | 5 m | 8 m |
 |---|---:|---:|---:|---:|---:|---:|
 | AP@0.5, validation | 0.405 | 0.538 | 0.372 | 0.224 | 0.160 | 0.109 |
 
-<Fig src="/media/notes/interview-bottle-dry_vs_3m.webp" alt="Four bottles, dry and at 3 m: everything turns cyan and the red CLEAR label turns dark green" caption="Dry, and at 3 m. Bottom right: the red <b>CLEAR</b> label is dark green underwater. Water eats red first, and a detector trained on white product shots has never seen that." wide />
+The one-metre result exceeds the dry result on these ten images. That can happen when a transform changes score ordering and box decisions; it is not evidence that adding water generally improves this detector. There are no uncertainty bounds here, and this small collection is not a substitute for independently recorded underwater scenes.
 
-## What I'd change, and haven't
+The [original sweep plot](/media/notes/interview-bottle-ap_vs_depth.webp) remains available for inspection; the table is the numerical record on this page.
 
-The repo has a `pipeline.fixed.config` with the fixes this argues for: the learning rate scaled to the batch, a short warm-up, a real held-out split, and augmentations that break the habit (bottles small and off-centre; hue and brightness jitter closer to water). **It has not been retrained**, and the note says so in bold, because every number above is from the 2023 model.
+<Fig src="/media/notes/interview-bottle-dry_vs_3m-readable.webp" alt="Four validation photographs and their synthetic 3 m counterparts, with legible confidence labels outside every image" caption="The same four validation photographs, dry and after a modeled 3 m optical water path. Re-rendered from the original model with captions outside the photographs so every score remains legible. These are transformed images, not a field trial; boxes retain the sheet's 0.3 display cutoff. <a href='/media/notes/interview-bottle-dry_vs_3m.webp' target='_blank' rel='noreferrer'>The original sheet is preserved.</a>" wide />
 
-The 2023 repo also carried about 170 MB of other people's code: the model garden, cocoapi, protoc and the zoo checkpoint. That's upstream's to host. The repo is lighter now, and honest about what's mine.
+## What I would change—and what remains unproved
 
-<Pull>The test set was the training set, and nobody checked, me included. A check nobody runs is a decoration.</Pull>
+The repository includes `pipeline.fixed.config`: a lower candidate learning rate, shorter warm-up, a bounded training schedule, single-device replica settings, relative paths and additional padding and colour augmentation. **The model has not been retrained with that file. Every detector score above belongs to the original exported model.**
+
+The validation set can guide a new experiment, but repeated tuning on it would make it a development set, not a final independent test. A convincing next evaluation needs new labelled scenes, a documented split rule and a fixed comparison protocol. Grouping by recording session, environment or product source would address relationships that exact-pixel deduplication misses.
+
+A useful comparison would hold the starting weights, split and evaluator fixed, then change the schedule or augmentation deliberately. Report localization errors, missed objects and false positives as well as AP. A smoother training curve on its own would not establish that the detector generalizes.
+
+The original submission is still worth keeping. Labelling photographs, getting a model through training and exporting something that draws boxes were real steps in my early vision work. The error was treating that visible success as if the experiment had already asked the harder question.
+
+<Pull>The model could draw a convincing box. The file named “test” had never been given an independent job.</Pull>
+
+## Read the experiment, not just the result
+
+The [research repository](https://github.com/fh1m/interview-bottle) retains the original README, screenshots, logs, TFRecords and exported model. A dated [replay receipt](https://github.com/fh1m/interview-bottle/blob/master/results/regrade-2026-11-19.json) records the current CPU re-grade, data hashes, exact-image audit and training-log inspection. The original data and weights were not changed; verification plots were written outside the checkout.
+
+The [original Kaggle dataset](https://www.kaggle.com/datasets/chethuhn/water-bottle-dataset/) and [LabelImg](https://github.com/HumanSignal/labelImg) belong in that account too. My work was the labelled task and detector experiment, not authorship of the photographs, TensorFlow or MobileNet.
+
+For the training recipe, read the [upstream TensorFlow configuration](https://github.com/tensorflow/models/blob/master/research/object_detection/configs/tf2/ssd_mobilenet_v2_320x320_coco17_tpu-8.config). For the batch-scaling argument, read [Goyal et al.](https://arxiv.org/abs/1706.02677) with its actual ImageNet setting in mind. For the numerical grade, inspect [the evaluator](https://github.com/fh1m/interview-bottle/blob/master/firstbottle/evaluate.py), including its matching rule and interpolation—not only the filename of the split it loads.

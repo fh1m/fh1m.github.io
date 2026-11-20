@@ -1,16 +1,16 @@
 {
- "generatedAt": "2026-11-16T23:33:32.304Z",
- "generatedAtLabel": "2026-11-16",
+ "generatedAt": "2026-11-20T08:29:26.915Z",
+ "generatedAtLabel": "2026-11-20",
  "login": "fh1m",
  "since": "2023-05-07",
  "followers": 16,
- "publicRepos": 23,
- "ownRepos": 22,
+ "publicRepos": 26,
+ "ownRepos": 25,
  "archivedRepos": 3,
  "totalStars": 15,
- "contributionsLastYear": 2489,
- "commitsLastYear": 2084,
- "privateContributionsLastYear": 54,
+ "contributionsLastYear": 2574,
+ "commitsLastYear": 2148,
+ "privateContributionsLastYear": 56,
  "busiestDay": [
   "2026-10-14",
   341
@@ -1478,132 +1478,196 @@
   ],
   [
    "2026-11-16",
-   29
+   37
   ],
   [
    "2026-11-17",
-   0
+   31
+  ],
+  [
+   "2026-11-18",
+   3
+  ],
+  [
+   "2026-11-19",
+   35
+  ],
+  [
+   "2026-11-20",
+   8
   ]
  ],
  "languages": [
   {
    "name": "Python",
    "color": "#3572A5",
-   "bytes": 13024813,
-   "share": 0.6330961153345128
+   "bytes": 13728205,
+   "share": 0.6322342547675337
   },
   {
    "name": "C",
    "color": "#555555",
    "bytes": 3944491,
-   "share": 0.19172958023059125
+   "share": 0.18165829602793984
   },
   {
    "name": "QML",
    "color": "#44a51c",
    "bytes": 2348562,
-   "share": 0.11415637820076605
+   "share": 0.10815990479784855
   },
   {
    "name": "Shell",
    "color": "#89e051",
-   "bytes": 325901,
-   "share": 0.015841045632181673
+   "bytes": 328502,
+   "share": 0.015128723468191534
   },
   {
-   "name": "Svelte",
-   "color": "#ff3e00",
-   "bytes": 191191,
-   "share": 0.009293206696090059
+   "name": "TypeScript",
+   "color": "#3178c6",
+   "bytes": 268235,
+   "share": 0.012353206797798359
+  },
+  {
+   "name": "JavaScript",
+   "color": "#f1e05a",
+   "bytes": 234253,
+   "share": 0.010788210904634589
+  },
+  {
+   "name": "MDX",
+   "color": "#fcb32c",
+   "bytes": 192602,
+   "share": 0.008870029398361732
   },
   {
    "name": "Lua",
    "color": "#000080",
    "bytes": 190562,
-   "share": 0.009262632939941283
+   "share": 0.00877607990680579
   },
   {
-   "name": "JavaScript",
-   "color": "#f1e05a",
-   "bytes": 147425,
-   "share": 0.007165875994011627
-  },
-  {
-   "name": "TypeScript",
-   "color": "#3178c6",
-   "bytes": 122006,
-   "share": 0.005930336554352264
+   "name": "Astro",
+   "color": "#ff5a03",
+   "bytes": 155460,
+   "share": 0.007159503900630912
   },
   {
    "name": "Roff",
    "color": "#ecdebe",
    "bytes": 95999,
-   "share": 0.00466621624249023
+   "share": 0.0044211064901368
   },
   {
    "name": "CSS",
    "color": "#663399",
-   "bytes": 54416,
-   "share": 0.0026449944588104912
+   "bytes": 81303,
+   "share": 0.003744301721555352
   },
   {
    "name": "Vim Script",
    "color": "#199f4b",
    "bytes": 50364,
-   "share": 0.002448039196624735
+   "share": 0.0023194471532958657
   },
   {
    "name": "C++",
    "color": "#f34b7d",
    "bytes": 49801,
-   "share": 0.0024206734975599324
+   "share": 0.0022935189357733182
   },
   {
    "name": "HTML",
    "color": "#e34c26",
-   "bytes": 8808,
-   "share": 0.0004281297999338946
+   "bytes": 26595,
+   "share": 0.0012247974156521235
   },
   {
    "name": "Dockerfile",
    "color": "#384d54",
    "bytes": 6224,
-   "share": 0.00030252950440378746
+   "share": 0.000286638056590292
   },
   {
    "name": "Makefile",
    "color": "#427819",
    "bytes": 4846,
-   "share": 0.00023554916104446562
+   "share": 0.00022317609611769844
   },
   {
    "name": "PowerShell",
    "color": "#012456",
    "bytes": 3942,
-   "share": 0.00019160850037913403
+   "share": 0.00018154357633016246
   },
   {
    "name": "CMake",
    "color": "#DA3434",
    "bytes": 3792,
-   "share": 0.00018431746155192193
+   "share": 0.00017463552548046068
   },
   {
    "name": "PureBasic",
    "color": "#5a6986",
    "bytes": 57,
-   "share": 0.0000027705947543405983
+   "share": 0.0000026250593228866717
   }
  ],
  "repos": [
+  {
+   "name": "Dristy",
+   "description": "Dristy — K210 vision firmware, host API, and research",
+   "url": "https://github.com/fh1m/Dristy",
+   "archived": false,
+   "isFork": false,
+   "stars": 1,
+   "forks": 0,
+   "pushedAt": "2026-11-20T07:43:29Z",
+   "createdAt": "2026-09-19T07:33:08Z",
+   "language": "C",
+   "color": "#555555",
+   "topics": [
+    "computer-vision",
+    "edge-ai",
+    "embedded",
+    "firmware",
+    "k210",
+    "kendryte",
+    "risc-v",
+    "robotics"
+   ],
+   "commits": 12
+  },
+  {
+   "name": "passless",
+   "description": "Flask/WebAuthn coursework: passkey registration and sign-in, virtual-authenticator demonstrations and documented account-enrollment limits.",
+   "url": "https://github.com/fh1m/passless",
+   "archived": false,
+   "isFork": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-20T07:24:10Z",
+   "createdAt": "2026-05-04T07:32:16Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "authentication",
+    "flask",
+    "passkeys",
+    "security",
+    "webauthn"
+   ],
+   "commits": 21
+  },
   {
    "name": "mongla_ws",
    "description": "An independent ROS 2 autonomy stack for autonomous underwater vehicles. Custom control board at 500 Hz, vision on a Hailo-8, and every capability claim carrying its evidence. Mongla is a research platform to push boundaries of underwater robotics. ",
    "url": "https://github.com/fh1m/mongla_ws",
    "archived": false,
+   "isFork": false,
    "stars": 5,
    "forks": 2,
-   "pushedAt": "2026-11-16T20:57:23Z",
+   "pushedAt": "2026-11-20T06:45:52Z",
    "createdAt": "2026-04-18T12:35:52Z",
    "language": "Python",
    "color": "#3572A5",
@@ -1619,13 +1683,189 @@
     "hailo-8",
     "raspberry-pi-5"
    ],
-   "commits": 1375
+   "commits": 1383
+  },
+  {
+   "name": "fh1m",
+   "description": "Config files for my GitHub profile.",
+   "url": "https://github.com/fh1m/fh1m",
+   "archived": false,
+   "isFork": false,
+   "stars": 1,
+   "forks": 0,
+   "pushedAt": "2026-11-20T05:08:19Z",
+   "createdAt": "2024-03-01T21:20:29Z",
+   "language": "JavaScript",
+   "color": "#f1e05a",
+   "topics": [
+    "config",
+    "github-config",
+    "profile",
+    "readme",
+    "robotics"
+   ],
+   "commits": 55
+  },
+  {
+   "name": "dhara",
+   "description": "Capture-time and velocity-unit contracts in archived visual odometry: preserved source, controlled CPU replay and explicit limits",
+   "url": "https://github.com/fh1m/dhara",
+   "archived": false,
+   "isFork": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-20T02:32:36Z",
+   "createdAt": "2026-11-20T02:32:30Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "dimensional-analysis",
+    "numpy",
+    "reproducible-research",
+    "robotics",
+    "timestamps",
+    "visual-odometry"
+   ],
+   "commits": 1
+  },
+  {
+   "name": "happy-little-trees",
+   "description": "When does a decision tree stop learning and start painting every accident? Depth sweep, decision-boundary canvases and cost-complexity pruning.",
+   "url": "https://github.com/fh1m/happy-little-trees",
+   "archived": false,
+   "isFork": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-19T16:21:01Z",
+   "createdAt": "2023-11-29T13:20:31Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "decision-trees",
+    "machine-learning",
+    "overfitting",
+    "scikit-learn",
+    "visualization"
+   ],
+   "commits": 7
+  },
+  {
+   "name": "interview-bottle",
+   "description": "A 2023 SSD MobileNet bottle detector re-examined: original data and model, split-leakage audit, box geometry, and reproducible image-domain stress tests.",
+   "url": "https://github.com/fh1m/interview-bottle",
+   "archived": false,
+   "isFork": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-19T11:44:27Z",
+   "createdAt": "2023-12-03T11:16:02Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "data-leakage",
+    "object-detection",
+    "ssd-mobilenet",
+    "tensorflow",
+    "underwater-robotics"
+   ],
+   "commits": 14
+  },
+  {
+   "name": "matra",
+   "description": "মাত্রা · Where monocular reconstruction earns its metre: reproducible scale recovery and depth-normalization experiments.",
+   "url": "https://github.com/fh1m/matra",
+   "archived": false,
+   "isFork": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-19T08:08:50Z",
+   "createdAt": "2026-11-19T08:08:41Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "depth-estimation",
+    "monocular-depth",
+    "opencv",
+    "projective-geometry",
+    "reproducible-research",
+    "visual-odometry"
+   ],
+   "commits": 1
+  },
+  {
+   "name": "dhrubotara",
+   "description": "ধ্রুবতারা · Reference-frame visual guidance: preserved experiments, controlled image warps and recorded-input replay.",
+   "url": "https://github.com/fh1m/dhrubotara",
+   "archived": false,
+   "isFork": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-19T08:08:29Z",
+   "createdAt": "2026-11-19T08:08:13Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "computer-vision",
+    "feature-matching",
+    "homography",
+    "opencv",
+    "optical-flow",
+    "reproducible-research"
+   ],
+   "commits": 1
+  },
+  {
+   "name": "fh1m.github.io",
+   "description": "Fahim Faisal's personal engineering archive: robotics work, research notebooks, photographs, source-linked experiments and CV.",
+   "url": "https://github.com/fh1m/fh1m.github.io",
+   "archived": false,
+   "isFork": false,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2026-11-17T05:44:34Z",
+   "createdAt": "2026-01-06T21:11:49Z",
+   "language": "TypeScript",
+   "color": "#3178c6",
+   "topics": [
+    "astro",
+    "interactive",
+    "portfolio",
+    "robotics",
+    "threejs",
+    "webgl"
+   ],
+   "commits": 81
+  },
+  {
+   "name": "duburi-rnd",
+   "description": "BRACU Duburi 4.2 research workspace: ROS 2 perception, navigation and control experiments, with programme and contributor credit.",
+   "url": "https://github.com/fh1m/duburi-rnd",
+   "archived": false,
+   "isFork": false,
+   "stars": 1,
+   "forks": 0,
+   "pushedAt": "2026-11-16T23:34:13Z",
+   "createdAt": "2026-03-06T12:27:21Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "ardusub",
+    "auv",
+    "computer-vision",
+    "robosub",
+    "robotics",
+    "ros2",
+    "underwater-robotics",
+    "yolo"
+   ],
+   "commits": 34
   },
   {
    "name": "secure-terminal-p2p-chat",
    "description": "What does Wireshark see when two terminals talk? A P2P terminal chat that upgrades from plaintext to RSA-OAEP + AES-256-GCM, with a strict mode and downgrade detection.",
    "url": "https://github.com/fh1m/secure-terminal-p2p-chat",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T06:02:22Z",
@@ -1642,30 +1882,11 @@
    "commits": 5
   },
   {
-   "name": "passless",
-   "description": "Can a login have no secret worth stealing? A Python/Flask WebAuthn service: passkeys, multi-device, every verification step enforced and tested.",
-   "url": "https://github.com/fh1m/passless",
-   "archived": false,
-   "stars": 0,
-   "forks": 0,
-   "pushedAt": "2026-11-16T05:58:57Z",
-   "createdAt": "2026-05-04T07:32:16Z",
-   "language": "Python",
-   "color": "#3572A5",
-   "topics": [
-    "authentication",
-    "flask",
-    "passkeys",
-    "security",
-    "webauthn"
-   ],
-   "commits": 20
-  },
-  {
    "name": "start-page",
    "description": "A keyboard-first browser new tab: one or two letters to anywhere, key:query to search. Built on Tilde Enhanced.",
    "url": "https://github.com/fh1m/start-page",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T05:49:50Z",
@@ -1686,6 +1907,7 @@
    "description": "Where will the bottle be half a second from now? A 2024 YOLOv7 + CSRT tracker's speed readout, measured against Kalman and least-squares predictors.",
    "url": "https://github.com/fh1m/half-a-second",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T05:48:30Z",
@@ -1702,30 +1924,11 @@
    "commits": 10
   },
   {
-   "name": "interview-bottle",
-   "description": "The underwater-robotics team interview task, graded properly three years later: 15 training images, a learning rate meant for TPUs, a test split that was the training set, and a pool.",
-   "url": "https://github.com/fh1m/interview-bottle",
-   "archived": false,
-   "stars": 0,
-   "forks": 0,
-   "pushedAt": "2026-11-16T05:48:06Z",
-   "createdAt": "2023-12-03T11:16:02Z",
-   "language": "Python",
-   "color": "#3572A5",
-   "topics": [
-    "data-leakage",
-    "object-detection",
-    "ssd-mobilenet",
-    "tensorflow",
-    "underwater-robotics"
-   ],
-   "commits": 11
-  },
-  {
    "name": "four-leds",
    "description": "Can a person steer a camera onto a target with four LEDs? A 2024 YOLOv5 + Arduino rig analysed as a human-in-the-loop controller: why bang-bang feedback hunts.",
    "url": "https://github.com/fh1m/four-leds",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T05:41:06Z",
@@ -1746,6 +1949,7 @@
    "description": "What does a 2001 face detector actually look at? The Viola–Jones cascade opened up: its first nine questions, how far you can tilt your head, and the faces it finds in coins and gravel.",
    "url": "https://github.com/fh1m/pareidolia",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T05:33:47Z",
@@ -1762,30 +1966,11 @@
    "commits": 5
   },
   {
-   "name": "happy-little-trees",
-   "description": "When does a decision tree stop learning and start painting every accident? Depth sweep, decision-boundary canvases and cost-complexity pruning.",
-   "url": "https://github.com/fh1m/happy-little-trees",
-   "archived": false,
-   "stars": 0,
-   "forks": 0,
-   "pushedAt": "2026-11-16T05:29:38Z",
-   "createdAt": "2023-11-29T13:20:31Z",
-   "language": "Python",
-   "color": "#3572A5",
-   "topics": [
-    "decision-trees",
-    "machine-learning",
-    "overfitting",
-    "scikit-learn",
-    "visualization"
-   ],
-   "commits": 6
-  },
-  {
    "name": "trust-issues",
    "description": "How many lying readings can a sensor calibration survive? Least squares vs Huber vs Theil–Sen vs RANSAC on a depth-sensor line.",
    "url": "https://github.com/fh1m/trust-issues",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T05:28:36Z",
@@ -1806,6 +1991,7 @@
    "description": "How deep can a colour threshold go before the water lies to it? A 2023 HSV arrow detector, sunk metre by metre through a Beer–Lambert water model.",
    "url": "https://github.com/fh1m/green-at-depth",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T05:24:59Z",
@@ -1826,6 +2012,7 @@
    "description": "Six hours, no team, one ultrasonic sensor: a 2024 contest robot's Arduino sketch, audited line by line and re-enacted in a simulator.",
    "url": "https://github.com/fh1m/E-Bhapa",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-11-16T05:22:48Z",
@@ -1842,27 +2029,11 @@
    "commits": 11
   },
   {
-   "name": "fh1m",
-   "description": "Config files for my GitHub profile.",
-   "url": "https://github.com/fh1m/fh1m",
-   "archived": false,
-   "stars": 1,
-   "forks": 0,
-   "pushedAt": "2026-11-16T04:07:40Z",
-   "createdAt": "2024-03-01T21:20:29Z",
-   "language": null,
-   "color": null,
-   "topics": [
-    "config",
-    "github-config"
-   ],
-   "commits": 44
-  },
-  {
    "name": ".dotfiles",
    "description": "Sensei Robotics: a dual-display Hyprland + Quickshell workstation and documented Arch setup",
    "url": "https://github.com/fh1m/.dotfiles",
    "archived": false,
+   "isFork": false,
    "stars": 5,
    "forks": 0,
    "pushedAt": "2026-10-24T08:35:48Z",
@@ -1886,41 +2057,22 @@
    "description": "An autonomy stack for a ground rover. The body being built is a small Ackermann chassis.",
    "url": "https://github.com/fh1m/rupsha_ws",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2026-10-23T17:39:38Z",
    "createdAt": "2026-10-21T09:04:46Z",
    "language": "Python",
    "color": "#3572A5",
-   "topics": [],
-   "commits": 8
-  },
-  {
-   "name": "fh1m.github.io",
-   "description": "Fahim Faisal — machines that perceive, reason, and act. Personal site (Astro 5, GitHub Pages).",
-   "url": "https://github.com/fh1m/fh1m.github.io",
-   "archived": false,
-   "stars": 0,
-   "forks": 0,
-   "pushedAt": "2026-10-16T09:03:13Z",
-   "createdAt": "2026-01-06T21:11:49Z",
-   "language": "Svelte",
-   "color": "#ff3e00",
-   "topics": [],
-   "commits": 51
-  },
-  {
-   "name": "Dristy",
-   "description": "Dristy — K210 vision firmware, host API, and research",
-   "url": "https://github.com/fh1m/Dristy",
-   "archived": false,
-   "stars": 1,
-   "forks": 0,
-   "pushedAt": "2026-09-19T16:07:07Z",
-   "createdAt": "2026-09-19T07:33:08Z",
-   "language": "C",
-   "color": "#555555",
-   "topics": [],
+   "topics": [
+    "apriltag",
+    "autonomy",
+    "gazebo",
+    "robotics",
+    "ros2",
+    "rover",
+    "urc"
+   ],
    "commits": 8
   },
   {
@@ -1928,6 +2080,7 @@
    "description": "Mongla Sim: Pixhawk-era AUV simulation, Gazebo/ArduSub SITL, 13 courses and an operator lab.",
    "url": "https://github.com/fh1m/mongla_sim",
    "archived": false,
+   "isFork": false,
    "stars": 0,
    "forks": 1,
    "pushedAt": "2026-09-01T19:47:36Z",
@@ -1938,24 +2091,11 @@
    "commits": 43
   },
   {
-   "name": "duburi-rnd",
-   "description": "The codebase for AUV, Research and Exprimental Concepts tested on Duburi 4.2. ",
-   "url": "https://github.com/fh1m/duburi-rnd",
-   "archived": false,
-   "stars": 1,
-   "forks": 0,
-   "pushedAt": "2026-04-04T04:25:33Z",
-   "createdAt": "2026-03-06T12:27:21Z",
-   "language": "Python",
-   "color": "#3572A5",
-   "topics": [],
-   "commits": 33
-  },
-  {
    "name": "duburi",
    "description": "Most epic AUV in world.",
    "url": "https://github.com/fh1m/duburi",
    "archived": true,
+   "isFork": false,
    "stars": 2,
    "forks": 0,
    "pushedAt": "2025-03-22T09:37:20Z",
@@ -1973,13 +2113,17 @@
    "description": "Custom Neovim port for my Personal development enviroment.",
    "url": "https://github.com/fh1m/nvim-pde",
    "archived": true,
+   "isFork": false,
    "stars": 0,
    "forks": 0,
    "pushedAt": "2023-10-15T07:30:27Z",
    "createdAt": "2023-10-15T07:27:30Z",
    "language": "Vim Script",
    "color": "#199f4b",
-   "topics": [],
+   "topics": [
+    "configuration",
+    "neovim"
+   ],
    "commits": 2
   },
   {
@@ -1987,14 +2131,37 @@
    "description": "Bash and Python scripts written for my Arch system.",
    "url": "https://github.com/fh1m/arch-scripts",
    "archived": true,
+   "isFork": false,
    "stars": 0,
    "forks": 1,
    "pushedAt": "2023-10-15T07:01:37Z",
    "createdAt": "2023-10-15T06:37:26Z",
    "language": "Python",
    "color": "#3572A5",
-   "topics": [],
+   "topics": [
+    "arch-linux",
+    "bash",
+    "python"
+   ],
    "commits": 2
+  },
+  {
+   "name": "comma-calib-challenge",
+   "description": "Trying The comma.ai Calibration Challenge!",
+   "url": "https://github.com/fh1m/comma-calib-challenge",
+   "archived": true,
+   "isFork": true,
+   "stars": 0,
+   "forks": 0,
+   "pushedAt": "2022-06-27T04:10:18Z",
+   "createdAt": "2023-11-29T11:46:10Z",
+   "language": "Python",
+   "color": "#3572A5",
+   "topics": [
+    "calibration",
+    "computer-vision"
+   ],
+   "commits": 18
   }
  ]
 }

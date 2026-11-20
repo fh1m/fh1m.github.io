@@ -10,8 +10,8 @@ const { projects } = Astro.props;
     const img = p.hero ? { src: p.hero, ...dims(p.hero) } : null;
     return (
       <li>
-        <a href={`/projects/${p.slug}`}>
-          {img ? <img src={img.src} alt="" width={img.w} height={img.h} loading="lazy" /> : <span class="noimg" aria-hidden="true"></span>}
+        <a href={`/projects/${p.slug}`} class:list={{ "text-only":!img }}>
+          {img && <img src={img.src} alt="" width={img.w} height={img.h} loading="lazy" />}
           <span class="wt">
             <span class="ti">{p.title}</span>
             {p.line && <span class="ln">{p.line}</span>}
@@ -25,13 +25,13 @@ const { projects } = Astro.props;
 </ol>
 <style>
   .works { list-style: none; margin: 0; padding: 0; display: grid; }
-  .works a { display: grid; grid-template-columns: 9rem minmax(0, 1fr) auto; gap: 1.6rem; align-items: center; padding: 1.1rem 0; border-bottom: 1px solid rgb(255 255 255 / .08); text-decoration: none; }
-  img, .noimg { width: 9rem; height: 6rem; object-fit: cover; border-radius: var(--r-2); background: rgb(255 255 255 / .05); }
-  .noimg { background: color-mix(in srgb, var(--c) 18%, transparent); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
+  .works a { display:grid; grid-template-columns:9rem minmax(0,1fr) auto; gap:1.6rem; align-items:center; padding:1.1rem 0; border-bottom:1px solid var(--line); text-decoration:none; }
+  img { width:9rem; height:6rem; object-fit:contain; border-radius:var(--r-2); background:var(--surface); }
+  .works a.text-only { grid-template-columns:minmax(0,1fr) auto; }
   .wt { display: grid; gap: .25rem; }
-  .ti { font: 600 var(--t1)/1.3 var(--sans); color: #fff; }
-  .ln { font: 400 var(--t0)/1.45 var(--sans); color: #e2e2e2; }
+  .ti { font:600 var(--t1)/1.3 var(--display); color:var(--ink-hi); }
+  .ln { font:400 var(--t0)/1.45 var(--sans); color:var(--ink); }
   .st { font: 400 var(--t0) var(--mono); color: var(--c); white-space: nowrap; font-variant-numeric: tabular-nums; }
   a:hover .ti { color: var(--c); }
-  @media (max-width: 700px) { .works a { grid-template-columns: 5.5rem minmax(0, 1fr); } img, .noimg { width: 5.5rem; height: 4rem; } .st { grid-column: 2; } }
+  @media(max-width:700px) { .works a { grid-template-columns:5.5rem minmax(0,1fr); } img { width:5.5rem; height:4rem; } .st { grid-column:2; } .works a.text-only { grid-template-columns:minmax(0,1fr); } .text-only .st { grid-column:1; } }
 </style>

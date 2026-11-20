@@ -46,7 +46,7 @@ export function mount(root: HTMLElement) {
     set(lNaive, { x: sx - 12, y: sy + 26, "text-anchor": "end" }); lNaive.textContent = "fix, applied on arrival";
     set(lSh, { x: sx + 12, y: sy + 26 }); lSh.textContent = "";
     slots.err.textContent = `${(chord * 100).toFixed(1)} cm`;
-    say(`error = <b>${(chord * 100).toFixed(1)} cm</b>, of which <b>${(side * 100).toFixed(1)} cm sideways</b>. Set the speed to zero and it vanishes, which is why it survives every bench test. Photon to detection alone is 18.0 ms median on Mongla; add the graph, the filter's queue and a frame you waited for, and a fifth of a second is ordinary.`);
+    say(`error = <b>${(chord * 100).toFixed(1)} cm</b>, of which <b>${(side * 100).toFixed(1)} cm sideways</b>. Set the speed to zero and the position error vanishes: a stationary test can hide it. This is a chosen-delay geometric model, not a measured Mongla latency budget. Capture, inference, transport and waiting at a consumer must be measured at their own boundaries before combining them.`);
   };
   scrub(slots.tau, { value: tau, min: 0, max: 600, step: 5, fmt: (x) => `${x.toFixed(0)} ms`, label: "Fix latency", tone: "estimate" }, (x) => { tau = x; draw(); poke(); });
   scrub(slots.v, { value: v, min: 0, max: 1.5, step: 0.05, fmt: (x) => `${x.toFixed(2)} m/s`, label: "Speed", tone: "measured" }, (x) => { v = x; draw(); poke(); });

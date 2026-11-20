@@ -1,16 +1,13 @@
 ---
 title: "The frame-age problem"
-dek: "A camera queue isn't a backlog of recent frames you can skip through. It's a fossil record of the moment your program stalled, and the standard fix recovers 12 % of it."
+dek: "Four old host buffers, a misleadingly fast read call and a timestamp that lied twice. The useful result is a measured capture path—not a claim that every camera or the whole control loop has the same latency."
 date: "2026-11"
 series: time
 part: 3
 kind: essay
 repo: mongla_ws
-hero: /media/lab/latency-verdict.webp
-heroAlt: "A latency table for both cameras ending in the verdict: sensor is the limit"
-heroPlot: false
 sources:
-  - { label: "camera-latency.md: the V4L2 finding, four policies, measured", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/perception/camera-latency.md" }
+  - { label: "Pinned camera-latency report: policies, stages and timestamp corrections", href: "https://github.com/fh1m/mongla_ws/blob/c957ba915e6f0574eff244c3e27eca42fa5fae9a/.claude/context/perception/camera-latency.md" }
   - { label: "V4L2 buffer queue (VIDIOC_QBUF / DQBUF)", href: "https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-qbuf.html" }
   - { label: "Carmack, Latency Mitigation Strategies", href: "https://danluu.com/latency-mitigation/" }
 ---
@@ -19,47 +16,86 @@ import Explore from "../../components/note/Explore.astro";
 import Pull from "../../components/note/Pull.astro";
 import Bars from "../../components/note/Bars.astro";
 
-A detector that looks healthy can be steering by the past. The boxes appear, the counters tick up, every node reports green, and the frame it's looking at is a third of a second old. For a vehicle moving at half a metre per second, that's a target that moved 17 cm while you weren't watching.
+A detector can return a correct box from the wrong moment. The counters tick, the picture looks plausible, and the control loop receives an observation that has been waiting in a queue. A vehicle moving at 0.5 m/s travels about 17 cm in a third of a second; that is a kinematic illustration of the cost, not a measured underwater run.
 
-This note is about where that third of a second comes from. The answer turned out to invert the advice in essentially every reference on the problem.
+This investigation starts with one controlled camera-path benchmark, then follows what the later source record changed. The distinction between *call duration*, *age relative to a kernel timestamp* and *physical sensor-to-actuator latency* matters throughout.
 
-## What everybody assumes
+## What the tested queue actually held
 
-Linux cameras speak V4L2. The driver owns a small ring of buffers; the camera fills them, your program takes one, reads it, and gives it back. If your program is slow, the buffers fill up. The usual mental picture is a queue of *recent* frames: if you fall behind, drain the queue and take the last one, and you're caught up.
+The V4L2 streaming API distinguishes empty buffers queued for capture from filled buffers available to dequeue. Returning a filled buffer to the application does not by itself make that storage available for another capture: it has to be requeued. The [kernel's QBUF/DQBUF documentation](https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-qbuf.html) describes that ownership exchange. It does not promise an unlimited backlog of recent images.
 
-That picture is wrong in one specific way. Stall a reader for 400 ms at 60 fps and read the driver's own sequence counter off what's waiting:
+In the linked benchmark, a consumer stalled for 400 ms at a nominal 60 fps. The four waiting buffers had sequence numbers **+1 to +4** relative to the previous frame: the beginning of the stall, not its end. Their reported ages were approximately **396, 380, 364 and 344 ms**, measured against the kernel-provided timestamps.
 
-<Explore id="fossil" n="fig 1" title="What a full camera queue actually holds" hint="drag the stall and pick a policy" caption="The driver owns four buffers. While the reader stalls, the camera fills the free ones and then has nowhere to put anything, so every later frame is dropped before it exists. Measured on two cameras from different vendors, so it's the V4L2/UVC contract, not one driver." />
+<Explore id="fossil" n="fig 1" title="Which frames are still available?" hint="change the stall and choose a policy" caption="Ideal four-buffer host queue. At 400 ms and 60 fps, the readout also shows the separate recorded camera-path result; the model is not a fitted driver simulation." />
 
-The queue holds frames **+1 to +4**: the four frames from the *start* of the stall, aged 396, 380, 364 and 344 ms. Frames +5 to +24 were never captured at all. The kernel had no free buffer, so the driver dropped them on the floor.
+Later sequence numbers were absent from that host queue. That observation does **not** establish that the sensor never exposed those images or identify every device-side drop stage. The report observed the pattern on Sonix and Fantech cameras; two devices do not establish every camera's firmware and buffering behaviour.
 
-<Pull>The queue is not a backlog of recent frames. It is a fossil record of the moment the consumer stalled.</Pull>
+<Pull>On this capture path, draining the queue meant choosing the least-old retained frame—not recovering the recent frames that were missing from it.</Pull>
 
 ## Four policies, one stall
 
-Same camera, same 400 ms stall, ten repetitions each:
+The same camera-path test compared four policies after the same 400 ms consumer stall, with ten repetitions per policy. These are ages relative to the kernel's stamp, not direct measurements of photon exposure or thruster response:
 
-<Bars title="age of the frame acted on after a 400 ms stall" unit=" ms" rows={[
-  { label: "A · plain read() (what shipped)", v: 396.1, tone: "failure" },
-  { label: "B · drain, take the last (the standard recipe)", v: 348.1, tone: "failure" },
-  { label: "C · drain, then wait for a new frame", v: 12.0, tone: "estimate", note: "but blocks 28 ms" },
-  { label: "D · keep-up thread (what ships now)", v: 16.9, tone: "measured", note: "blocks 0 ms" },
-]} src="mongla_ws camera-latency.md §2. B is the advice in the OpenCV issue threads and 'bufferless VideoCapture' gists; it hands you the least-old fossil." />
+<Bars title="kernel-stamp age of the frame selected after the stall" unit=" ms" rows={[
+  { label: "A · plain read, the old baseline", v: 396.1, tone: "failure" },
+  { label: "B · drain, take the last queued frame", v: 348.1, tone: "failure" },
+  { label: "C · drain, then wait for a new frame", v: 12.0, tone: "estimate", note: "blocks 28 ms" },
+  { label: "D · separate keep-up reader", v: 16.9, tone: "measured", note: "blocks 0 ms in this test" },
+]} src="camera-latency.md §2, one controlled path and configuration; not a universal camera specification." />
 
-**B** recovers 12 % of the staleness, because draining a fossil record gets you the least-old fossil. **C** gets a fresh frame but makes the caller wait for it. **D** is a small thread whose only job is to dequeue and immediately requeue, so the driver *always* has a free buffer, never drops a frame, and the newest one is always about one frame old. Under a busy consumer (25 ms of work per tick, the shape of an inference) it holds 22.4 ms median and 31.95 ms at the 95th percentile, at the camera's full 62.5 Hz with zero sequence gaps.
+**B** reduced the reported age by about 12% in this setup. **C** selected a newer frame but blocked the caller. **D** separated the reader from the slower consumer, returning buffers promptly while keeping a latest-frame slot. Under a separate 25 ms-work-per-tick consumer test, the report records **22.4 ms median / 31.95 ms p95**, with the pump at 62.5 Hz and no sequence gaps observed in that run.
 
-## Freshness over throughput
+Those observations are not a guarantee that a reader thread can never be descheduled or drop a frame. The source also records a different buffer-count sweep with one dropped frame in roughly 400 at every setting. A mechanism can remove a particular source of backlog without making the whole system infallible.
 
-For a moving vehicle, an old correct answer is a wrong answer. Throughput is a benchmark number; freshness is what keeps a control loop honest. The keep-up thread throws work away on purpose, and that's the right trade.
+## A fast return is not a fresh image
+
+Timing `read()` measures how long the call took. An already-filled old buffer can return quickly; waiting for a new observation can take longer while giving a younger image. Neither duration alone tells the consumer which event the pixels represent.
+
+The benchmark therefore reads `v4l2_buffer.timestamp` through ioctl and compares it with the corresponding monotonic clock. The report describes that stamp as the frame-arrival boundary. It is not an independent photodiode measurement of exposure start, and timestamp meaning and clock domain still need checking on a different driver.
+
+The empty-queue boundary matters too. If the consumer resumes at 20 ms but the model's first new frame is at about 66.7 ms, plain reading must wait about 46.7 ms. It cannot invent an immediately available fresh frame. A latest-frame slot can instead return the preceding frame again; that is an old observation, not a new one. Frame identity and age must survive the interface.
+
+## The software path has its own boundaries
+
+For a single-camera, no-contention run, the source reports these ages against the same kernel stamp:
+
+| Observation boundary | Reported age (ms) |
+|---|---:|
+| read returns | 14.56 |
+| after cv_bridge encoding | 14.88 |
+| after publish returns | 15.20 |
+| at the subscriber | 16.96 |
+
+These are reported boundary ages, not a physical photon-to-thrust timeline or an exact additive decomposition of every processing stage. Different camera modes, contention and detector configurations need their own measurements.
+
+In the camera report's later §19, the run identified as `72e1e83` used the forward camera with the downward camera paused for 60 s. It records **11.46 ms median image age** and **27.25 ms median detection age** at their subscribers. Those are another configuration again; they should not be spliced into the four-policy test or into a bare accelerator benchmark.
+
+## A timestamp can lie in two places
+
+The first bug was at publication. `camera_node` stamped `now()` when publishing an image, so a frame that had queued appeared newly born. The source correction carries the kernel-derived observation time instead.
+
+The second was downstream. The detector preserved the image header, but `vision_state` replaced its time with the arrival instant of the detection message. Freshness decay and frame-newness checks then measured time since arrival, hiding the pipeline's age again.
+
+These are not merely display defects. A consumer using age to decide whether to coast, reduce authority or accept a distinct observation needs the time of the observation—not the most recent function call that touched it. [Dhara](/notes/dhara/) exposes the related velocity error: even a positive duration can name the wrong pair of events.
+
+## Copying can be the right ownership decision
+
+The capture pump copies compressed bytes out of the reusable driver buffer; decoding happens when a consumer needs an image. Its immutable slot carries the payload, capture time and sequence together. Replacing the slot does not mean a consumer should suddenly decode bytes from a different frame under the old timestamp.
+
+The source reports **13.1 µs** for the byte copy versus **2,450.2 µs** for JPEG decoding in that experiment. A zero-copy view saved only about 11.5 µs while requiring the driver buffer to remain pinned until the reader finished. Saving that copy was not automatically worth a more fragile lifetime contract or tying up capture storage.
+
+The later report also changed its earlier capture-rate advice after moving decode out of the pump: with a 30 Hz consumer, requested capture settings from 30 to 210 Hz reduced reported age from **46.12 to 8.94 ms** at similar CPU cost. That is evidence for that mode and implementation, not a promise that every sensor can reach the requested rate. Capture, decode and publish rates are separate knobs.
+
+## Freshness is not a finished verdict
+
+An archived report below ends with “sensor is the limit” and full configured control authority. It records what that report printed; it does not establish a permanent limit for every later pipeline. Authority is a policy output under particular thresholds, not a navigation-accuracy measurement.
+
+<Fig src="/media/lab/latency-verdict.webp" alt="Archived latency report showing forward and downward rates, configured authority values and a sensor-limit verdict" caption="An earlier report from the archive. Its verdict is not treated as a whole-system guarantee: later source entries measure contention and correct timestamp boundaries. The printed authority values are not evidence of underwater accuracy." wide contain />
+
+The old “18.0 ms photon to detection” budget illustration has been retired from this page. The [primary ledger](https://github.com/fh1m/mongla_ws/blob/c957ba915e6f0574eff244c3e27eca42fa5fae9a/.claude/context/measured-bars.md?plain=1#L214-L245) explicitly cautions that B-61 path after a BGR/RGB mismatch. The [Mongla story](/notes/mongla/) now separates the dated accelerator-sharing bench, the failed workload condition and the later stage probe instead of chaining unmatched sessions into one attractive timeline.
 
 <Pull by="John Carmack">The speed of light sucks.</Pull>
 
-Push it to the end and the goal stops being "fast". It's to make the software vanish as a source of delay, so that what's left is the camera itself. On Mongla's live hardware, both cameras, that's where it ended:
+The useful habit is to attach a boundary, clock, frame identity and configuration to a timing number. [Dristy](/notes/dristy/) separates device-side results from streaming a whole image. The older [bottle narration experiment](/notes/half-a-second/) shows why a correct description arriving late is still a different product.
 
-<Fig src="/media/lab/latency-verdict.webp" alt="Latency table: forward camera 73.4 Hz, downward 27.6 Hz, authority at p99 of 1.000, verdict sensor is the limit" caption="Authority at the 99th percentile: <b>1.000</b> for both cameras. The freshest frame the sensor could provide is the frame the controller acts on." wide contain />
-
-<Fig src="/media/mongla-docs/frame-budget.svg" alt="One frame from photon to thrust over 40 ms: exposure and transfer, Hailo-8 inference, the ROS graph, the detection existing at 18.0 ms, the 500 Hz board ticking underneath" caption="One frame, photon to thrust, every span measured. The board underneath ticks every 2 ms regardless." wide />
-
-The lesson generalises past cameras: any time a slow stage sits behind a fast one, ask what happens to the backlog. If the answer is *it queues*, you've built a time machine pointed the wrong way. [Dristy](/notes/dristy) has the same rule printed on its README, and the 2024 version of me met the problem without a name for it, [narrating a bottle](/notes/half-a-second) half a second late.
-
-Next: [tracking without detection](/notes/tracking-without-detection), for when the newest frame has nothing in it at all.
+Next: [tracking without detection](/notes/tracking-without-detection/), for when the newest frame has nothing in it at all.

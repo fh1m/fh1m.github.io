@@ -1,0 +1,19 @@
+---
+interface Props { name: string; caption: string; portrait?: boolean; width?: number; height?: number }
+const { name, caption, portrait = false, width = portrait ? 464 : 960, height = portrait ? 832 : 540 } = Astro.props;
+---
+<figure class:list={["archive-film", { portrait }]} style={`--film-aspect:${width / height}`}>
+  <video controls muted playsinline preload="none" poster={`/media/archive/${name}.webp`} aria-label={caption} width={width} height={height}>
+    <source src={`/media/archive/${name}.mp4`} type="video/mp4" />
+    <a href={`/media/archive/${name}.mp4`}>Open the archival clip</a>
+  </video>
+  <figcaption><span class="film-label">From the archive</span>{caption}<small>Silent web copy. Play when you want; nothing autoplays.</small></figcaption>
+</figure>
+<style>
+  .archive-film { margin:2rem 0; min-width:0; width:100%; max-width:calc(70svh * var(--film-aspect)); }
+  video { display:block; width:100%; height:auto; object-fit:contain; background:var(--page); border:1px solid var(--line-2); border-radius:var(--r-3); }
+  .portrait { max-width:min(30rem, calc(70svh * var(--film-aspect))); }
+  figcaption { color:var(--ink); line-height:1.65; margin-top:.8rem; max-width:70ch; }
+  .film-label { display:block; color:var(--action); font-size:var(--t-1); margin-bottom:.25rem; }
+  small { display:block; color:var(--dim); font:400 var(--t-2)/1.6 var(--sans); margin-top:.4rem; }
+</style>

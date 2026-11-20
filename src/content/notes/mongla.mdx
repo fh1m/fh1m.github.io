@@ -6,13 +6,13 @@ series: machines
 part: 4
 kind: project
 repo: mongla_ws
-hero: /media/mongla-docs/mongla-iso.webp
-heroAlt: "The Mongla hull from its CAD: red fairings over a grey pressure can, the axial thruster in the nose"
+hero: /media/mongla/perception-preview.webp
+heroAlt: "Mongla's perception overlay on recorded pool footage, replayed later through the detector"
 sources:
   - { label: "The Mongla site: the full tour", href: "https://fh1m.github.io/mongla_ws/" }
   - { label: "The Shift: the architecture from first principles", href: "https://fh1m.github.io/mongla_ws/the-shift.html" }
   - { label: "Capability map: every claim with its evidence", href: "https://fh1m.github.io/mongla_ws/capability-map.html" }
-  - { label: "measured-bars.md: the measurement ledger", href: "https://github.com/fh1m/mongla_ws/blob/main/.claude/context/measured-bars.md" }
+  - { label: "Dated ledger: B-61 cautions, corrected comparisons and the 19 November sharing bench", href: "https://github.com/fh1m/mongla_ws/blob/c957ba915e6f0574eff244c3e27eca42fa5fae9a/.claude/context/measured-bars.md" }
   - { label: "srot-control-board: Rakibul Islam's firmware", href: "https://github.com/RakibulIslam1/srot-control-board" }
   - { label: "RoboNation score sheets (RoboSub)", href: "https://robonation.org/programs/robosub/" }
 ---
@@ -20,20 +20,21 @@ import Fig from "../../components/note/Fig.astro";
 import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
 import Stats from "../../components/note/Stats.astro";
+import { hailoSharing } from "../../data/facts";
 
-Mongla (মোংলা) is named for the port on the Pasur river, the gateway to the Sundarbans. It's the software I'd build if I controlled the whole architecture of an underwater vehicle, and since April 2026, I do.
+Mongla (মোংলা) is named for the port on the Pasur river, the gateway to the Sundarbans. It is the autonomous software architecture I have been writing independently since April 2026. The control board and its firmware are Rakibul Islam's work; the interfaces between those responsibilities matter.
 
-Underwater there's no radio, no GPS, and no second chance to explain yourself. Salt water eats radio in centimetres, so the vehicle can't phone home, can't get a fix from the sky, and can't be steered by a person once it's down. A vehicle either understood what it was looking at, or it didn't, and it won't tell you which. Mongla is the software that has to be right anyway.
+The design is for untethered autonomy. Ordinary Wi-Fi and GNSS are not dependable through-water links, so a mission cannot assume continuous positioning or teleoperation. Tethers and acoustic systems are different engineering options, not things that cease to exist underwater. Mongla's software has to decide what it can do with the observations and links actually available—and refuse when they are insufficient.
 
 <Stats items={[
   { v: "500 Hz", l: "control loop, on a board core nothing else may interrupt" },
-  { v: "53.9 Hz", l: "detection through the live ROS graph, not a benchmark" },
-  { v: "18.0 ms", l: "photon to detection, median" },
-  { v: "4,742", l: "tests passing, none failing" },
-  { v: "0 dives", l: "the honest one: this platform has never been in water", tone: "failure" },
-]} src="All from fh1m.github.io/mongla_ws, each with its method in measured-bars.md." />
+  { v: `${hailoSharing.requestedDetectorHz} + ${hailoSharing.requestedDetectorHz} Hz`, l: "two detector workers held their requested rates in a sharing bench" },
+  { v: `${hailoSharing.requestedXfeatHz} Hz`, l: "XFeat alongside those workers; one repeated input frame" },
+  { v: "4,742", l: "passing tests reported at an archived checkpoint, not field validation" },
+  { v: "0 dives", l: "this independent platform has no water trials", tone: "failure" },
+]} src={`Accelerator figures: ${hailoSharing.date}, ${hailoSharing.durationS} s per condition, inference calls rather than live ROS/camera throughput. Board and archived test figures have separate scopes.`} />
 
-That last number is the reason the rest can be trusted. A stack that has never swum, saying so on its front page, is a stack that isn't going to round anything up.
+The zero limits what I can claim; it does not certify the other figures. Each number still needs its own method and conditions. An older performance comparison in the project's own ledger has already been cautioned or retracted, which is why the headline here is a smaller, dated claim.
 
 ## Where it learned
 
@@ -73,25 +74,37 @@ What crosses the cable is almost nothing. The whole of `move_forward 3 --gain 40
   { src: "/media/mongla-docs/mongla-plan.webp", alt: "The hull from above, with the hatch and both vertical tunnels", caption: "Plan: two vertical tunnels, the hatch." },
 ]} credit="Rendered from the CAD mesh itself, not a photograph and not an artist's impression." />
 
-Every number about the body was read off the CAD geometry: 702.0 × 176.1 × 172.1 mm, a fineness ratio of 3.99 (just under the band of minimum-drag bodies; slightly stubby, deliberately compact), 3.310 L of dry volume that is the vehicle's entire source of buoyancy. Five thrusters in the CAD, all on the centreplane: two lateral tunnels for sway and yaw, two vertical for heave and pitch, one axial in the nose. That's five of six degrees of freedom. Roll has no actuator and relies on passive stability. (The firmware's mixer is still written for an older eight-thruster frame; the project lists that mismatch as an open item rather than hiding it.)
+The archived CAD report gives bounds of **702.0 × 176.1 × 172.1 mm**, a fineness ratio of **3.99** and **3.310 L** of modelled dry volume. These are geometry values, not a validated displacement, buoyancy or drag result for a finished vehicle. The design places five thrusters on the centreplane: two lateral, two vertical and one axial. It plans sway/yaw, heave/pitch and forward thrust, with no dedicated roll actuator. Passive stability and the matching mixer still need validation; the archived record also flags an older eight-thruster mixer as a design/integration mismatch.
 
-You can take the hull apart yourself in [the Mongla arena](/#mongla), from the same mesh the project's site uses.
+The [observatory's Mongla miniature](/#mongla) illustrates capture, inference and control rather than pretending this unfinished hull is a built vehicle. The CAD views remain here as design context.
 
 ## Everything down here fights you
 
-| the medium does this | so this breaks | what was measured |
+| the medium does this | so this breaks | evidence and boundary |
 |---|---|---|
 | absorbs red first | colour thresholds, contrast tricks | 17 preprocessing configs, never once positive |
 | bends light at the port glass | any angle taken in air | 63.8° in air → 46.7° in water, by Snell |
-| blocks radio entirely | telemetry, GPS, rescue | no link below the surface |
-| moves while you decide | position held by dead reckoning | 0.12 m/s current → 1.374 m of drift in 40 s |
+| strongly attenuates ordinary Wi-Fi/GNSS signals | assumptions of continuous radio positioning and teleoperation | the design cannot depend on that link; no RF-propagation experiment is claimed here |
+| moves while you decide | position held by dead reckoning | simulated 0.12 m/s cross-current case: 1.374 m drift in 40 s, not an in-water measurement |
 | hides what you were tracking | detectors that assume continuity | 71 real detection gaps, catalogued |
 
 <Fig src="/media/mongla-docs/field-of-view.svg" alt="Two cones from one lens: 63.8 degrees measured in air, 46.7 degrees in water through a flat port" caption="One lens, two fields of view. The 27 % the water takes is 27 % of the course a search pattern believes it's sweeping. The water figure is computed by Snell's law, not yet measured underwater, and the project says so." />
 
 ## It sees, and it knows how it knows
 
-The detector runs on the Hailo-8: 99.0 Hz standalone, 53.9 Hz through the live ROS graph (different sessions, so the gap is flagged as "one run owed", not quoted as a cost). The camera mailbox keeps only the newest frame. A queue served frames 396 ms stale; the mailbox serves them 16.9 ms stale. That's [the frame-age problem](/notes/the-frame-age-problem).
+An earlier version of this page quoted **53.9 Hz through the ROS graph** and **18.0 ms “photon to detection.”** The ledger explicitly cautions those B-61 rows: the HEF path supplied BGR to a model expecting RGB, and the record says to re-take the measurements before quoting. Standalone inference was subsequently re-measured; that does not turn the old graph figure into a current, matched end-to-end result. A later matched ROS probe also retracts the claim that the graph itself cost 45% of throughput. I do not keep those earlier numbers as validated headlines.
+
+The accelerator claim used here is narrower. On **19 November 2026**, `hailo_share.py` ran the shipped forward and downward detectors plus XFeat through one Hailo-8 VDevice. Each condition lasted **15 s** and reused one real downward image. These are inference-call rates, not fresh camera frames, a ROS throughput result or an accuracy evaluation.
+
+| Requested workers | Reported rates, Hz | What the condition establishes |
+|---|---|---|
+| forward 30; downward 60; no XFeat | forward 30.1; downward 44.9 | the detector pair already saturates before the requested downward rate |
+| forward 30; downward 60; XFeat 3 | forward 30.1; downward 42.6; XFeat 3.1 | fails that original sharing budget; the extra work costs the saturated stream rate |
+| forward 30; downward 30; XFeat 3 | forward 30.1; downward 30.1; XFeat 3.1 | holds the revised requested rates in this short, repeated-frame bench |
+
+The failed first condition stays in the record. Reducing the requested workload is a second experiment, not re-scoring the first as a pass. The <a href={hailoSharing.source}>pinned benchmark and its same-day correction</a> also separate where the contention occurs: a 12 s stage probe reports downward total-call medians of **13.94 ms alone** and **23.09 ms paired**, while the chip-stage medians grow from **13.49 to 22.60 ms**. That points to accelerator contention under those conditions, rather than the earlier unmeasured guess that host work owned the queue. Medians from separate columns are not an exact additive per-frame budget.
+
+The camera-queue result is another experiment again: **396.1 to 16.9 ms** of age relative to the kernel's timestamp in a controlled consumer-stall benchmark. It does not measure the same boundary as an inference call. That distinction, and the later timestamp bugs, are in [the frame-age problem](/notes/the-frame-age-problem/).
 
 <Gallery items={[
   { src: "/media/mongla-docs/mirpur-gate.webp", alt: "A gate in a hazy turquoise pool at Mirpur, boxed by the real detector", caption: "Real footage, Mirpur: the gate at 0.85." },
@@ -101,7 +114,7 @@ The detector runs on the Hailo-8: 99.0 Hz standalone, 53.9 Hz through the live R
 
 When the detector blinks, a *lock ladder* coasts the target through the gap, rung by rung, each rung's timeout sized against those 71 real dropouts (p50 0.155 s, p90 0.651 s, worst 4.00 s) rather than a guessed constant. One clip held its target through 175 frames with no detection at all, because an anchor matched image structure instead of asking the network again. And the ladder ends in a refusal, not an invention: LOST is an honest answer. That's [tracking without detection](/notes/tracking-without-detection).
 
-A downward camera turned into a velocity sensor (no DVL, so the floor becomes the speedometer): worst error 1.09 cm over a 30 cm slide. A right-invariant EKF fuses it with depth and heading, and replays late measurements at the instant they describe instead of when they arrive. That's [turning a camera into a sensor](/notes/turning-a-camera-into-a-sensor).
+A downward camera became a candidate velocity source: three 30 cm manual slides in air gave at most 1.09 cm distance-magnitude error. That is not a general vector-velocity accuracy figure or an underwater validation. A right-invariant EKF fuses observations with depth and heading, and replays late measurements at the instant they describe instead of when they arrive. The measurements and their limits are in [turning a camera into a sensor](/notes/turning-a-camera-into-a-sensor).
 
 ## The results it had to take back
 

@@ -1,49 +1,159 @@
 ---
 title: "What Wireshark sees"
-dek: "A terminal chat that starts in plaintext on purpose, upgrades to RSA-OAEP and AES-256-GCM, and shows you both sides of the line in packet captures."
+dek: "A plaintext-to-encrypted terminal-chat experiment, read at wire level: bytes, authentication tags, fingerprints, and the policy gaps encryption does not fix."
 date: "2026"
 series: build
 part: 8
 kind: project
 repo: secure-terminal-p2p-chat
-hero: /media/notes/p2p-chat-wireshark_sec.webp
-heroAlt: "Wireshark showing a chat message as AES-GCM ciphertext"
+hero: /media/securechat/terminal-preview.webp
+heroAlt: "Archived sender-side terminal log showing public-key exchange, the handshake and an encrypted chat message"
 sources:
   - { label: "secure-terminal-p2p-chat", href: "https://github.com/fh1m/secure-terminal-p2p-chat" }
   - { label: "NIST SP 800-38D: GCM", href: "https://csrc.nist.gov/pubs/sp/800/38/d/final" }
+  - { label: "Inspected chat revision", href: "https://github.com/fh1m/secure-terminal-p2p-chat/tree/b776e21d4286b3ea5b8ec2bc1ed4935cba85a558" }
+  - { label: "Actual cryptography helpers", href: "https://github.com/fh1m/secure-terminal-p2p-chat/blob/b776e21d4286b3ea5b8ec2bc1ed4935cba85a558/crypto.py" }
+  - { label: "Actual framing and timestamp helpers", href: "https://github.com/fh1m/secure-terminal-p2p-chat/blob/b776e21d4286b3ea5b8ec2bc1ed4935cba85a558/protocol.py" }
+  - { label: "PyCryptodome: OAEP limits and authentication", href: "https://www.pycryptodome.org/src/cipher/oaep" }
 ---
 import Fig from "../../components/note/Fig.astro";
-import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
 
-Two terminals, one TCP socket, no server in the middle. The chat starts in **plaintext on purpose**, so you can watch what an eavesdropper sees. Then `/share` runs a handshake (RSA-2048 with OAEP to move a session key, RSA-PSS signatures to prove who sent it) and every message after that is AES-256-GCM.
+Two terminals, one TCP connection, and a deliberately bad first impression: before key sharing, the words are readable on the wire.
 
-<Gallery items={[
-  { src: "/media/notes/p2p-chat-Wireshark_clear.webp", alt: "Wireshark: the chat text readable in the TCP payload", caption: "<b>Before /share.</b> Every word, readable in the payload." },
-  { src: "/media/notes/p2p-chat-wireshark_sec.webp", alt: "Wireshark: the same chat as ciphertext with a key id", caption: "<b>After /share.</b> Noise, plus a key id." },
-]} />
+That is the point of this coursework project. Instead of treating “encrypted” as a badge in the corner of a UI, the protocol makes its transition inspectable. `/sendpub` exchanges public keys; `/share` starts a key-establishment handshake; later messages use AES-GCM. The source remains a learning implementation, not a replacement for a mature secure messenger.
 
-## Four questions
+## Start with something you can read
 
-Secure chat answers four questions, and each one needs a different tool:
+The original capture contains a newline-delimited JSON message with `type: PLAIN_CHAT`. The text says “Hello, This is test Text.” There is no puzzle for Wireshark to solve: the sentence is already in the payload.
 
-| question | the threat | the tool |
+<Fig src="/media/securechat/stream-clear-detail.webp" alt="The original Wireshark Follow TCP Stream window, with the PLAIN_CHAT JSON and readable test sentence intact" caption="The actual cleartext stream. A detail crop removes empty packet panes while preserving the message and stream controls." wide />
+
+After the handshake, the capture changes to `SEC_CHAT`. The outer envelope is still readable JSON, but the chat body is represented by a Base64-encoded encrypted blob.
+
+<Fig src="/media/securechat/stream-sec-detail.webp" alt="The original encrypted-session TCP stream, showing readable type, sender, timestamp and key ID beside an encoded blob" caption="Encrypted content is not an invisible conversation. Type, sender label, timestamp and key ID remain readable in this archived capture." wide />
+
+Base64 is not the encryption. It is a text representation used to carry binary bytes inside JSON. A compressed file can look opaque too; unreadability by eye is not a cryptographic test.
+
+The screenshots preserve an earlier demonstration. The implementation discussion below follows [the inspected source revision](https://github.com/fh1m/secure-terminal-p2p-chat/tree/b776e21d4286b3ea5b8ec2bc1ed4935cba85a558), including its later receive-policy checks.
+
+## Four properties, not one adjective
+
+| Property | The question | Mechanism in this implementation |
 |---|---|---|
-| confidentiality: can outsiders read it? | eavesdropping | AES-256-GCM |
-| integrity: was it changed? | tampering | GCM's authentication tag |
-| authenticity: is it really them? | impersonation | RSA-PSS signatures, key fingerprints |
-| freshness: is it new? | replay | nonces, timestamps, sequence counters |
+| Confidentiality | Can someone without the session key read the protected body? | AES-256-GCM encryption |
+| Integrity | Was the protected body or its associated context changed? | GCM authentication tag and associated data |
+| Key possession | Does the handshake signature verify under the supplied peer key? | RSA-PSS over a defined payload |
+| Freshness and ordering | Does this belong to the current exchange and expected message sequence? | Handshake nonces, handshake time checks and per-session chat sequence numbers |
 
-Confidentiality is the one everybody remembers. The other three are where real protocols break.
+The deliberately narrow wording of the third row matters. Verifying a signature under a key does not establish whose key it is. That needs a trust decision outside the signature calculation.
 
-<Fig src="/media/notes/p2p-chat-chatview_sec.webp" alt="The terminal chat view after the secure session is established" caption="The session after the handshake, with its key and state in the terminal." wide />
+## Why RSA carries a key, not the conversation
 
-## The downgrade I added later
+The code generates RSA-2048 key pairs. Its OAEP helper explicitly selects SHA-256, while RSA-PSS signs a SHA-256 digest. A fresh 32-byte random session key becomes the AES-256 key.
 
-Going back to it, one gap stood out. A chat that starts in plaintext has to accept plaintext. So what happens if plaintext arrives *after* a secure session exists? A peer that holds the key has no reason to send it. Either something broke, or someone else is talking.
+There is a practical reason for this hybrid design. With a 2,048-bit RSA modulus and SHA-256, OAEP can encrypt at most `256 − 2 × 32 − 2 = 190` bytes. A 32-byte session key fits; an arbitrary chat history does not.
 
-Now two things guard that line. Plaintext after a secure session raises a downgrade warning instead of being shown like any other message. And `/strict` refuses plaintext entirely, for when you'd rather drop a message than read a forged one. Four tests pin both behaviours.
+The [library's OAEP documentation](https://www.pycryptodome.org/src/cipher/oaep) also makes an important distinction: encryption to a public key does not authenticate who created the ciphertext. Anyone with that public key can encrypt to it. The signature has a separate job.
 
-<Pull>A protocol that quietly accepts the weaker option has a weaker option, not a stronger one.</Pull>
+RSA and AES key lengths are not directly comparable measures of strength. “2,048 versus 256” is not a scoreboard; they are different constructions solving different parts of the exchange.
 
-Rekeying (`/rekey`) rotates to a fresh session key through the same handshake. The protocol messages are newline-delimited JSON, deliberately readable, because the point of the project is that you can inspect every byte and see which property each one buys.
+## The handshake has two local state machines
+
+Public keys are exchanged first. The inspected handshake then proceeds as follows:
+
+1. The initiator sends `KEY_REQ` with a random nonce, A.
+2. The responder returns `KEY_CHALLENGE`, echoing A and adding nonce B.
+3. The initiator generates the session key, encrypts it to the peer's RSA public key, and sends a signed `KEY_SET`.
+4. The responder checks the pending nonces, timestamp, signature, decrypted key length and derived key ID. It activates the session locally and sends an AES-GCM-protected acknowledgement.
+5. The initiator verifies the acknowledgement's context, nonce B, key ID and freshness before activating its own session.
+
+The peers therefore do not enter the established state at the same instruction. The acknowledgement is part of the protocol, not decoration added after “the encryption worked.”
+
+The signed `KEY_SET` payload contains the sender label, timestamp, both nonces, key ID and encrypted key. Both sides serialize that selected payload with sorted JSON keys and compact separators before signing or verifying it. A signature needs an agreed byte representation, not two objects that merely look equivalent on screen.
+
+The key ID is the first 16 hexadecimal characters of SHA-256 over the session key. It selects a session; it is not the key, a signature or a replacement for the GCM tag.
+
+## Inside the encrypted blob
+
+`crypto.py` returns a specific binary layout: **12 bytes of nonce, 16 bytes of tag, then ciphertext**. The plaintext being encrypted is the serialized inner JSON, containing sender, timestamp, sequence and text—not just the visible sentence.
+
+<figure class="wide">
+<svg viewBox="0 0 900 210" role="img" aria-labelledby="chat-blob-title chat-blob-desc">
+  <title id="chat-blob-title">The actual AES-GCM blob layout used by the chat</title>
+  <desc id="chat-blob-desc">A 12-byte nonce is followed by a 16-byte authentication tag and variable-length ciphertext. The complete blob is Base64 encoded for the outer JSON envelope. Associated data binds the message purpose and key ID without encrypting that context.</desc>
+  <style>{`.chat-byte{font:15px var(--mono);fill:var(--ink)}.chat-byte-title{font:600 18px var(--display);fill:var(--ink-hi)}`}</style>
+  <text x="20" y="30" class="chat-byte-title">Before Base64 and the outer JSON</text>
+  <rect x="20" y="62" width="156" height="74" fill="var(--surface)" stroke="var(--instrument)" />
+  <rect x="176" y="62" width="208" height="74" fill="var(--surface)" stroke="var(--action)" />
+  <rect x="384" y="62" width="496" height="74" fill="var(--surface)" stroke="var(--measured)" />
+  <text x="98" y="93" text-anchor="middle" class="chat-byte">nonce</text><text x="98" y="118" text-anchor="middle" class="chat-byte">12 bytes</text>
+  <text x="280" y="93" text-anchor="middle" class="chat-byte">tag</text><text x="280" y="118" text-anchor="middle" class="chat-byte">16 bytes</text>
+  <text x="632" y="93" text-anchor="middle" class="chat-byte">ciphertext</text><text x="632" y="118" text-anchor="middle" class="chat-byte">variable length</text>
+  <text x="20" y="178" class="chat-byte">AAD: P2P-CHAT-V2 | SEC_CHAT | key_id</text>
+</svg>
+<figcaption>The helper's actual byte order. Ciphertext width is schematic, not a fixed packet length.</figcaption>
+</figure>
+
+There are 28 bytes of nonce-and-tag overhead before Base64. If the serialized inner message contains `n` bytes, this binary blob contains `n + 28`; its Base64 form occupies `4 × ceil((n + 28) / 3)` characters before the outer envelope is added.
+
+Associated data, or AAD, binds the purpose and key ID. The implementation uses a context string such as `P2P-CHAT-V2|SEC_CHAT|key_id`, and a different purpose for `KEY_ACK`. That context is authenticated, not encrypted. Supplying the wrong context makes tag verification fail.
+
+A local smoke run of the actual helpers recovered the original message, rejected a changed ciphertext byte, and rejected the same blob under the wrong purpose. It also exercised OAEP key recovery and PSS verification. Those are checks of the primitives and their use here, not proof of the entire protocol against every attacker.
+
+GCM nonces must not repeat under a key. This implementation draws 12 random bytes for each encryption. Random generation is not a mathematical guarantee of uniqueness for an unlimited number of messages; key usage and collision risk still matter.
+
+## “Verified” is not a trust source
+
+The peer sends a public key and a claimed fingerprint. The receiver computes a SHA-256 fingerprint from the PEM text and stores the received key. If the key changes, the displayed verification state is reset.
+
+What establishes that key's connection to a person? Not the key's own claim.
+
+The UI provides `/verify`, optionally with an expected fingerprint. With no argument, the inspected implementation simply marks the currently received fingerprint as acknowledged. With an argument, it compares against the supplied value. A meaningful comparison needs an independently trusted reference, not the same untrusted connection supplying both the key and its supposed identity.
+
+The handshake is not gated on that verification flag. Consequently, the correct claim is not “RSA proves it is really them.” It is that the signatures verify possession of the private key corresponding to the public key the application has accepted.
+
+This is the same separation that matters in [Passless](/notes/passless): cryptographic validity and account or identity authorization are not interchangeable.
+
+## Time, sequence and replay are different checks
+
+`protocol.py` defines a ±180-second freshness window. The inspected code applies time checks during the key handshake and binds its pending nonces to that exchange.
+
+For encrypted chat, the receive handler checks the decrypted timestamp's **type**, but does not apply that age window. Instead, it requires a positive sequence number equal to the next expected value. Both counters reset when a session is activated.
+
+A local receive-path check confirmed the distinction: an authenticated message with an old timestamp and the expected sequence was accepted; a duplicate sequence and a skipped sequence were refused. So “timestamp freshness protects every chat message” would overstate the implementation.
+
+This is not just vocabulary. Age asks how long ago something happened. Sequence asks where it belongs in a session. A new message can arrive late; an old message can still be correctly ordered.
+
+## The plaintext boundary is a policy
+
+The later receive path warns when plaintext arrives after a secure session has been established. In strict mode, it drops that post-session plaintext instead of displaying it. Sending is also blocked before a secure session when strict mode is enabled.
+
+But the current implementation does **not** refuse incoming plaintext in every state:
+
+| Local state | Sending | Incoming plaintext |
+|---|---|---|
+| No session; strict off | Plaintext | Displayed |
+| No session; strict on | Refused | Still displayed in the inspected code |
+| Session established; strict off | Encrypted | Warned about, then displayed |
+| Session established; strict on | Encrypted | Warned about and dropped |
+
+The existing four pytest checks pass. A separate local receive-path smoke also checked the missing pre-session strict case. This page records the narrower behaviour; the application source remains unchanged during this website pass.
+
+<Pull>Encrypting the message does not decide when plaintext is acceptable.</Pull>
+
+## What the capture cannot prove
+
+The outer JSON still exposes message type, sender label, time, key ID and encoded length. IP addresses, ports, traffic timing and connection duration remain visible too. Content encryption is not traffic anonymity.
+
+Rekeying generates a new session key through the same exchange and resets session counters. It does not introduce an ephemeral Diffie–Hellman exchange or establish forward secrecy. If the RSA private key used to receive a recorded session-key envelope is later compromised, rotating AES keys through that same RSA key does not make those recordings safe.
+
+TCP also gives a byte stream, not one application message per network packet. The receive loop accumulates bytes and extracts complete newline-delimited envelopes. One `recv(4096)` can return part of a message, several messages, or boundaries that have nothing to do with the JSON lines.
+
+These details make the exercise useful to me: they are places where an attractive diagram or a green “secure” label can outrun the code. The packet capture starts the question; it does not finish the security argument.
+
+## Follow the layers
+
+Read [`crypto.py`](https://github.com/fh1m/secure-terminal-p2p-chat/blob/b776e21d4286b3ea5b8ec2bc1ed4935cba85a558/crypto.py) for primitives and byte layout, [`protocol.py`](https://github.com/fh1m/secure-terminal-p2p-chat/blob/b776e21d4286b3ea5b8ec2bc1ed4935cba85a558/protocol.py) for serialization and the freshness helper, then the actual handlers in [`main.py`](https://github.com/fh1m/secure-terminal-p2p-chat/blob/b776e21d4286b3ea5b8ec2bc1ed4935cba85a558/main.py) to see which checks are applied in each state.
+
+[NIST SP 800-38D](https://csrc.nist.gov/pubs/sp/800/38/d/final) specifies GCM and its associated-data model. [PyCryptodome's OAEP documentation](https://www.pycryptodome.org/src/cipher/oaep) explains the size limit and why public-key encryption needs a separate authentication argument. For real private communications, I would choose an established authenticated protocol rather than promote this coursework into a secure-messaging product.

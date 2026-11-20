@@ -8,17 +8,21 @@ import Explore from "../../components/note/Explore.astro";
 import { projects, elementById, type Project } from "../../data/elements";
 import { lessons } from "../../data/lessons";
 import { dims, rows } from "../../data/media";
+import { projectContext } from "../../data/project-context";
+import ArchiveFilm from "../../components/ArchiveFilm.astro";
 export const getStaticPaths = () => projects.map((p) => ({ params: { slug: p.slug }, props: { p } }));
 const { p } = Astro.props as { p: Project };
 const el = elementById[p.element];
 const ll = lessons.filter((l) => l.project === p.slug);
 const lead = p.hero ? { src: p.hero, alt: p.heroAlt ?? "", ...dims(p.hero) } : null;
-// the lead photo is the cover; without a bench, the first gallery picture is the artefact; nothing repeats
-const g0 = !p.bench && p.gallery?.[0] ? { src: p.gallery[0][0], alt: p.gallery[0][1], ...dims(p.gallery[0][0]) } : null;
-const stageImg = p.bench ? null : g0 ?? lead;
-const story = rows((p.gallery ?? []).slice(g0 ? 1 : 0));
+// The cover is not repeated as the artefact or in the picture sequence.
+const gallery = (p.gallery ?? []).filter(([src]) => src !== p.hero);
+const g0 = !p.bench && gallery[0] ? { src: gallery[0][0], alt: gallery[0][1], ...dims(gallery[0][0]) } : null;
+const stageImg = g0;
+const story = rows(gallery.slice(g0 ? 1 : 0));
 const i = el.projects.findIndex((x) => x.slug === p.slug);
 const next = el.projects[i + 1];
+const context = projectContext[p.slug];
 ---
 <Base title={p.title} nation={p.element} description={p.line ?? p.summary} crumb={{ href: `/${el.id}`, label: el.name, bn: el.bn }}>
   <main id="main" class="track-page">
@@ -30,27 +34,34 @@ const next = el.projects[i + 1];
         {p.line && <p class="line">{p.line}</p>}
         <p class="sum">{p.summary}</p>
       </div>
-      {lead && <img class="cover-img" src={lead.src} alt={lead.alt} width={lead.w} height={lead.h} fetchpriority="high" />}
+      {lead && <figure class="cover-media"><a class="image-view" href={lead.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${lead.alt}`}><img class="cover-img" src={lead.src} alt={lead.alt} width={lead.w} height={lead.h} fetchpriority="high" /></a><figcaption>{lead.alt}<span class="image-hint">Open image to inspect at full size.</span></figcaption></figure>}
     </header>
 
-    <section class="screen split" aria-label="The artefact">
+    <section class:list={["screen", "split", { "has-stage": !!p.bench || !!stageImg, "has-bench": !!p.bench }]} aria-label="The artefact">
       <div class="col-text">
         <h2>What I did</h2>
         <p class="txt">{p.role}</p>
         {p.figures && <ul class="nums" aria-label="Numbers">{p.figures.map(([n, l]) => <li><b>{n}</b><span>{l}</span></li>)}</ul>}
       </div>
-      <div class="col-stage">
+      {(p.bench || stageImg) && <div class="col-stage">
         {p.bench ? <Explore bench={p.bench[0]} title={p.bench[1]} hint={p.bench[2]} /> : stageImg && (
-          <figure class="lead"><img src={stageImg.src} alt={stageImg.alt} width={stageImg.w} height={stageImg.h} /><figcaption>{stageImg.alt}</figcaption></figure>
+          <figure class="lead"><a class="image-view" href={stageImg.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${stageImg.alt}`}><img src={stageImg.src} alt={stageImg.alt} width={stageImg.w} height={stageImg.h} loading="lazy" /></a><figcaption>{stageImg.alt}<span class="image-hint">Open image to inspect at full size.</span></figcaption></figure>
         )}
-      </div>
+      </div>}
     </section>
+
+    {context && <section class="screen engineering-context" aria-label="Engineering context">
+      <div><h2>The problem</h2><p>{context.problem}</p></div>
+      <div><h2>How I approached it</h2><p>{context.approach}</p><h3>Where the claim stops</h3><p>{context.boundary}</p></div>
+    </section>}
+    {p.slug === "aerd" && <section class="screen"><ArchiveFilm name="engine-test" caption="Static engine-test footage from the supplied AERD archive. Propulsion is team work; my responsibilities were guidance, data acquisition, trajectory and recovery." /></section>}
+    {p.slug === "duburi" && <section class="screen campaign"><div><h2>The people between runs</h2><p>Before the score sheet: data collection, test footage, debugging at a shared desk. From the team's own films and my preserved work archive.</p><a href="/notes/the-2025-workbench">Read the 2025 workbench record</a></div><ArchiveFilm name="vision-lab" caption="2025 team-film excerpt: working through the vision dataset with teammates. Original on-screen captions retained." /></section>}
 
     {story.map((row) => (
       <section class="screen pics" aria-label="In pictures">
         <div class:list={["pic-row", { many: row.length > 1 }]}>
           {row.map((im) => (
-            <figure><img src={im.src} alt={im.cap} width={im.w} height={im.h} loading="lazy" style={`max-width:min(100%, ${im.w}px)`} /><figcaption>{im.cap}</figcaption></figure>
+            <figure><a class="image-view" href={im.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${im.cap}`}><img src={im.src} alt={im.cap} width={im.w} height={im.h} loading="lazy" style={`max-width:min(100%, ${im.w}px)`} /></a><figcaption>{im.cap}<span class="image-hint">Open image to inspect at full size.</span></figcaption></figure>
           ))}
         </div>
       </section>
@@ -64,7 +75,7 @@ const next = el.projects[i + 1];
           <p class="txt">{l.truth}</p>
           {l.refs.some((r) => r.href.includes("/commit/"))
             ? <p class="fixed">Corrected in {l.refs.filter((r) => r.href.includes("/commit/")).map((r, k) => <>{k > 0 && ", "}<a class="h" href={r.href}>{r.label}</a></>)}. <a href={`/lessons/${l.slug}`}>The full lesson</a></p>
-            : <p class="fixed">The fix is in <a href={l.refs[0].href}>{l.refs[0].label}</a>. <a href={`/lessons/${l.slug}`}>The full lesson</a></p>}
+            : <p class="fixed">Archived source: <a href={l.refs[0].href}>{l.refs[0].label}</a>. <a href={`/lessons/${l.slug}`}>Read the finding</a></p>}
         </div>
       </section>
     ))}
@@ -90,6 +101,7 @@ const next = el.projects[i + 1];
           {p.repo && <><dt>Code</dt><dd><a href={`https://github.com/${p.repo}`}>github.com/{p.repo}</a></dd></>}
           {p.private && <><dt>Code</dt><dd>Private for now, so it is described here and not linked.</dd></>}
         </dl>
+        <p class="media-credit"><a href="/media/CREDITS.md">Media sources and adaptations</a></p>
       </div>
       <div>
         {p.notes.length > 0 && <><h2>Read more</h2><ul class="more">{p.notes.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></>}
@@ -107,42 +119,58 @@ const next = el.projects[i + 1];
   .cover { border: 0; grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; }
   .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
   .cover-img { width: 100%; height: auto; max-height: 56svh; object-fit: contain; border-radius: var(--r-2); }
+  .cover-media { margin:0; min-width:0; }
+  .image-view { display:grid; justify-items:center; max-width:100%; min-width:0; border-radius:var(--r-2); }
+  .cover-media figcaption, .media-credit { font:400 var(--t-1)/1.5 var(--sans); color:var(--dim); margin-top:.7rem; }
+  .image-hint { display:block; color:var(--action); font:400 .8rem/1.5 var(--sans); margin-top:.35rem; }
   .cover-text { max-width: 44rem; }
   .kicker { font: 500 var(--t-1) var(--sans); color: var(--c); margin: 0 0 .8rem; }
-  h1 { font: 600 clamp(2rem, 4.2vw, 3.2rem)/1.08 var(--sans); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.02em; }
-  .line { font: 500 clamp(1.05rem, 1.5vw, 1.25rem)/1.45 var(--sans); color: #fff; margin: 0 0 1rem; max-width: 36ch; }
-  .sum { font: 500 var(--t0)/1.6 var(--sans); color: #c8c8c8; max-width: 56ch; margin: 0; }
-  h2 { font: 600 clamp(1.3rem, 2.2vw, 1.75rem)/1.2 var(--sans); color: #fff; margin: 0 0 1.2rem; letter-spacing: -.01em; }
-  .txt { font: 500 var(--t0)/1.7 var(--sans); color: #e2e2e2; max-width: 52ch; }
-  .split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 4vw; align-items: start; }
-  .col-stage :global(.x) { margin: 0; }
-  .lead { margin: 0; } .lead figcaption { margin-top: .6rem; font: 500 var(--t-1)/1.5 var(--sans); color: #a3a3a3; } .lead img { width: 100%; height: auto; max-height: 76svh; object-fit: contain; display: block; border-radius: var(--r-3); }
+  h1 { font:600 clamp(1.75rem,2.5vw,2.25rem)/1.18 var(--display); color:var(--ink-hi); margin:0 0 .65rem; letter-spacing:-.02em; }
+  .line { font:500 1.0625rem/1.5 var(--sans); color:var(--ink-hi); margin:0 0 .65rem; max-width:65ch; }
+  .sum { font:400 var(--body-size)/var(--lh) var(--sans); color:var(--ink); max-width:76ch; margin:0; }
+  h2 { font:600 clamp(1.25rem,1.55vw,1.375rem)/1.3 var(--display); color:var(--ink-hi); margin:0 0 .65rem; letter-spacing:-.01em; }
+  .txt { font:400 var(--body-size)/var(--lh) var(--sans); color:var(--ink); max-width:78ch; }
+  .split { grid-template-columns:minmax(0,1fr); gap:4vw; align-items:start; }
+  .split.has-stage { grid-template-columns:minmax(0,5fr) minmax(0,7fr); }
+  .col-stage :global(.x) { margin:0; }
+  .col-stage { min-width:0; }
+  .split.has-bench { grid-template-columns:minmax(0,1fr); gap:1rem; }
+  .has-bench .col-text { display:grid; grid-template-columns:minmax(8rem,1fr) minmax(0,3fr); gap:.5rem 2rem; align-items:baseline; }
+  .has-bench .txt { margin:0; }
+  .has-bench .nums { grid-column:1/-1; margin:.5rem 0 0; }
+  .lead { margin:0; } .lead figcaption { margin-top:.6rem; font:400 var(--t-1)/1.5 var(--sans); color:var(--dim); } .lead img { width:100%; height:auto; max-height:76svh; object-fit:contain; display:block; border-radius:var(--r-3); }
   .nums { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 1.4rem 2rem; }
   .nums li { display: grid; gap: .2rem; }
   .nums b { font: 500 clamp(1.4rem, 2.4vw, 2rem)/1.1 var(--mono); color: var(--c); font-variant-numeric: tabular-nums; }
-  .nums span { font: 500 var(--t-1)/1.45 var(--sans); color: #a3a3a3; }
+  .nums span { font:400 var(--t-1)/1.45 var(--sans); color:var(--dim); }
   .pics { justify-items: center; }
   .pic-row { display: flex; gap: 2rem; align-items: center; justify-content: center; width: 100%; }
   .pic-row figure { margin: 0; display: grid; gap: .8rem; justify-items: center; min-width: 0; max-width: 100%; flex: 0 1 auto; }
   .pic-row img { width: auto; height: auto; max-width: 100%; max-height: 64svh; border-radius: var(--r-3); display: block; }
   .pic-row.many img { max-height: 64svh; }
-  .pic-row figcaption { font: 500 var(--t-1)/1.5 var(--sans); color: #a3a3a3; max-width: 56ch; text-align: center; }
+  .pic-row figcaption { font:400 var(--t-1)/1.5 var(--sans); color:var(--dim); max-width:56ch; text-align:center; }
   .statement { justify-items: center; }
   .st { max-width: 52rem; }
   .st.wide { max-width: none; width: 100%; }
   .believed { font: 500 clamp(1.1rem, 1.7vw, 1.4rem)/1.45 var(--sans); margin: 0 0 1.2rem; }
-  .wrong { color: #a3a3a3; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 3px; }
-  .fixed { font: 500 var(--t-1)/1.6 var(--sans); color: #a3a3a3; } .fixed a { color: #fff; margin-right: .6rem; }
+  .wrong { color:var(--dim); text-decoration:line-through; text-decoration-color:var(--failure); text-decoration-thickness:3px; }
+  .fixed { font:400 var(--t-1)/1.6 var(--sans); color:var(--dim); } .fixed a { color:var(--action); margin-right:.6rem; }
   .h { font-family: var(--mono); }
   .cons canvas { width: 100%; height: 220px; display: block; cursor: crosshair; }
-  .read { min-height: 3em; color: #a3a3a3; font-size: var(--t-1); }
+  .read { min-height:3em; color:var(--dim); font-size:var(--t-1); }
+  .engineering-context, .campaign { grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:4vw; }
+  .engineering-context p, .campaign p { font:400 var(--body-size)/var(--lh) var(--sans); color:var(--ink); max-width:85ch; }
+  .engineering-context h3 { font:600 var(--t1)/1.3 var(--display); color:var(--action); margin:1rem 0 .55rem; }
+  .campaign :global(.archive-film) { margin:0; }
+  @media(max-width:900px) { .engineering-context, .campaign { grid-template-columns:1fr; } }
   .end { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 4vw; }
   dl { display: grid; grid-template-columns: 10rem 1fr; gap: .7rem 1.4rem; margin: 0; font: 400 var(--t0)/1.55 var(--sans); }
-  dt { color: #8c8c8c; } dd { margin: 0; color: #e2e2e2; } dd a, .more a { color: #fff; }
+  dt { color:var(--dim); } dd { margin:0; color:var(--ink); } dd a, .more a { color:var(--action); }
   .more { padding-left: 1.1rem; margin: 0 0 2rem; display: grid; gap: .4rem; font: 400 var(--t0)/1.5 var(--sans); }
   @media (max-width: 900px) {
-    .split, .end, .cover.has-img { grid-template-columns: 1fr; }
+    .split, .split.has-stage, .end, .cover.has-img { grid-template-columns:1fr; }
     .pic-row { flex-direction: column; }
     dl { grid-template-columns: 1fr; gap: .1rem; } dd { margin-bottom: .6rem; }
   }
+  @media(max-width:600px) { .has-bench .col-text { grid-template-columns:1fr; gap:.25rem; } }
 </style>

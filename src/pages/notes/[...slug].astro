@@ -1,11 +1,14 @@
 ---
 /**
- * A note as a sequence of screens: a full-bleed cover, then one scene per idea (built by
- * src/lib/rehype-scenes.mjs). The stage beside the text follows the paragraph being read.
+ * Continuous technical articles. Source order carries the story; wide evidence
+ * can break out of the reading column without becoming a separate slideshow.
  */
 import Base from "../../layouts/Base.astro";
 import { getCollection, render } from "astro:content";
 import { seriesById } from "../../data/series";
+import { seriesColours } from "../../data/palette";
+import { dims } from "../../data/media";
+import { formatArchiveDate } from "../../lib/date";
 
 export async function getStaticPaths() {
   const notes = await getCollection("notes");
@@ -16,123 +19,144 @@ export async function getStaticPaths() {
   });
 }
 const { note, parts, prev, next } = Astro.props;
-const { Content } = await render(note);
+const { Content, headings } = await render(note);
+const sections = headings.filter((heading) => heading.depth === 2);
 const d = note.data;
 const ser = seriesById[d.series];
-const ACCENT: Record<string, string> = { workshop: "#e0b062", water: "#4f8fe0", sight: "#ef6a4f", time: "#a98cf0", ground: "#79b35f", air: "#eaa63b" };
-const when = new Date(d.date + (d.date.length === 7 ? "-01" : "")).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+const when = formatArchiveDate(d.date);
 // A cover image the body also shows would appear twice; the body's copy sits where the text points
 // at it, so that one stays and the cover goes text-only.
 const body = note.body ?? "";
-const cover = d.hero && !body.includes(`"${d.hero}"`) ? d.hero : undefined;
+const coverSrc = d.hero && !body.includes(`"${d.hero}"`) ? d.hero : undefined;
+const cover = coverSrc ? { src:coverSrc, alt:d.heroAlt ?? "", ...dims(coverSrc) } : null;
 const minutes = Math.max(1, Math.round(body.replace(/^import .*$/gm, "").split(/\s+/).filter((w) => /[a-z0-9]/i.test(w)).length / 200));
 ---
 <Base title={d.title} description={d.dek} bodyClass="note-page" crumb={{ href: `/notes#${ser.id}`, label: `${ser.title}, part ${d.part} of ${parts.length}`, bn: ser.bn }} progress>
-  <main id="main" class="note" style={`--acc:${ACCENT[ser.domain] ?? "#4f8fe0"}`}>
+  <main id="main" class="note" style={`--acc:${seriesColours[ser.domain]}`}>
 
     <header class:list={["cover", { "has-img": !!cover }]}>
       <div class="cover-text">
-        <p class="kicker"><time datetime={d.date}>{when}</time>, {minutes} minute read</p>
+        <p class="kicker">Work record: <time datetime={d.date}>{when}</time>, {minutes} minute read</p>
         <h1>{d.title}</h1>
         <p class="dek">{d.dek}</p>
+        {d.repo && <p class="repo-link"><a href={`https://github.com/fh1m/${d.repo}`}>Source: fh1m/{d.repo} ↗</a></p>}
       </div>
-      {cover && <img class:list={["cover-img", { plot: d.heroPlot }]} src={cover} alt={d.heroAlt ?? ""} fetchpriority="high" />}
+      {cover && <figure class="cover-media"><a class="image-view" href={cover.src} target="_blank" rel="noreferrer" aria-label={`Open full-size cover image: ${d.heroAlt ?? d.title}`}><img class:list={["cover-img", { plot:d.heroPlot }]} src={cover.src} alt={cover.alt} width={cover.w} height={cover.h} fetchpriority="high" /></a><figcaption>{cover.alt}<span class="image-hint">Open image to inspect at full size.</span></figcaption></figure>}
     </header>
+    <div class="reading-layout">
+      <aside class="reading-tools" aria-label="Article navigation and sources">
+        {sections.length > 1 && <details class="reading-map" open>
+          <summary>In this article <span>{sections.length}</span></summary>
+          <nav aria-label="In this article"><ol>{sections.map((section) => <li><a href={`#${section.slug}`}>{section.text}</a></li>)}</ol></nav>
+        </details>}
+        <details class="reading-sources" open>
+          <summary>Code & sources</summary>
+          {d.sources.length > 0 && <ul class="sources">{d.sources.map((source) => <li><a href={source.href}>{source.label}</a></li>)}</ul>}
+          <p class="media-link"><a href="/media/CREDITS.md">Media sources and adaptations</a></p>
+        </details>
+      </aside>
+      <article class="prose"><Content /></article>
+    </div>
 
-    <article class="scenes"><Content /></article>
-
-    <footer class="scene end">
+    <footer class="end">
       <div class="end-col">
         <h2>{ser.title}</h2>
         <ol class="chapters">{parts.map((p) => <li><a href={`/notes/${p.id}`} aria-current={p.id === note.id ? "page" : undefined}><span class="pn">{p.data.part}</span><span>{p.data.title}</span></a></li>)}</ol>
         <p class="moves">{prev && <a href={`/notes/${prev.id}`} rel="prev" class="pill ghost">Previous: {prev.data.title}</a>}{next && <a href={`/notes/${next.id}`} rel="next" class="pill">Next: {next.data.title}</a>}</p>
       </div>
-      <div class="end-col">
-        {d.repo && <><h2>Code</h2><p><a href={`https://github.com/fh1m/${d.repo}`}>github.com/fh1m/{d.repo}</a></p></>}
-        {d.sources.length > 0 && <><h2>Sources</h2><ul class="sources">{d.sources.map((s) => <li><a href={s.href}>{s.label}</a></li>)}</ul></>}
-      </div>
     </footer>
   </main>
 </Base>
-
 <script>
-  // the stage follows the beat being read; runs on every page load (ClientRouter swaps pages)
-  document.addEventListener("astro:page-load", () => {
-    const split = document.querySelectorAll<HTMLElement>(".scene-split");
-    if (!split.length && !document.querySelector(".scene")) return;
-    split.forEach((sc) => sc.querySelector(".stage-item")?.classList.add("on"));
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        const beat = e.target as HTMLElement, sc = beat.closest(".scene")!;
-        sc.querySelectorAll<HTMLElement>(".stage-item").forEach((it) => it.classList.toggle("on", it.dataset.step === beat.dataset.step));
-      }
-    }, { rootMargin: "-45% 0px -45% 0px" });
-    document.querySelectorAll(".scene-split .beat").forEach((b) => io.observe(b));
-    const seen = new IntersectionObserver((entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")), { threshold: 0.15 });
-    document.querySelectorAll(".scene").forEach((s) => seen.observe(s));
-  });
+  const narrowReading = matchMedia("(max-width:900px)");
+  const readingGroups = document.querySelectorAll<HTMLDetailsElement>(".reading-tools > details");
+  const setReadingLayout = () => readingGroups.forEach((group) => { group.open = !narrowReading.matches; });
+  setReadingLayout();
+  narrowReading.addEventListener("change", setReadingLayout);
+  const sectionLinks = new Map<string, HTMLAnchorElement>();
+  for (const link of document.querySelectorAll<HTMLAnchorElement>(".reading-map a")) sectionLinks.set(link.hash.slice(1), link);
+  let currentSection: HTMLAnchorElement | undefined;
+  const readingHeadings = document.querySelectorAll<HTMLElement>(".prose h2[id]");
+  const readingBar = document.querySelector<HTMLElement>(".sbar")!;
+  let readingFrame = 0;
+  const updateSection = () => {
+    readingFrame = 0;
+    const edge = readingBar.offsetHeight + 24;
+    let next: HTMLAnchorElement | undefined;
+    for (const heading of readingHeadings) {
+      if (heading.getBoundingClientRect().top > edge) break;
+      next = sectionLinks.get(heading.id) ?? next;
+    }
+    if (next === currentSection) return;
+    currentSection?.removeAttribute("aria-current");
+    next?.setAttribute("aria-current", "location");
+    currentSection = next;
+  };
+  const queueSectionUpdate = () => { if (!readingFrame) readingFrame = requestAnimationFrame(updateSection); };
+  addEventListener("scroll", queueSectionUpdate, { passive:true });
+  addEventListener("resize", queueSectionUpdate);
+  new ResizeObserver(queueSectionUpdate).observe(document.querySelector(".prose")!);
+  queueSectionUpdate();
 </script>
 
+
 <style>
-  .note { --acc: #4f8fe0; position: relative; }
-  .bn { font-family: var(--bangla); color: var(--acc); }
-
-  .cover { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; padding: clamp(3rem, 8vh, 5.5rem) var(--gutter) clamp(2rem, 5vh, 3.5rem); }
-  .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
-  .cover-img { width: 100%; height: auto; max-height: 52svh; object-fit: contain; border-radius: var(--r-2); }
-  .cover-img.plot { filter: invert(1) hue-rotate(180deg); }
-  .cover-text { max-width: 44rem; }
-  .kicker { font: 500 var(--t-1) var(--sans); color: var(--acc); margin: 0 0 .8rem; }
-  h1 { font: 600 clamp(2rem, 4.2vw, 3.2rem)/1.08 var(--sans); color: #fff; margin: 0 0 1rem; letter-spacing: -.015em; max-width: 22ch; }
-  .dek { font: 400 clamp(1.05rem, 1.5vw, 1.25rem)/1.5 var(--sans); color: #d0d0d0; max-width: 52ch; margin: 0; }
-
-  .scenes :global(.scene) { position: relative; padding: clamp(3rem, 7vh, 5rem) var(--gutter); display: grid; align-content: center; }
-  .scenes :global(.scene + .scene) { border-top: 1px solid rgb(255 255 255 / .06); }
-  .scenes :global(.scene-split) { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 4vw; align-items: start; align-content: start; }
-  .scenes :global(.scene-stage) { position: sticky; top: 4rem; height: calc(100svh - 5rem); display: grid; align-items: center; }
-  .scenes :global(.stage-inner) { display: grid; }
-  .scenes :global(.stage-item) { grid-area: 1 / 1; opacity: 0; transform: scale(.98); transition: opacity .6s ease, transform .6s ease; pointer-events: none; max-height: 86svh; overflow: auto; }
-  .scenes :global(.stage-item.on) { opacity: 1; transform: none; pointer-events: auto; }
-  .scenes :global(.stage-item > *) { margin: 0 !important; max-width: none !important; width: 100%; }
-  .scenes :global(.stage-item img) { max-height: 74svh; width: 100%; object-fit: contain; }
-  .scenes :global(.beat) { padding: 0 0 1.4rem; }
-  .scenes :global(.scene-split .beat + .beat) { padding-top: 22vh; }
-  .scenes :global(.scene-split .scene-text) { padding: 0 0 20vh; }
-  .scenes :global(.scene-text h2) { font: 600 clamp(1.3rem, 2.2vw, 1.75rem)/1.2 var(--sans); color: #fff; margin: 0 0 1rem; max-width: 32ch; }
-  .scenes :global(.scene-text p), .scenes :global(.scene-text li) { font: 400 var(--t0)/1.7 var(--sans); color: #d6d6d6; max-width: 62ch; }
-  .scenes :global(.scene-text strong) { color: #fff; }
-  .scenes :global(.scene-text a) { color: #fff; text-decoration-color: var(--acc); }
-  .scenes :global(.scene-statement) { justify-items: start; }
-  .scenes :global(.scene-statement .scene-text) { max-width: 52rem; width: 100%; }
-  
-  .scenes :global(.scene-intro p:first-child) { font-size: var(--t1); line-height: 1.55; color: #fff; }
-  .scenes :global(.pull) { margin: 2rem 0; padding: 0; border: 0; }
-  .scenes :global(.pull p) { font: 500 clamp(1.15rem, 1.8vw, 1.45rem)/1.4 var(--sans) !important; color: #fff !important; max-width: 40ch !important; }
-  .scenes :global(.pull) { border-left: 2px solid var(--acc) !important; padding-left: 1.2rem !important; }
-  .scenes :global(table) { width: 100%; font: 400 var(--t-1)/1.5 var(--mono); }
-  .scenes :global(pre) { font-size: clamp(.95rem, 1.3vw, 1.2rem); padding: 1.4rem; background: #0c0c0e; border-radius: var(--r-3); overflow-x: auto; }
-
-  .end { padding: clamp(3rem, 7vh, 5rem) var(--gutter); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 4vw; align-content: center; border-top: 1px solid rgb(255 255 255 / .08); }
-  .end h2 { font: 600 var(--t1) var(--sans); color: var(--acc); margin: 0 0 1rem; }
-  .chapters { list-style: none; margin: 0 0 2rem; padding: 0; display: grid; gap: .3rem; }
-  .chapters a { display: grid; grid-template-columns: 2.4rem 1fr; gap: .6rem; padding: .7rem 0; border-bottom: 1px solid rgb(255 255 255 / .08); text-decoration: none; font: 400 var(--t0)/1.4 var(--sans); color: #8c8c8c; }
-  .chapters a:hover, .chapters a[aria-current="page"] { color: #fff; }
-  .chapters .pn { font-family: var(--mono); color: var(--acc); }
-  .moves { display: flex; flex-wrap: wrap; gap: .6rem; }
-  .sources { margin: 0 0 2rem; padding-left: 1.1rem; display: grid; gap: .4rem; font: 500 var(--t-1)/1.5 var(--sans); }
-  .sources a, .end-col > p a:not(.pill) { color: #e2e2e2; }
-
-  @media (max-width: 900px) {
-    .cover.has-img { grid-template-columns: 1fr; }
-    .scenes :global(.scene-split) { grid-template-columns: 1fr; }
-    /* phones: no sticky stage; every figure sits in the flow above the text of its scene */
-    .scenes :global(.scene-stage) { position: static; height: auto; order: -1; }
-    .scenes :global(.stage-inner) { gap: 1.4rem; }
-    .scenes :global(.stage-item) { grid-area: auto; opacity: 1; transform: none; max-height: none; overflow: visible; pointer-events: auto; }
-    .scenes :global(.scene-split .beat + .beat) { padding-top: 0; }
-    .scenes :global(.scene-split .scene-text) { padding: 0; }
-    .end { grid-template-columns: 1fr; }
-    }
-  @media (prefers-reduced-motion: reduce) { .scenes :global(.scene) { opacity: 1; transform: none; transition: none; } .scenes :global(.stage-item) { transition: none; } }
+  .note { --acc:var(--instrument); position:relative; max-width:var(--page-width); margin-inline:auto; }
+  .cover { display:grid; grid-template-columns:minmax(0,1fr); gap:2rem; align-items:center; padding:var(--section-gap) var(--gutter); border-bottom:1px solid var(--line); }
+  .cover.has-img { grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); }
+  .cover-text { min-width:0; }
+  .cover-text .repo-link { grid-column:1/-1; margin:.9rem 0 0; font:500 .875rem/1.5 var(--mono); overflow-wrap:anywhere; }
+  .cover-text .repo-link a { color:var(--action); text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:.3em; }
+  .kicker { font:400 var(--t-1)/1.5 var(--interface); color:var(--acc); margin:0 0 .65rem; }
+  h1 { font:600 clamp(1.75rem,2.3vw,2rem)/1.18 var(--display); color:var(--ink-hi); margin:0 0 .65rem; letter-spacing:-.025em; max-width:38ch; }
+  .dek { font:400 1rem/1.55 var(--sans); color:var(--ink); max-width:74ch; margin:0; }
+  .cover:not(.has-img) .cover-text { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); column-gap:clamp(1.5rem,4vw,4rem); align-items:start; }
+  .cover:not(.has-img) .kicker, .cover:not(.has-img) h1 { grid-column:1; }
+  .cover:not(.has-img) .dek { grid-column:2; grid-row:1/span 2; align-self:center; max-width:none; }
+  .cover-media { margin:0; min-width:0; }
+  .cover-img { display:block; width:100%; height:auto; max-height:42svh; object-fit:contain; border-radius:var(--r-2); }
+  .cover-img.plot { filter:invert(1) hue-rotate(180deg); }
+  .image-view { display:block; border-radius:var(--r-2); }
+  .cover-media figcaption { color:var(--dim); font:400 var(--t-1)/1.5 var(--sans); margin-top:.6rem; }
+  .reading-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(13rem,17rem); gap:clamp(1.5rem,3vw,3rem); padding:1.35rem var(--gutter) 2rem; align-items:start; }
+  .reading-tools { grid-column:2; grid-row:1; position:sticky; top:calc(var(--header-height) + 1rem); max-height:calc(100svh - var(--header-height) - 2rem); overflow:auto; scrollbar-width:thin; padding-left:1rem; border-left:1px solid var(--line); min-width:0; }
+  .reading-tools details + details { margin-top:1rem; padding-top:.75rem; border-top:1px solid var(--line); }
+  .reading-tools summary { cursor:pointer; display:grid; grid-template-columns:auto 1fr auto; gap:.65rem; padding:.4rem 0 .65rem; font:500 var(--t-1)/1.4 var(--interface); color:var(--instrument); }
+  .reading-tools summary span { color:var(--dim); font-weight:400; }
+  .reading-tools summary::before { content:"+"; }
+  .reading-tools details[open] summary::before { content:"−"; }
+  .reading-map ol { display:grid; gap:.4rem; padding:0 0 .4rem 1.45rem; margin:0; font:400 var(--t-1)/1.45 var(--sans); }
+  .reading-map a { color:var(--ink); text-decoration:none; }
+  .reading-map a:hover { color:var(--instrument); text-decoration:underline; }
+  .reading-map a[aria-current="location"] { color:var(--instrument); text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:.25em; }
+  .media-link { font:400 var(--t-2)/1.5 var(--interface); margin:.25rem 0 .75rem; }
+  .image-hint { display:block; color:var(--action); font-size:.8rem; margin-top:.3rem; }
+  .prose { display:flow-root; grid-column:1; grid-row:1; min-width:0; }
+  .prose > :global(*) { min-width:0; max-width:100%; }
+  .prose > :global(p), .prose :global(li) { font:400 var(--body-size)/var(--lh) var(--sans); color:var(--ink); }
+  .prose > :global(p) { margin:0 0 .7rem; max-width:100ch; }
+  .prose :global(h2) { clear:both; font:600 clamp(1.25rem,1.55vw,1.375rem)/1.3 var(--display); margin:1.1rem 0 .55rem; letter-spacing:-.015em; }
+  .prose :global(h3) { font:600 1.0625rem/1.35 var(--display); margin:.9rem 0 .45rem; }
+  .prose :global(ul), .prose :global(ol) { margin:.2rem 0 1rem; padding-left:1.3rem; max-width:100ch; }
+  .prose :global(li + li) { margin-top:.35rem; }
+  .prose > :global(.wide), .prose > :global(.gallery), .prose > :global(.x), .prose > :global(.reading-region), .prose > :global(pre) { clear:both; width:100%; margin:1rem 0 1.2rem; }
+  .prose :global(.fig img) { display:block; width:auto; max-width:100%; max-height:75svh; height:auto; margin-inline:auto; object-fit:contain; }
+  .prose :global(figcaption) { font:400 var(--t-1)/1.55 var(--sans); color:var(--dim); margin-top:.55rem; max-width:84ch; }
+  .prose :global(.pull) { margin:1rem 0; padding:.5rem 0 .5rem 1rem; border-left:2px solid var(--acc); }
+  .prose :global(.pull p) { margin:0; font-size:1.1rem; }
+  .prose :global(pre) { padding:1.1rem; background:var(--surface); font:400 .9rem/1.6 var(--mono); overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-2); }
+  .prose :global(.reading-region) { min-width:0; max-width:100%; overflow-x:auto; }
+  .prose :global(.reading-diagram > svg) { display:block; width:100%; min-width:var(--diagram-width); max-width:none; height:auto; }
+  .prose :global(.reading-table > table) { width:100%; font:400 var(--t-1)/1.5 var(--mono); margin:0; }
+  .end { padding:var(--section-gap) var(--gutter); border-top:1px solid var(--line); background:var(--surface); }
+  .end h2 { font:600 var(--t1)/1.3 var(--display); margin:0 0 .8rem; }
+  .chapters { list-style:none; margin:0 0 1.25rem; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 2rem; }
+  .chapters a { display:grid; grid-template-columns:2rem minmax(0,1fr); gap:.6rem; padding:.7rem 0; border-bottom:1px solid var(--line-2); text-decoration:none; font:400 var(--t0)/1.5 var(--sans); color:var(--ink); }
+  .chapters a:hover, .chapters a[aria-current="page"] { color:var(--action); }
+  .chapters .pn { font-family:var(--mono); color:var(--acc); }
+  .moves { display:flex; flex-wrap:wrap; gap:.6rem; }
+  .end-col { min-width:0; }
+  .sources { margin:0 0 .75rem; padding-left:1.1rem; display:grid; gap:.5rem; font:400 var(--t-2)/1.5 var(--sans); }
+  @media(max-width:900px) { .cover.has-img, .reading-layout { grid-template-columns:minmax(0,1fr); } .cover:not(.has-img) .cover-text { display:block; } .reading-tools { grid-column:1; grid-row:1; position:static; max-height:none; overflow:visible; padding:0 0 .5rem; border-left:0; border-bottom:1px solid var(--line); } .prose { grid-column:1; grid-row:2; } }
+  @media(max-width:600px) { .chapters { grid-template-columns:minmax(0,1fr); } }
 </style>

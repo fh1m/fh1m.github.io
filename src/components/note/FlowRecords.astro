@@ -1,0 +1,30 @@
+---
+import data from "../../data/mongla.json";
+const names: Record<string, string> = { lat: "Lateral", fwd: "Forward", back: "Back" };
+---
+<div class="records">
+  <table>
+    <caption>Recorded slide outputs · 7 September 2026</caption>
+    <thead><tr><th scope="col">Record</th><th scope="col">Distance magnitude</th><th scope="col">Implied height</th></tr></thead>
+    <tbody>
+      {data.flowRuns.map((r) => {
+        // Protocol comes from measured-bars §13, not an error-threshold outlier filter.
+        const diagnostic = r.when === "04:20:05";
+        return <tr>
+          <th scope="row">{diagnostic ? "Diagonal" : names[r.phase] ?? r.phase}<small>{r.when}{diagnostic && ` · ${r.axis_deg.toFixed(1)}°`}</small></th>
+          <td>{(r.abs_m * 100).toFixed(2)} cm</td>
+          <td>{diagnostic ? "Not comparable" : `${r.implied_h_m.toFixed(3)} m`}</td>
+        </tr>;
+      })}
+    </tbody>
+  </table>
+</div>
+<style>
+  .records { margin:1rem 0; }
+  table { width:100%; max-width:40rem; border-collapse:collapse; margin:0; font:400 var(--t-1)/1.45 var(--sans); }
+  caption { text-align:left; color:var(--ink-hi); font-weight:600; margin-bottom:.5rem; }
+  th,td { padding:.6rem .35rem; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); }
+  thead th { color:var(--ink-hi); font-weight:600; } tbody th { color:var(--ink); font-weight:400; }
+  td { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  small { display:block; color:var(--dim); font:400 .75rem/1.5 var(--mono); margin-top:.15rem; }
+</style>

@@ -144,9 +144,9 @@ export const lessons: Lesson[] = [
     title: "A filter with no memory",
     driving: "A 2024 thrust-vector-control gimbal: an MPU6050 and two SG90 servos, PID on the tilt. Read again in 2026.",
     believed: "v1 fuses gyro and accelerometer with a complementary filter (0.96 / 0.04).",
-    truth: "Each call declares a new local `angleX` and reads it before it exists, so the filter has no memory and the estimate is undefined. v2 dropped the gyro entirely (accelerometer-only angles, so motor vibration goes straight into the angle) and integrated over milliseconds, so the I and D gains carried a factor-1000 unit error, with no anti-windup.",
+    truth: "Each call creates a new uninitialized local angleX, rather than retaining the previous estimate. V2 separates X and Y loops but uses accelerometer-only angles. Its I and D gains use milliseconds, so their numerical values cannot be copied unchanged into a seconds-based loop. Servo commands are clamped; the error integrals are not.",
     lesson: "State has to live somewhere. And units are part of the gain.",
-    recommendation: "Keep filter state outside the loop; write dt in seconds; clamp the integral.",
+    recommendation: "Persist filter state; specify time and gain units; handle a zero interval and actuator saturation.",
     refs: [{ label: "gist v1 (2024-09-12)", href: "https://gist.github.com/fh1m/e3a64a4dc321eee82a6d761142e63ba2" }, { label: "gist V2 (2024-09-13)", href: "https://gist.github.com/fh1m/139d52f53c70b3b8b7f45b944ee0ea1c" }],
   },
   {

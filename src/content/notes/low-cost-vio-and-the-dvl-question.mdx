@@ -45,6 +45,6 @@ A vehicle's orientation lives on a curved space: rotations don't add like number
 
 ## The DVL question
 
-Does Mongla need the expensive sensor? A spec sheet can't answer that. Only whether the cheap estimate clears the bar the mission needs, measured in water, can. Until then the honest state is written down: the board can't yet even accept an external velocity measurement, so a 1.09 cm-good estimate currently has nowhere to go. It's on the roadmap as a pull request, not hidden.
+Does Mongla need the expensive sensor? A spec sheet can't answer that. Only whether the cheap estimate clears the bar the mission needs, measured in water, can. The camera's three 30 cm manual slides in air reached a maximum distance-magnitude error of 1.09 cm; that is not the same as validated underwater velocity accuracy. At the time of that record, the board could not accept an external velocity measurement. A promising bench result still needed an integration path and an in-water evaluation.
 
 That's the end of [Time](/notes#time) for now. The next series is about whether any of these numbers can be trusted at all: [Measuring honestly](/notes/trust-issues).

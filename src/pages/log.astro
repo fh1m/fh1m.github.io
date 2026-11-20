@@ -1,20 +1,41 @@
 ---
 import Base from "../layouts/Base.astro";
-import { chapters } from "../data/story";
+import { chapters, type Media } from "../data/story";
 import stats from "../data/github.json";
 import mongla from "../data/mongla.json";
-
+import { education, roles } from "../data/facts";
+import ArchiveFilm from "../components/ArchiveFilm.astro";
+import { dims } from "../data/media";
+import { getCollection } from "astro:content";
+const notes = await getCollection("notes");
+const repoSummaries = new Map(notes.filter((note) => note.data.kind === "project" && note.data.repo).map((note) => [note.data.repo!.toLowerCase(), note.data.dek] as const));
 const repos = [...stats.repos].filter((r) => r.name !== "fh1m").sort((a, b) => b.pushedAt.localeCompare(a.pushedAt));
 const water = mongla.water.events;
-const chapterHref: Record<string, string> = { source: "/notes", sky: "/projects/aerd", water: "/projects/duburi", cat: "/projects/e-bhapa", ground: "/projects/mongol-tori", current: "/water", mongla: "/projects/mongla", dristy: "/projects/dristy", rupsha: "/projects/rupsha", den: "/projects/den", mohona: "/" };
+const chapterHref: Record<string, string> = { origin:"/everything", source: "/notes", sky: "/projects/aerd", water: "/projects/duburi", cat: "/projects/e-bhapa", ground: "/projects/mongol-tori", current: "/water", mongla: "/projects/mongla", dristy: "/projects/dristy", rupsha: "/projects/rupsha", den: "/projects/den", mohona: "/" };
 const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earlier vehicle", RECORDED_WATER_REPLAY: "real footage, replayed", CURRENT_WATER: "in water, this platform", NOT_YET: "not yet" };
+const mediaKind: Record<Media["tier"], string> = {
+  Own:"Personal archive", Team:"Team archive", Doc:"Document", Sim:"Simulation",
+  Water:"Water archive", Bench:"Bench experiment", CAD:"CAD render", Replay:"Recorded footage, replayed",
+};
+const openingScenes = [
+  { src:"/media/archive/fahim-portrait.webp", alt:"Fahim smiling outdoors beside a coastal path", caption:"Fahim, away from the workbench. Personal archive.", lead:true },
+  { src:"/media/notes/nvim-2022-07-05.webp", alt:"Fahim's July 2022 Neovim setup, with split buffers and a colourful status line", caption:"July 2022. The editor, early.", lead:false },
+  { src:"/media/aerd/cover.webp", alt:"The AERD team gathered around a white weather balloon on launch day", caption:"Balloon-launch day. AERD team archive.", lead:false },
+];
 ---
-<Base title="Log" description="The dated record: every project, every repository, and every time a vehicle in this lineage was actually in water.">
+<Base title="A life, still being worked out" description="Fahim Faisal's personal archive: early web work, college, tools, rocketry, studying in Germany, rovers, underwater vehicles, research and the things still unfinished.">
   <main id="main" class="log">
-    <header>
-      <p class="kick"><span class="bn">লগ</span> <span class="mono">the log · rebuilt {stats.generatedAtLabel}</span></p>
-      <h1>The dated record.</h1>
-      <p class="lede">The notebook, flattened into dates. Then the numbers, generated at build time from the public GitHub API and from Mongla's own snapshot at commit <code>{mongla.provenance.commit.slice(0, 7)}</code>, so nothing here is typed by hand.</p>
+    <header class="life-header">
+      <div class="life-intro">
+        <p class="kick"><span class="bn" lang="bn">গল্পটা এখনও চলছে</span></p>
+        <h1>A life, still being worked out.</h1>
+        <p class="lede">I'm Fahim, from Dhaka. The habit started with remote-control cars and anything with a circuit I could take apart. The dated archive begins later: web work at Thinkit in 2021, a college ICT club, and a Linux setup I kept screenshotting as it grew.</p>
+        <p class="lede">Then rockets, cameras, a semester in Bad Honnef, a rover arm, and Bhapa—the campus cat who gave a small robot its name. Some threads became team projects; others are still unfinished. Here they are in order, with the old files and photographs kept alongside the newer work.</p>
+        <a class="archive-start" href="#h-time">Follow the years <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="life-mosaic">
+        {openingScenes.map((scene) => { const { w, h } = dims(scene.src); return <figure class:list={["life-cover", { lead:scene.lead }]}><a class="image-view" href={scene.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${scene.alt}`}><img src={scene.src} alt={scene.alt} width={w} height={h} loading={scene.lead ? "eager" : "lazy"} fetchpriority={scene.lead ? "high" : "auto"} /></a><figcaption>{scene.caption}</figcaption></figure>; })}
+      </div>
     </header>
 
     <section aria-labelledby="h-time">
@@ -24,20 +45,38 @@ const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earli
           <li class={`d-${c.domain}`}>
             <span class="when mono">{c.when}</span>
             <span class="dot" aria-hidden="true"></span>
-            <a href={chapterHref[c.id] ?? "/notes"}><span class="bn">{c.bn}</span> <b>{c.title}</b></a>
-            <span class="lesson">{c.lesson}</span>
+            <a href={`#chapter-${c.id}`}><span class="bn" lang="bn">{c.bn}</span> <b>{c.title}</b></a>
           </li>
         ))}
       </ol>
     </section>
 
+    {chapters.map((c) => <section class={`chapter d-${c.domain}`} id={`chapter-${c.id}`} aria-labelledby={`title-${c.id}`}>
+      <header><p class="chapter-date">{c.when} <span lang="bn">{c.bn}</span></p><h2 id={`title-${c.id}`}>{c.title}</h2></header>
+      <div class="chapter-body">{c.body.map((p) => <p set:html={p} />)}</div>
+      {c.split && <details class="attribution"><summary>My part, and everyone else's</summary><dl><dt>My part</dt><dd set:html={c.split.me} />{c.split.team && <><dt>The team</dt><dd set:html={c.split.team} /></>}{c.split.others && <><dt>Other people</dt><dd set:html={c.split.others} /></>}</dl></details>}
+      {c.media.length > 0 && <div class="chapter-media">{c.media.map((m) => { const { w, h } = dims(m.src); return <figure class:list={{ wide:m.wide, document:m.tier === "Doc" }}><a class="image-view" href={m.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${m.alt}`}><img src={m.src} alt={m.alt} width={w} height={h} loading="lazy" decoding="async" /></a><figcaption><span class="media-kind">{mediaKind[m.tier]}</span><span set:html={m.caption} /><span class="image-hint">Open image to inspect at full size.</span></figcaption></figure>; })}</div>}
+      {c.id === "sky" && <ArchiveFilm name="engine-test" caption="A static engine test from the supplied AERD archive. This is team footage, not a claim that I designed the propulsion system." />}
+      {c.id === "current" && <div class="film-pair"><ArchiveFilm name="vision-member" caption="2024 team film: introduced as a member of AI & Machine Vision, explaining data collection." /><ArchiveFilm name="vision-lab" caption="2025 team film: at the workbench with teammates, discussing varied lighting and the dataset." /><ArchiveFilm name="vision-workbench" caption="2025, a second workbench excerpt. The labels and subtitles are from the original team film." /></div>}
+      {c.id === "water" && <ArchiveFilm name="heading-lock" portrait caption="The file was named headlock_1st_time. A vehicle is released and disturbed in the pool; this is a remembered test, not a quantified heading-error benchmark." />}
+      {c.id === "source" && <div class="interlude"><h3>A college club, not a robot</h3><p>As General Secretary of the ICT Club at SOS Hermann Gmeiner College, January–September 2022, I organized seminars and programs and automated content management through the YouTube and Facebook APIs. It belongs here alongside the machines: there was work to do before there was a vehicle to put it on.</p><p>Thinkit was March–June 2021. The club came the following year. The editor screenshots are dated July and October 2022; they are not reconstructions of how an early setup might have looked.</p></div>}
+      {c.id === "cat" && <div class="interlude"><h3>A semester away</h3><p>In 2024 I studied Autonomous Systems for one semester on campus at IU in Bad Honnef, Germany. My BRAC University studies ran from September 2023 to August 2026; I did not complete that degree. Since fall 2026 I study Computer Science and Engineering at United International University.</p><p>Those are different parts of the same education, not three completed degrees. The work continued across them: experiments with cameras, the TVC gimbal, then the rover arm.</p></div>}
+      {c.id === "current" && <div class="interlude"><h3>Sonar, between campaigns</h3><p>{roles.find((r) => r.org === "Dubotech")!.dates}: Junior Autonomous Engineer at Dubotech. Custom sonar firmware, deep-water navigation, legacy backends and the start of internal tool documentation. The implementation is not public here, so I describe the responsibility rather than inventing a technical walkthrough or publishing someone else's internals.</p></div>}
+      {c.benches?.filter((b) => b.key !== "recorder").map((b) => <aside class="bench" aria-label={`Interactive bench: ${b.title}`}><h3><span class="tag">try it</span> {b.title}</h3><div class="bench-body" data-bench={b.key}><p>Loading the bench…</p></div><p class="dim">An explanatory model or archived experiment, not live vehicle telemetry. The linked notebook gives its assumptions.</p></aside>)}
+      <nav class="chapter-notes" aria-label={`Read more about ${c.title}`}>{c.notes.filter((n) => n.href !== "/log").map((n) => <a href={n.href}>{n.label === "cv" ? "Professional documents" : n.label}</a>)}<a href={chapterHref[c.id] ?? "/notes"}>Related work</a><a class="back-to-years" href="#h-time">Back to the years ↑</a></nav>
+    </section>)}
+
+    <section aria-labelledby="h-study"><h2 id="h-study">Study, without the shorthand</h2><dl class="study">{education.map((e) => <div><dt>{e.org}</dt><dd>{e.dates}. {e.degree}.{e.org === "BRAC University" ? " Degree not completed." : ""}{e.note && ` ${e.note}`}</dd></div>)}</dl></section>
+
     <section aria-labelledby="h-water" class="d-water">
       <h2 id="h-water">Every time a vehicle in this lineage was in water</h2>
       <p class="dim">From <a href="https://github.com/fh1m/mongla_ws/blob/main/docs/evidence/water.json">water.json</a> in mongla_ws: the project's own ledger of water contact, with evidence for each row.</p>
+      <div class="table-scroll" role="region" aria-label="Water-contact ledger; scroll horizontally on a narrow screen" tabindex="0">
       <table>
         <thead><tr><th>when</th><th>where</th><th>status</th><th>what happened</th></tr></thead>
         <tbody>{water.map((e) => <tr><td class="num">{e.date}</td><td>{e.place}</td><td><span class:list={["st", e.status === "NOT_YET" ? "no" : "yes"]}>{statusLabel[e.status] ?? e.status}</span></td><td>{e.observed}</td></tr>)}</tbody>
       </table>
+      </div>
     </section>
 
     <section aria-labelledby="h-gh" class="d-sight">
@@ -61,61 +100,104 @@ const statusLabel: Record<string, string> = { HISTORICAL_WATER: "in water, earli
           <li>
             <a href={r.url}><b>{r.name}</b></a>
             <span class="lang mono"><i style={`background:${r.color ?? "#555"}`}></i>{r.language ?? "—"}{r.archived && " · archived"}</span>
-            <p>{r.description}</p>
+            <p>{repoSummaries.get(r.name.toLowerCase()) ?? r.description}</p>
             <span class="mono dim">last push {r.pushedAt.slice(0, 10)}</span>
           </li>
         ))}
       </ul>
     </section>
+    <p class="media-source"><a href="/media/CREDITS.md">Photographs, footage and adaptations: the source record</a></p>
   </main>
 </Base>
 
 <script>
   const bus = new EventTarget();
-  const el = document.querySelector<HTMLElement>('[data-bench="recorder"]');
-  if (el) new IntersectionObserver(([e], io) => { if (!e.isIntersecting) return; io.disconnect(); import("../benches/recorder").then((m) => { el.replaceChildren(); m.mount(el, bus); el.dataset.ready = "1"; }); }, { rootMargin: "400px" }).observe(el);
+  const benches = import.meta.glob<{ mount: (el: HTMLElement, bus: EventTarget) => void }>("../benches/*.ts");
+  const observer = new IntersectionObserver((entries) => { for (const entry of entries) { if (!entry.isIntersecting) continue; const el = entry.target as HTMLElement; observer.unobserve(el); const load = benches[`../benches/${el.dataset.bench}.ts`]; if (load) load().then((m) => { el.replaceChildren(); m.mount(el, bus); el.dataset.ready = "1"; }); } }, { rootMargin: "400px" });
+  document.querySelectorAll<HTMLElement>("[data-bench]").forEach((el) => observer.observe(el));
 </script>
 
 <style>
-  .log { position: relative; z-index: 1; max-width: 64rem; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; }
+  .table-scroll, .bench-body { min-width:0; max-width:100%; overflow-x:auto; }
+  .log { position:relative; z-index:1; max-width:var(--page-width); padding:var(--section-gap) var(--gutter) 0; }
   .kick { display: flex; gap: .8rem; align-items: baseline; margin: 0 0 .5rem; }
   .kick .bn { color: var(--blue); font-family: var(--bangla); }
   .kick .mono { color: var(--dim); font-size: var(--t-2); }
-  h1 { font: 500 var(--t5) var(--sans); color: var(--ink-hi); margin: 0 0 .6rem; }
+  h1 { font:600 clamp(1.75rem,2.2vw,2.25rem)/1.15 var(--display); color:var(--ink-hi); margin:0 0 .6rem; }
   .lede { color: var(--ink); max-width: 62ch; }
-  h2 { font: 500 var(--t2) var(--sans); color: var(--ink-hi); margin: 3rem 0 1rem; }
-  .timeline { list-style: none; margin: .8rem 0 0; padding: 0; position: relative; }
-  .timeline::before { content: ""; position: absolute; left: 9.6rem; top: .4rem; bottom: .4rem; width: 1px; background: var(--line-2); }
-  .timeline li { display: grid; grid-template-columns: 8.6rem 2rem 1fr; gap: .2rem 0; align-items: baseline; padding: .45rem 0; }
-  .when { color: var(--dim); text-align: right; padding-right: 1rem; font-size: var(--t-2); }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); justify-self: center; transform: translateY(-1px); }
-  .timeline a { text-decoration: none; color: var(--ink-hi); }
-  .timeline a .bn { color: var(--blue); margin-right: .3rem; font-family: var(--bangla); }
-  .timeline .lesson { grid-column: 3; font-style: italic; color: var(--ink); font-size: var(--t-1); }
+  h2 { font:600 var(--t2)/1.3 var(--display); color:var(--ink-hi); margin:1.8rem 0 .8rem; }
+  .timeline { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.5rem 1.25rem; list-style:none; margin:.8rem 0 0; padding:0; }
+  .timeline li { display:grid; grid-template-columns:.8rem minmax(0,1fr); gap:.2rem .4rem; align-content:start; align-items:baseline; padding:.65rem 0; border-top:1px solid var(--line-2); }
+  .when { grid-column:2; color:var(--dim); font-size:var(--t-2); line-height:1.5; }
+  .dot { grid-column:1; grid-row:1; width:6px; height:6px; border-radius:50%; background:var(--instrument); align-self:center; }
+  .timeline a { grid-column:2; min-height:44px; text-decoration:none; color:var(--ink-hi); }
+  .timeline a:hover, .timeline a:focus-visible { color:var(--instrument); text-decoration:underline; text-underline-offset:.22em; }
+  .timeline a .bn { color:var(--instrument); margin-right:.3rem; font-family:var(--bangla); }
+  .back-to-years { margin-left:auto; color:var(--instrument); font-size:var(--t-1); }
   .dim { color: var(--dim); }
   td:nth-child(4) { font-size: var(--t-1); color: var(--ink); min-width: 20rem; }
   .st { font: 400 var(--t-2) var(--mono); padding: .05rem .4rem; border: 1px solid var(--line-2); white-space: nowrap; }
   .st.yes { color: var(--blue); border-color: var(--blue); }
   .st.no { color: var(--red); border-color: var(--red); }
   .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1px; margin: .8rem 0 1.6rem; background: var(--line); border: 1px solid var(--line); }
-  .nums div { background: rgb(3 6 14 / .95); padding: .7rem .8rem; }
+  .nums div { background:var(--surface); padding:.7rem .8rem; }
   .nums dt { font: 400 var(--t3) var(--mono); color: var(--ink-hi); line-height: 1.1; }
   .nums dd { margin: .25rem 0 0; color: var(--dim); font-size: var(--t-2); }
   .bench { border: 1px solid var(--line); padding: 1rem 1.1rem 1.2rem; }
   .bench h3 { font: 500 var(--t1) var(--sans); display: flex; gap: .6rem; align-items: center; color: var(--ink-hi); }
   .tag { font: 400 var(--t-2) var(--mono); color: var(--dim); border: 1px solid var(--line-2); padding: .05rem .4rem; }
-  .repos { list-style: none; padding: 0; margin: .8rem 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .6rem; }
-  .repos li { border: 1px solid var(--line); padding: .8rem .9rem; display: grid; gap: .3rem; transition: border-color .2s; }
+  .repos { list-style: none; padding: 0; margin: .8rem 0 0; }
+  .repos li { border-top: 1px solid var(--line); padding: 1rem 0; display: grid; grid-template-columns: minmax(12rem, 1fr) 2fr; gap: .3rem 1rem; }
   .repos li:hover { border-color: var(--blue); }
   .repos a { text-decoration: none; color: var(--ink-hi); }
   .repos p { margin: 0; font-size: var(--t-1); color: var(--ink); }
   .lang { color: var(--dim); display: inline-flex; gap: .4rem; align-items: center; font-size: var(--t-2); }
   .lang i { width: .55rem; height: .55rem; border-radius: 50%; display: inline-block; }
-  @media (max-width: 700px) {
-    .timeline::before { left: .45rem; }
-    .timeline li { grid-template-columns: 1.6rem 1fr; }
-    .when { grid-column: 2; text-align: left; padding: 0; order: -1; }
-    .dot { grid-row: 1 / span 3; grid-column: 1; }
-    .timeline a, .timeline .lesson { grid-column: 2; }
-  }
+  .chapter { margin:1.8rem 0; padding-top:1.15rem; border-top:1px solid var(--line-2); scroll-margin-top:calc(var(--header-height) + 1rem); }
+  .chapter h2 { margin:.35rem 0 .65rem; max-width:40ch; }
+  .chapter-date { color:var(--action); font:400 var(--t-1) var(--sans); }
+  .chapter-date span { font-family:var(--bangla); margin-left:1rem; }
+  .chapter-body, .interlude { max-width:96ch; color:var(--ink); line-height:var(--lh); }
+  .chapter-body p { margin:0 0 .75rem; }
+  .chapter-media { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.25rem; margin:1.25rem 0; }
+  .chapter-media figure { margin:0; }
+  .chapter-media .wide { grid-column:1/-1; }
+  .chapter-media img { width:auto; height:auto; max-width:100%; max-height:40rem; display:block; border-radius:var(--r-2); }
+  .chapter-media .document img { max-height:18rem; }
+  .chapter-media figcaption { color:var(--dim); font-size:var(--t-1); line-height:1.6; margin-top:.6rem; }
+  .media-kind { display:block; color:var(--instrument); margin-bottom:.25rem; }
+  .image-view { display:grid; justify-items:center; min-width:0; max-width:100%; border-radius:var(--r-2); }
+  .image-hint { display:block; color:var(--action); font-size:.8rem; margin-top:.35rem; }
+  .media-source { margin:2rem 0; font-size:var(--t-1); }
+  .attribution { max-width:70ch; margin:1.5rem 0; border-left:2px solid var(--line-2); padding:.5rem 1rem; color:var(--dim); }
+  .attribution summary { cursor:pointer; color:var(--ink); }
+  .attribution dt { color:var(--ink-hi); margin:.75rem 0 .25rem; }
+  .attribution dd { margin:0; line-height:1.7; }
+  .chapter-notes { display:flex; flex-wrap:wrap; gap:.5rem 1.3rem; margin:.8rem 0; font-size:var(--t-1); }
+  .chapter-notes a { display:inline-flex; min-height:44px; align-items:center; text-underline-offset:.3em; }
+  .interlude { margin:2rem 0; }
+  .interlude h3 { font:500 var(--t1) var(--sans); color:var(--ink-hi); }
+  .study div { margin:1.2rem 0; line-height:1.7; }
+  .study dt { font-weight:500; color:var(--ink-hi); }
+  .study dd { margin: .2rem 0 0; color:var(--dim); }
+  .life-header { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr); gap:2rem; align-items:center; margin-bottom:1.4rem; }
+  .life-intro { min-width:0; }
+  .life-intro .lede { max-width:72ch; margin-bottom:.8rem; }
+  .archive-start { display:inline-flex; align-items:center; gap:1rem; min-height:44px; font:500 var(--t-1)/1.4 var(--interface); color:var(--instrument); }
+  .life-mosaic { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); grid-template-rows:repeat(2,minmax(0,1fr)); gap:.75rem; height:clamp(20rem,28vw,26rem); min-width:0; }
+  .life-cover { margin:0; min-width:0; min-height:0; display:grid; grid-template-rows:minmax(0,1fr) auto; gap:.35rem; }
+  .life-cover.lead { grid-row:1/3; }
+  .life-mosaic .image-view { display:block; height:100%; min-height:0; overflow:hidden; }
+  .life-mosaic img { width:100%; height:100%; object-fit:cover; border-radius:var(--r-2); }
+  .life-cover.lead img { object-position:65% 35%; }
+  .life-cover figcaption { font:400 var(--t-2)/1.4 var(--sans); color:var(--dim); margin:0; }
+  @media(max-width:1100px) { .life-header { grid-template-columns:minmax(0,1fr); gap:1rem; } }
+  @media(max-width:700px) { .life-mosaic { height:auto; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:auto auto; } .life-cover.lead { grid-column:1/-1; grid-row:auto; } .life-mosaic img { height:auto; aspect-ratio:16/10; object-fit:contain; } .life-cover.lead img { aspect-ratio:3/2; } }
+  .film-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem; align-items:start; }
+  .chapter h2 { font-size:clamp(1.25rem,1.55vw,1.5rem); font-weight:600; }
+  .chapter-body p { color:var(--ink); font-size:var(--body-size); line-height:var(--lh); }
+  @media(max-width:700px) { .film-pair { grid-template-columns:1fr; gap:0; } h1 { font-size:2rem; } }
+  @media(max-width:700px) { .chapter-media { grid-template-columns:1fr; } .repos li { grid-template-columns:1fr; } }
+  @media(max-width:1100px) { .timeline { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:600px) { .timeline { grid-template-columns:minmax(0,1fr); } }
 </style>

@@ -32,10 +32,11 @@ async function init() {
   cv.addEventListener("click", () => { if (hi >= 0) open(`https://github.com/${P.repo}/commit/${pts[hi].r[1]}`, "_blank", "noopener"); });
   new ResizeObserver(layout).observe(cv);
 }
-// fetch the commit history (about 200 KB) only when the strip comes near the screen; on every page load
-document.addEventListener("astro:page-load", () => {
+// Fetch the history only when the strip approaches the viewport.
+const start = () => {
   const target = document.querySelector("canvas[data-commits]");
   if (!target) return;
   const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); init(); } }, { rootMargin: "300px 0px" });
   io.observe(target);
-});
+};
+start();

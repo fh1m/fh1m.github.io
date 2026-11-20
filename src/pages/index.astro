@@ -10,45 +10,34 @@ import Opening from "../components/game/Opening.astro";
 import Panels from "../components/game/Panels.astro";
 import { ZONE_INFO } from "../game/zones";
 import { PLANETS, MOONS, STATIONS, ROCKS, HOME, PROBE } from "../space/system";
-import { projects } from "../data/elements";
 const keys: Record<string, string> = { air: "1", water: "2", earth: "3", fire: "4" };
-const spotlight = [
-  ["mongla", "An AUV stack that won't round its zero"],
-  ["duburi", "8th of 58, through a dead onboard computer"],
-  ["dristy", "A camera that answers with a number"],
-].map(([slug, hook]) => ({ ...projects.find((p) => p.slug === slug)!, hook }));
 const moonsOf = (z: string) => MOONS.filter((m) => m.parent === z);
 const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS.map((p) => ({ id: p.id, label: p.label, cls: "planet", zone: p.zone })), ...MOONS.map((m) => ({ id: m.id, label: m.label, cls: "moon" })), ...STATIONS.map((s) => ({ id: s.id, label: s.label, cls: "station" })), { id: HOME.id, label: "Home", cls: "station" }, { id: PROBE.id, label: "Voyager 1", cls: "station" }];
 ---
 <Base chrome={false} bodyClass="game" description="Fahim Faisal, robotics engineer from Dhaka: underwater vehicles, rockets, rovers and vision on small chips, laid out as a solar system you can fly through. Every project has the failure that taught something and the commit that fixed it.">
-  <main id="main" class="game-shell">
+  <main id="main" class="game-shell landing">
     <img class="poster-img" src="/world/poster.webp" alt="The fh1m system from above: a star, four worlds on their orbits, a ringed gas giant, a belt of rocks, and stations. Every body is listed in the index." width="1600" height="1000" />
     <canvas id="world" aria-label="The fh1m system: a star, four worlds with their projects as moons, a belt of lessons, and stations. Every body is also listed in the index."></canvas>
     <div class="labels" id="labels" aria-hidden="true">
-      {labelIds.map((l) => <button type="button" tabindex="-1" class:list={["lbl", l.cls]} data-lbl={l.id} {...("zone" in l && l.zone ? { "data-zone": l.zone } : { "data-focus": l.id })}>{l.label}</button>)}
+      {labelIds.map((l) => <button type="button" hidden tabindex="-1" class:list={["lbl", l.cls]} data-lbl={l.id} {...("zone" in l && l.zone ? { "data-zone":l.zone } : { "data-focus":l.id })}>{l.label}</button>)}
     </div>
 
     <div class="left">
     <header class="intro" id="intro">
       <h1><button type="button" data-focus="fh1m">Fahim Faisal</button></h1>
-      <p>I build machines that have to decide alone, under water, in the air and on chips the size of a stamp. I believe the measurement over the memory, and I keep a record of what each one got wrong first.</p>
-      <ol class="life" aria-label="A short life, so far">
-        <li><b>2021</b> first code someone else depended on</li>
-        <li><b>2023</b> rockets, then water</li>
-        <li><b>2024</b> a semester in Germany, a rover arm</li>
-        <li><b>2026</b> a stack of my own</li>
-      </ol>
-      <p class="cta"><a class="pill" href="/cv">For recruiters: the CV</a><a class="pill ghost" href="/everything">All the work</a><a class="pill ghost" href="/about">The record</a></p>
+      <p class="hello" lang="bn">আসেন, একটু ঘুরে দেখেন।</p>
+      <p>I'm Fahim, from Dhaka. I write code, build robots, and occasionally discover that the robot understood the code better than I did.</p>
+      <p>Rockets led to underwater vehicles, then rovers and small vision chips. This is a record of the work, the wrong turns, and what I learned along the way.</p>
+      <nav class="cta" aria-label="Choose a route"><a class="pill ghost" href="/log">Read my story</a><button class="pill" id="explore" type="button">Explore the observatory</button><a class="pill ghost" href="/about">See my work</a></nav>
+      <a class="opening-link" href="/?intro">A view from Voyager</a>
     </header>
 
-    <nav class="spot" id="spot" aria-label="Start with these">
-      {spotlight.map((s) => <a href={`/projects/${s.slug}`}><img src={`/media/thumbs/${s.slug}.webp`} alt="" width="160" height="100" loading="lazy" /><span class="st">{s.title}</span><span class="sh">{s.hook}</span></a>)}
-    </nav>
 
     <nav class="index" id="index" aria-label="Everything in the system">
-      <details open>
-        <summary>Index</summary>
+      <details>
+        <summary>Find a place</summary>
         <label class="find"><span class="sr-only">Find</span><input id="find" type="search" placeholder="Find a project, a lesson…" autocomplete="off" /></label>
+        <p class="map-note">Schematic models. Open a project for the actual hardware, code and evidence.</p>
         <ol class="tree">
           <li><button type="button" data-focus="fh1m">The star: about me</button></li>
           {PLANETS.map((p) => (
@@ -87,10 +76,13 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     ))}
 
 <Panels />
-    <p class="guide" id="guide" aria-live="polite"><span class="who">Bunnu</span> <span id="guide-say"></span></p>
+    <p class="guide" id="guide" aria-live="polite"><span class="who">Bunnu</span> <span id="guide-say"></span><small id="guide-source"></small></p>
     <p class="tip" id="tip" aria-hidden="true"></p>
 
     <div class="hud">
+      <a class="snd" href="/about">Work</a>
+      <button class="snd" id="bunnu-toggle" type="button" aria-pressed="false">Bunnu: off</button>
+      <button id="bunnu-story" class="snd" type="button" hidden>Another story</button>
       <button class="snd" id="snd" type="button" aria-pressed="true">Sound</button>
     </div>
 
@@ -101,7 +93,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
 <script>
   import { createSound } from "../game/audio";
   import { MISSIONS } from "../game/missions";
-  import { ANECDOTES, IDLE } from "../data/anecdotes";
+  import { ANECDOTES } from "../data/anecdotes";
   import "../scripts/live-stats";
   import { startPoster, wantsPoster } from "../game/poster";
   const sfx = createSound(); sfx.scene("space");
@@ -114,7 +106,6 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   const opening = document.getElementById("opening")!;
   const beats = [...opening.querySelectorAll<HTMLElement>(".beat")];
   const title = document.getElementById("intro")!, zonesEl = document.getElementById("zones")!;
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let i = -1, timer = 0, done = false;
 
   const show = (n: number) => {
@@ -126,28 +117,78 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   const finish = async () => {
     if (done) return; done = true; clearTimeout(timer);
     opening.classList.add("gone"); setTimeout(() => opening.remove(), 1300);
+    title.classList.add("on");
+    const shell = document.getElementById("main")!;
+    const explore = document.getElementById("explore") as HTMLButtonElement;
+    const indexDetails = document.querySelector<HTMLDetailsElement>("#index details")!;
+    const closeIndex = () => { indexDetails.open = false; };
+    const enterObservatory = async () => {
+      if (shell.classList.contains("exploring")) return;
+      explore.disabled = true;
+      explore.setAttribute("aria-busy", "true");
+      await worldP;
+      shell.classList.remove("landing"); shell.classList.add("exploring");
+      zonesEl.classList.add("on"); document.getElementById("index")!.classList.add("on");
+      explore.removeAttribute("aria-busy");
+      document.querySelector<HTMLElement>("#index summary")?.focus();
+      greet();
+    };
+    explore.addEventListener("click", enterObservatory);
     const world = await worldP; world.fallIn();
-    title.classList.add("on"); zonesEl.classList.add("on"); document.getElementById("index")!.classList.add("on");
-    // on a phone the index starts folded, so the system itself is the first thing you see
-    if (matchMedia("(max-width: 900px)").matches) document.querySelector("#index details")?.removeAttribute("open");
     const buttons = [...document.querySelectorAll<HTMLButtonElement>("button[data-zone]")];
-    const go = (z: string) => world.go((z || null) as never);
+    const go = (z: string) => { closeIndex(); world.go((z || null) as never); };
     buttons.forEach((b) => b.addEventListener("click", () => go(b.dataset.zone ?? "")));
     const plates = [...document.querySelectorAll<HTMLElement>(".plate")];
     const panels = [...document.querySelectorAll<HTMLElement>(".objpanel")];
     const tip = document.getElementById("tip")!;
     const names: Record<string, string> = Object.fromEntries(panels.map((p) => [p.dataset.obj!, p.querySelector("h2")!.textContent!]));
     let current: string | null = null;
-    const closePanel = () => { if (!panels.some((p) => p.classList.contains("on"))) return; panels.forEach((p) => p.classList.remove("on")); world.setYear(null); world.go((current || null) as never); };
-    world.onObject((id) => { plates.forEach((p) => p.classList.remove("on")); panels.forEach((p) => { const on = p.dataset.obj === id; p.classList.toggle("on", on); if (on) p.querySelectorAll<HTMLImageElement>("img[data-src]").forEach((im) => { im.src = im.dataset.src!; im.removeAttribute("data-src"); }); }); panels.find((p) => p.dataset.obj === id)?.querySelector<HTMLElement>(".close")?.focus({ preventScroll: true }); });
+    const closePanel = () => {
+      if (!panels.some(p => p.classList.contains("on"))) return;
+      panels.forEach(p => p.classList.remove("on")); world.setYear(null); world.go((current || null) as never);
+      const nextFocus = shell.classList.contains("exploring")
+        ? zonesEl.querySelector<HTMLButtonElement>(`button[data-zone="${current ?? ""}"]`) : explore;
+      nextFocus?.focus({ preventScroll: true });
+    };
+    world.onObject(id => {
+      closeIndex(); plates.forEach(p => p.classList.remove("on"));
+      const selected = panels.find(p => p.dataset.obj === id);
+      if (selected?.dataset.domain) current = selected.dataset.domain;
+      if (selected) history.replaceState(null, "", `#${id}`);
+      buttons.forEach(b => b.setAttribute("aria-pressed", String((b.dataset.zone || null) === current)));
+      panels.forEach(p => {
+        p.classList.toggle("on", p === selected);
+        if (p === selected) p.querySelectorAll<HTMLImageElement>("img[data-src]").forEach(im => { im.src = im.dataset.src!; im.removeAttribute("data-src"); });
+      });
+      selected?.querySelector<HTMLElement>(".close")?.focus({ preventScroll: true });
+    });
     world.onHover((id, x, y) => { tip.textContent = id ? names[id] ?? "" : ""; tip.classList.toggle("on", !!id); tip.style.transform = `translate(${x + 16}px, ${y + 14}px)`; });
-    document.querySelectorAll<HTMLButtonElement>("[data-focus]").forEach((b) => b.addEventListener("click", () => world.focus(b.dataset.focus!)));
+    document.querySelectorAll<HTMLButtonElement>("[data-focus]").forEach((b) => b.addEventListener("click", async () => { await enterObservatory(); world.focus(b.dataset.focus!); }));
     panels.forEach((p) => p.querySelector(".close")!.addEventListener("click", closePanel));
-    addEventListener("keydown", (e) => { if (e.key === "Escape") closePanel(); });
+    addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (indexDetails.open) { closeIndex(); indexDetails.querySelector("summary")?.focus(); }
+      else closePanel();
+    });
     // Bunnu narrates (a caption, not a chat); missions run inside the zone's own plate
     const guide = document.getElementById("guide")!, gsay = document.getElementById("guide-say")!;
     let hideGuide = 0;
-    const speak = (text: string) => {
+    const clearGuide = () => { clearTimeout(hideGuide); guide.classList.remove("on"); };
+    const companion = document.getElementById("bunnu-toggle")!;
+    let companionOn = localStorage.getItem("bunnu-enabled") === "1";
+    const visited = new Set<string>(JSON.parse(localStorage.getItem("bunnu-visited") || "[]"));
+    const storyButton = document.getElementById("bunnu-story") as HTMLButtonElement;
+    const syncCompanion = () => { companion.setAttribute("aria-pressed", String(companionOn)); companion.textContent = `Bunnu: ${companionOn ? "on" : "off"}`; storyButton.hidden = !companionOn; };
+    syncCompanion();
+    companion.addEventListener("click", () => {
+      companionOn = !companionOn; localStorage.setItem("bunnu-enabled", companionOn ? "1" : "0"); syncCompanion();
+      if (companionOn) speak(visited.size ? `Welcome back. We've visited ${visited.size} places together. Want another story? Click my ship.` : "I'm Bunnu. He built the robots; I supervised from the desk. Pick a world. I'll keep the notes.");
+      else clearGuide();
+    });
+    world.onObject((id) => { clearGuide(); visited.add(id); localStorage.setItem("bunnu-visited", JSON.stringify([...visited])); });
+    const speak = (text: string, source = "") => {
+      if (!companionOn || !shell.classList.contains("exploring")) return;
+      document.getElementById("guide-source")!.textContent = source ? `From: ${source}` : "";
       gsay.textContent = text; guide.classList.remove("on"); void guide.offsetWidth; guide.classList.add("on");
       clearTimeout(hideGuide); hideGuide = window.setTimeout(() => guide.classList.remove("on"), Math.max(6000, text.split(" ").length * 420));
     };
@@ -160,7 +201,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     const initial = new Map([...boxes].map(([k, b]) => [k, b.innerHTML]));
     const endMission = () => { world.setMode("idle"); plates.forEach((p) => p.classList.remove("in-mission")); boxes.forEach((b, k) => { b.innerHTML = initial.get(k)!; b.querySelector<HTMLButtonElement>("[data-mission]")!.onclick = () => run(k); }); };
     function run(zone: string) {
-      greeted = true; clearTimeout(greet);
+      greeted = true;
       const m = MISSIONS.find((x) => x.zone === zone)!, box = boxes.get(zone)!, plate = box.closest(".plate")!;
       panels.forEach((p) => p.classList.remove("on")); plate.classList.add("in-mission");
       world.setMode("idle"); speak(m.setup);
@@ -191,32 +232,40 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
       fire: "Fire is the element of power. On a chip that small, power is the budget.",
     };
     const toldZone = new Set<string>();
-    world.onZone((z) => { endMission(); if (z) { greeted = true; if (!toldZone.has(z)) { toldZone.add(z); speak(ZLINES[z]); } } });
+    world.onZone((z) => { clearGuide(); endMission(); if (z) { greeted = true; if (!toldZone.has(z)) { toldZone.add(z); speak(ZLINES[z]); } } });
     let greeted = false;
-    const greet = window.setTimeout(() => { if (!greeted) speak("I'm Bunnu, and that's my ship. Pick a world, open anything in the index, or click my ship for a story from the logs."); }, reduce ? 400 : 3500);
+    const greet = () => { if (!greeted && companionOn) { greeted = true; speak("I'm Bunnu. Pick a world, or click my ship for a story from the logs. You can switch me off above; no hard feelings. Probably."); } };
+    if (shell.classList.contains("exploring")) greet();
 
     // labels that sit on the bodies themselves
     const lbls = new Map([...document.querySelectorAll<HTMLElement>("[data-lbl]")].map((b) => [b.dataset.lbl!, b]));
     world.onFrame?.((pos) => {
       for (const [id, b] of lbls) {
-        const q = pos.get(id);
-        if (!q || !q.visible) { b.style.opacity = "0"; b.style.pointerEvents = "none"; continue; }
+        const q = pos.get(id), y = q ? q.y + Math.min(q.r,160) : 0;
+        const hidden = !q || !q.visible || q.x < 0 || q.x > innerWidth || y < 0 || y > innerHeight - 24;
+        if (b.hidden !== hidden) b.hidden = hidden;
+        if (hidden || !q) continue;
         b.style.opacity = "1"; b.style.pointerEvents = "auto";
-        b.style.transform = `translate(${q.x.toFixed(1)}px, ${(q.y + Math.min(q.r, 160)).toFixed(1)}px) translateX(-50%)`;
+        b.style.transform = `translate(${q.x.toFixed(1)}px, ${y.toFixed(1)}px) translateX(-50%)`;
       }
     });
-    // Bunnu tells a real story when you poke her ship; now and then, a line of her own
-    let ai = Math.floor(Math.random() * ANECDOTES.length);
-    world.onBunnu?.(() => { greeted = true; ai = (ai + 1) % ANECDOTES.length; speak(ANECDOTES[ai].line); world.sound.pluck(660); });
-    let idleN = 0;
-    setInterval(() => { if (!document.hidden && !document.querySelector(".objpanel.on, .plate.in-mission") && (idleN++ === 0 || Math.random() < 0.5)) speak(IDLE[Math.floor(Math.random() * IDLE.length)]); }, 30000);
+    // The same story control works with keyboard, pointer and the static poster.
+    let ai = Number(localStorage.getItem("bunnu-story") || "0") % ANECDOTES.length;
+    const nextStory = () => { if (!companionOn) { companion.click(); return; } greeted = true; const story = ANECDOTES[ai]; speak(story.line, story.src); ai = (ai + 1) % ANECDOTES.length; localStorage.setItem("bunnu-story", String(ai)); world.sound.pluck(660); };
+    storyButton.addEventListener("click", nextStory);
+    world.onBunnu?.(nextStory);
     // find anything in the index
     const find = document.getElementById("find") as HTMLInputElement;
     find.addEventListener("input", () => {
       const q = find.value.trim().toLowerCase();
       document.querySelectorAll<HTMLLIElement>(".tree li").forEach((li) => { const hit = !q || li.textContent!.toLowerCase().includes(q); li.hidden = !hit; });
     });
-    find.addEventListener("keydown", (e) => { if (e.key === "Enter") document.querySelector<HTMLButtonElement>(".tree li:not([hidden]) button")?.click(); });
+    find.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      const query = find.value.trim().toLowerCase();
+      const match = [...indexDetails.querySelectorAll<HTMLButtonElement>(".tree button")].find((button) => !button.closest("li[hidden]") && button.textContent!.toLowerCase().includes(query));
+      if (match) { e.preventDefault(); match.click(); }
+    });
 
     // the time machine
     const tmRange = document.getElementById("tm-year") as HTMLInputElement | null, tmAge = document.getElementById("tm-age")!;
@@ -231,47 +280,55 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     };
     tmRange?.addEventListener("input", () => { tmRange.dataset.touched = "1"; setTM(); }); setTM();
     world.onObject((id) => { if (id !== "timemachine" && tmRange && tmRange.value !== tmRange.max) { tmRange.value = tmRange.max; setTM(); } });
-    world.onZone((z) => { current = z; panels.forEach((p) => p.classList.remove("on")); buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.zone || null) === z))); plates.forEach((p) => p.classList.toggle("on", p.dataset.plate === z)); });
-    addEventListener("keydown", (e) => { const k = "01234".indexOf(e.key); if (k >= 0) go(["", "air", "water", "earth", "fire"][k]); });
+    world.onZone((z) => { current = z; history.replaceState(null, "", z ? `#${z}` : location.pathname + location.search); panels.forEach((p) => p.classList.remove("on")); buttons.forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.zone || null) === z))); plates.forEach((p) => p.classList.toggle("on", p.dataset.plate === z)); });
+    addEventListener("keydown", (e) => { if ((e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return; const k = "01234".indexOf(e.key); if (k >= 0 && shell.classList.contains("exploring")) go(["", "air", "water", "earth", "fire"][k]); });
     const snd = document.getElementById("snd")!;
     snd.setAttribute("aria-pressed", String(world.sound.on()));
     snd.addEventListener("click", () => snd.setAttribute("aria-pressed", String(world.sound.toggle())));
+    const openFragment = async () => {
+      const id = location.hash.slice(1);
+      if (!id) { if (shell.classList.contains("exploring")) go(""); return; }
+      if (Object.hasOwn(names, id)) { await enterObservatory(); world.focus(id); }
+      else if (buttons.some(button => button.dataset.zone === id)) { await enterObservatory(); go(id); }
+    };
+    addEventListener("hashchange", openFragment);
+    await openFragment();
   };
   const next = () => (i < beats.length - 1 ? show(i + 1) : finish());
   document.getElementById("op-next")?.addEventListener("click", next);
   document.getElementById("op-skip")?.addEventListener("click", finish);
   opening.addEventListener("click", (e) => { if (!(e.target as HTMLElement).closest("button")) next(); });
   addEventListener("keydown", (e) => { if (done) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); next(); } if (e.key === "Escape") finish(); });
-  if (sessionStorage.getItem("seen-opening")) finish(); else { sessionStorage.setItem("seen-opening", "1"); show(0); }
+  if (new URLSearchParams(location.search).has("intro")) { opening.hidden = false; show(0); } else finish();
 </script>
 <style>
   :global(body.game) { overflow: hidden; background: #000; }
   .game-shell { position: fixed; inset: 0; }
-  #world { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #world { position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; transition:transform .9s var(--ease); }
   .game-shell::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / .55) 100%); }
   .zones { position: absolute; z-index: 3; left: 50%; bottom: 1.6rem; transform: translate(-50%, 20px); display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; opacity: 0; transition: opacity .8s ease, transform .8s ease; pointer-events: none; }
   .zones:global(.on) { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
-  .zones button { display: grid; justify-items: center; gap: .15rem; min-width: 6.2rem; padding: .65rem 1.1rem .55rem; border: 0; border-radius: var(--r-2); background: rgb(255 255 255 / .1); color: #fff; cursor: pointer; font: 500 var(--t0) var(--sans); transition: background .25s, transform .25s cubic-bezier(.2,.8,.3,1.3); backdrop-filter: blur(6px); }
-  .zones button .bn { font: 400 var(--t-2) var(--bangla); color: var(--c); opacity: .85; }
-  .zones button:hover { background: rgb(255 255 255 / .18); transform: translateY(-2px); }
+  .zones button { display:grid; justify-items:center; gap:.15rem; min-width:6.2rem; padding:.65rem 1.1rem .55rem; border:1px solid var(--line-2); border-radius:var(--r-2); background:var(--surface); color:var(--ink-hi); cursor:pointer; font:500 var(--t0) var(--sans); transition:background .18s,transform .18s; }
+  .zones button .bn { font:400 var(--t-2) var(--bangla); color:var(--c); }
+  .zones button:hover { background:var(--raised); transform:translateY(-2px); }
   .zones button[aria-pressed="true"] { background: var(--c); color: #000; }
   .zones button[aria-pressed="true"] .bn { color: #000; }
-  .zones .all { align-self: stretch; color: #c8c8c8; font-size: var(--t-1); }
+  .zones .all { align-self:stretch; color:var(--dim); font-size:var(--t-1); }
   .hud { position: absolute; z-index: 4; top: 1rem; right: 1.2rem; display: flex; gap: .6rem; }
-  .snd { font: 500 var(--t-1) var(--sans); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: var(--r-2); padding: .45rem .9rem; cursor: pointer; }
-  .snd[aria-pressed="false"] { text-decoration: line-through; opacity: .7; }
+  .snd { font:500 var(--t-1) var(--sans); color:var(--ink); background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r-2); padding:.45rem .9rem; cursor:pointer; }
+  #snd[aria-pressed="false"] { text-decoration: line-through; opacity: .7; }
   .skip-game { font: 500 var(--t-1) var(--sans); color: #000; background: #fff; border-radius: var(--r-2); padding: .45rem .9rem; text-decoration: none; }
-  .plate { position: absolute; z-index: 3; right: clamp(1rem, 3vw, 2.4rem); top: 50%; width: min(24rem, 88vw); transform: translate(24px, -50%); opacity: 0; pointer-events: none; padding: 1.2rem 1.3rem 1.1rem; border-radius: var(--r-3); background: rgb(10 10 12 / .9); border: 1px solid #262626; backdrop-filter: blur(10px); color: #ececec; font-family: var(--sans); transition: opacity .6s ease .5s, transform .6s cubic-bezier(.2,.8,.3,1) .5s; }
-  .plate:global(.on) { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+  .plate { position:absolute; z-index:3; right:clamp(1rem,3vw,2.4rem); top:50%; width:min(24rem,88vw); transform:translate(16px,-50%); opacity:0; visibility:hidden; pointer-events:none; padding:1.2rem 1.3rem 1.1rem; border-radius:var(--r-3); background:var(--page); border:1px solid var(--line-2); color:var(--ink); font-family:var(--sans); transition:opacity .18s ease,transform .2s ease,visibility 0s linear .2s; }
+  .plate:global(.on) { opacity:1; visibility:visible; transform:translate(0,-50%); pointer-events:auto; transition-delay:0s; }
   .plate .kicker { margin: 0 0 .2rem; font: 600 var(--t-1) var(--sans); color: var(--c); }
   .plate .bn { font-family: var(--bangla); font-weight: 400; }
   .plate h2 { font: 600 var(--t2)/1.2 var(--sans); color: #fff; margin: 0 0 .6rem; }
-  .pline { font: 500 var(--t0)/1.5 var(--sans); color: #d0d0d0; margin: 0 0 .9rem; }
-  .plate dl { display: grid; grid-template-columns: auto 1fr; gap: .3rem .9rem; margin: 0 0 .9rem; padding: .7rem .8rem; border-radius: var(--r-2); background: rgb(255 255 255 / .06); }
-  .plate dt { font: 600 var(--t-2) var(--sans); color: #8c8c8c; }
-  .plate dd { margin: 0; font: 400 var(--t-1) var(--mono); color: #fff; font-variant-numeric: tabular-nums; }
-  .real { font: 500 var(--t-2)/1.5 var(--sans); color: #8c8c8c; margin: 0; }
-  .real a { color: #fff; }
+  .pline { font:400 var(--t0)/1.6 var(--sans); color:var(--ink); margin:0 0 .9rem; }
+  .plate dl { display:grid; grid-template-columns:auto 1fr; gap:.3rem .9rem; margin:0 0 .9rem; padding:.7rem .8rem; border-radius:var(--r-2); background:var(--surface); }
+  .plate dt { font:500 var(--t-2) var(--sans); color:var(--dim); }
+  .plate dd { margin:0; font:400 var(--t-1) var(--mono); color:var(--ink-hi); font-variant-numeric:tabular-nums; }
+  .real { font:400 var(--t-2)/1.6 var(--sans); color:var(--dim); margin:0; }
+  .real a { color:var(--action); }
   @media (max-width: 760px) {
     .plate { top: auto; bottom: 4.6rem; left: .6rem; right: .6rem; width: auto; transform: translate(0, 20px); max-height: 52svh; overflow: auto; }
     .plate:global(.on) { transform: none; }
@@ -289,29 +346,29 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .poster #world { display: none; }
   .mission-row { display: flex; align-items: center; gap: .6rem; margin: .9rem 0 0; }
   .mission :global(.start), .mission :global(.ghost) { display: inline-block; font: 600 var(--t-1) var(--sans); color: #000; background: var(--c); border: 0; border-radius: var(--r-2); padding: .55rem 1.1rem; cursor: pointer; text-decoration: none; transition: transform .12s; }
-  .mission :global(.ghost) { background: rgb(255 255 255 / .1); color: #fff; box-shadow: none; }
+  .mission :global(.ghost) { background:var(--surface); color:var(--ink); box-shadow:none; }
   .mission :global(.mission-row) { flex-wrap: wrap; }
   .mission :global(h3) { font: 600 var(--t1) var(--sans); color: #fff; margin: 1rem 0 .4rem; }
-  .mission :global(.m-text) { font: 500 var(--t-1)/1.6 var(--sans); color: #e2e2e2; margin: 0 0 .6rem; }
+  .mission :global(.m-text) { font:400 var(--t-1)/1.6 var(--sans); color:var(--ink); margin:0 0 .6rem; }
   .mission :global(.obs) { color: #fff; font-weight: 600; }
   .mission :global(.m-q) { font: 600 var(--t-1) var(--sans); color: var(--c); margin: .8rem 0 .5rem; }
   .mission :global(.hyps) { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
-  .mission :global(.hyps button) { width: 100%; text-align: left; font: 600 var(--t-1)/1.45 var(--sans); color: #fff; background: rgb(255 255 255 / .07); border: 1px solid rgb(255 255 255 / .12); border-radius: var(--r-2); padding: .6rem .8rem; cursor: pointer; }
+  .mission :global(.hyps button) { width:100%; text-align:left; font:500 var(--t-1)/1.45 var(--sans); color:var(--ink); background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r-2); padding:.6rem .8rem; cursor:pointer; }
   .mission :global(.hyps button:hover:not([aria-disabled="true"])) { border-color: var(--c); }
-  .mission :global(.hyps button.struck) { color: #8c8c8c; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 2px; cursor: default; }
-  .mission :global(.reply) { font: 500 var(--t-2)/1.5 var(--sans); color: #c8c8c8; margin: .35rem .2rem 0; }
-  .mission :global(.nums) { font: 400 var(--t-2)/1.6 var(--mono); color: #8dff6a; margin: 0 0 .6rem; }
+  .mission :global(.hyps button.struck) { color:var(--dim); text-decoration:line-through; text-decoration-color:var(--failure); text-decoration-thickness:2px; cursor:default; }
+  .mission :global(.reply) { font:400 var(--t-2)/1.5 var(--sans); color:var(--dim); margin:.35rem .2rem 0; }
+  .mission :global(.nums) { font:400 var(--t-2)/1.6 var(--mono); color:var(--measured); margin:0 0 .6rem; }
   .plate:global(.in-mission) .pline, .plate:global(.in-mission) dl, .plate:global(.in-mission) .real, .plate:global(.in-mission) .things-h, .plate:global(.in-mission) .things { display: none; }
   .guide { position: absolute; z-index: 6; left: 50%; bottom: 5.6rem; width: min(44rem, 90vw); transform: translate(-50%, 8px); margin: 0; text-align: center; font: 400 var(--t0)/1.5 var(--sans); color: #fff; text-shadow: 0 2px 10px rgb(0 0 0 / .8), 0 0 2px rgb(0 0 0 / .9); opacity: 0; transition: opacity .6s ease, transform .6s ease; pointer-events: none; }
   .guide.on { opacity: 1; transform: translate(-50%, 0); }
-  .guide .who { color: #ff9ec2; font-weight: 600; margin-right: .3rem; }
+  .guide .who { color:var(--action); font-weight:600; margin-right:.3rem; }
   .start:active { transform: translateY(3px); box-shadow: 0 1px 0 rgb(0 0 0 / .25); }
   .here { font: 500 var(--t-2) var(--sans); color: var(--c); }
-  .zones button[data-done]::after { content: ""; position: absolute; top: .35rem; right: .45rem; width: .45rem; height: .45rem; border-radius: 50%; background: #8dff6a; box-shadow: 0 0 6px #8dff6a; }
+  .zones button[data-done]::after { content:""; position:absolute; top:.35rem; right:.45rem; width:.45rem; height:.45rem; border-radius:50%; background:var(--measured); }
   .zones button { position: relative; }
-  .things-h { margin: .9rem 0 .4rem; font: 600 var(--t-2) var(--sans); color: #8c8c8c; }
-  .things { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
-  .things button, .voy { font: 500 var(--t-1) var(--sans); color: #fff; background: rgb(255 255 255 / .12); border: 0; border-radius: var(--r-2); padding: .4rem .85rem; cursor: pointer; }
+  .things-h { margin:.9rem 0 .4rem; font:500 var(--t-2) var(--sans); color:var(--dim); }
+  .things { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:.4rem; }
+  .things button, .voy { font:500 var(--t-1) var(--sans); color:var(--ink); background:var(--surface); border:1px solid var(--line-2); border-radius:var(--r-2); padding:.4rem .85rem; cursor:pointer; }
   .things button:hover { background: var(--c); color: #000; }
   .tip { position: absolute; left: 0; top: 0; z-index: 6; margin: 0; pointer-events: none; font: 600 var(--t-1) var(--sans); color: #000; background: #fff; border-radius: var(--r-2); padding: .3rem .75rem; opacity: 0; transition: opacity .15s; }
   .tip:global(.on) { opacity: 1; }
@@ -319,47 +376,68 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   @media (max-width: 520px) { .skip-game .long { display: none; } .skip-game .short { display: inline; } }
   .left { position: absolute; z-index: 4; left: 1.2rem; top: 1rem; bottom: 6rem; width: min(30rem, 40vw); display: flex; flex-direction: column; gap: .9rem; pointer-events: none; }
   .left > * { pointer-events: auto; }
-  .intro { position: relative; opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
+  .intro { position:relative; opacity:0; transition:opacity .18s ease; font-family:var(--sans); }
   .intro:global(.on) { opacity: 1; }
+  .intro h1 button:focus-visible { outline:2px solid var(--instrument); outline-offset:4px; }
   .intro h1 { margin: 0 0 .5rem; font: 600 var(--t2)/1.1 var(--sans); }
   .intro h1 button { all: unset; cursor: pointer; color: #fff; }
-  .intro h1 button:hover { color: #ffcf8a; }
-  .intro p { margin: 0 0 .5rem; font: 400 var(--t-1)/1.55 var(--sans); color: #c9ccd2; max-width: 52ch; text-shadow: 0 1px 8px #000; }
-  .life { list-style: none; margin: .2rem 0 .6rem; padding: 0; display: grid; gap: .2rem; font: 400 var(--t-2)/1.4 var(--sans); color: #9aa1ad; text-shadow: 0 1px 8px #000; }
-  .life b { font: 500 var(--t-2) var(--mono); color: #ffcf8a; margin-right: .35rem; font-variant-numeric: tabular-nums; }
+  .intro h1 button:hover { color:var(--action); }
+  .intro p { margin:0 0 .5rem; font:400 var(--t-1)/1.55 var(--sans); color:var(--ink); max-width:52ch; text-shadow:0 1px 8px #000; }
   .zones button.all { align-content: center; }
   .intro .cta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
-  .spot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; max-width: 30rem; opacity: 0; transition: opacity .8s ease .2s; }
-  .intro:global(.on) ~ .spot { opacity: 1; }
-  .spot a { display: grid; align-content: start; gap: .2rem; padding: .35rem .35rem .5rem; border-radius: var(--r-3); background: #08090c; border: 1px solid #262626; text-decoration: none; transition: border-color .15s, transform .15s; }
-  .spot a:hover { border-color: #ffcf8a; transform: translateY(-2px); }
-  .spot img { width: 100%; aspect-ratio: 16 / 10; height: auto; object-fit: cover; border-radius: calc(var(--r-3) - .35rem); background: #111318; }
-  .spot .st { font: 600 var(--t-1)/1.2 var(--sans); color: #fff; padding: .15rem .2rem 0; }
-  .spot .sh { font: 400 var(--t-2)/1.35 var(--sans); color: #9aa1ad; padding: 0 .2rem; }
-  .index { position: relative; flex: 1 1 auto; min-height: 0; width: 17rem; display: flex; opacity: 0; transition: opacity .8s ease; font-family: var(--sans); }
+  .index { position:relative; flex:0 1 auto; min-height:0; width:17rem; display:flex; opacity:0; transition:opacity .3s ease; font-family:var(--sans); }
+  .index:has(details[open]) { flex:1 1 auto; }
   .index:global(.on) { opacity: 1; }
-  .index details { max-height: 100%; display: flex; flex-direction: column; background: #08090c; border: 1px solid #262626; border-radius: var(--r-3); padding: .6rem .7rem; overflow: hidden; }
-  .index summary { font: 500 var(--t-1) var(--sans); color: #e8e8e8; cursor: pointer; padding: .2rem 0 .5rem; }
-  .find input { width: 100%; box-sizing: border-box; font: 400 var(--t-1) var(--sans); color: #fff; background: #111318; border: 1px solid #2a2a2a; border-radius: var(--r-2); padding: .45rem .6rem; margin-bottom: .5rem; }
+  .index details { width:100%; max-height:100%; display:flex; flex-direction:column; align-self:flex-start; background:var(--page); border:1px solid var(--line-2); border-radius:var(--r-2); padding:.35rem .7rem; overflow:hidden; }
+  .index summary { font:500 var(--t-1)/1.45 var(--sans); color:var(--ink); cursor:pointer; min-height:44px; padding:.6rem 0; }
+  .find input { width:100%; box-sizing:border-box; font:400 var(--t-1) var(--sans); color:var(--ink-hi); background:var(--surface); border:1px solid var(--control-border); border-radius:var(--r-1); padding:.45rem .6rem; margin-bottom:.5rem; }
   .tree { list-style: none; margin: 0; padding: 0 .2rem 0 0; overflow-y: auto; min-height: 0; scrollbar-width: thin; }
-  .index details[open] { flex: 1 1 auto; }
-  .tree ol { list-style: none; margin: 0 0 .4rem; padding: 0 0 0 .8rem; border-left: 1px solid #262626; }
-  .tree button { all: unset; display: block; cursor: pointer; padding: .2rem .3rem; border-radius: var(--r-1); font: 400 var(--t-1)/1.35 var(--sans); color: #b8bcc4; }
-  .tree button:hover, .tree button:focus-visible { color: #fff; background: rgb(255 255 255 / .06); }
-  .tree .wl { color: var(--c, #e8e8e8); font-weight: 500; margin-top: .3rem; }
+  .index details[open] { flex:1 1 auto; align-self:stretch; }
+  .tree ol { list-style:none; margin:0 0 .4rem; padding:0 0 0 .8rem; border-left:1px solid var(--line); }
+  .tree button { all:unset; display:block; box-sizing:border-box; width:100%; min-height:2.6rem; cursor:pointer; padding:.45rem .5rem; border-radius:var(--r-1); font:400 var(--t-1)/1.35 var(--sans); color:var(--ink); }
+  .tree button:hover, .tree button:focus-visible { color:var(--ink-hi); background:var(--raised); }
+  .tree button:focus-visible { outline:2px solid var(--instrument); outline-offset:-2px; }
+  .tree .wl { color:var(--instrument); font-weight:500; margin-top:.3rem; }
   .labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
-  .lbl { position: absolute; left: 0; top: 0; margin: 6px 0 0; min-height: 0; font: 400 12px/1 var(--sans); color: #c9ccd2; background: none; border: 0; padding: 2px 4px; border-radius: var(--r-1); cursor: pointer; white-space: nowrap; opacity: 0; transition: opacity .3s; text-shadow: 0 1px 6px #000; }
-  .lbl.planet { font: 500 14px/1 var(--sans); color: #fff; }
-  .lbl.star { font: 500 13px/1 var(--sans); color: #ffcf8a; }
-  .lbl.station { color: #9aa3b2; }
+  .lbl { position:absolute; left:0; top:0; margin:6px 0 0; min-height:28px; font:500 14px/1.2 var(--sans); color:var(--ink); background:none; border:0; padding:4px 6px; border-radius:var(--r-1); cursor:pointer; white-space:nowrap; opacity:0; transition:opacity .18s; text-shadow:0 1px 6px #000; }
+  .lbl.planet { font:600 16px/1.2 var(--display); color:var(--ink-hi); }
+  .lbl.star { font:600 16px/1.2 var(--display); color:var(--action); }
+  .lbl.station { color:var(--ink); }
   .lbl:hover { color: #fff; text-decoration: underline; }
+  .landing .labels, .landing .index, .landing .zones { visibility: hidden; }
+  .landing .guide, .landing #bunnu-story { display:none; }
+  .landing .left { top: 50%; bottom: auto; transform: translateY(-50%); left: clamp(1.5rem, 6vw, 7rem); width: min(39rem, 53vw); }
+  .landing .intro h1 { font:600 clamp(2rem,3.5vw,3rem)/1.12 var(--display); letter-spacing:-.025em; }
+  .landing .intro p { font-size:var(--t0); line-height:1.55; max-width:60ch; }
+  .intro .hello { color:var(--dim); font-family:var(--bangla); margin:.8rem 0 1.3rem; }
+  .intro .cta { margin-top: 1.6rem; gap: .6rem; }
+  .opening-link { display:inline-block; margin-top:1.3rem; color:var(--dim); font-size:.85rem; text-underline-offset:.3em; }
+  .exploring .intro p, .exploring .intro .cta, .exploring .opening-link { display: none; }
+  .exploring .intro h1 { font-size: 1.15rem; }
+  .snd { text-decoration:none; }
+  .snd[hidden] { display:none; }
+  #guide-source { display:block; margin-top:.6rem; color:var(--dim); line-height:1.5; }
+  .map-note { font:400 .8rem/1.5 var(--sans); color:var(--dim); margin:0 0 .7rem; }
+  .snd[aria-pressed="true"] { border-color:var(--instrument); }
+  @media(min-width:901px) { .landing #world, .landing .poster-img { transform:translateX(20vw); } }
+  .landing .intro p:not(.hello) { color:var(--ink); }
+  @media (max-width: 900px) {
+    .hud { left:.6rem; right:.6rem; gap:.4rem; justify-content:flex-end; }
+    .snd { font-size:.75rem; white-space:nowrap; padding:.45rem .6rem; min-height:2.6rem; }
+    .landing .left { top:6rem; bottom:1rem; left:1.4rem; right:1.4rem; width:auto; transform:none; overflow-y:auto; }
+    .landing .intro { padding: 1rem; background: rgb(0 0 0 / .65); border-radius: var(--r-3); }
+    .landing .intro p:not(.cta) { display: block; overflow: visible; font-size: 1rem; }
+    .landing .intro .hello { font-size: .9rem; }
+    .landing .intro h1 { font-size: 2.8rem; }
+    .exploring .left { top: 4rem; }
+  }
   @media (max-width: 900px) {
     .left { left: .6rem; right: .6rem; width: auto; bottom: auto; }
     .index { width: auto; } .tree { max-height: 46svh; }
-    .life, .spot .sh { display: none; }
-    .spot { max-width: none; }
+    .intro .cta { max-width: 35rem; }
     .intro p:not(.cta) { font-size: var(--t-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .intro .cta .pill { padding: .5rem .8rem; }
   }
+  @media(prefers-reduced-motion:reduce) { #world { transition:none; } }
   .nojs { position: absolute; inset: auto 1rem 1rem; z-index: 12; color: #fff; }
 </style>

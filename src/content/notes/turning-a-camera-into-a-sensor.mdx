@@ -16,8 +16,9 @@ sources:
 import Fig from "../../components/note/Fig.astro";
 import Explore from "../../components/note/Explore.astro";
 import Pull from "../../components/note/Pull.astro";
+import FlowRecords from "../../components/note/FlowRecords.astro";
 
-A Doppler velocity log bounces sound off the seabed and reads your speed over ground from the echo's frequency shift. It's the instrument underwater navigation is built on, and it costs more than everything else on a student vehicle put together. Mongla doesn't have one.
+A bottom-lock Doppler velocity log reads speed relative to the seabed from acoustic frequency shifts. It provides a velocity reference where GPS cannot reach—not an absolute position fix. Mongla's low-cost design does not include one.
 
 What it does have is a camera pointed at the floor. When the vehicle moves, the floor slides across the image. The question is how to turn pixels per second into metres per second.
 
@@ -25,24 +26,25 @@ What it does have is a camera pointed at the floor. When the vehicle moves, the 
 
 A floor feature directly below the camera, at height *h*, moving at speed *v*, slides across the sensor at <code>v · f / h</code> pixels per second, where *f* is the focal length in pixels. Turn it around and pixel motion is a speed, as long as you know *h*.
 
-That's the whole sensor. Notice what it hides: *h* appears as a ratio, so an error in height becomes the same percentage error in every speed, in the same direction, forever. Drag the numbers and watch the dead-reckoning drift that a small height error buys:
+That's the scale dependence the simple model isolates: with fixed calibration and a flat floor, multiplying the believed height by a factor multiplies the reported horizontal velocity by the same factor. Drift also depends on speed and elapsed time. Drag the numbers to explore that relationship; rotation, vertical motion and feature-tracking errors are outside this model:
 
-<Explore id="floor" n="fig 1" title="A camera pointed at the floor" hint="drag the numbers" caption="f = 513.94 px, the downward camera at the flow resolution. The slides at the bottom are the real bench runs from the raw file, all four of them." />
+<Explore id="floor" n="fig 1" title="A camera pointed at the floor" hint="drag the numbers" caption="f = 513.94 px, the downward camera at the flow resolution. A horizontal-span schematic, not an underwater validation." />
 
 ## Checking it against a tape
 
 On 7 September 2026 the downward camera went on a bench rig at 0.72 m above the floor (by tape), and was slid 30 cm by hand along each axis.
 
-| slide | measured | error | height it implies |
-|---|---:|---:|---:|
-| lateral | 30.13 cm | +0.13 | 0.72 m |
-| forward | 31.09 cm | +1.09 | 0.69 m |
-| back | 31.04 cm | +1.04 | 0.70 m |
-| **tape** | — | — | **0.72 m** |
+<FlowRecords />
 
-Worst error 1.09 cm on 30 cm, 3.6 %. The raw file holds a fourth run, a deliberately diagonal slide that read 42.53 cm at −171.8°: not a 30 cm test, but a check that the angle comes out right, and it did. The strongest result is the last column: each slide recovers the tape's height to within 3 cm, so the scale chain closes on itself.
+For the **three nominally axial 30 cm trials—lateral, forward and back—** the largest error in the **integrated distance magnitude** is 1.09 cm, or about 3.6%. That is a statement about these trials, not a general error bound on the velocity sensor or its two-dimensional trajectory.
 
-For scale: a commercial DVL's bottom track is quoted at 0.5–1 %, and published monocular visual odometry in real turbid water at 0.89–1.88 %. This was in air, on a hand slide whose own precision is about ±1 cm, so it's an upper bound on the sensor's error, not a measurement of it.
+The raw JSON also preserves a fourth record: magnitude 42.53 cm, angle −171.8°, and 31 fallback samples. The accompanying measurement ledger describes that run as a deliberately diagonal diagnostic. Its JSON still contains the logger's nominal `truth_m: 0.3`, so that field alone does not establish the actual diagonal travel distance. I do not include it in the three-axis summary or treat it as independently validated directional accuracy.
+
+Direction needs a separate reference. The forward trial includes a 6.93 cm cross-axis component in the reported coordinate frame. The ledger attributes the angle to the hand path; without an independently tracked two-dimensional path, this experiment cannot separate operator direction from directional estimation error.
+
+The implied-height column is calculated as `assumed height × tape travel / measured distance`. For fixed tracked image displacements under the linear projection used here, measured distance scales with assumed height, so that assumed height cancels algebraically: the column re-expresses the same image displacement using the known travel. Comparing it with the lens-to-floor tape measurement is a useful consistency check, not a second independent experiment.
+
+A DVL's velocity specification and a visual-odometry paper's trajectory error are not the same statistic as maximum distance-magnitude error over three short hand slides. These trials were in air; the ledger describes the manual reference as roughly ±1 cm, without an independently calibrated motion rig. That uncertainty does not establish an upper bound on the algorithm's error, because reference and estimation errors can reinforce or cancel. The linked [turbid-water visual-odometry study](https://doi.org/10.3390/s19030687) is further reading, not a like-for-like benchmark won by this test.
 
 ## Three bugs, one mistake
 

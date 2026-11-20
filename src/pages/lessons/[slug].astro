@@ -3,11 +3,12 @@
 import Base from "../../layouts/Base.astro";
 import { lessons, type Lesson } from "../../data/lessons";
 import { projects, elementById } from "../../data/elements";
+import { formatArchiveDate } from "../../lib/date";
 export const getStaticPaths = () => lessons.map((l, i) => ({ params: { slug: l.slug }, props: { l, prev: lessons[i - 1] ?? null, next: lessons[i + 1] ?? null } }));
 const { l, prev, next } = Astro.props as { l: Lesson; prev: Lesson | null; next: Lesson | null };
 const el = elementById[l.element];
 const proj = projects.find((p) => p.slug === l.project);
-const when = new Date(l.date + (l.date.length === 7 ? "-01" : "")).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+const when = formatArchiveDate(l.date);
 ---
 <Base title={l.title} nation={l.element} description={l.lesson} crumb={{ href: "/lessons", label: "What I got wrong", bn: el.bn }} progress>
   <main id="main" class="screens">
@@ -36,10 +37,10 @@ const when = new Date(l.date + (l.date.length === 7 ? "-01" : "")).toLocaleDateS
   </main>
 </Base>
 <style>
-  .s-kicker a { color: inherit; }
+  .s-kicker a { color:var(--action); }
   .rec { display: grid; grid-template-columns: 11rem minmax(0, 52rem); gap: 1.4rem 2.4rem; margin: 0; }
   .rec dt { font: 500 var(--t-1)/1.6 var(--sans); color: var(--c); padding-top: .15rem; }
-  .rec dd { margin: 0; font: 400 var(--t1)/1.55 var(--sans); color: #e8e8e8; }
+  .rec dd { margin:0; font:400 var(--t1)/1.55 var(--sans); color:var(--ink); }
   @media (max-width: 700px) { .rec { grid-template-columns: 1fr; gap: .3rem; } .rec dd { margin-bottom: 1rem; } }
   .h { font-family: var(--mono); }
   .row { display: flex; flex-wrap: wrap; gap: .7rem; }

@@ -5,7 +5,7 @@
 import { canvas, slider, readout, buttons, C, emit } from "./ui";
 
 export function mount(el: HTMLElement, bus: EventTarget) {
-  const cv = canvas(el, 0.5, "Error over time for a person steering a camera with four LEDs");
+  const cv = canvas(el, 0.32, "Error over time for a person steering a camera with four LEDs");
   const say = readout(el);
   const s = { delay: 250, zone: 50, mode: "bang" as "bang" | "prop" };
   const DT = 0.005, T = 6, SPEED = 600;

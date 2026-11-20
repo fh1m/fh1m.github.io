@@ -1,155 +1,81 @@
 ---
 import Base from "../layouts/Base.astro";
-import { person, education, roles, results, publications, skills, mongla } from "../data/facts";
-import stats from "../data/github.json";
-// Proof of work: each number is measured, and each links to the write-up or commit that shows how.
-const proof = [
-  { n: "396 → 16.9 ms", what: "age of the camera frame the vehicle steers by, after replacing the queue with a keep-up thread", href: "/notes/the-frame-age-problem" },
-  { n: "18.0 ms", what: "median photon-to-detection latency on a Hailo-8, measured end to end", href: "/notes/mongla" },
-  { n: "701 FPS", what: "XFeat backbone on the Hailo-8, 23× the Pi 5 CPU; no published figure found elsewhere", href: "/notes/the-71-transposes" },
-  { n: "1.09 cm", what: "worst error turning a downward camera into a velocity sensor, over a 30 cm slide", href: "/notes/turning-a-camera-into-a-sensor" },
-  { n: "30.4 % → 1.2 %", what: "gate detections with “image enhancement” switched on; 17 configurations, so the feature was deleted", href: "/notes/mongla" },
-  { n: "958 / 958", what: "ESC frames reading zero with no motor attached; the health check was rewritten so it can fail", href: "/notes/from-worked-once-to-works-every-time" },
+import { person, education, roles, publications, skills, hailoSharing } from "../data/facts";
+const experience = roles.filter((r) => !r.org.startsWith("Mongla"));
+const concise = Astro.props.concise === true;
+const selectedExperience = concise ? experience.filter((r) => ["BRACU Duburi", "Dubotech", "BRACU Mongol-Tori", "Amateur Experimental Rocketry (AERD)"].includes(r.org)) : experience;
+const projects = [
+  { name: "Mongla", url: "https://github.com/fh1m/mongla_ws", detail: `Developed an independent ROS 2 AUV autonomy stack integrating perception, estimation and mission execution over MAVLink. Bench-tested two ${hailoSharing.requestedDetectorHz} Hz detection networks plus ${hailoSharing.requestedXfeatHz} Hz XFeat on one Hailo-8 (${hailoSharing.durationS} s, repeated-frame input; ${hailoSharing.date}). No water trials. Control board and firmware by Rakibul Islam.` },
+  { name: "Camera capture latency", url: "/notes/the-frame-age-problem", detail: "Replaced queued camera consumption with latest-frame capture, reducing kernel-stamped frame age from 396.1 ms to 16.9 ms in a controlled stall benchmark. Evaluated buffering policies against the kernel timestamps rather than using throughput as a proxy for freshness." },
+  { name: "Optical-flow velocity: bench evaluation", url: "/notes/turning-a-camera-into-a-sensor", detail: "Evaluated downward-camera optical flow on three axial 30 cm manual slides in air: 0.13–1.09 cm integrated-distance-magnitude error. This is a small bench evaluation, not full trajectory accuracy or underwater DVL validation." },
+  { name: "Dristy", url: "https://github.com/fh1m/Dristy", detail: "Built K210 vision firmware and a host API combining neural inference and classical vision. Designed compact serial responses so host software consumes detection results rather than transferring full video frames." },
+  { name: "Rupsha", url: "https://github.com/fh1m/rupsha_ws", detail: "Developed a ROS 2 autonomy stack for an Ackermann rover and evaluated behavior in Gazebo. Physical chassis remains in build; simulation results are not represented as field deployment." },
 ];
 ---
-<Base title="CV" description="CV of Fahim Faisal (fh1m): autonomy and robotics: perception, control, embedded." bodyClass="cv-page">
-  <main id="main" class="cv">
+<Base title={concise ? "Résumé" : "Technical CV"} description="Muhammad Fahim Faisal: robotics and autonomy experience, selected engineering projects, education and publications." bodyClass="cv-page">
+  <main id="main" class:list={["cv", { concise }]}>
+    <nav class="document-tools no-print" aria-label="Professional documents"><a href="/about">Talk is cheap, so here is work</a><a href="/cv/fahim-faisal-resume.pdf" download>One-page résumé</a><a href="/cv/fahim-faisal-cv.pdf" download>Two-page CV</a></nav>
     <header class="cv-head">
-      <div>
-        <h1>{person.fullName}</h1>
-        <p class="role">{person.line}</p>
-        <p class="contact mono">
-          <span>{person.place}</span>
-          <a href={`mailto:${person.email}`}>{person.email}</a>
-          <a href={person.github}>github.com/{person.handle}</a>
-          <a href="https://fh1m.github.io">fh1m.github.io</a>
-          {person.linkedin && <a href={person.linkedin}>LinkedIn</a>}
-        </p>
-      </div>
-      <p class="dl no-print"><a class="btn-pill" href="/cv/fahim-faisal-cv.pdf" download>Download the PDF</a></p>
+      <h1>{person.fullName}</h1>
+      <p class="specialism">Robotics and autonomy • Perception, control and embedded systems</p>
+      <p class="contact"><span>{person.place}</span><a href={`mailto:${person.email}`}>{person.email}</a><a href={person.github}>github.com/fh1m</a><a href="https://fh1m.github.io">fh1m.github.io</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}</p>
     </header>
-
-    <section aria-labelledby="cv-proof">
-      <h2 id="cv-proof">Proof of work</h2>
-      <p class="dim lede">Measured, not estimated. Each one links to how it was measured.</p>
-      <ul class="proof">{proof.map((p) => <li><a href={p.href}><span class="pn">{p.n}</span><span class="pw">{p.what}</span></a></li>)}</ul>
-      <p class="dim gh">{stats.commitsLastYear.toLocaleString("en-US")} commits in the last year across {stats.ownRepos} public repositories of my own. Every project on the <a href="/everything">work index</a> links to its code.</p>
+    <p class="summary">Computer science undergraduate with engineering experience across underwater vehicles, rover perception and experimental rocketry. Builds and evaluates perception and control software on resource-constrained hardware; documents measured results and validation limits.</p>
+    <section aria-labelledby="experience"><h2 id="experience">Engineering experience</h2>
+      {selectedExperience.map((r) => <article class="entry"><h3>{r.org}</h3><p class="position">{r.title.replaceAll(" · ", "; ")} <span class="dates">({r.dates})</span></p>{r.url && <p class="project-source"><a href={r.url}>{r.url}</a></p>}<ul>{r.points.slice(0, concise ? 1 : undefined).map((p) => <li>{p.replace(" The first code of mine that someone else depended on.", "")}</li>)}</ul></article>)}
     </section>
-    <section aria-labelledby="cv-results">
-      <h2 id="cv-results">Results</h2>
-      <ul class="results">
-        {results.map((r) => <li><span class="num">{r.year}</span><span><b>{r.event}</b> · {r.team}: {r.result}.{r.detail && <span class="dim"> {r.detail}</span>}</span></li>)}
-      </ul>
-    </section>
-
-    <section aria-labelledby="cv-exp">
-      <h2 id="cv-exp">Experience</h2>
-      {roles.map((r) => (
-        <article class="role-item">
-          <header><h3>{r.url ? <a href={r.url}>{r.org}</a> : r.org}</h3><span class="mono dates">{r.dates}</span></header>
-          <p class="title">{r.title}</p>
-          <ul>{r.points.map((p) => <li>{p}</li>)}</ul>
-        </article>
-      ))}
-    </section>
-
-    <section aria-labelledby="cv-own">
-      <h2 id="cv-own">Selected work</h2>
-      <ul class="own">
-        <li><a href="https://github.com/fh1m/mongla_ws"><b>Mongla</b></a>: independent ROS 2 autonomy stack for AUVs. {mongla.loopHz} Hz board loop (board and firmware by Rakibul Islam), {mongla.detectHz} Hz detection through the live graph, {mongla.tests.toLocaleString("en-US")} tests. Not yet in water.</li>
-        <li><a href="https://github.com/fh1m/Dristy"><b>Dristy</b></a>: open firmware and host API for a K210 vision co-processor (KPU nets, classical vision, compact serial answers).</li>
-        <li><a href="https://github.com/fh1m/rupsha_ws"><b>Rupsha</b></a>: ROS 2 autonomy stack for an Ackermann rover; Gazebo-verified, chassis in build.</li>
-        <li><a href="https://github.com/fh1m/mongla_sim"><b>Mongla Sim</b></a>: Gazebo + ArduSub SITL with six courses, a native DVL and an operator lab.</li>
-        <li><b>Re-graded early work</b> (2023–24, revisited 2026 with measurements and fixes): <a href="https://github.com/fh1m/green-at-depth">green-at-depth</a>, <a href="https://github.com/fh1m/half-a-second">half-a-second</a>, <a href="https://github.com/fh1m/four-leds">four-leds</a>, <a href="https://github.com/fh1m/E-Bhapa">E-Bhapa</a>, <a href="https://github.com/fh1m/trust-issues">trust-issues</a>, <a href="https://github.com/fh1m/pareidolia">pareidolia</a>, <a href="https://github.com/fh1m/interview-bottle">interview-bottle</a>.</li>
-        <li><b>Security</b>: <a href="https://github.com/fh1m/passless">Passless</a> (WebAuthn, 25 tests), <a href="https://github.com/fh1m/secure-terminal-p2p-chat">secure terminal P2P chat</a> (RSA-OAEP + AES-256-GCM, strict mode).</li>
-      </ul>
-    </section>
-
-    <section aria-labelledby="cv-pub">
-      <h2 id="cv-pub">Publications</h2>
-      <ul class="pubs">{publications.map((p) => <li><b>{p.title}</b>. {p.authors}. <span class="dim">{p.venue}.</span></li>)}</ul>
-    </section>
-
-    <section aria-labelledby="cv-edu">
-      <h2 id="cv-edu">Education</h2>
-      {education.map((e) => (
-        <article class="role-item">
-          <header><h3>{e.org}</h3><span class="mono dates">{e.dates}</span></header>
-          <p class="title">{e.degree}{e.note && <span class="dim"> {e.note}</span>}</p>
-        </article>
-      ))}
-    </section>
-
-    <section aria-labelledby="cv-skills">
-      <h2 id="cv-skills">Tools</h2>
-      <dl class="skills">{Object.entries(skills).filter(([k]) => k !== "source").map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-    </section>
-
-    <p class="src">Generated from the site's single facts file, {stats.generatedAtLabel}. Every line has a source in <a href="https://github.com/fh1m/fh1m.github.io/blob/main/src/data/facts.ts">facts.ts</a>.</p>
+    <section aria-labelledby="projects"><h2 id="projects">Selected engineering projects</h2>{projects.slice(0, concise ? 2 : undefined).map((p) => <article class="project"><h3>{p.name} <a class="project-source" href={p.url}>{new URL(p.url, Astro.site).href}</a></h3><p>{p.detail}</p></article>)}</section>
+    <section aria-labelledby="education"><h2 id="education">Education</h2>{education.map((e) => <article class="education"><h3>{e.org}</h3><p>{e.org === "BRAC University" ? "Coursework toward B.Sc. Computer Science; minor studies in Electrical and Electronic Engineering. Degree not completed." : e.org.startsWith("IU ") ? "Coursework toward B.Sc. Autonomous Systems (one semester, on campus) — Bad Honnef, Germany." : e.degree}{e.current && " (in progress)"} <span class="dates">({e.dates})</span></p></article>)}</section>
+    <section aria-labelledby="skills"><h2 id="skills">Technical skills</h2><div class="skills">{Object.entries(skills).filter(([k]) => k !== "source").map(([k,v]) => <p><b>{k}:</b> {v}</p>)}</div></section>
+    {!concise && <section aria-labelledby="publications"><h2 id="publications">Publications and technical reports</h2><ul>{publications.map((p) => <li><a href={p.url}><b>{p.title}.</b></a> {p.authors}. {p.venue}.</li>)}<li>Co-author, BRACU Duburi Technical Design Reports, RoboSub 2025 and 2026.</li></ul></section>}
+    <p class="source-note no-print">Supporting measurements, source code and project histories are available on the <a href="/about">work page</a>. Team results are distinguished from individual contributions; bench and simulation results are not field-validation claims.</p>
   </main>
 </Base>
-
 <style>
-  .cv { position: relative; z-index: 1; max-width: 58rem; margin-inline: auto; padding: 3rem clamp(1.4rem, 5vw, 5rem) 0; --pink: var(--ink-hi); }
-  .cv-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; border-bottom: 1px solid var(--line-2); padding-bottom: 1.2rem; margin-bottom: 1.6rem; }
-  h1 { font: 500 var(--t5) var(--sans); color: var(--ink-hi); margin: 0 0 .3rem; }
-  .role { font: italic 400 var(--t1) var(--sans); color: var(--ink); margin: 0 0 .6rem; }
-  .contact { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin: 0; color: var(--dim); font-size: var(--t-1); }
-  h2 { display: flex; align-items: center; gap: .9rem; font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 2.4rem 0 .9rem; }
-  h2::after { content: ""; flex: 1; height: 1px; background: var(--line-2); }
-  .lede { margin: -.3rem 0 1rem; font-size: var(--t-1); }
-  .proof { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1px; background: var(--line-2); border: 1px solid var(--line-2); border-radius: var(--r-3); overflow: hidden; }
-  .proof li { background: #070809; }
-  .proof a { display: grid; gap: .35rem; height: 100%; box-sizing: border-box; padding: 1rem 1.1rem 1.1rem; text-decoration: none; transition: background .15s; }
-  .proof a:hover { background: #101216; }
-  .pn { font: 500 var(--t2)/1.1 var(--mono); color: #ffcf8a; font-variant-numeric: tabular-nums; }
-  .pw { font: 400 var(--t-1)/1.45 var(--sans); color: var(--ink); }
-  .gh { margin: .9rem 0 0; font-size: var(--t-1); }
-  .results, .own, .pubs { list-style: none; padding: 0; margin: 0; display: grid; gap: .7rem; }
-  .results li { display: grid; grid-template-columns: 3.4rem 1fr; gap: .8rem; }
-  .results .num { color: var(--ink-hi); }
-  .role-item { margin: 0 0 1.4rem; }
-  .role-item header { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; flex-wrap: wrap; }
-  .role-item h3 { font: 500 var(--t1) var(--sans); color: var(--ink-hi); margin: 0; }
-  .role-item h3 a { text-decoration: none; }
-  .dates { color: var(--dim); font-size: var(--t-2); }
-  .title { margin: .15rem 0 .4rem; color: var(--ink); }
-  .role-item ul { margin: 0; padding-left: 1.1rem; color: var(--ink); }
-  .role-item li { margin: .2rem 0; font-size: var(--t-1); }
-  .role-item li::marker { color: var(--faint); }
-  .dim { color: var(--dim); }
-  .skills { display: grid; gap: .45rem; margin: 0; }
-  .skills div { display: grid; grid-template-columns: 11rem 1fr; gap: 1rem; }
-  .skills dt { font: 400 var(--t-2) var(--mono); color: var(--dim); }
-  .skills dd { margin: 0; }
-  .src { margin-top: 3rem; }
-  .btn-pill { display: inline-block; font: 400 var(--t-1) var(--sans); text-decoration: none; padding: .55rem 1rem; border: 1px solid var(--line-2); border-radius: var(--r-2); color: var(--ink-hi); }
-  .btn-pill:hover { border-color: var(--blue); }
+  .cv { position: relative; z-index: 1; box-sizing: border-box; max-width: 56rem; margin: 2rem auto; padding: 2.8rem; background: #fff; color: #20252b; font: 400 1rem/1.5 var(--sans); border-radius: 3px; }
+  .cv p { max-width:none; }
+  .cv a { color: #174866; } .document-tools { display:flex; flex-wrap:wrap; gap:.7rem 1.2rem; margin-bottom:2rem; font-size:.85rem; }
+  .cv b { color:inherit; } .cv { color-scheme:light; } .cv :global(::selection) { background:#c9dce8; color:#111; }
+  .cv-head { text-align:center; border-bottom:1px solid #71808a; padding-bottom:1rem; } h1 { color:#172630; font:600 2rem/1.15 var(--sans); margin:0 0 .5rem; } .specialism { margin:.3rem 0; font-size:.95rem; } .contact { display:flex; justify-content:center; flex-wrap:wrap; gap:.2rem 1rem; font-size:.8rem; margin:.5rem 0 0; }
+  .summary { margin:1.2rem 0; }
+  h2 { color:#172630; font:600 1.05rem/1.2 var(--sans); margin:1.6rem 0 .75rem; padding-bottom:.3rem; border-bottom:1px solid #b8c1c7; }
+  h3 { font:600 1rem/1.3 var(--sans); margin:0; color:#20252b; }
+  .dates { font-size:.85em; white-space:nowrap; }
+  .position { font-style:italic; margin:.12rem 0 .3rem; }
+  ul { padding-left:1.2rem; margin:.3rem 0 .9rem; }
+  li { margin:.25rem 0; }
+  .entry { margin-bottom:1rem; }
+  .project { margin:.65rem 0; }
+  .project p,.education p { margin:.2rem 0 .6rem; }
+  .project-source { font-size:.9em; font-weight:400; overflow-wrap:anywhere; }
+  .entry .project-source { margin:.15rem 0 .3rem; }
+  .project h3 .project-source { margin-left:.6rem; }
+  .skills p { margin:.25rem 0; }
+  .skills b { font-weight:600; }
+  .source-note { font-size:.85rem; margin-top:2rem; }
+  @media(max-width:600px) { .cv { margin:0; padding:1.5rem 1.1rem; } h1 { font-size:1.65rem; } }
   @media print {
-    :global(html), :global(body) { background: #fff !important; color: #000 !important; font-size: 9.3pt; line-height: 1.38; }
-    :global(.top), :global(.foot), :global(.skip), :global(.world), :global(.descent), .no-print { display: none !important; }
-    :global(.grain::after) { display: none; }
-    .cv { padding: 0 1mm !important; margin: 0 !important; max-width: none !important; width: auto !important; background: none !important; border: 0 !important; backdrop-filter: none !important; --pink: #1d3d7a; }
-    :global(html), :global(body), :global(main) { background: #fff !important; }
-    :global(:root) { color-scheme: light !important; }
-    .role, .results .num, .results b, .skills dt, .own b, .pubs b { color: #000 !important; }
-    h2 { color: #1d3d7a; }
-    h1 { font-size: 22pt; }
-    .role { font-size: 12pt; margin-bottom: .3rem; }
-    .role-item li { font-size: 9pt; margin: .05rem 0; }
-    .results, .own, .pubs { gap: .3rem; }
-    h1, .title, .role-item h3 { color: #000; }
-    .contact, .dates, .dim, .src, .role-item ul { color: #333; }
-    .role-item ul, .skills dd, .results li, .own li, .pubs li { color: #111; }
-    a { color: #000; text-decoration: none; }
-    h2 { margin-top: 1.1rem; break-after: avoid; }
-    .role-item { break-inside: avoid; margin-bottom: .7rem; }
-    .cv-head { margin-bottom: 1rem; padding-bottom: .8rem; }
-    .proof { background: #ccc !important; border-color: #ccc !important; border-radius: 4px; grid-template-columns: repeat(3, 1fr); }
-    .proof li { background: #fff !important; } .proof a { padding: .35rem .5rem; gap: .1rem; }
-    .pn { color: #1d3d7a !important; font-size: 11pt; } .pw { color: #111 !important; font-size: 8.3pt; }
-    .lede, .gh { display: none; }
-    .src { display: none; }
-    h2::after { background: #ccc; }
+    :global(html),:global(body) { background:#fff!important; color:#20252b!important; font-size:10pt; line-height:1.3; }
+    :global(.sbar),:global(.top),:global(.foot),:global(.skip),:global(.world),.no-print { display:none!important; }
+    :global(body::before),:global(body::after) { display:none!important; }
+    .cv { max-width:none; padding:0; margin:0; border:0; font-size:10pt; line-height:1.3; }
+    .cv:not(.concise) section[aria-labelledby="projects"] { break-before:page; }
+    h1 { font-size:21pt; }
+    h2 { font-size:11pt; margin:1rem 0 .45rem; break-after:avoid; }
+    h3 { font-size:10pt; }
+    .contact { font-size:9pt; }
+    .specialism { font-size:10pt; }
+    .summary { margin:.7rem 0; }
+    .entry,.project,.education { break-inside:avoid; }
+    .entry { margin-bottom:.65rem; }
+    ul { margin:.2rem 0 .5rem; }
+    li { margin:.16rem 0; }
+    .cv a { color:inherit; text-decoration:none; }
+    .concise { font-size:10pt; line-height:1.25; }
+    .concise h2 { margin:.65rem 0 .3rem; }
+    .concise h3 { font-size:10pt; }
+    .concise .entry { margin-bottom:.4rem; }
+    .concise .summary { margin:.5rem 0; }
   }
+  @media print { :global(html) { color-scheme:light; } :global(.bar-space) { display:none!important; } }
 </style>

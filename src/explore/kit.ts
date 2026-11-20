@@ -6,9 +6,10 @@
  *   say()         a live sentence under the diagram whose numbers are the outputs
  * Colours carry one meaning everywhere (see DESIGN.md).
  */
+import { siteTheme } from "../data/palette";
 export const C = {
-  chalk: "#eef0f4", dim: "#8d97a8", faint: "#5d6678", line: "#161d2c", grid: "#0a1122",
-  me: "#d7655d", medium: "#6aa7c4", measured: "#7b9ce0", failure: "#d7655d", estimate: "#a9b2c2",
+  chalk:siteTheme["--chalk"], dim:siteTheme["--dim"], faint:siteTheme["--faint"], line:siteTheme["--line"], grid:siteTheme["--page"],
+  me:siteTheme["--me"], medium:siteTheme["--medium"], measured:siteTheme["--measured"], failure:siteTheme["--failure"], estimate:siteTheme["--estimate"],
 } as const;
 
 const NS = "http://www.w3.org/2000/svg";
@@ -31,8 +32,11 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Attrs = 
 }
 
 /** An SVG with a fixed viewBox, labelled for assistive tech. */
-export function svg(root: Element, w: number, h: number, label: string) {
-  const e = s("svg", { viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": label, class: "x-svg" }, root);
+export function svg(root: Element, w: number, height: number, label: string) {
+  const wrap = h("div", { class: "x-plot", style: `--plot-width:${w}px` }, root);
+  const viewport = h("div", { class: "x-plot-scroll", role: "region", tabindex: 0, "aria-label": "Scrollable diagram" }, wrap);
+  const e = s("svg", { viewBox: `0 0 ${w} ${height}`, role: "img", "aria-label": label, class: "x-svg" }, viewport);
+  h("p", { class: "x-plot-hint" }, wrap, "Swipe horizontally to inspect the diagram labels.");
   return e;
 }
 

@@ -12,54 +12,112 @@ heroPlot: true
 sources:
   - { label: "four-leds: the study, the v2 rig, the tests", href: "https://github.com/fh1m/four-leds" }
   - { label: "Arduino tone() and Timer2", href: "https://docs.arduino.cc/language-reference/en/functions/advanced-io/tone/" }
+  - { label: "The simulation: assumptions, random seed and scoring", href: "https://github.com/fh1m/four-leds/blob/main/fourleds/run.py" }
+  - { label: "v2: laptop protocol and Uno firmware", href: "https://github.com/fh1m/four-leds/tree/main/rig" }
+  - { label: "Åström and Murray: Feedback Systems, free textbook", href: "https://fbswiki.org/wiki/index.php/Main_Page" }
 ---
 import Fig from "../../components/note/Fig.astro";
 import Pull from "../../components/note/Pull.astro";
+import Explore from "../../components/note/Explore.astro";
 
 April 2024. A laptop runs YOLOv5 on a webcam, finds a bottle, and remembers where it sat still for three seconds. Move the camera away and an Arduino lights the way back: red for left, green for right, white for up, blue for down, and a buzzer when you're within ±50 px.
 
-It worked on my desk. Nothing about it was ever measured. And it's a control loop: the *sensor* is a neural net, the *controller* is a person, and the *signal* between them is four bits. Control loops can be analysed, even when one of the parts has opinions.
+It worked on my desk. That was the extent of the evidence then: a demonstration, not a measurement of how quickly or reliably someone could return to the target. The laptop did not move the camera. I did.
 
-## The person, drawn the way a textbook would
+That small distinction changes the project. The detector is the sensor, the LEDs are a display, the person supplies both the interpretation and the motion. I had built part of a control loop, then let the operator quietly supply the parts I had not designed. Looking back at this alongside the later vehicle work is more useful than pretending it was an early autonomous robot.
 
-They see the LEDs about 250 ms late (a typical visual reaction time), move the camera at a comfortable 600 px/s in whichever direction is lit, and their hand shakes a little. Detections arrive at 15 Hz. Each zone size gets 200 tries from random starting points. Two displays:
+## What the camera remembers
 
-- **Bang-bang (2024):** each LED is on or off.
-- **Proportional:** the same LEDs, PWM-dimmed with the size of the error, so the person slows down on approach.
+The reference is an image position, not a place in the room. If a detected bottle has box corners `(x₁, y₁)` and `(x₂, y₂)`, its centre is `((x₁ + x₂)/2, (y₁ + y₂)/2)`. Compare that centre with the stored reference and there are two errors: horizontal and vertical.
 
-<Fig src="/media/notes/four-leds-deadband_sweep.webp" alt="Failure rate and median settling time against buzzer zone size for on/off and dimmed LEDs" caption="At the 2024 zone of ±50 px, on/off LEDs never settle 95.5 % of the time. Dimmed: 2.0 %." wide plot />
+This is enough to say which way the target appears to have moved. It does not recover the camera's position, the bottle's distance, or a three-dimensional trajectory. Moving the bottle can change the same image coordinates as moving the camera. A larger bounding box is not, by itself, a calibrated range measurement.
 
-| buzzer zone | on/off: never settled | dimmed: never settled | dimmed: median settle |
+The original ±50 px acceptance zone is a square in image coordinates: both errors must be inside their limits. It is not a 50 px radius. The distinction matters near a corner, where each coordinate can be acceptable even though the distance from the centre exceeds 50 px.
+
+Four on/off indicators can communicate direction, including a diagonal through two lights at once. They do not communicate how much motion is left. A target 51 px away and one 200 px away produce the same instruction. The hardware did not prohibit a richer signal; the binary display policy did.
+
+## Regrading a desk demonstration
+
+In 2026 I returned to the rig as a human-in-the-loop study. There were no recruited participants and no measured reaction-time distribution. The “person” in the plots is a deliberately simple model, whose assumptions can be read and changed in [`fourleds/run.py`](https://github.com/fh1m/four-leds/blob/main/fourleds/run.py):
+
+- **250 ms reaction delay.** A command is acted on 25 simulation steps after it is displayed.
+- **600 px/s maximum motion.** This is image-space speed, not a measured hand speed or a speed in metres per second.
+- **10 ms integration steps.** Each trial lasts eight seconds, with Gaussian velocity noise of standard deviation 25 px/s added separately on both axes at each step.
+- **Random starts.** Each coordinate begins uniformly between −220 and +220 px. There are 200 trials at each zone size; each display mode starts its random generator from seed `2024`.
+- **Held detections.** The LEDs retain the last observation between detection updates. The source requests 15 Hz, but `int(1 / 15 / 0.01)` gives six steps: the implemented period is 60 ms, or about 16.67 Hz. The archived plots include that rounding, not an exact 15 Hz sensor.
+
+The two policies get the same motion limit, reaction delay and noise model. The on/off policy asks for full speed whenever an axis is outside the zone. The proportional policy scales the command with error, reaching full brightness at four times the zone half-width. Inside the zone, either policy switches that axis off.
+
+That is a comparison of display policies **under these assumptions**, not a finding that real people behave like delayed motors.
+
+<Fig src="/media/notes/four-leds-deadband_sweep.webp" alt="Simulated failure rate and conditional median settling time against buzzer-zone half-width for binary and proportional displays" caption="The original model, rerun from its published source. At ±50 px, 191 of 200 binary-display trials and 4 of 200 proportional-display trials fail the eight-second criterion. These are simulated trials, not people." wide plot />
+
+## What “settled” actually means
+
+The scorer looks at both axes. A trial succeeds only if it spends at least the final second of its eight-second run inside the acceptance square. Its settling time is the first step after the last excursion outside. A brief pass through the centre does not count.
+
+| Zone half-width | On/off: failed within 8 s | Dimmed: failed within 8 s | Dimmed: median among successes |
 |---:|---:|---:|---:|
-| ±20 px | 99.5 % | 99.5 % | — |
+| ±10 px | 100.0 % | 100.0 % | No successes |
+| ±20 px | 99.5 % | 99.5 % | 0.00 s, one success |
 | ±30 px | 97.5 % | 6.5 % | 3.34 s |
-| **±50 px (2024)** | **95.5 %** | **2.0 %** | **1.04 s** |
+| ±40 px | 97.5 % | 2.5 % | 1.11 s |
+| **±50 px, the 2024 setting** | **95.5 %** | **2.0 %** | **1.04 s** |
 | ±75 px | 81.0 % | 0.0 % | 0.52 s |
 | ±100 px | 0.5 % | 0.5 % | 0.50 s |
 
-## Why it hunts
+The ±20 px row is a good warning about reporting a median without its denominator. The sole successful dimmed trial has a settling time of zero: it begins inside and never needs to leave. That is not evidence of an extraordinarily fast controller. At ±30 px the successful trials take longer, yet the display is much more useful because almost all the trials succeed.
 
-The arithmetic fits on a sticky note. At 600 px/s with a 250 ms delay, the camera travels **150 px** after the LED changes and before the hand does. The 2024 zone is only 100 px wide. A person who obeys the LEDs exactly sails straight through, sees the opposite LED, and sails back. Forever.
+Likewise, “failed within eight seconds” does not mean “can never settle.” The run is finite. A zero observed failure rate in 200 trials is not a guarantee either; a different seed, motion model or starting distribution can change it. The small reversal between the ±75 and ±100 px rows is another reason not to turn the table into a universal law.
 
-<Fig src="/media/notes/four-leds-one_try.webp" alt="Two traces: one try at the 2024 zone oscillating, one at a tight zone" caption="One try each. The on/off display at the 2024 zone hunts back and forth across the target." wide plot />
+## Why the indicator hunts
 
-<Pull>The LEDs never said slow down. Real people only managed because they slowed down on their own.</Pull>
+Before changing a neural network, the arithmetic is worth doing. At 600 px/s with a 250 ms delay, motion continues for roughly **150 px** after the display changes and before the model responds. The original acceptance zone is only 100 px wide.
 
-Dimming the LEDs adds the missing *slow down*, and the loop settles. Until you shrink the zone too far: at ±20 px even the dimmed display oscillates. Its effective gain (600 px/s over an 80 px ramp, 7.5 s⁻¹) times the 0.25 s delay is about 1.9, past the ~π/2 where a delayed loop stops being stable. The fix there is lower gain, not more LEDs.
+So the model can cross the whole zone while still carrying out the instruction that brought it there. The next observation asks for the opposite direction, but that instruction also arrives late. A bang-bang display has supplied a sign without supplying a braking policy.
 
-Same problem as an underwater vehicle centring itself on a gate from a camera: a slow detector, a delay before the thrusters answer, and a controller that has to brake before it arrives. Later vehicles taught me that properly. Four LEDs taught it first. The [delay arena](/#delay) lets you try both displays with your own reaction time on a slider.
+<Fig src="/media/notes/four-leds-one_try.webp" alt="Simulated horizontal-error traces for binary and dimmed displays at ±50 px and ±20 px acceptance zones" caption="One illustrative model trial, not an experimental recording of a person's hand. The ±50 px trace shows hunting; the tighter zone also defeats the high-gain proportional policy." wide plot />
 
-## v2: the rig, rebuilt with a "slow down"
+<Pull>The demonstration worked with a person in the loop. It did not establish that the display had taught the person how to slow down.</Pull>
 
-Building the dimmed display on a real Uno runs into two pieces of silicon trivia worth knowing:
+The estimate `distance ≈ speed × delay` is intentionally rough. Sampling adds another wait; the hand model is not a real wrist; camera motion does not always translate to a constant pixel speed. Its value is diagnostic: the missing time scale is already large enough to explain why simply following the lights can overshoot.
 
-- **PWM only exists on pins 3, 5, 6, 9, 10 and 11.** v1 had white and blue on 12 and 13, which can only be on or off. You can't dim a pin that can't PWM.
-- **`tone()` borrows Timer2, which also drives PWM on pins 3 and 11.** A buzzer and a dimmable green LED on 11 can't coexist. Green moves to 9, the buzzer to 3, where losing PWM costs nothing.
+## Why dimming helps, until it doesn't
+
+In the model, a dimmer light means a smaller commanded speed. Near the target, the proportional policy is approximately `velocity = −K × delayed_error`. With maximum speed 600 px/s and a full-brightness ramp of `4b` pixels, where `b` is the zone half-width, the effective gain is `K = 600 / (4b)` per second.
+
+At `b = 50 px`, that gain is 3 s⁻¹. At `b = 20 px`, it is 7.5 s⁻¹. Tightening the zone has not merely demanded more precision: this implementation has also made the response more aggressive.
+
+A useful reference is the ideal continuous delayed loop `ė(t) = −K e(t − τ)`. Try an exponential solution and its characteristic equation is `s + K exp(−sτ) = 0`. At the first imaginary-axis crossing, setting `s = jω` gives:
+
+```text
+K cos(ωτ) = 0
+ω = K sin(ωτ)
+first crossing: ωτ = π/2, ω = K
+therefore: Kτ = π/2
+```
+
+Below that first boundary the ideal linear loop is stable; at the boundary it loses that margin. The narrow-zone setting gives `Kτ = 7.5 × 0.25 = 1.875`, larger than `π/2 ≈ 1.571`. The original ±50 px setting gives 0.75.
+
+This is an explanation to test, not an exact stability proof for the plotted simulation. The simulation has a deadband, saturation, sampled observations and noise, which the linear equation omits. A real person can anticipate, change speed and learn. Still, the calculation identifies a specific intervention: reduce gain independently of the required precision, rather than treating a smaller zone as permission to respond harder.
+
+<Explore bench="delay" title="Give the indicator time to catch up" hint="Compare the two displays, then increase reaction delay" caption="A simplified six-second, one-axis browser model, starting 180 px away and without the study's random noise. It explains the mechanism; it is not a reproduction of the Monte Carlo table or a measurement of your reaction time." fallback="With a delayed binary display, the model can cross the target before the reversal arrives. Proportional feedback reduces motion near the target, but excessive gain or delay can still make it hunt." />
+
+## Taking the idea back to an Uno
+
+The v2 code changes more than the LED brightness. The laptop side uses YOLOv8, retains the hold-still reference mechanism, and sends numerical errors rather than direction words. It is an implementation of the idea to evaluate, not evidence that the simulated success rate transfers to a physical rig.
+
+On a classic ATmega328P Uno, the pin allocation matters:
+
+- **PWM exists on pins 3, 5, 6, 9, 10 and 11.** v1 put white and blue on 12 and 13, so two of its four directions cannot express intermediate brightness.
+- **`tone()` conflicts with PWM on pins 3 and 11.** Green moves from 11 to 9. The buzzer moves to 3, where losing PWM is harmless because the buzzer does not need a dimming channel.
+
+This is a constraint of that board and timer implementation, not a statement about every board sold under the Arduino name. A control idea that ignores which timer owns an output has not reached the hardware yet.
 
 <figure class="wide">
 <svg viewBox="0 0 960 250" role="img" aria-labelledby="pins-t">
   <title id="pins-t">Arduino Uno digital pins 2 to 13. Version 1: buzzer on 9, red 10, green 11, white 12, blue 13. Version 2: buzzer 3, blue 5, white 6, green 9, red 10. Pins 3, 5, 6, 9, 10 and 11 can do PWM.</title>
-  <style>{`.p{font:13px var(--mono);fill:var(--dim)}.h{font:12px var(--mono);fill:var(--faint)}.pwm{fill:none;stroke:var(--measured);stroke-dasharray:3 3}.pin{fill:#0b0f12;stroke:#2c333a}`}</style>
+  <style>{`.p{font:15px var(--mono);fill:var(--dim)}.h{font:13.5px var(--mono);fill:var(--dim)}.pwm{fill:none;stroke:var(--measured);stroke-dasharray:3 3}.pin{fill:var(--surface);stroke:var(--line)}`}</style>
   <text x="20" y="22" class="h">pin</text>
   {[2,3,4,5,6,7,8,9,10,11,12,13].map((p, i) => (<g><rect class="pin" x={80 + i * 72} y="34" width="56" height="34" rx="3" />{[3,5,6,9,10,11].includes(p) && <rect class="pwm" x={77 + i * 72} y="31" width="62" height="40" rx="4" />}<text x={108 + i * 72} y="56" text-anchor="middle" class="p">{p}</text></g>))}
   <text x="20" y="118" class="h">v1</text>
@@ -70,10 +128,52 @@ Building the dimmed display on a real Uno runs into two pieces of silicon trivia
 <figcaption>Pin map, from the two sketches. Dashed outline: the pins that can actually do PWM. v1 put two of four LEDs where dimming is impossible.</figcaption>
 </figure>
 
-The v2 sketch reads `E <dx> <dy>` lines (signed error, as a percentage of "far"), sets each LED's brightness from its share of the error, sounds the buzzer inside the zone, and goes dark if the laptop stops talking for 400 ms rather than show a stale direction. 6,564 bytes on an Uno.
+## A protocol is part of the control loop
+
+[`rig/main_v2.py`](https://github.com/fh1m/four-leds/blob/main/rig/main_v2.py) defines “far” as one quarter of the frame width. It divides each pixel error by that distance, multiplies by 100, clips to ±100 and sends a newline-terminated command:
+
+```text
+E 50 -25
+```
+
+For a 640 px-wide frame, this corresponds to an 80 px rightward error and a 40 px upward error. The same frame-width scale is used for both axes. The example is useful because the numbers can be checked at both ends of the serial connection; it is not just an illustration of what a message might look like.
+
+The sketch lights only the indicator for the appropriate sign on each axis. Beyond its acceptance threshold it maps magnitude to PWM levels from 20 to 255, keeping a small visible floor rather than fading all the way to an imperceptible light. The buzzer sounds only when **both** errors are acceptable.
+
+There is an important difference from the study. Firmware `ZONE = 12` is 12 percent of “far,” nominally 3 percent of frame width: about 19.2 px at 640 px width, before integer quantization. It is **not** the original ±50 px zone. Its brightness ramp also differs from the model's `4b` ramp. The plotted 2.0 percent failure rate therefore cannot honestly be presented as a measured result for this firmware.
+
+## When the camera stops seeing
+
+No bottle means no fresh error message. Without a freshness rule, a disconnected camera or a lost detection could leave a perfectly bright instruction pointing toward an old target.
+
+The sketch tracks the last parsed message and asks the outputs to go dark after 400 ms without an update. That is a useful change in meaning: darkness says “I do not have a current instruction,” rather than silently pretending the last one remains true.
+
+It is not a hard 400 ms deadline. The loop uses blocking `Serial.readStringUntil('\n')`; an incomplete serial line can delay the watchdog check until that read times out. The distinction between a configured timeout and a guaranteed response time is exactly the kind of detail a working demonstration hides.
+
+The reference-acquisition rule has limits too. In v2, “still” means successive detected centres move by less than eight pixels for three seconds. Slow accumulated drift can satisfy that condition; it is not a pose tracker. The detector takes the first returned bottle box rather than maintaining a target identity across multiple bottles. Those are concrete boundaries of the present implementation, not problems a nicer LED animation solves.
 
 ## The bug I kept
 
-The 2024 `main.py` has an operator-precedence bug: it sends `leftdown` instead of `left,down`. It works anyway, because the Arduino only checks whether each word *appears* in the line. The original stays in the repo, bug included, and a test pins it on record.
+The 2024 `main.py` has an operator-precedence bug: it sends `leftdown` instead of `left,down`. It works anyway because the Arduino checks whether each direction word *appears* in the line, not whether it received the intended comma-separated format.
+
+That is why an end-to-end demonstration can pass while the interface contract is wrong. The producer and consumer accidentally tolerate each other. Replace either side with a parser that enforces the intended format and the same diagonal instruction can fail.
+
+The original stays in the repository, bug included. The v2 protocol has explicit numerical fields; the tests retain the old behaviour on record. Keeping the historical version separate makes the change legible without rewriting what the 2024 project actually was.
 
 <Pull>Two bugs cancelling out is still two bugs.</Pull>
+
+## What followed the lights
+
+This belongs beside the [2024 bottle tracker](/notes/half-a-second), not above it as a more impressive project. Both started as camera demonstrations. One narrated motion with suspicious precision; the other reduced it to four lights. Both forced the later question: how old is the observation by the time somebody acts on it?
+
+Underwater gate centring makes that question less forgiving. A detector updates, an observation waits, a controller asks for thrust, and a vehicle continues moving while the request takes effect. A person can quietly compensate for a bad display. A vehicle needs that compensation in its model, controller and stopping behaviour.
+
+The connection is a way of thinking, not a claim that an Arduino desk rig validates an AUV. The later [frame-age measurements](/notes/the-frame-age-problem) ask what the camera pipeline actually delivers; [Mongla](/notes/mongla) keeps bench results separate from water trials. Four LEDs is an earlier point on that same thread.
+
+## Read, change, check
+
+For the experiment, start with [`display()`, `trial()` and `score()`](https://github.com/fh1m/four-leds/blob/main/fourleds/run.py), not the plot alone. Change delay, motion speed and the proportional ramp separately. Check failure rate **and** conditional settling time, then repeat with other seeds. A policy that looks faster only because almost every difficult trial failed is not an improvement.
+
+For the hardware boundary, compare [`error_line()`](https://github.com/fh1m/four-leds/blob/main/rig/main_v2.py) with [`level()`, `show()` and the watchdog](https://github.com/fh1m/four-leds/blob/main/rig/fourleds_v2/fourleds_v2.ino). Track units all the way from pixels through normalized percentages to PWM duty. Before interpreting a physical trial, make its acceptance zone and ramp match the model you intend to test.
+
+For the theory, Åström and Murray's freely available [*Feedback Systems*](https://fbswiki.org/wiki/index.php/Main_Page) provides the feedback, stability and frequency-domain foundations behind the delayed-loop argument. Arduino's [`tone()` reference](https://docs.arduino.cc/language-reference/en/functions/advanced-io/tone/) documents the PWM conflict. The useful next reading is the one that explains a constraint in this rig, not a longer list of vaguely related robotics links.

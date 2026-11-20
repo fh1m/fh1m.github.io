@@ -7,7 +7,7 @@
  *   cv26   = the 2026 CV PDF (main branch, static/fahim-faisal-cv.pdf)
  *   mongla = https://fh1m.github.io/mongla_ws/ (RoboSub records read from RoboNation score sheets)
  *   repo   = the named GitHub repository
- *   user   = told by Fahim during the 2026-11-16 rebuild interview
+ *   user   = Fahim's direct rebuild clarifications, including his August 2026 departure
  */
 
 export const person = {
@@ -33,7 +33,7 @@ export interface Education {
 
 export const education: Education[] = [
   { org: "United International University (UIU)", degree: "B.Sc. Computer Science and Engineering", dates: "Fall 2026 – present", current: true, source: "user" },
-  { org: "BRAC University", degree: "B.Sc. Computer Science, minor in Electrical and Electronic Engineering", dates: "Sep 2023 – Aug 2026", note: "Left in 2026, a decision made on principle.", source: "cv26, user, mongla" },
+  { org: "BRAC University", degree: "B.Sc. Computer Science, minor in Electrical and Electronic Engineering", dates: "Sep 2023 – Aug 2026", note: "Left in August 2026, a decision made on principle.", source: "cv26, user, mongla" },
   { org: "IU International University of Applied Sciences", degree: "B.Sc. Autonomous Systems (one semester, on campus)", dates: "2024", note: "Bad Honnef, Germany.", source: "cv26" },
 ];
 
@@ -46,23 +46,36 @@ export interface Role {
   source: string;
 }
 
+/** Dated inference-call sharing bench, not camera/ROS throughput or detection accuracy. */
+export const hailoSharing = {
+  date: "2026-11-19",
+  durationS: 15,
+  requestedDetectorHz: 30,
+  requestedXfeatHz: 3,
+  measuredForwardHz: 30.1,
+  measuredDownwardHz: 30.1,
+  measuredXfeatHz: 3.1,
+  input: "one repeated downward frame",
+  source: "https://github.com/fh1m/mongla_ws/blob/c957ba915e6f0574eff244c3e27eca42fa5fae9a/.claude/context/measured-bars.md?plain=1#L8603-L8673",
+} as const;
+
 export const roles: Role[] = [
   {
-    org: "BRACU Duburi", title: "Engineering Team Lead · formerly Sub-Team Lead, AI & Machine Vision", dates: "Sep 2023 – 2026", url: "https://bracuduburi.com",
+    org: "BRACU Duburi", title: "Former Engineering Team Lead · previously Sub-Team Lead, AI & Machine Vision", dates: "Sep 2023 – Aug 2026", url: "https://bracuduburi.com/robosub/2026",
     points: [
+      "Led engineering for the 2026 RoboSub campaign: 8th of 58 teams, best round 6,234 points.",
       "Rebuilt the AUV vision stack on modern CNN detectors with a custom dataset pipeline, domain-specific pretraining and source-free domain adaptation.",
       "Deployed detection on edge hardware for on-vehicle inference; built the team's dev and deployment tooling.",
-      "Led engineering for the 2026 RoboSub campaign: 8th of 58 teams, best round 6,234 points.",
       "Two-vehicle 2026 campaign: Duburi 4.5 and Dubomini 2.0 share one ROS 2 stack and coordinate mid-run over an in-house inter-vehicle link; YOLO26 replaced YOLOv11 for NMS-free inference on a Jetson Orin Nano.",
       "Co-author of the team's Technical Design Reports for RoboSub 2025 and 2026.",
     ],
-    source: "cv26, mongla",
+    source: "cv26, mongla, user",
   },
   {
     org: "Mongla (independent)", title: "Author · autonomy stack for AUVs", dates: "Apr 2026 – present", url: "https://github.com/fh1m/mongla_ws",
     points: [
       "Independent ROS 2 autonomy stack: perception, estimation and a mission language over MAVLink to a 500 Hz control board.",
-      "Hailo-8 detection at 53.9 Hz through the live ROS graph; 18.0 ms photon-to-detection median latency. The control board and its firmware are Rakibul Islam's.",
+      `One Hailo-8 held two ${hailoSharing.requestedDetectorHz} Hz detection networks plus ${hailoSharing.requestedXfeatHz} Hz XFeat in a ${hailoSharing.durationS} s repeated-frame bench (${hailoSharing.date}); not a live ROS or accuracy result. The control board and firmware are Rakibul Islam's.`,
       "Every capability carries the file or the measurement behind it; the blocked rows stay visible.",
       "Contributor to the SROT control board's Hengla firmware and its Bondor ground station (Rakibul Islam's projects).",
     ],
@@ -70,13 +83,14 @@ export const roles: Role[] = [
   },
   {
     org: "Dubotech", title: "Junior Autonomous Engineer", dates: "Oct 2025 – Feb 2026",
-    points: ["Custom firmware for sonar hardware; a navigation stack for deep-water monitoring; backends for the sonar stack."],
-    source: "cv26",
+    points: ["Developed custom firmware for sonar hardware and a navigation stack for deep-water monitoring.", "Maintained sonar-stack backends and started in-house documentation for internal tools."],
+    source: "cv26, Resume_fh1m.md",
   },
   {
     org: "BRACU Mongol-Tori", title: "Contributor, Autonomous Subteam", dates: "Dec 2024 – May 2025",
     points: [
       "Inverse kinematics for a 2-DOF arm that types on a keyboard; a separate lightweight vision unit for alignment; custom OCR to tell keys apart.",
+      "Built an in-house GUI and simulation environment for arm testing and calibration.",
       "Ran the dataset pipeline for URC 2025, where the team ranked in the global top 10.",
     ],
     source: "cv26",
@@ -98,6 +112,11 @@ export const roles: Role[] = [
     org: "Thinkit Inc", title: "Web Development Intern", dates: "Mar 2021 – Jun 2021",
     points: ["Back-end work for a move to MongoDB; front-end bug fixes. The first code of mine that someone else depended on."],
     source: "cv26",
+  },
+  {
+    org: "ICT Club, SOS Hermann Gmeiner College", title: "General Secretary", dates: "Jan 2022 – Sep 2022",
+    points: ["Organized seminars and club programs; automated content management using the YouTube and Facebook APIs."],
+    source: "Resume_fh1m.md",
   },
 ];
 
@@ -121,12 +140,14 @@ export const publications = [
     title: "Color is Also Class Evidence: Re-evaluating Domain Generalization for Underwater Object Detection",
     authors: "T. M. Wasif Ishmam, Yaad Kamrul Bari, Muhammad Fahim Faisal, Md Khalilur Rhaman",
     venue: "OpenReview, 2025",
+    url: "https://openreview.net/forum?id=qiFAySNAsW",
     source: "cv26",
   },
   {
     title: "E-Commerce Recommendation System Based on Demand Clues",
     authors: "I. N. Reeve, T. Alam, M. Rahman Munia, A. Atif Showmik, M. F. Faisal",
     venue: "Universe International Journal of Interdisciplinary Research, Vol. 4, Issue 11, 2024",
+    url: "https://uijir.com/wp-content/uploads/2024/04/17.14.-E-COMMERCE-RECOMMENDATION-SYSTEM-BASED-ON-DEMAND-CLUES.pdf",
     source: "cv26",
   },
 ];
@@ -134,21 +155,8 @@ export const publications = [
 export const skills = {
   Languages: "Python, C, C++, Rust, TypeScript",
   "Robotics": "ROS 2, MAVLink, Nav2, Gazebo/ArduSub SITL, Pixhawk, ESP32, Jetson, Hailo-8",
-  "Vision & ML": "PyTorch, OpenCV, YOLO, TensorRT, scikit-learn",
+  "Computer vision & machine learning": "PyTorch, OpenCV, YOLO, TensorRT, scikit-learn",
   "Embedded & hardware": "Arduino/AVR, ESP32, K210, KiCad, PCB design",
   Tools: "Linux (Arch), Git, Docker, Bash, Astro, Flask",
   source: "cv26, repos",
-} as const;
-
-/** Mongla's measured numbers, quoted with their own caveats (source: mongla). */
-export const mongla = {
-  loopHz: 500,
-  detectHz: 53.9,
-  latencyMs: 18.0,
-  fovAirDeg: 63.8,
-  fovWaterDeg: 46.7,
-  tests: 4742,
-  dives: 0,
-  hullMm: 702,
-  source: "mongla (fh1m.github.io/mongla_ws), measured; 'in water: 0 dives' is the project's own wording",
 } as const;

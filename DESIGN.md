@@ -12,6 +12,14 @@ photos of real vehicles, real commits, real measurements. The voice is Sagan's p
 Hotz's bluntness, Karpathy's "here is how it actually works", Rick's wit. Structure is
 Donda/Rubin reduction: one thing at a time, nothing extra.
 
+### November 2026 refinement
+
+The entrance is now direct: a human introduction and three choices, with the animated opening opt-in. The selected observatory is a navigational exhibit, not a qualification. Its miniature project models are schematics; actual hardware, CAD and recorded output belong in the project/story pages.
+
+Oxocarbon Dark is the selected palette: neutral charcoal layers, bright neutral prose, pink primary actions and blue navigation/focus. Domain and data colors come from the same established family, not unrelated background hues. Photographs should be large enough to inspect; diagrams must say whether they are measured, simulated or illustrative. Press is a dated source list, never a wall of endorsement logos.
+
+The shared type roles take the Mongla site's separation of display, prose and data without copying its vehicle-specific palette: Manrope headings, Zed Sans reading and interface text, IBM Plex Mono measurements/code and Tiro Bangla. Professional documents use conventional Plex Sans. Zed Sans must not be replaced by Zed Mono for body text. Important links remain visibly actionable. Wide technical material has labelled, focusable horizontal regions on phones; the document itself must not widen. Gallery images preserve native proportions and open at full resolution.
+
 ## Never (the documented tells, and where this site did them)
 
 Type and labels
@@ -24,7 +32,7 @@ Type and labels
 - One word of a headline in a different colour, italic or weight.
 
 Colour and surfaces
-- Tinted near-black surfaces (#0b0b0b, #111) standing in for black; navy "surfaces".
+- Undifferentiated near-black or navy content cards. Instrument frames may use a restrained blue-black surface when it helps separate controls from prose.
 - Glow: coloured box-shadow/text-shadow halos (the header dot, the map pins).
 - Glassmorphism: backdrop-blur panels floating over a background (the old sheets).
 - Rainbow: colour that means nothing. Each nation colour is used only for its own nation.
@@ -36,7 +44,7 @@ Layout
 - Stat banner rows: a grid of big-number/small-label boxes (project "figures").
 - Numbered markers 01/02/03 unless the content really is a sequence.
 - The same section template repeated on every page; hairline rules between everything.
-- A 3D globe or HUD as the hero because "space looks impressive" (rejected).
+- A 3D globe or HUD as a substitute for an introduction. The optional observatory must be preceded by direct routes to the story and work.
 
 Motion
 - Fade-up on scroll, hover-grow on every card, ambient loops that never stop.
@@ -71,13 +79,11 @@ Words
 - Images of the university programme's vehicles belong to Duburi, not Mongla.
 - Held media (see MEDIA_AUDIT) is never used.
 
-## Tokens
+## Canonical tokens
 
-- Background #000. Text #ececec, secondary #a3a3a3 (≥ 7:1), tertiary #7a7a7a (≥ 4.5:1).
-- Nations: water #4f8fe0, earth #79b35f, fire #e5533d, air #eaa63b. Red for "this was wrong"
-  is the fire red; it only appears struck-through beside its correction.
-- Type: Zed Sans for everything readable; Obel Mono only for code, hashes, tabular figures.
-  Scale with real contrast: 0.875 / 1 / 1.25 / 1.75 / 3 / 5 rem.
+`src/data/palette.ts` supplies the selected Oxocarbon roles; `src/styles/global.css` supplies their CSS and typography roles. Do not reintroduce the superseded black-only palette or a second hard-coded nation-color system. Source photographs and planetary textures retain their actual colors.
+
+Manrope is the heading face, Zed Sans the reading/interface face, IBM Plex Mono the code/data face and Tiro Bangla the Bangla face. Professional documents deliberately use Plex Sans. Heading contrast comes from hierarchy and composition, not oversized gaps or a different color on one word.
 
 ## Sources
 
@@ -89,3 +95,17 @@ Words
 - Jim Nielsen, "The AI Aesthetic" (2026). godobject.dev "10 tells of a slop UI". Fountain Institute "7 signs".
 - Wikipedia: Signs of AI writing (puffery, vague association, rule of three).
 - HN "My website is ugly because I made it" (44114982): personal sites are valued for being visibly someone's.
+
+## Approved whole-site revision, November 2026
+
+The user approved an openly themed personal world, credible 3D rendering, stronger editorial composition across every route, a researched dark palette and close desktop/mobile browser inspection. Black, navy and bottle green were examples, not a closed list. Earlier black-only and subtle-reference rules yield to this explicit direction.
+
+The initial custom ink/deep-water/aubergine/copper mix was explicitly rejected. Do not reinstate it. After actual-page previews of several established palettes, the user selected Oxocarbon. `src/data/palette.ts` is the canonical source for CSS, SVG and canvas roles. Attribution: [Oxocarbon](https://github.com/nyoom-engineering/oxocarbon), [base16 colors](https://github.com/nyoom-engineering/base16-oxocarbon); MIT notice is retained in `public/licenses/oxocarbon.txt`. Follow [Carbon color roles](https://www.carbondesignsystem.com/building-blocks/foundations/color/overview): neutral layers dominate, accents have a purpose, decorative borders are not substitutes for accessible control boundaries. Build and responsive checks do not certify visual quality or all contrast combinations.
+
+Controls now have a 4 px radius, source/document actions a deliberate 2 px edge, and instruments at most 10 px. There is no rule to put every section in a card. Composition, contextual media and reading rhythm must carry the hierarchy; alternating colored rectangles alone are not a finished design.
+
+### Applied reading and control system
+
+Neutral layers and semantic accents now carry the domain pages, reports, notebook, project records, archive and directory. Source photographs/planetary textures are not recolored to match UI tokens; GitHub language/activity colors remain source data. Important actions and evidence links use pink; navigation/progress/focus use blue. Missing project images are not represented by blank tiles.
+
+Notebook discovery uses full-width series headers and editorial columns, with contextual images retained on phones. Technical figures preserve proportions and open at full resolution. Wide engineering drawings keep readable labels in a focusable horizontal region rather than shrinking type below legibility. Only explanatory motion remains in those drawings; no decorative wait before their outlines appear.

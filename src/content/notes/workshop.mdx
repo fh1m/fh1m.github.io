@@ -1,6 +1,6 @@
 ---
 title: "The workshop"
-dek: "Tools I built for myself: a new-tab page that takes a key and goes anywhere, a 2022 editor in screenshots, and the small sharp things engineers make between machines."
+dek: "The editor screenshots from 2022, a browser page from 2023, and the two-host workbench they grew into. Tools, habits, small experiments, and a desk with a personality."
 date: "2026-11"
 series: machines
 part: 7
@@ -13,56 +13,145 @@ sources:
   - { label: "nvim-pde", href: "https://github.com/fh1m/nvim-pde" }
   - { label: "comma.ai calib_challenge (the original)", href: "https://github.com/commaai/calib_challenge" }
   - { label: "My calib_challenge fork", href: "https://github.com/fh1m/comma-calib-challenge" }
+  - { label: "Digital Den: the current workstation", href: "https://github.com/fh1m/.dotfiles" }
+  - { label: "Den architecture: compositor, shell, services and editor", href: "https://github.com/fh1m/.dotfiles/blob/main/docs/architecture.md" }
+  - { label: "Cross-host input, recovery and private state", href: "https://github.com/fh1m/.dotfiles/blob/main/docs/digital-den/README.md" }
+  - { label: "The editor's actual environment resolver", href: "https://github.com/fh1m/.dotfiles/blob/main/home/.config/nvim/lua/sensei/environment.lua" }
+  - { label: "Sensei guests: sources, original writing and staged dialogue", href: "https://github.com/fh1m/.dotfiles/blob/main/docs/digital-den/SENSEI-GUESTS.md" }
 ---
 import Fig from "../../components/note/Fig.astro";
 import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
-import Stats from "../../components/note/Stats.astro";
+import Explore from "../../components/note/Explore.astro";
 
-Every engineer has a workshop: the tools they built because the shop didn't sell the one they needed, or sold it with too many buttons. Mine mostly live in terminals and in the first thing a browser shows.
+The oldest pictures here are not of robots. They are screenshots of my editor: July 2022, then October, with another arrangement of buffers, colours and status lines. The control panels came before the underwater team.
 
-## A new tab that takes a key
+In October 2023 there was a browser start page: mostly a clock, a box to type into and shortcuts to the places I kept opening. The current workbench is considerably less restrained. Two machines have names, five panels have jobs, the desktop has a companion, and there is still usually a terminal in the middle of it.
 
-A browser new-tab page: a black screen, a clock and a text box. Built in October 2023 on Ozenc Bilgili's Tilde Enhanced, then re-keyed for how I actually move around the web.
+These belong in the same record as the vehicles. They are the surroundings in which the code gets written, a derivation stays open, a test carries on running, or an evening disappears into a tool that was supposed to save five minutes.
 
-<Fig src="/media/notes/start-page-2023.webp" alt="October 2023: the start page with a large clock, on a riced tiling-window desktop" caption="<b>October 2023</b>, in its natural habitat: a riced bspwm desktop. The setup has since moved on." wide />
+## 2022: an editor as a time capsule
 
-Every site I open more than twice a day gets a one- or two-letter key. Type the key, press Enter, done. The same keys take arguments: `g:kalman filter` searches GitHub, `r/r/robotics` opens a subreddit, `?` shows the grid, and anything else becomes a web search.
-
-<Stats items={[
-  { v: "1.38", l: "characters per shortcut key, on average, across 21 shortcuts" },
-  { v: "13.3", l: "characters in the domain each one replaces" },
-]} />
-
-The whole brain is one parser that checks in a fixed order: does it look like a URL? Is it *exactly* a key? Is it `key:query`, then `key/path`? Otherwise search. Order matters. `d` (Drive) and `dc` (Discord) share a first letter, and that only works because a key must match exactly: prefixes never win. You can type into the real grammar in the [workshop arena](/#workshop).
+The [nvim-pde archive](https://github.com/fh1m/nvim-pde) calls itself a personal development environment. Its README is mostly dated screenshots; the configuration and plugin locks are preserved too. It is a Neovim configuration, not a new editor implementation.
 
 <Gallery items={[
-  { src: "/media/notes/start-page-search.webp", alt: "The start page with g:kalman filter typed into the box", caption: "A GitHub search, two keystrokes in." },
-  { src: "/media/notes/start-page-now.webp", alt: "The start page today: clock and the help grid", caption: "Today, with the help grid." },
-]} />
+  { src:"/media/notes/nvim-2022-07-05.webp", alt:"The July 2022 Neovim setup with split buffers, completion and a colourful status line", caption:"5 July 2022. Ranger's source is open in my editor; it is not code I am claiming to have authored." },
+  { src:"/media/notes/nvim-2022-10-12.webp", alt:"The October 2022 Neovim setup with a changed arrangement of buffers and theme", caption:"12 October 2022. Another dated view of the same habit." },
+]} credit="Preserved screenshots from github.com/fh1m/nvim-pde." />
 
-During the clean-up I found the default search had been labelled *DuckDuckGo* while pointing at Google since 2023, a leftover from the template. It says Google now. At least it's honest.
+An editor screenshot records a different kind of progress from a release. Completion, file navigation, syntax parsing, diagnostics and a status line have to agree about the buffer under the cursor. They look like one interface, but they are separate pieces with separate configuration and failure modes.
 
-## An editor, in screenshots
+That separation is useful to understand. A language server provides language-specific analysis; the editor is its client. A plugin manager installs editor extensions. A tool installer finding a Python executable does not establish that the language server, debugger and test runner are using the Python environment in which the project actually works.
 
-In 2022 I built my own Neovim configuration and screenshotted it as it grew, the way some people photograph a plant. The repo is mostly those screenshots, which is fitting: an editor config is a diary written in Lua.
+The older screenshots are worth keeping without pretending every old choice was an architectural breakthrough. They show the setup I was using before Duburi, before a robotics workbench needed containers and serial devices, and before the same environment had to work on more than one machine.
+
+## 2023: a new tab that takes a key
+
+The start page began with [Ozenc Bilgili's Tilde Enhanced](https://github.com/ozencb/tilde-enhanced). I changed its keys and configuration for my own routes around the web; the template deserves its credit.
+
+<Fig src="/media/notes/start-page-2023.webp" alt="The October 2023 start page, showing a large clock on the old tiling-window desktop" caption="October 2023, on the old bspwm setup. A period image, not a reconstruction made for this site." wide />
+
+The idea is small enough to learn in a minute. An exact key opens a saved destination. A colon asks that destination to search; a slash asks for a path. Across the 21 shortcuts in the repository, keys average 1.38 characters against 13.3 characters for their domains. Those are lengths in a configuration, not a measured productivity gain.
+
+The parser's interesting part is precedence. A URL must not become a search just because it contains punctuation. `d` and `dc` must remain different keys, not competing prefixes. A search argument can contain another colon or an ampersand without accidentally becoming part of the URL's control syntax.
+
+| Input | Interpretation |
+|---|---|
+| `g` | The saved GitHub destination |
+| `g:kalman filter` | GitHub search, with the query URL-encoded |
+| `r/r/robotics` | The Reddit origin plus `/r/robotics` |
+| `dc/help` | The Discord origin plus `/help`, replacing its saved `/app` path |
+| `example.org` | A URL; the original parser supplies `http://` when no protocol is present |
+| Unrecognized text | The default web search |
+
+The distinction between a saved URL and its origin matters. Appending `/help` to `https://discord.com/app` would produce `/app/help`; the original parser strips the saved path first. It is a small interface contract, and easy to get wrong in a friendly-looking preview.
+
+<Explore bench="query" title="Try the shortcut grammar without leaving the page" hint="Try dc/help, g:camera & motion, or r/r/robotics" caption="A nine-key excerpt of the start page. This shows the chosen rule and destination; it does not open a website, submit a search or record what you type." fallback="An exact key chooses a saved destination. key:query searches it; key/path starts at its origin. Unrecognized text falls back to web search." />
+
+There are useful rough edges in the old implementation. Raw URLs and exact keys are checked before the trimmed search/path forms, so whitespace is not treated identically in every branch. The example above preserves that behaviour rather than advertising a cleaner grammar than the source implements.
+
+During the later clean-up I also found a less mathematical mismatch: the default search had been labelled DuckDuckGo while pointing to Google since 2023. The label says Google now. A configuration can be technically functional and still tell the wrong story about what it does.
 
 <Gallery items={[
-  { src: "/media/notes/nvim-2022-07-05.webp", alt: "Neovim in July 2022: a code buffer with a file tree and status line", caption: "5 July 2022." },
-  { src: "/media/notes/nvim-2022-10-12.webp", alt: "Neovim in October 2022: split buffers with a more elaborate theme", caption: "12 October 2022." },
-]} credit="From github.com/fh1m/nvim-pde." />
+  { src:"/media/notes/start-page-search.webp", alt:"The start page with g:kalman filter entered", caption:"A site-specific search, rather than a trip through the address bar and the site's own search field." },
+  { src:"/media/notes/start-page-now.webp", alt:"The current start page with its shortcut help grid", caption:"The help grid keeps the grammar discoverable; memorization is optional." },
+]} />
 
-## Estimating where a car is pointing
+## The Den: the workbench gets a home address
 
-In 2023 I attempted comma.ai's open calibration challenge: given dashcam video, recover the camera's pitch and yaw relative to the direction of travel. It's a fork, an attempt, and the fun was in the estimation, not the leaderboard. It was also the first time I met the idea that motion itself is a measurement: the road slides past the camera in a pattern that points at where the car is going.
+**Arete** is the laptop. **Homie** is the home PC. Docked, the arrangement has two external displays, the laptop display, its ScreenPad and Homie's display. It is two computers sharing a workbench, not one machine with a magically larger pool of memory or GPU RAM.
 
+<Fig src="/media/den/den-layout.webp" alt="Illustrated arrangement of the two-host, five-panel Digital Den, using real application captures with pink input routes and an illustrated avatar" caption="The Den's physical arrangement and application roles. The application captures are real; the connecting routes and avatar are illustrative. Open the original to read the small panels." wide />
 
-## The rest of the bench
+The panels have different jobs. Code and review can stay on the main display while a derivation and its experimental Canvas remain above it. Documentation, calendar and weather have another place; the ScreenPad can hold a file picker, a USB check or a short result without taking over the main workspace. Homie has its own graphics, storage and host policy.
 
-- **[Passless](/notes/passless):** a login with no secret worth stealing.
-- **[Secure terminal chat](/notes/secure-p2p-chat):** what Wireshark sees before and after a handshake.
-- **[Cipher project](https://github.com/fh1m/cipher-project):** Caesar, Affine, Playfair and Hill, with a PyQt6 front end and a CLI. The fun part runs the other way: given a little known plaintext, it recovers a Hill key by inverting a matrix mod 26.
-- **Where the old repos went:** Arduino-Vision is now [four LEDs](/notes/four-leds), and Track_and_Predict is now [half a second](/notes/half-a-second). Both were rewritten as measurements rather than demos.
-- **Dotfiles and Arch scripts:** the machine I work on, kept in version control, because a setup you can't rebuild is a setup you're afraid to change.
+This is the grown-up version of the old screenshots, but it is still a personal desktop. The hot pink is allowed to be hot pink. Music, wallpaper and a small illustrated colleague do not have to disappear just because a terminal contains robotics code.
 
-<Pull>A tool you built yourself is the only one whose failures you're allowed to be smug about.</Pull>
+## What actually draws the desktop
+
+The [architecture map](https://github.com/fh1m/.dotfiles/blob/main/docs/architecture.md) separates responsibilities that a screenshot makes look like one application:
+
+- **Hyprland, the compositor,** places application windows and manages the physical displays and workspaces.
+- **Quickshell, the shell,** draws the bars, dropdowns, launcher, notifications and overlays. Screen-specific surfaces are created per output rather than assuming every monitor has the same geometry.
+- **QML services** hold shared state and adapt system sources. The open panel and its location belong to shared shell state, not a separate contradictory copy in every button.
+- **The working applications** remain applications: a light terminal, persistent tmux sessions, Neovim, Obsidian, browsers and project tools.
+
+This boundary explains a practical design choice. A desktop panel can request a workspace change, but it should not become an alternative window manager. A calendar can be part of the shell without making a terminal session depend on the calendar being healthy. The code, the reasoning and the surrounding controls can share a visual language without sharing every failure.
+
+The public tree also distinguishes configuration from machine state. Shared files are rendered for the selected hardware profile; replaced files are backed up. Credentials, selected vaults and private pairing state do not become portable merely because the visible desktop is in Git.
+
+## One Python, or three disagreeing tools
+
+One of the more consequential parts of the current editor is not visible in a screenshot: [`environment.lua`](https://github.com/fh1m/.dotfiles/blob/main/home/.config/nvim/lua/sensei/environment.lua).
+
+A robotics repository may be opened on the host while its dependencies live in a virtual environment or a container. If diagnostics inspect one interpreter, tests launch another and the debugger launches a third, all three tools can be internally consistent and disagree with the program that actually runs.
+
+The resolver gives these tools one place to ask. An explicit editor selection wins. Otherwise a runnable interpreter in the project profile wins; if that does not resolve, the code checks project `.venv` and `venv` paths, then the active environment or `python3` on the path. Project profiles are matched by root, preferring the most specific matching root.
+
+There is a detail worth reading in the implementation: a fallback profile can already contain the host interpreter. Merely creating a `.venv` does not therefore guarantee that it will be selected first. `DevInfo` exposes the resolved state; `DevEnvironment` validates a chosen executable and makes the selection explicit. The useful property is inspectability, not an assertion that automatic detection never makes the wrong choice.
+
+<Fig src="/media/den/arete-main.webp" alt="Neovim and tmux beside Mongla's public repository, with a numerical calibration check open" caption="The current workbench, with a source-backed numerical check open beside its repository. This is a desktop capture, not a measurement of a vehicle." wide />
+
+## Sharing a mouse means designing a way back
+
+Moving between hosts sounds trivial until the cursor is somewhere else and the recovery key is being captured by the wrong machine.
+
+The Den defines physical crossing routes: from the top of the laptop to Homie, or from the right edge of the upper external display, with corresponding return edges. A disconnected configured output disables that edge rather than leaving an invisible destination.
+
+The recovery controls are deliberately distinct. Double Ctrl locates the cursor. Triple Ctrl pauses sharing and brings it home. Ctrl+Alt+Esc releases native capture. The receiving machine keeps its own local input usable. These are not decorative shortcut choices; they make it possible to recover when the cross-host convenience is the thing that fails.
+
+Clipboard transfer is narrower than “share everything.” The public design supports text and PNG offers, excludes sensitive offers, limits payloads and keeps other formats local. Shared storage has an explicit writable area; older volumes remain read-only. A network disconnect is not a reason to change ownership, reset a repository or erase a disk.
+
+The same distinction applies to continuity. Tmux preserves a running session while its server lives. Git preserves source history. Encrypted snapshots preserve the selected backup scope. None is a substitute for all the others, and a second drive in the same PC is not protection against losing the PC.
+
+## A little less solemn
+
+Zondo is the Den's illustrated deskbuddy. He finds an unoccupied corner, types, wanders and offers short text bubbles. Applications win the space; quiet, fullscreen, lock and reduced-motion rules take precedence. The renderer is separate from the input service and does not need to inspect code, clipboard contents or keystrokes to be a companion.
+
+There is also a [Sensei guests collection](https://github.com/fh1m/.dotfiles/blob/main/docs/digital-den/SENSEI-GUESTS.md), drawn from the people named on Mongla's own reference shelf: Richard Feynman, George Hotz, John Carmack, Andrej Karpathy, Jim Keller, Chris Lattner, Paul Graham, Tim Urban, Kanye West and Rick Rubin.
+
+Its most important distinction is editorial. Real excerpts keep their sources. Interpretations are labelled as interpretations; original workshop prompts and staged dialogue are not passed off as historical quotations. Zondo's final question belongs to the desktop's writing, not to the visitor's biography. The public validation record also names which host was actually checked rather than treating a shared configuration as proof of deployment everywhere.
+
+The desk has other rabbit holes. Music gets artwork and a queue. A comic can be a research break. The radio panel turns an RTL-SDR receiver into an invitation to look at signals rather than another permanently running dashboard.
+
+<Fig src="/media/den/radio-panel.webp" alt="Readable detail of Homie's RTL-SDR radio panel, showing broadcast FM controls and an uncalibrated relative spectrum" caption="The radio panel, cropped from the real desktop capture so its labels remain readable. The spectrum is explicitly relative and uncalibrated; it is not a calibrated RF power measurement." />
+
+A spectrum separates signal content by frequency; a waterfall adds time so changes have a history. That is a different way of looking at a familiar neighbourhood. The public receiver controls are on demand, with bounded observations and saved receipts—not a claim that the workstation should silently scan in the background.
+
+## A camera question from 2023
+
+The tools archive also contains my attempt at [comma.ai's calibration challenge](https://github.com/fh1m/comma-calib-challenge): recover camera pitch and yaw relative to the direction of travel from dashcam video. It remains a fork and an attempt, not a leaderboard result I can substantiate here.
+
+The question is useful even without a score. Pitch and yaw describe camera alignment, not the car's global position. Image motion mixes camera motion, scene geometry and independently moving objects. A method that treats every moving pixel as an equally good clue has already made a strong assumption about the scene.
+
+That question reappears in the later [camera-as-a-sensor work](/notes/turning-a-camera-into-a-sensor): what has to be known before pixel motion can become a useful physical measurement? The earlier attempt stays in the story because it is part of the thread, not because every old repository needs to be rewritten as a success.
+
+## The other small tools
+
+[Passless](/notes/passless) asks what a login can keep when it does not store a password. [The terminal chat](/notes/secure-p2p-chat) makes the wire traffic visible before and after an authenticated-encryption handshake. [Cipher project](https://github.com/fh1m/cipher-project) is a different kind of exercise: classical ciphers, including recovering a Hill key from known plaintext through matrix arithmetic modulo 26.
+
+The old names are kept reachable too. Arduino-Vision became the [Four LEDs study](/notes/four-leds); Track_and_Predict became [Half a second](/notes/half-a-second). The newer analyses do not make the earlier demonstrations cease to exist.
+
+For the browser tool, read [`queryParser.js`](https://github.com/fh1m/start-page/blob/main/js/queryParser.js) alongside the configuration: the grammar and the chosen destinations are separate concerns. For the current workstation, start with the [architecture map](https://github.com/fh1m/.dotfiles/blob/main/docs/architecture.md), then the [input and recovery guide](https://github.com/fh1m/.dotfiles/blob/main/docs/digital-den/README.md). They explain why the desk looks the way it does, and what happens when part of it is absent.
+
+<Pull>The workbench is allowed to have a personality. It still needs a way to recover.</Pull>

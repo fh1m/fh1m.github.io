@@ -12,47 +12,185 @@ sources:
   - { label: "Dhaka Tribune: AIUB and AERD launch first weather balloon", href: "https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon" }
   - { label: "Amateur Experimental Rocketry Dhaka", href: "https://www.facebook.com/profile.php?id=61550725171921" }
   - { label: "RocketPy", href: "https://github.com/RocketPy-Team/RocketPy" }
+  - { label: "NASA Glenn: how gimbaled thrust creates a turning moment", href: "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/gimbal/" }
+  - { label: "RocketPy: sources of uncertainty and sensitivity analysis", href: "https://docs.rocketpy.org/en/latest/user/sensitivity.html" }
+  - { label: "The original V1 gimbal controller", href: "https://gist.github.com/fh1m/e3a64a4dc321eee82a6d761142e63ba2" }
+  - { label: "The revised two-axis controller", href: "https://gist.github.com/fh1m/139d52f53c70b3b8b7f45b944ee0ea1c" }
 ---
 import Fig from "../../components/note/Fig.astro";
 import Gallery from "../../components/note/Gallery.astro";
 import Pull from "../../components/note/Pull.astro";
 import Explore from "../../components/note/Explore.astro";
 
-Before the AUV there was a rocket. In February 2023 I joined Amateur Experimental Rocketry Dhaka (AERD), founded in 2022 and backed by AIUB's research centre. I started where a machine has the fewest places to hide: something that has to leave the ground and come back in a recoverable number of pieces.
+I worked with Amateur Experimental Rocketry Dhaka from February 2023 to February 2025. My corner of the team was attitude, guidance, navigation and control, trajectory prediction, parachute development and procurement. It was an awkwardly useful combination: the controller can ask for anything; procurement tells it what actually exists.
 
-My jobs were attitude, guidance, navigation and control, trajectory prediction, the parachute, and procurement. Procurement isn't glamorous, but it decides which design you actually get to build.
+This came before my work with Duburi, but the two periods overlapped. The engineering questions travelled more easily than the hardware. What state do we know? How late do we know it? What can the actuator really do?
 
 <Gallery items={[
-  { src: "/media/aerd/cover.webp", alt: "The AERD team standing outdoors with a large white weather balloon", caption: "AERD, with the balloon." },
-]} credit="Photos: AERD; press image: The Daily Star." />
+  { src: "/media/aerd/cover.webp", alt: "The AERD team standing outdoors with a large white weather balloon", caption: "The weather-balloon team. The launch reported by Dhaka Tribune was on 12 January 2024." },
+]} credit="Team photograph: AERD archive." />
 
-## What I built
+## The work inside the headline
 
-- **A ROS 2 (Humble) data-acquisition stack**, so a test produced data instead of anecdotes.
-- **Flight controllers** (Pixhawk, Betaflight), and V1 of an in-house flight computer for a monocopter UAV, which I led.
-- **A visual SLAM stack for GPS-denied navigation.** Like underwater, there are times there's nothing overhead you can trust.
-- **Trajectory prediction with RocketPy, checked against real flight-test data.** A simulation you never compare to a flight is a wish.
+The public milestones matter, but they are team milestones. The Daily Star reported a successful hybrid-engine test at AIUB's research facility on **1 September 2023**. Its article was published on 13 September. The later weather-balloon launch was **12 January 2024**, not 2023.
 
-The engine fired at AIUB's research facility: the first hybrid rocket engine tested in Bangladesh, covered by The Daily Star and others. In 2023 AIUB and AERD also launched their first weather balloon. I was one member of the team behind both, and I'd rather be precise about that than impressive.
+The [balloon report](https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon) was a press release carried by Dhaka Tribune. It describes recovery near Comilla, about 120 km from the launch site, with the payload intact. Temperature, humidity and wind measurements were part of its purpose; the report also connects that atmospheric data to future rocket-trajectory prediction.
 
-<Fig src="/media/aerd/mou-02.webp" alt="AIUB and AERD representatives at a table signing an agreement" caption="The AIUB and AERD agreement: a student team turning into a research programme." wide />
+My contributions sat in the systems around flight:
 
-## The gimbal
+- **Data acquisition:** implementing a ROS 2 Humble stack for collecting test data.
+- **Flight software and electronics:** working with Pixhawk and Betaflight controllers, and leading V1 development of an in-house flight computer for a monocopter UAV.
+- **Navigation:** work on a visual-SLAM software stack for GPS-denied UAV navigation.
+- **Prediction and testing:** using RocketPy for trajectory work and comparing against real flight-test data.
+- **Recovery and getting things built:** parachute development and procurement alongside A&GNC work.
 
-From September 2024, at BRAC University's LASSET lab, I worked controls and trajectory for the university's rocketry sub-team. I built an in-house PID controller for a thrust-vector-control gimbal, a 2-axis controller, and a GUI to track and monitor it. The demo went to the Research Excellence Awards Initiative as a funding submission.
+The monocopter computer, a rocket's trajectory and a weather balloon are not one interchangeable “autonomous system.” They share tools and questions, but their dynamics, missions and evidence are different.
 
-A thrust-vector gimbal holds a rocket upright by tilting the engine under it, like balancing a broom on a fingertip. Everything you need to know about PID is in that broom.
+<Fig src="/media/aerd/mou-02.webp" alt="AIUB and AERD representatives at a table signing an agreement" caption="The AIUB–AERD collaboration agreement. Institutional support is part of this history, alongside the machines." wide />
 
-- **P** pushes in proportion to the tilt. Alone, it overshoots and rings: when the rocket is finally upright, it's still rotating.
-- **D** pushes back against how fast the tilt is changing. It's the brake. It also amplifies sensor noise, which is why nobody turns it up to eleven.
-- **I** remembers the error that's still there. Only I beats a steady wind, and only I winds up and takes over if you let it.
+## Guidance, navigation and control are three different jobs
 
-Tune it yourself: press *P only*, then *add D*, then *add I*, and watch the three classic failures go by in order.
+**Guidance** chooses what motion is wanted: a path, an attitude target or a recovery objective. **Navigation** estimates the state needed to pursue it: position, velocity, orientation and their uncertainties. **Control** turns the difference between wanted and estimated motion into actuator commands.
 
-<Explore bench="gimbal" n="fig 1" title="A thrust-vector gimbal against the wind" hint="drag the gains" caption="A toy plant with honest shapes: one axis, actuator saturation, a gusting wind from 1 s. The numbers are illustrative, not the rocket's." />
+That separation matters when debugging. A vehicle can track the wrong target accurately. An excellent controller can act on an old attitude estimate. A correct command can arrive at an actuator whose sign or range is different from the software's assumption.
 
-<Fig src="/media/lab/meghdut-tui-1.webp" alt="A terminal flight UI: MAVLink receive and transmit panels, orientation, and a safety panel" caption="Later, for drones: a terminal UI over MAVLink with a safety panel that never lets you forget the props. The same habit, on a different airframe." wide contain />
+Data acquisition is a fourth concern, not a synonym for any of those three. A useful recording needs to preserve what was measured, its units and frame, and when the measurement happened. A timestamp attached when a message reaches a computer is not automatically the time at which the sensor observed the world.
 
-<Pull>A controller isn't clever. It's patient, many times a second.</Pull>
+The test needs to remain inspectable after the hardware is packed away. A convincing plot is not enough if two channels use different clocks or if a frame conversion has quietly changed what “up” means.
 
-The question rockets asked is the one water asked next: how does a machine control itself when it can't ask anyone for help? Underwater, the answer arrived with a 500 Hz board and [a lot more humility](/notes/mongla).
+## A trajectory is an argument about inputs
+
+The useful output of a flight simulator is not just a pleasing arc. It is a prediction conditional on a motor model, mass properties, aerodynamic assumptions, launch conditions, atmosphere and recovery behaviour.
+
+For one translational axis, the bookkeeping is the familiar `m a = thrust + aerodynamic force + gravity`, with each quantity expressed in a consistent frame. The difficulty is in the terms: thrust changes through the burn, mass changes as propellant is consumed, drag depends on relative airspeed, and the atmosphere is not a constant-density vacuum.
+
+A small error early in flight can affect a later outcome. A mass estimate changes acceleration. A wind profile changes relative airflow and drift. A recovery-system delay changes where descent begins. Agreement at apogee alone cannot establish that the whole trajectory, attitude history or landing prediction was right.
+
+That is why comparison against test data was part of my RocketPy work, rather than treating the simulator as a second source of truth. A matched raw flight log and model configuration are not published here, so this account concentrates on the reasoning rather than attaching an unsupported accuracy percentage.
+
+There is still a useful distinction to make:
+
+| Question | What it tells you | What it does not settle |
+|---|---|---|
+| Does a nominal run reproduce a test? | Whether one parameterized case agrees with observations | How robust that agreement is to uncertain inputs |
+| Which uncertain inputs dominate an output? | Where better measurements may reduce prediction spread | Whether omitted physics is unimportant |
+| What changes across plausible weather and hardware variation? | A distribution of conditional outcomes | Permission to treat every simulated outcome as a safe flight |
+
+RocketPy's [sensitivity guide](https://docs.rocketpy.org/en/latest/user/sensitivity.html) makes this concrete. It separates modelling and numerical approximations from weather and measurement uncertainty, then uses Monte Carlo results to estimate which parameter uncertainties contribute most to an output's variance. Its worked example is **not our rocket**; it is further reading for the method.
+
+The balloon's atmospheric measurements belong in this story for that reason. “Weather” is not scenery surrounding a trajectory calculation. It is an input.
+
+## The gimbal at LASSET
+
+From September 2024 to February 2025, I also worked with BRAC University's LASSET rocketry sub-team on controls and trajectory prediction. I implemented an in-house PID controller for a two-axis thrust-vector-control gimbal, plus a GUI for tracking and monitoring. The demo was submitted to the Research Excellence Awards Initiative as a funding proposal.
+
+A gimbal changes the direction of thrust relative to the rocket. If the thrust line does not pass through the centre of mass, it creates a turning moment. In a simplified planar geometry, its magnitude is `|τ| = T ℓ |sin δ|`: thrust `T`, distance `ℓ` from the centre of mass to the pivot, and gimbal angle `δ`.
+
+<figure class="wide">
+<svg viewBox="0 0 1000 360" role="img" aria-labelledby="tvc-title tvc-desc">
+  <title id="tvc-title">A gimbal creates a moment; a controller must close the whole loop</title>
+  <desc id="tvc-desc">Left: a schematic rocket, its centre of mass, a pivot below it and a thrust vector tilted away from the body axis. Right: a conceptual loop from estimated attitude to a controller, actuator and vehicle, then back through sensing. This explains the mechanism, not the historical electronics or dimensions.</desc>
+  <defs><marker id="tvc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="context-stroke" /></marker></defs>
+  <style>{`.tvc-label{font:15px var(--mono);fill:var(--ink)}.tvc-heading{font:600 18px var(--display);fill:var(--ink-hi)}.tvc-box{fill:var(--surface);stroke:var(--line)}.tvc-flow{fill:none;stroke:var(--instrument);stroke-width:2;marker-end:url(#tvc-arrow)}`}</style>
+  <text x="20" y="28" class="tvc-heading">The mechanical leverage</text>
+  <path d="M260 55 224 105V275H296V105Z" class="tvc-box" />
+  <path d="M260 45V320" stroke="var(--line)" stroke-dasharray="5 5" />
+  <circle cx="260" cy="165" r="5" fill="var(--instrument)" />
+  <path d="M260 165 340 95H395" stroke="var(--instrument)" fill="none" />
+  <text x="345" y="83" class="tvc-label">centre of mass</text>
+  <path d="M200 165V285" stroke="var(--ink)" />
+  <path d="M193 165H207M193 285H207" stroke="var(--ink)" />
+  <text x="177" y="230" class="tvc-label">ℓ</text>
+  <path d="M248 285H272L279 314H241Z" transform="rotate(23 260 285)" fill="var(--raised)" stroke="var(--ink)" />
+  <circle cx="260" cy="285" r="4" fill="var(--action)" />
+  <path d="M260 285 311 165" fill="none" stroke="var(--action)" stroke-width="3" marker-end="url(#tvc-arrow)" />
+  <text x="319" y="211" class="tvc-label" style="fill:var(--action)">thrust T</text>
+  <text x="284" y="263" class="tvc-label">δ</text>
+  <text x="20" y="345" class="tvc-label">Moment magnitude: T ℓ |sin δ|</text>
+  <text x="530" y="28" class="tvc-heading">The loop around it</text>
+  <rect x="530" y="70" width="160" height="70" rx="5" class="tvc-box" />
+  <text x="610" y="99" text-anchor="middle" class="tvc-label">sensing +</text><text x="610" y="122" text-anchor="middle" class="tvc-label">estimation</text>
+  <rect x="790" y="70" width="180" height="70" rx="5" class="tvc-box" />
+  <text x="880" y="99" text-anchor="middle" class="tvc-label">controller</text><text x="880" y="122" text-anchor="middle" class="tvc-label">error → command</text>
+  <rect x="790" y="235" width="180" height="70" rx="5" class="tvc-box" />
+  <text x="880" y="264" text-anchor="middle" class="tvc-label">actuator</text><text x="880" y="287" text-anchor="middle" class="tvc-label">command → angle</text>
+  <rect x="530" y="235" width="160" height="70" rx="5" class="tvc-box" />
+  <text x="610" y="264" text-anchor="middle" class="tvc-label">vehicle</text><text x="610" y="287" text-anchor="middle" class="tvc-label">force → motion</text>
+  <g class="tvc-flow"><path d="M690 105H790" /><path d="M880 140V235" /><path d="M790 270H690" /><path d="M610 235V140" /></g>
+  <text x="730" y="90" text-anchor="middle" class="tvc-label">state</text>
+  <text x="740" y="345" text-anchor="middle" class="tvc-label">Conceptual, not the archived wiring</text>
+</svg>
+<figcaption>A mechanism and a control loop. Dimensions are schematic; the turning sign depends on the chosen axes.</figcaption>
+</figure>
+
+For small angles, `sin δ ≈ δ`, so the effective gain from gimbal angle to torque is approximately `T ℓ`. It is not fixed throughout a real burn. Thrust, centre of mass and moment of inertia can change. A servo has travel, rate and load limits. Backlash and a flexible mount do not become ideal just because the controller runs in software.
+
+Two axes add another obligation: establish which measured rotation and actuator direction belong together. A stable-looking single-axis demo does not prove the complete two-axis vehicle loop. The sign convention has to survive the sensor frame, controller and physical gimbal.
+
+## What the three gains actually do
+
+For a fixed upright reference, a simple torque-form controller is `u = −Kp θ − Kd ω − Ki ∫θ dt`. Here `θ` is tilt and `ω` is angular rate. This is a useful model for explanation, not a claim that the physical gimbal accepted torque commands directly.
+
+- **P** provides a restoring action proportional to tilt. For an otherwise undamped rotational plant, P alone does not provide the damping needed to settle.
+- **D** opposes angular motion for a fixed reference. Real derivative estimates also expose noise and filtering delay; the browser model below gives the controller an ideal state.
+- **I** accumulates persistent error. It can remove the offset caused by a constant disturbance in a stable, unsaturated loop. If the actuator saturates while the integral keeps growing, it can also store a large unwanted command.
+
+“Only I beats a steady wind” would be the wrong lesson. In this simplified model, PD settles under a constant disturbance torque with an offset `θ = τd / Kp`. Integral action can remove that offset; a correct disturbance feedforward could also cancel it. More P trades the offset against other constraints—it is not free precision.
+
+The distinction between a constant disturbance and a varying one matters too. Cancelling the mean wind torque does not cancel every gust. Nor does adding I guarantee stability: for the ideal inertia-only model, the characteristic polynomial is `J s³ + Kd s² + Kp s + Ki`. With positive coefficients, stability also requires `Kd Kp > J Ki`.
+
+<Explore bench="gimbal" n="fig 1" title="A one-axis controller against a disturbance" hint="Compare P, PD and PID" caption="An illustrative inertia-only model: J = 1, torque limited to ±12, eight simulated seconds. The disturbance begins after 1 s and contains a constant term plus a sinusoid. These are not the physical gimbal's units, gains or flight results." />
+
+Try **P only**, then **add D**, then **add I**. The second preset should make the reason for damping visible; the third changes the persistent offset. Moving the controls can also produce a badly behaved response. That is a model to interrogate, not an animation that certifies a tuning.
+
+The bench does not contain sensor noise, an estimator, servo dynamics, structural flex, a full flight trajectory or anti-windup. It keeps integrating the integral state even when the output is clamped. A real implementation needs to decide what that state should do when the actuator cannot deliver the request.
+
+## Reopening the controller, not just the demo
+
+The preserved code is less tidy than the explanation above. That is why it belongs beside the explanation.
+
+The [first gist](https://gist.github.com/fh1m/e3a64a4dc321eee82a6d761142e63ba2) reads an MPU6050, combines accelerometer angles with gyro rates, and uses `PID_v1`. But the complementary-filter expression contains a state-lifetime bug:
+
+```cpp
+float dt = (millis() - timer) / 1000.0;
+float angleX = 0.96 * (angleX + gyroXrate * dt)
+             + 0.04 * accAngleX;
+```
+
+The `angleX` on the right is not the previous call's estimate. It is the new, uninitialized local being declared on that line. A complementary filter needs the previous estimate to survive between samples. The intended recurrence is `estimate[k] = α (estimate[k−1] + rate[k] dt) + (1−α) accelAngle[k]`; without that stored state, the weights 0.96 and 0.04 do not rescue it.
+
+A minimal C++ extraction of that exact expression is rejected with `-Werror=uninitialized`. That checks the language defect without pretending to compile or operate the complete Arduino hardware.
+
+There is another detail easy to miss in a demonstration: V1 returns only `angleX` and sends one PID output to both servos. At zero PID output, its two servo commands are 90° and 180°. That is what the code requests—not proof of two independent attitude loops or of the mechanism's calibrated neutral.
+
+The [second gist](https://gist.github.com/fh1m/139d52f53c70b3b8b7f45b944ee0ea1c) introduces separate X and Y error sums and outputs. It also switches to angles calculated from accelerometer readings alone. Accelerometers respond to specific force, so vibration and vehicle acceleration complicate interpreting those readings as gravity-based tilt. A static orientation demonstration and a powered flight are different tests.
+
+V2's time interval is in **milliseconds**. That is a unit convention, not by itself proof of a wrong gain. The danger is copying the same numerical gains into a seconds-based implementation and assuming the controller stayed the same:
+
+| Same 10 ms interval | Millisecond convention | Second convention |
+|---|---:|---:|
+| Numerical time step | 10 | 0.01 |
+| Integral increment for a constant 10° error | 100 degree·ms | 0.1 degree·s |
+| Derivative for a 2° error change | 0.2 degree/ms | 200 degree/s |
+
+To preserve the output when converting this millisecond-based formulation to seconds, multiply its numerical integral gain by 1,000 and divide its derivative gain by 1,000. The units move with the gains. Changing only `dt` changes the controller.
+
+The first interval also deserves an explicit positive-time check: `lastTime` is set near the end of setup, and the first loop can begin in the same `millis()` tick. The later `delay(10)` does not protect that first division. Finally, clamping the servo command to 0–180° does not clamp the error sums. The integrator can keep accumulating while the output is already at a limit.
+
+These are not reasons to erase the prototype. They make its progression inspectable: one-axis feedback and a broken state estimate, then separate axes with different sensing and timing assumptions. The later review is part of the work, rather than a polished replacement for it.
+
+## What carried into the next airframe
+
+<Fig src="/media/lab/meghdut-tui-1.webp" alt="A later MAVLink terminal interface with receive and transmit panels, orientation and a safety panel" caption="Later drone work: MAVLink traffic, orientation and a safety panel. A different airframe, with the interface between observation and action still exposed." wide contain />
+
+The continuity is not that every machine got the same controller. It is the habit of making the interfaces inspectable: what arrived, what frame it used, what the controller asked for, and what the hardware was allowed to do.
+
+That thread runs through the later [MAVLink sign-boundary investigation](/notes/the-sign-flip-at-the-mavlink-boundary), the [frame-age problem](/notes/the-frame-age-problem), and the underwater work with [Mongla](/notes/mongla). A control law is only one part of that chain.
+
+<Pull>The gains are visible. The assumptions need to be visible too.</Pull>
+
+## Keep reading
+
+[NASA Glenn's gimbaled-thrust explanation](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/gimbal/) is a clear starting point for the mechanical moment. [RocketPy](https://github.com/RocketPy-Team/RocketPy) and its [sensitivity-analysis guide](https://docs.rocketpy.org/en/latest/user/sensitivity.html) cover the different question of how a flight prediction depends on uncertain inputs.
+
+For the historical record, the [hybrid-engine report](https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016) and [weather-balloon report](https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon) remain linked as team coverage. My own roles and dates are also collected in the [CV](/cv), alongside the other work from those years.

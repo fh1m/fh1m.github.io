@@ -1,4 +1,5 @@
 /** Shared building blocks for the test benches: a crisp canvas, a labelled slider, a live readout. */
+import { siteTheme, oxocarbon } from "../data/palette";
 
 export function canvas(parent: HTMLElement, aspect = 0.62, label = "") {
   const c = document.createElement("canvas");
@@ -69,8 +70,8 @@ export function buttons(parent: HTMLElement, items: { label: string; pressed?: b
 
 export const css = getComputedStyle(document.documentElement);
 export const C = {
-  chalk: "#eef0f4", dim: "#8d97a8", faint: "#5d6678", line: "#161d2c",
-  measured: "#7b9ce0", failure: "#d7655d", medium: "#6aa7c4", estimate: "#a9b2c2", pink: "#d7655d", time: "#7b9ce0", air: "#d7655d",
+  chalk:siteTheme["--chalk"], dim:siteTheme["--dim"], faint:siteTheme["--faint"], line:siteTheme["--line"],
+  measured:siteTheme["--measured"], failure:siteTheme["--failure"], medium:siteTheme["--medium"], estimate:siteTheme["--estimate"], pink:oxocarbon.pink, time:oxocarbon.violet, air:oxocarbon.ice,
 };
 
 export function emit(bus: EventTarget, bench: string, value: unknown) {

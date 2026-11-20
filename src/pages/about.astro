@@ -6,7 +6,7 @@
  */
 import Base from "../layouts/Base.astro";
 import gh from "../data/github.json";
-import { person, publications, results } from "../data/facts";
+import { person, publications, results, roles, hailoSharing } from "../data/facts";
 
 const press = [
   { src: "The Business Standard", title: "BRACU Duburi qualifies two underwater vehicles for RoboSub 2026 semi-finals", url: "https://www.tbsnews.net/economy/corporates/bracu-duburi-qualifies-two-underwater-vehicles-robosub-2026-semi-finals-1467436", year: 2026, img: "/media/press/tbs-robosub-2026.webp" },
@@ -15,8 +15,10 @@ const press = [
   { src: "BRACU Express", title: "BRACU Duburi’s innovation elevates Bangladesh in robotics", url: "https://bracuexpress.com/bracu-duburis-innovation-elevates-bangladesh-in-robotics/", year: 2025, img: "/media/press/bracuexpress-robotics.webp" },
   { src: "BRAC University", title: "Mongol-Tori ranks among global top 10 at University Rover Challenge 2025", url: "https://www.bracu.ac.bd/news/brac-universitys-mongol-tori-team-ranks-among-global-top-10-university-rover-challenge-2025", year: 2025 },
   { src: "BRAC University", title: "Mongol-Tori first runner-up at Bangladesh ICT & Innovation Awards 2025", url: "https://www.bracu.ac.bd/news/bracu-mongol-tori-first-runner-bangladesh-ict-and-innovation-awards-2025", year: 2025 },
-  { src: "The Daily Star", title: "First hybrid rocket engine in Bangladesh tested successfully", url: "https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016", year: 2024, img: "/media/press/dailystar-hybrid-rocket.webp" },
-  { src: "Dhaka Tribune", title: "AIUB, AERD launch first weather balloon", url: "https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon", year: 2023 },
+  { src: "The Daily Star", title: "First hybrid rocket engine in Bangladesh tested successfully", url: "https://www.thedailystar.net/campus/news/first-hybrid-rocket-engine-bangladesh-tested-successfully-3418016", year: 2023, img: "/media/press/dailystar-hybrid-rocket.webp" },
+  { src: "Dhaka Tribune", title: "AIUB, AERD launch first weather balloon", url: "https://www.dhakatribune.com/bangladesh/336802/aiub-aerd-launch-first-weather-balloon", year: 2024 },
+  { src: "AIUB", title: "Research collaboration agreement with Amateur Experimental Rocketry Dhaka", url: "https://www.aiub.edu/agreement-signing-ceremony-between-dr-anwarul-abedin-institute-of-innovation-aiub-and-amateur-experimental-rocketry-dhaka", year: 2023 },
+  { src: "PCBWay", title: "AERD: the team's account of hybrid rocketry, data acquisition and flight-computer development", url: "https://www.pcbway.com/project/sponsor/AERD_Bangladesh_s_First_Hybrid_Rocketry_Team_3cf1cf00.html", year: 2024 },
 ];
 const certs = [
   { img: "/media/certs/robosub-2024.webp", cap: "RoboSub 2024, 27th annual, participation" },
@@ -34,7 +36,7 @@ const life: [string, string, string][] = [
   ["2023", "Then water", "Joined BRACU Duburi's vision sub-team. Learned that the pool disagrees with the dataset."],
   ["2024", "A semester in Germany", "Autonomous Systems at IU, Bad Honnef. Back home, a thrust-vector gimbal that had to hold still on command."],
   ["2025", "A rover arm that types", "Inverse kinematics and OCR for Mongol-Tori at the University Rover Challenge; vision lead at RoboSub."],
-  ["2026", "Leading, then leaving", "Engineering lead for two vehicles at RoboSub 2026. Left BRAC University on principle, started again at UIU."],
+  ["2026", "Leading, then leaving", "Engineering lead for two vehicles at RoboSub 2026. Left BRAC University and Duburi in August 2026; started again at UIU."],
   ["2026", "A stack of my own", "Mongla: an autonomy stack where every claim names the file or measurement behind it, and the dive count is honestly zero."],
 ];
 // a year of contributions as a weekly heatmap (53 columns × 7 rows)
@@ -45,18 +47,39 @@ const first = new Date(days[0][0]).getDay();
 const cells = days.map(([d, n], i) => ({ d, n, x: Math.floor((i + first) / 7), y: (i + first) % 7 }));
 const langs = (gh.languages as { name: string; color: string; share: number }[]).slice(0, 6);
 ---
-<Base title="The record" description="Fahim Faisal's record: press coverage, RoboSub certificates, a year of GitHub activity, languages, publications and current focus.">
-  <main id="main" class="screens">
-    <header class="screen">
+<Base title="Talk is cheap, so here is work" description="Fahim Faisal's engineering work, contributions, experiments, press coverage, achievements, certificates and publications, with sources and validation limits.">
+  <main id="main" class="screens work-page">
+    <header class="screen work-cover">
       <div class="measure head">
-        <img src="/media/own/fahim.webp" alt="Fahim Faisal" width="768" height="1024" />
-        <div>
-          <h1 class="s-h1">The record</h1>
-          <p class="s-dek">{person.fullName}, robotics engineer from Dhaka. The parts of the story other people wrote down: press, certificates, papers, and the commits themselves.</p>
-          <p class="s-meta"><a href="/cv">CV</a> · <a href="/cv/fahim-faisal-cv.pdf" download>PDF</a> · <a href={person.github}>GitHub</a> · {person.linkedin && <a href={person.linkedin}>LinkedIn</a>} · <a href={`mailto:${person.email}`}>{person.email}</a></p>
+        <figure class="work-portrait"><img src="/media/archive/fahim-at-work.webp" alt="Fahim at the laptop on the right, working with BRACU Duburi teammates in the competition tent" width="1600" height="1066" /><figcaption>A laptop, a team, and a vehicle that needs to work. Photo: BRACU Duburi.</figcaption></figure>
+        <div class="work-intro">
+          <h1 class="s-h1">Talk is cheap,<br />so here is work.</h1>
+          <p class="s-dek">I'm {person.fullName}. I work on perception, control and embedded systems. Here are the machines, the measurements, and the people I built them with.</p>
+          <nav class="document-links" aria-label="Professional documents"><a class="document-link" href="/cv/fahim-faisal-resume.pdf" download>One-page résumé <span>PDF</span></a><a class="document-link" href="/cv/fahim-faisal-cv.pdf" download>Technical CV <span>2 pages, PDF</span></a></nav>
+          <nav class="work-links" aria-label="Contact and source code"><a href={person.github}>GitHub</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}<a href={`mailto:${person.email}`}>Email</a></nav>
         </div>
       </div>
     </header>
+
+    <nav class="work-sections screen" aria-label="On this page"><a href="#contributions">Contributions</a><a href="#experiments">Experiments</a><a href="#h-res">Achievements</a><a href="#h-press">Press & mentions</a><a href="#h-cert">Certificates</a><a href="#h-pub">Publications</a></nav>
+
+    <section class="screen" id="contributions" aria-labelledby="h-contributions">
+      <h2 class="s-h2" id="h-contributions">What I worked on</h2>
+      <p class="s-txt">Team results belong to the team. These are my responsibilities, not a claim to have built every part.</p>
+      <div class="contributions">{roles.map((r) => <article><div class="role-heading"><h3>{r.url ? <a href={r.url}>{r.org}</a> : r.org}</h3><span class="s-meta">{r.dates}</span></div><p class="position">{r.title.replaceAll(" · ", "; ")}</p><ul>{r.points.map((p) => <li>{p}</li>)}</ul></article>)}</div>
+    </section>
+
+    <section class="screen" id="experiments" aria-labelledby="h-experiments">
+      <h2 class="s-h2" id="h-experiments">Measurements with the fine print</h2>
+      <p class="s-txt">These are dated experiments, not counters that improve when the page refreshes. Open the notebook for the method, failed attempts and limits.</p>
+      <ol class="evidence">
+        <li><a href="/notes/the-frame-age-problem"><span class="reading">396.1 → 16.9 ms</span><span><b>How old is the frame?</b> A latest-frame capture thread replaced queued consumption. Throughput alone had hidden the delay.</span></a></li>
+        <li><a href="/notes/turning-a-camera-into-a-sensor"><span class="reading">1.09 cm</span><span><b>Camera-based motion, on the bench.</b> Maximum distance-magnitude error in three 30 cm manual slides in air. Not a general velocity-accuracy figure or an underwater DVL validation.</span></a></li>
+        <li><a href="/notes/mongla"><span class="reading">30 / 30 / 3 Hz</span><span><b>Three networks, one accelerator.</b> Two detector workers held {hailoSharing.requestedDetectorHz} Hz each alongside {hailoSharing.requestedXfeatHz} Hz XFeat in a {hailoSharing.durationS} s repeated-frame bench ({hailoSharing.date}). Inference-call sharing, not live ROS throughput or detection accuracy; no water trials.</span></a></li>
+        <li><a href="/notes/from-worked-once-to-works-every-time"><span class="reading">958 / 958</span><span><b>A reassuring zero, with nothing attached.</b> Every ESC telemetry frame reported zero. A message count did not establish that a propeller was present.</span></a></li>
+      </ol>
+      <p class="s-txt"><a href="/everything">Browse every project</a> or <a href="/lessons">the ideas that did not survive testing</a>.</p>
+    </section>
 
     <section class="screen" id="now" aria-labelledby="h-now">
       <h2 class="s-h2" id="h-now">Now</h2>
@@ -81,17 +104,19 @@ const langs = (gh.languages as { name: string; color: string; share: number }[])
     </section>
 
     <section class="screen" aria-labelledby="h-res">
-      <h2 class="s-h2" id="h-res">Results</h2>
-      <ul class="list">{results.map((r) => <li><span class="yr">{r.year}</span><span><b>{r.event}</b>, {r.team}: {r.result}.</span></li>)}</ul>
+      <h2 class="s-h2" id="h-res">Things we reached together</h2>
+      <p class="s-txt">Competition outcomes, with my role beside them. The reporting below supplies the outside perspective.</p>
+      <ul class="list">{results.map((r) => <li><span class="yr">{r.year}</span><span><b>{r.event}</b>, {r.team}: {r.result}.<small class="result-detail">{r.detail}</small></span></li>)}</ul>
     </section>
 
     <section class="screen" aria-labelledby="h-press">
-      <h2 class="s-h2" id="h-press">In the press</h2>
+      <h2 class="s-h2" id="h-press">Outside the notebook</h2>
+      <p class="s-txt">Newsroom coverage, university notices and a sponsor-hosted team account. These document the teams and their work; they are not individual endorsements.</p>
       <ul class="press">
         {press.map((p) => (
           <li><a href={p.url}>
-            {p.img ? <img src={p.img} alt="" loading="lazy" /> : <span class="noimg">{p.src}</span>}
-            <span class="pt">{p.title}</span><span class="s-meta">{p.src}, {p.year}</span>
+            {p.img && <img src={p.img} alt="" loading="lazy" />}
+            <span class="press-copy"><span class="s-meta">{p.src}, {p.year}</span><span class="pt">{p.title}</span></span>
           </a></li>
         ))}
       </ul>
@@ -104,7 +129,7 @@ const langs = (gh.languages as { name: string; color: string; share: number }[])
 
     <section class="screen" aria-labelledby="h-pub">
       <h2 class="s-h2" id="h-pub">Publications</h2>
-      <ul class="list">{publications.map((p) => <li><span><b>{p.title}</b>. {p.authors}. <span class="s-meta">{p.venue}.</span></span></li>)}</ul>
+      <ul class="list">{publications.map((p) => <li><span><a href={p.url}><b>{p.title}</b></a>. {p.authors}. <span class="s-meta">{p.venue}.</span></span></li>)}</ul>
       <p class="s-meta">Also co-author of BRACU Duburi's Technical Design Reports for RoboSub 2025 and 2026.</p>
     </section>
   </main>
@@ -113,29 +138,60 @@ const langs = (gh.languages as { name: string; color: string; share: number }[])
   import "../scripts/live-stats";
 </script>
 <style>
-  .head { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 1.6rem; align-items: center; }
-  .head img { width: 100%; height: auto; border-radius: var(--r-2); }
+  .head { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:clamp(2rem,4vw,4rem); align-items:center; max-width:none!important; }
+  .work-cover { padding-top:var(--section-gap); padding-bottom:var(--section-gap); }
+  .work-intro .s-h1 { font-size:clamp(1.8rem,2.5vw,2.25rem); line-height:1.18; letter-spacing:-.025em; max-width:24ch; }
+  .work-intro .s-dek { color:var(--ink); max-width:66ch; line-height:1.55; }
+  .work-portrait { order:2; margin:0; align-self:stretch; display:flex; flex-direction:column; justify-content:center; }
+  .head img { width:100%; height:auto; object-fit:contain; border-radius:var(--r-2); }
+  .work-portrait figcaption { font-size:.8rem; max-width:55ch; color:var(--dim); }
   .cols { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.6rem; }
-  .t { font: 600 var(--t1) var(--sans); color: #fff; margin: 0 0 .3rem; }
+  .t { font:600 var(--t1) var(--display); color:var(--ink-hi); margin:0 0 .3rem; }
   .heat { width: 100%; max-width: 56rem; height: auto; margin: 1rem 0; }
   .heat .l0 { fill: #15171c; } .heat .l1 { fill: #0e4429; } .heat .l2 { fill: #006d32; } .heat .l3 { fill: #26a641; } .heat .l4 { fill: #39d353; }
   .langs .bar { display: flex; height: 8px; border-radius: var(--r-1); overflow: hidden; max-width: 56rem; }
-  .langs ul { list-style: none; padding: 0; margin: .7rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font: 400 var(--t-1) var(--sans); color: #d6d6d6; }
+  .langs ul { list-style:none; padding:0; margin:.7rem 0 0; display:flex; flex-wrap:wrap; gap:.4rem 1.2rem; font:400 var(--t-1)/1.5 var(--sans); color:var(--ink); }
   .langs i { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; }
-  .langs span { color: #8c8c8c; font-family: var(--mono); }
-  .list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .7rem; font: 400 var(--t0)/1.55 var(--sans); color: #d6d6d6; }
-  .list li { display: flex; gap: 1rem; } .yr { font-family: var(--mono); color: #8c8c8c; min-width: 3rem; }
-  .life { list-style: none; margin: 0; padding: 0; max-width: 46rem; border-left: 1px solid #2a2a2a; }
+  .langs span { color:var(--dim); font-family:var(--mono); }
+  .list { list-style:none; margin:0 0 1rem; padding:0; display:grid; gap:.7rem; font:400 var(--t0)/1.55 var(--sans); color:var(--ink); }
+  .list li { display:flex; gap:1rem; } .yr { font-family:var(--mono); color:var(--dim); min-width:3rem; }
+  .life { list-style:none; margin:0; padding:0; max-width:46rem; border-left:1px solid var(--line-2); }
   .life li { position: relative; display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: 1rem; padding: 0 0 1.4rem 1.4rem; }
-  .life li::before { content: ""; position: absolute; left: -5px; top: .55rem; width: 9px; height: 9px; border-radius: 50%; background: #ffcf8a; box-shadow: 0 0 10px rgb(255 207 138 / .5); }
-  .life .yr { padding-top: .2rem; color: #ffcf8a; }
+  .life li::before { content:""; position:absolute; left:-5px; top:.55rem; width:9px; height:9px; border-radius:50%; background:var(--instrument); }
+  .life .yr { padding-top:.2rem; color:var(--instrument); }
   .life .t { font-size: var(--t0); }
   .life .s-txt { margin: 0; }
-  .press { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1.6rem; }
-  .press a { display: grid; gap: .45rem; text-decoration: none; }
-  .press img, .noimg { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-2); background: #111318; display: grid; place-items: center; font: 500 var(--t0) var(--sans); color: #8c8c8c; }
-  .pt { font: 500 var(--t0)/1.4 var(--sans); color: #fff; } .press a:hover .pt { text-decoration: underline; }
+  .press { list-style:none; margin:0; padding:0; max-width:none; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 2.4rem; }
+  .press li { border-top:1px solid var(--line-2); }
+  .press a { display:flex; align-items:center; gap:1rem; padding:1rem 0; text-decoration:none; }
+  .press img { width: 8rem; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--r-2); flex-shrink: 0; }
+  .press-copy { display: grid; gap: .35rem; }
+  .pt { font:500 var(--t0)/1.4 var(--sans); color:var(--ink-hi); } .press a:hover .pt { text-decoration:underline; }
   .certs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.4rem; }
   .certs figure { margin: 0; } .certs img { width: 100%; height: auto; border-radius: var(--r-2); }
-  @media (max-width: 700px) { .head { grid-template-columns: 1fr; } .head img { max-width: 10rem; } }
+  .work-links, .work-sections, .document-links { display:flex; flex-wrap:wrap; gap:.8rem 1.4rem; }
+  .document-links { margin:1.4rem 0 0; gap:.8rem; }
+  .work-links { margin:1rem 0 0; font-size:1rem; align-items:center; gap:.9rem 1.5rem; }
+  .document-link { min-height:3.1rem; display:inline-flex; align-items:center; gap:.7rem; padding:.65rem .85rem; border:1px solid var(--line-2); border-bottom:2px solid var(--action); border-radius:2px; text-decoration:none; color:var(--chalk); }
+  .document-link span { color:var(--action); font:400 .75rem var(--interface); }
+  .work-page :is(section[id], h2[id]) { scroll-margin-top:calc(var(--header-height) + 4.5rem); }
+  .work-sections { padding-block:.8rem; position:sticky; top:var(--header-height); z-index:8; background:var(--surface); border-block:1px solid var(--line); }
+  .work-sections a { text-underline-offset:.35em; color:var(--chalk); font-size:.9rem; }
+  #experiments, section:has(#h-cert) { background:var(--surface); }
+  section:has(#h-press) { background:var(--surface); }
+  .contributions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 2.4rem; max-width:none; }
+  .contributions article { border-top:1px solid var(--line); padding:1rem 0; min-width:0; }
+  .role-heading { display:flex; justify-content:space-between; gap:.4rem 1rem; flex-wrap:wrap; align-items:baseline; }
+  .role-heading h3 { margin:0; font:600 var(--t1)/1.4 var(--display); color:var(--ink-hi); }
+  .position { margin:.3rem 0 .7rem; color:var(--dim); }
+  .contributions ul { max-width:85ch; color:var(--ink); padding-left:1.2rem; line-height:var(--lh); }
+  .evidence { list-style:none; padding:0; margin:1rem 0; max-width:none; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 2.4rem; }
+  .evidence li { border-top:1px solid var(--line); min-width:0; }
+  .evidence a { display:grid; grid-template-columns:minmax(9rem,12rem) minmax(0,1fr); gap:1rem; padding:1rem 0; text-decoration:none; color:var(--ink); line-height:var(--lh); }
+  .evidence b { display:block; color:var(--ink-hi); font-weight:500; }
+  .reading { font:400 1.25rem/1.45 var(--mono); color:var(--instrument); }
+  .result-detail { display:block; color:var(--ink); margin-top:.3rem; font:400 var(--t-1)/1.55 var(--sans); }
+  @media(max-width:1100px) { .contributions, .evidence, .press { grid-template-columns:minmax(0,1fr); } }
+  @media(max-width:600px) { .evidence a { grid-template-columns:1fr; gap:.5rem; } .press img { width:5rem; } .press a { gap:.8rem; } }
+  @media(max-width:700px) { .head { grid-template-columns:1fr; gap:1.25rem; } .work-cover { padding-top:var(--section-gap); } .work-portrait { width:100%; max-width:none; } .work-intro .s-h1 { font-size:clamp(1.95rem,8vw,2.5rem); } .document-links { display:grid; grid-template-columns:1fr; } .document-link { justify-content:space-between; } .work-sections { flex-wrap:nowrap; overflow-x:auto; gap:1.2rem; } .work-sections a { flex-shrink:0; padding-block:.35rem; } }
 </style>

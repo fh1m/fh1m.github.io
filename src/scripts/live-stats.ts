@@ -33,4 +33,4 @@ async function apply() {
     el.textContent = `${base.trim()} Latest public commit: ${live.last.repo}, "${clip(live.last.msg, 56)}",${ago === 0 ? " today" : ` ${ago} day${ago === 1 ? "" : "s"} ago`}.`;
   }
 }
-document.addEventListener("astro:page-load", apply);
+apply();

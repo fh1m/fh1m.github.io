@@ -1,0 +1,120 @@
+---
+title: "A fixed point in moving water"
+dek: "Dhrubotara: reference images, XFeat, optical flow and an old guidance display. A pool recording and a ten-pixel experiment expose the difference between a useful visual cue and a depth measurement."
+date: "2026-11"
+series: machines
+part: 10
+kind: project
+repo: dhrubotara
+hero: /media/archive/reference-pool.webp
+heroAlt: "A target and dark tiled lines on a pool floor beneath moving patterns of sunlight"
+sources:
+  - { label: "XFeat: upstream learned feature matcher", href: "https://github.com/verlab/accelerated_features" }
+  - { label: "OpenCV: feature matching and homography", href: "https://docs.opencv.org/4.x/d1/de0/tutorial_py_feature_homography.html" }
+  - { label: "OpenCV: optical-flow assumptions and tracking", href: "https://docs.opencv.org/4.x/d4/dee/tutorial_optical_flow.html" }
+---
+import Fig from "../../components/note/Fig.astro";
+import ArchiveFilm from "../../components/ArchiveFilm.astro";
+
+There is a reference image on the left, a live image on the right, and a small three-dimensional guidance display beside them. Below are performance traces, raw IMU values, an EKF panel and a fusion panel. The window is crowded because the experiment had grown: first features, then detections, then flow, then an attempt to put visual guidance beside inertial information.
+
+That is the November 2025 application capture in my archive. The later research case study is called **Dhrubotara — ধ্রুবতারা**, the North Star. A directional reference is useful; it is not a complete account of where you are. The distinction is also the point of this story.
+
+This is a new analysis of preserved code and footage, not a claim that I reran the old application on a vehicle. The historical XFeat interface, a new CPU replay and a controlled image experiment answer different questions. Keeping them separate makes each one more useful.
+
+## S: capture a reference
+
+<Fig src="/media/archive/reference-pair.webp" alt="Reference and current lab images from the archived guidance application: green features, a person and phone detections" caption="The reference/current portion of the capture named 23 November 2025. The left image stays put while the right changes. This is an editorial crop, not a new run. <a href='/media/archive/reference-guidance.webp' target='_blank' rel='noreferrer'>Open the complete interface.</a>" wide contain />
+
+The source gives the reference a physical interaction: press `S` to capture a frame, `R` to reset, `G` to toggle guidance. The saved image becomes something to compare against rather than another unlabelled frame in a video stream.
+
+XFeat supplies feature correspondences. YOLO contributes object boxes. The later versions add an optical-flow fallback, telemetry handling, performance monitoring and finally a modular native application with a separate web-dashboard branch. The root folder still contains `features.py`, the numbered versions, backups, heading experiments and small controller helpers. It is a development history, not a stack of independent deployments.
+
+The screenshot shows why a reference image is appealing. Ceiling edges and the arrangement of the lab are recognizable across both panes, even as a person and a phone change the foreground. But a matching feature does not come with a label saying whether it belongs to the room, a moving person, a reflection or an object whose apparent size has changed.
+
+There is an authorship boundary here too: **XFeat is the upstream Verlab model**. My archive contains the application and integration around it. The supplied vendor checkout matches upstream tracked content; the learned feature algorithm is not my invention.
+
+## The image transform has a direction
+
+The guidance function fits a homography from current-frame points back to reference-frame points:
+
+```text
+reference_point ∼ H × current_point
+```
+
+The order is easy to lose in a display full of arrows. If the image content moves ten pixels right, a transform that aligns it back to the saved image moves it ten pixels left. A correction arrow and a measured displacement may intentionally have opposite signs. Neither should quietly become a world-space vehicle velocity.
+
+The preserved function requires at least eight proposed matches, uses RANSAC with a five-pixel reprojection threshold, then reads horizontal and vertical terms directly from the matrix. It reports the fraction of matches accepted as inliers and constructs a scale from the norms of two matrix columns.
+
+That is an image-registration calculation. For a flat observed surface and a calibrated camera, a homography can be related to camera rotation, translation, the surface normal and its distance. Translation is coupled to that distance. For more general scenes, different depths and moving foregrounds make a single planar interpretation weaker. Pure camera rotation can also create a coherent image transform.
+
+So there are several missing steps between “I fitted a matrix” and “the vehicle moved this many metres”: calibration, a frame convention, a scale source, an account of the observed surface, and a reason to treat the accepted correspondences as stationary structure. This experiment had not acquired those merely by drawing three axes.
+
+## A flow fallback that invents a depth cue
+
+The optical-flow path is smaller and easier to isolate. It detects up to 200 corners, tracks them with pyramidal Lucas–Kanade, keeps points with successful tracking status, and takes the median displacement. That gives a horizontal and vertical image cue.
+
+Then it makes a further conversion. Above a median flow magnitude of two pixels, its third output grows linearly:
+
+```python
+scale = 1.0 + (median_flow_magnitude - 2.0) / 50.0
+```
+
+Below that threshold, it stays at one. In the historical function the output is named `dz_scale`. That name suggests something about motion along the viewing axis. The calculation itself only sees how far tracked points moved.
+
+To separate those meanings, the new experiment starts with a seeded textured image and shifts it sideways. There is no zoom. The reference and shifted image have exactly the same scale. The original numerical kernels are left unchanged.
+
+| Known image shift | Fitted homography scale | Flow-derived “scale” | Flow score |
+| ---: | ---: | ---: | ---: |
+| 0 px | 1.000 | 1.000 | 100.00% |
+| 5 px | 1.000 | 1.060 | 99.69% |
+| 10 px | 1.000 | 1.160 | 99.37% |
+| 20 px | 1.000 | 1.360 | 95.76% |
+
+These are measured outputs of the controlled image test, rounded for reading. They are not physical camera measurements. The ten-pixel case is the useful counterexample: **the image did not expand, but the third flow output rose to 1.16**.
+
+The score stays high because its ingredients are the number of tracked corners and the consistency of their motion. A consistent sideways translation is very good at satisfying those ingredients. It does not make a change in depth more likely by the same percentage. The number is a heuristic score, not a calibrated probability.
+
+A textureless image provides the complementary boundary. With no corners to track, the original function returns invalid and a zero score. That is more honest than a fabricated stationary pose. The problem appears when plentiful, consistent observations are asked to support a quantity they do not measure.
+
+## The water moves, too
+
+<ArchiveFilm name="reference-pool" width={640} height={480} caption="The supplied downward-looking pool clip: tiled structure, a target and moving illumination. This 15 fps web copy is for inspection. The numerical replay uses the original approximately 29.96 fps file, not this compressed preview; no camera trajectory or recording date is inferred." />
+
+The pool recording in the same archive is a better image than a generic underwater stock photograph because it contains the difficulty. There is structure to track, but there is also light that moves over that structure.
+
+Optical flow assumes that a local image pattern remains sufficiently similar as it moves between frames. Its brightness-constancy equation relates spatial gradients, temporal change and image velocity. One equation cannot determine both components of motion at a single pixel; Lucas–Kanade pools evidence across a local patch, and pyramids make larger motions easier to follow.
+
+Moving illumination puts pressure on that assumption. Repeated tiles put pressure on correspondence uniqueness. A target entering the image changes what a reference matcher has available. Those conditions are visible in this clip. They do not, on their own, identify the cause of every bad fit or provide a camera-error measurement.
+
+The new replay samples the full recording every five frames. ORB provides a deliberately modest CPU correspondence baseline, then passes those matches to the unchanged archived homography function. The unchanged optical-flow fallback runs between consecutive sampled frames. No learned model, camera, serial port or telemetry stream is opened.
+
+There are **179 evaluated pairs**. The homography function returns its valid flag on **144**; optical flow returns valid on **179**. Those counts describe the functions' acceptance behavior. They are not 144 correct poses or 179 correct motion estimates. Without ground truth, that conclusion is unavailable.
+
+The two paths also remember different things. Homography keeps comparing against the first sampled frame. Optical flow compares against the previous sampled frame. Their arrows span different intervals. Putting them in neighboring panels does not make them interchangeable estimates of one displacement.
+
+## The metre cannot be added in the last panel
+
+The archived IMU-fusion function makes the boundary especially clear. It checks freshness, applies a simplified roll correction and, when EKF data is available, multiplies velocity components by a fixed factor of 100 before blending them with visual displacement.
+
+A velocity in metres per second and a displacement in pixels do not become compatible because both can be drawn as arrows. A camera model, elapsed time, scene geometry and the transformation between inertial and camera frames are doing work that a constant cannot generally replace. The code itself calls this a rough scaling and notes that proper calibration is needed.
+
+The complete historical screenshot is useful evidence of integration work: raw attitude values are visible, while its EKF panel says **no EKF data**. It is not evidence that the velocity-assisted branch supplied a validated correction in that frame. The new replay does not synthesize missing telemetry to make the panel look complete.
+
+## What survives the re-analysis
+
+The supported research path is now much smaller than the original application: a file-only replay, the unchanged numerical kernels, a controlled translation experiment, per-frame CSV results and regressions for the important boundaries. A fresh environment has run both experiments. The complete pool input is retained byte-for-byte, alongside 39 preserved Python source files and their hashes. One publication-only change replaces the old web backend's hard-coded signing key with required environment configuration; its original remains privately preserved.
+
+That does not erase the larger application. The original feature versions, dashboards, heading code and controller helpers remain inspectable. Some historical helpers can open devices or send commands, so they are not imported by the replay. A preserved file is not automatically a safe demonstration entry point.
+
+What changes is the claim made for each output. Correspondence is allowed to be correspondence. Image displacement is allowed to stay in pixels. A failed estimate stays missing. The flow-derived scale is kept as a reproducible historical heuristic, not promoted to a depth sensor.
+
+The neighboring work asks related but separate questions. [The 2025 workbench](/notes/the-2025-workbench/) follows identity, depth and control through the numbered experiments. [The frame-age problem](/notes/the-frame-age-problem/) asks whether an apparently fresh observation is old. [Reading the Ping360](/notes/reading-the-ping360/) follows another small conversion whose unit changes its meaning by three orders of magnitude.
+
+A fixed reference is still a useful idea. It becomes more useful when the rest of the interface stops pretending that the reference answers every navigation question.
+
+## Further reading
+
+- **[OpenCV's homography tutorial](https://docs.opencv.org/4.x/d1/de0/tutorial_py_feature_homography.html):** how matches, RANSAC and the inlier mask produce an image transform; useful context for the eight-match guard and five-pixel threshold in the preserved function.
+- **[OpenCV's optical-flow tutorial](https://docs.opencv.org/4.x/d4/dee/tutorial_optical_flow.html):** brightness constancy, local ambiguity, image pyramids and forward–backward checking. The archived fallback uses forward status checks, not the stronger backward check.
+- **[XFeat's upstream project](https://github.com/verlab/accelerated_features):** the learned feature implementation used by the old application. The new CPU replay intentionally uses ORB, so its acceptance counts are not an evaluation of XFeat.

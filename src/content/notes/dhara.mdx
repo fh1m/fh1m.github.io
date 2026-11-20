@@ -1,0 +1,134 @@
+---
+title: "A displacement called velocity"
+dek: "Dhara: an old perception engine, a three-line assignment and the second missing from m/s. Controlled poses separate the unit error from feature quality—and show why even a positive time interval can belong to the wrong events."
+date: "2026-11"
+series: time
+part: 6
+kind: project
+repo: dhara
+sources:
+  - { label: "Preserved odometry assignment, lines 162–171", href: "https://github.com/fh1m/dhara/blob/447672f22f36ed4e29047a6d884cd08caafd99d4/origin/perception-system/odometry/visual_odometry.py#L162-L171" }
+  - { label: "Original state contract: velocity labelled m/s", href: "https://github.com/fh1m/dhara/blob/447672f22f36ed4e29047a6d884cd08caafd99d4/origin/perception-system/core/types.py#L215-L242" }
+  - { label: "Executable replay and actual numerical receipt", href: "https://github.com/fh1m/dhara/blob/447672f22f36ed4e29047a6d884cd08caafd99d4/results/controlled.json" }
+  - { label: "ROS REP 103: units and frame conventions", href: "https://www.ros.org/reps/rep-0103.html" }
+  - { label: "ROS 2 Clock and Time design", href: "https://design.ros2.org/articles/clock_and_time.html" }
+---
+import Explore from "../../components/note/Explore.astro";
+import Pull from "../../components/note/Pull.astro";
+
+The `flow_use` archive is not a small folder. It contains trackers, feature extractors, depth estimation, optical flow, odometry, mapping, dashboards and several version-labelled experiments. The modular engine brings many of those ideas behind one interface. Its state objects have the reassuring vocabulary of a robot: position, orientation, velocity, confidence.
+
+The interesting question is whether each field has earned its meaning. [Matra](/notes/matra/) follows the metre through depth and reconstruction. **Dhara — ধারা**, a stream or flow, stays in the same source family and asks what happened to the second.
+
+This is a new numerical reconstruction from preserved work, not a new vehicle trial or a claim that the complete historical application runs today. The small supported experiment is useful precisely because it does not need the rest of the engine to look convincing.
+
+## Three lines, two different quantities
+
+The original `VOState` documents its velocity vector as **m/s**. After composing a new pose, the odometry module does this:
+
+```python
+if len(self.pose_history) > 0:
+    prev_pos = self.pose_history[-1][:3, 3]
+    self.state.velocity = self.state.position - prev_pos
+```
+
+That is a position difference. If both positions are in metres, the result is a displacement in metres between accepted pose updates. There is no elapsed-time denominator in the assignment.
+
+Calling it “metres per frame” can help describe the cadence dependence, but the stored quantity is still the displacement of that update. A comment saying `m/s` cannot supply a second that the calculation never used.
+
+The preserved module is broader than this one block: feature extraction, descriptor matching, essential-matrix estimation, pose recovery, depth-based scale, keyframes and loop-closure checks. Those stages have their own assumptions. They do not rescue a missing denominator at the state boundary.
+
+<Pull>A field name is a promise to the next component. The arithmetic is where that promise is either kept or broken.</Pull>
+
+## Give the positions every advantage
+
+A full camera run would add feature errors, scale ambiguity, motion blur and calibration uncertainty. None is necessary to expose this unit mismatch. The controlled experiment supplies already-correct metric positions for a constant **0.5 m/s motion along x**, starting from a nonzero position.
+
+Only the interval between accepted observations changes:
+
+| Capture gap (ms) | Stored dx (m) | Average vx (m/s) |
+|---:|---:|---:|
+| 100 | 0.050 | 0.500 |
+| 40 | 0.020 | 0.500 |
+| 20 | 0.010 | 0.500 |
+| 16.666667 | 0.008333 | 0.500 |
+
+The values are rounded here. The [published receipt](https://github.com/fh1m/dhara/blob/447672f22f36ed4e29047a6d884cd08caafd99d4/results/controlled.json) keeps the float64 outputs and integer-nanosecond intervals. The approximately 60 Hz case constructs its position using the same rounded interval; these are not measured camera frame rates.
+
+The original field becomes smaller as updates become more frequent. The constructed vehicle has not slowed down. Less time has passed between its poses.
+
+The replay executes the unchanged guarded assignment in an isolated numerical wrapper. It does **not** instantiate XFeat, run `VisualOdometry.process` end to end, or evaluate a neural model. The complete original modules and their verified source hashes are retained so the small experiment can be checked against the larger context.
+
+## The interval belongs to accepted observations
+
+The replacement calculation is deliberately ordinary:
+
+```text
+dp_m = p1_m - p0_m
+dt_s = (t1_ns - t0_ns) / 1e9
+v_mps = dp_m / dt_s
+```
+
+The important part is not division. It is identifying the two positions and the two instants that belong together.
+
+The original `process` method can return early when it has too few features, too few matches or a failed pose recovery. Pose history is appended after a successful update. Its previous stored pose is therefore not guaranteed to come from the immediately preceding camera frame.
+
+Multiplying every displacement by a configured FPS would repair only the special case of evenly spaced, accepted observations at exactly that frequency. A dropped observation changes the interval even if the camera's nominal FPS stays the same.
+
+Dhara also supplies accepted capture gaps of **20, 40, 200, 50 and 690 ms** for the same known motion. The archived x displacements range from 0.010 to 0.345 m. Dividing by the corresponding capture intervals keeps the interval-average velocity at 0.5 m/s to floating-point precision. All five pairs remain in the receipt; no large displacement is removed as an inconvenient outlier.
+
+This is an interface requirement, not an instruction to trust a loop-frequency counter more carefully. Capture identity and time must survive the path from observation to accepted pose.
+
+## The right duration can still use the wrong clock events
+
+There are at least two tempting times to attach to a pose: when its image was captured, and when processing finished. They can both increase monotonically. They do not describe the same events.
+
+In the controlled example, image A is captured at 1.000 s and its result completes at 1.030 s. Image B is captured at 1.100 s and completes at 1.300 s. The known displacement is 0.05 m.
+
+The capture interval is 0.100 s, giving 0.5 m/s. The completion interval is 0.270 s, giving about **0.185185 m/s**. A check for a positive denominator accepts both; it cannot discover that one pair of timestamps names the wrong events.
+
+<Explore bench="time-units" n="01" title="One motion, two ways to lose its time" hint="Change capture spacing and worker delay" fallback="The archived field stores displacement rather than velocity. A capture-time denominator restores the rate for known metric poses; a processing-completion denominator can still be wrong. The numerical receipt and table remain readable without JavaScript." caption="Illustrative arithmetic, not a camera replay. The two rows share a time axis; event labels remain native text at phone widths. The first result has a fixed 30 ms delay; the second adds the selected extra delay. Use the Python case for the unchanged source assignment." src="Preserved source, controlled inputs and executable evidence: <a href='https://github.com/fh1m/dhara'>fh1m/dhara</a>." />
+
+These completion times are constructed inputs, not measured inference latency. Moving the delay control does not run a model or make a real camera slower. It makes the distinction between an observation interval and a worker interval visible.
+
+If both results have the same constant processing delay, that delay cancels out of their difference. The completion-based calculation can then produce the right number while both poses are still old. **Correct interval velocity is not proof of fresh state.** That is the connection to the separate [frame-age problem](/notes/the-frame-age-problem/): the age of a result and the duration between its source observations answer different questions.
+
+## Average velocity is not instantaneous velocity
+
+Even with the right units and timestamps, a finite position difference gives an average over an interval. It need not equal the instantaneous velocity at the newer observation.
+
+For a one-dimensional, constant-acceleration example, position is `x0 + v0*t + 0.5*a*t*t`. Subtract two positions and divide by their interval: the result equals velocity at the interval's midpoint. The newer-endpoint velocity differs by half the acceleration times the interval.
+
+With an assumed acceleration of 0.4 m/s² over 0.2 s, that difference is **0.04 m/s**. This is a constructed kinematic example, not an acceleration measured on Mongla or a result in the archived camera experiments. It explains why the corrected helper is named and documented as an *interval-average* calculation rather than an instantaneous-velocity estimator.
+
+Nor is a shorter interval automatically better. Differencing can amplify pose noise. In the simple scalar case of two independent position errors with the same standard deviation, velocity uncertainty grows as the square root of two times position uncertainty, divided by the interval. Assuming 1 mm independent position uncertainty and a 20 ms interval gives about **0.071 m/s** standard deviation. Those assumptions are not measurements of this camera; correlated pose errors would need their covariance included.
+
+The rate calculation can have correct dimensions while its estimate remains noisy, delayed or based on a bad pose. Filtering and uncertainty need their own evidence.
+
+## What the corrected contract actually requires
+
+The runnable helper takes two three-component positions and their integer-nanosecond capture timestamps. It returns an independent float64 vector and does not mutate either input pose.
+
+Its numerical checks are explicit: nonpositive intervals are refused; noninteger timestamps are not silently treated as seconds; wrongly shaped or nonfinite positions are rejected. Unrepresentable arithmetic raises an error rather than returning an infinite velocity. There is no zero-speed substitute for a clock failure and no guessed FPS fallback.
+
+Integer timestamps are subtracted **before** conversion to floating point. The regression includes a 100 µs interval on a large absolute epoch, guarding against needlessly losing that small interval by converting both absolute values first. This protects one timing calculation; it does not eliminate spatial-coordinate rounding or every possible clock problem.
+
+The caller still has semantic obligations. Positions must already be metric and expressed in the same fixed frame. Both times must refer to capture instants in a compatible clock domain. An array of three numbers and two increasing integers cannot prove those facts on its own.
+
+A paused or backwards-jumping simulated clock needs a new observation pair, not differentiation across a discontinuity. The helper refuses an invalid pair; it is not a complete ROS clock manager, pose filter or stale-data policy.
+
+## The stream needs a ruler and a clock
+
+Matra and Dhara are separate questions in the same source family. A scale-free reconstruction divided by seconds still has not earned metres per second. Correct metric positions subtracted without time have lost the rate. Positions in two incompatible frames cannot be repaired by either scalar operation.
+
+That is what I keep from this part of the archive: not another claim that the largest dashboard was a finished navigation system, but small interfaces that can be held to an exact contract. The broader engine records the exploration. The focused cases make particular claims executable.
+
+The historical application remains unchanged. This study establishes a unit mismatch in one preserved assignment and a correct, bounded interval-rate calculation. It does not validate the old feature extractors, underwater navigation, pose conventions or a deployed ROS odometry stream.
+
+## Read and reproduce
+
+The [Dhara repository](https://github.com/fh1m/dhara) contains the clean-environment commands, unchanged source snapshots, provenance manifest, actual receipt and numerical regressions. The CLI runs on CPU without devices or model downloads.
+
+[ROS REP 103](https://www.ros.org/reps/rep-0103.html) is useful for the metre, second and body/optical frame conventions. The [ROS 2 Clock and Time design](https://design.ros2.org/articles/clock_and_time.html) explains why playback, clock domains, pauses and backwards jumps are not just edge cases a real-time-looking display can ignore.
+
+For the other half of the same source path, return to [where the metre enters the map](/notes/matra/). For the larger collection of imperfect interfaces these experiments came from, the [2025 workbench](/notes/the-2025-workbench/) keeps the older controllers, trackers and fusion attempts in view.

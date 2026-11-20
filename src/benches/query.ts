@@ -16,27 +16,34 @@ const CMDS: { key: string; name: string; url: string; search?: string }[] = [
   { key: "md", name: "MDN", url: "https://developer.mozilla.org", search: "/search?q={}" },
   { key: "h", name: "HackerNews", url: "https://news.ycombinator.com" },
 ];
+const bases = Object.fromEntries(CMDS.map((command) => [command.key, new URL(command.url).origin]));
 const URLISH = /^((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)$/i;
 
 function parse(q: string): { rule: string; to: string } {
-  const t = q.trim();
-  if (!t) return { rule: "type something", to: "" };
-  if (URLISH.test(t)) return { rule: "looks like a URL", to: /^[a-z]+:\/\//i.test(t) ? t : `http://${t}` };
-  const exact = CMDS.find((c) => c.key === t);
-  if (exact) return { rule: `exact key "${exact.key}"`, to: exact.url };
-  const [k, ...rest] = t.split(":");
-  const s = CMDS.find((c) => c.key === k && c.search);
-  if (s && rest.length) return { rule: `${s.name} search`, to: s.url + s.search!.replace("{}", encodeURIComponent(rest.join(":").trim())) };
-  const [pk, ...path] = t.split("/");
-  const p = CMDS.find((c) => c.key === pk);
-  if (p && path.length) return { rule: `${p.name} + path`, to: `${p.url}/${path.join("/")}` };
-  return { rule: "default web search", to: `https://google.com/search?q=${encodeURIComponent(t)}` };
+  if (!q) return { rule:"type something", to:"" };
+  if (URLISH.test(q)) return { rule:"looks like a URL", to:/^[a-z]+:\/\//i.test(q) ? q : `http://${q}` };
+  const trimmed = q.trim();
+  const colon = trimmed.indexOf(":"), slash = trimmed.indexOf("/");
+  const searchKey = colon < 0 ? trimmed : trimmed.slice(0, colon);
+  const pathKey = slash < 0 ? trimmed : trimmed.slice(0, slash);
+  for (const command of CMDS) {
+    if (q === command.key) return { rule:`exact key "${command.key}"`, to:command.url };
+    if (searchKey === command.key && command.search) {
+      const query = colon < 0 ? "" : trimmed.slice(colon + 1).trim();
+      return { rule:`${command.name} search`, to:bases[command.key] + command.search.replace("{}", encodeURIComponent(query)) };
+    }
+    if (pathKey === command.key) {
+      const path = slash < 0 ? "" : trimmed.slice(slash + 1).trim();
+      return { rule:`${command.name} + path`, to:`${bases[command.key]}/${path}` };
+    }
+  }
+  return { rule:"default web search", to:`https://google.com/search?q=${encodeURIComponent(q)}` };
 }
 
 export function mount(el: HTMLElement, bus: EventTarget) {
   const wrap = document.createElement("div");
   wrap.innerHTML = `<label for="q-in">new tab</label>
-    <input id="q-in" type="text" autocomplete="off" spellcheck="false" value="g:kalman filter" style="width:100%;margin-top:.4rem;background:#000;border:1px solid #24304a;border-radius: var(--r-1);color:${C.measured};font:400 1.05rem var(--mono);padding:.7rem .8rem" />`;
+    <input id="q-in" type="text" autocomplete="off" spellcheck="false" value="g:kalman filter" style="width:100%;margin-top:.4rem;background:var(--page);border:1px solid var(--line);border-radius:var(--r-1);color:${C.measured};font:400 1.05rem var(--mono);padding:.7rem .8rem" />`;
   el.append(wrap);
   const say = readout(el);
   const keys = document.createElement("p");

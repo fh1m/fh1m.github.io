@@ -1,0 +1,115 @@
+---
+title: "Reading the Ping360, below the picture"
+dek: "My sonar logger, viewers and detection experiment: learning what a ping contains, where its units come from, and what I would need to understand before writing independent firmware."
+date: "2025-12"
+series: machines
+part: 9
+kind: story
+sources:
+  - { label: "Blue Robotics: Ping360 message definitions", href: "https://docs.bluerobotics.com/ping-protocol/pingmessage-ping360/" }
+  - { label: "Blue Robotics: ping-python", href: "https://github.com/bluerobotics/ping-python" }
+  - { label: "Junayed's sonar data and upstream reference repository", href: "https://github.com/junayed/Sonar-Data-Collection-Analysis-AI-Ping360-Bluerobotics" }
+---
+import Fig from "../../components/note/Fig.astro";
+
+I wanted more than a sonar picture. I wanted to understand the Ping360 well enough that we could eventually write our own firmware rather than depend entirely on Blue Robotics' implementation. The preserved work is the investigation on the way to that goal: a logger, two viewers, a detection display, and changes to lower-level reference tools. It is not a completed replacement firmware release.
+
+This sits alongside my October 2025–February 2026 work as a junior autonomous engineer at Dubotech, where my responsibilities included sonar firmware and navigation. The files discussed here are a specific development archive, not the complete employer system. The December 2025 captures and logging scripts preserve the point where I was making the data inspectable and asking what the display actually meant.
+
+## My code, the reference tools and the data
+
+The authorship matters because these files share a folder with a README that I did not write. I used data from [Junayed's Ping360 repository](https://github.com/junayed/Sonar-Data-Collection-Analysis-AI-Ping360-Bluerobotics). That repository's README is reference material, not my project description or evidence of my role.
+
+My application scripts are <code>logger_v1.py</code>, <code>ping_reader_v1.py</code>, <code>lol.py</code> and <code>sonar_detection_v1.py</code>. Three accompanying helpers—<code>Ping360.py</code>, <code>Ping360_connection.py</code> and <code>decode_sensor_binary_log.py</code>—have mixed provenance: upstream-based files I modified because they did not yet do what I wanted. Their original author headers remain in the archive. Using and changing those helpers is not a claim that I originated Blue Robotics' device API or the upstream collection tools.
+
+The useful development story is what I was trying to expose: device settings, individual scan lines, sample intensities, angle, range conversion and the difference between missing data and an empty scene.
+
+## A scan is assembled, not photographed
+
+A Ping360 is a mechanically scanning imaging sonar. A return message contains an angle and a vector of signal strengths for that direction, together with the settings associated with the measurement. Rotating the head and collecting more lines gradually fills a polar image. Unlike a camera exposure, the complete circle is not observed at one instant.
+
+The [protocol](https://docs.bluerobotics.com/ping-protocol/pingmessage-ping360/) represents the head angle in gradians: 400 steps make a full revolution, so one step is 0.9°. My viewer converts an angle to radians with <code>angle / 400 × 2π</code>. A label that simply puts a degree sign after the raw value confuses a display convention with the device's actual unit.
+
+The intensity vector runs from nearer samples to farther ones. Its values are return strengths, not object labels or distances by themselves. To place a sample on the map, the software needs both its index along the line and the sample interval. To relate it to a moving vehicle, it also needs timing and a frame relationship.
+
+A sweeping display can look complete while mixing observations of different ages. If the vehicle or an obstacle moves during the sweep, a stitched circle is not automatically a consistent map. A dark direction might mean a weak return, an unobserved direction, a failed request or an old line. Those cases should not acquire the same meaning just because the image buffer stores zero.
+
+## Why I separated logging from looking
+
+The logger configures the device, requests scan lines and writes timestamped CSV output with settings recorded in its header. The viewers make the same type of data visible as a polar plot and a heatmap. The detection experiment adds an intensity threshold, closest-return information and a per-direction clearance display.
+
+Each answers a different question. The live view helps inspect what the acquisition path is delivering. A stored log lets me revisit the numeric samples rather than rely on a screenshot. A threshold experiment makes it possible to ask how a decision changes when I change the cutoff. None requires pretending that a coloured pixel has already become a reliable obstacle.
+
+The preserved image is unusually useful because it is not a glamorous successful scan:
+
+<details class="sonar-capture wide">
+<summary>Inspect the archived viewer capture · no visible returns</summary>
+<Fig src="/media/archive/sonar-view-2025.webp" alt="The preserved Ping360 viewer with an empty polar plot and uniformly blue intensity heatmap" caption="The supplied December 2025 viewer capture. No returns are visible here; this frame documents the interface, not successful object detection or a clear surrounding environment." contain />
+</details>
+
+The two panels have different roles. The polar plot asks where a return would be placed geometrically. The heatmap keeps the angle/sample-index structure closer to the raw scan. Keeping both is useful while investigating an acquisition or interpretation problem: a plausible map can otherwise conceal an incorrect conversion.
+
+## The interval hidden inside a range label
+
+For a sample index i, period setting P and assumed sound speed c, the basic time-of-flight model is:
+
+```text
+sample interval = P × 25 nanoseconds
+round-trip time = i × sample interval
+range           = c × round-trip time / 2
+```
+
+The factor of two is physical: sound travels out to a reflector and back. The sound-speed assumption also matters. The prototype uses 1500 m/s. That is an assumption for conversion, not a measurement of the water's actual sound speed, which depends on conditions.
+
+<figure class="wide">
+<svg viewBox="0 0 960 260" role="img" aria-labelledby="sonar-flight-title sonar-flight-desc">
+<title id="sonar-flight-title">A sonar range comes from a round trip</title>
+<desc id="sonar-flight-desc">An outgoing acoustic path from a sonar to a surface and a returning echo. The measured delay contains both paths, so range is half of sound speed times delay. The sample period is expressed in 25-nanosecond ticks.</desc>
+<defs><marker id="sonar-out-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--instrument)"/></marker><marker id="sonar-back-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="var(--estimate)"/></marker></defs>
+<rect x="45" y="70" width="55" height="120" rx="5" fill="var(--surface)" stroke="var(--line-2)"/><path d="M420 45V215" stroke="var(--ink)" stroke-width="4"/>
+<path d="M110 100H410" stroke="var(--instrument)" stroke-width="3" fill="none" marker-end="url(#sonar-out-arrow)"/><path d="M410 170H110" stroke="var(--estimate)" stroke-width="3" fill="none" marker-end="url(#sonar-back-arrow)"/>
+<g font-family="var(--sans)" font-size="17" fill="var(--ink)"><text x="44" y="225">sonar</text><text x="378" y="240">reflector</text><text x="190" y="83">outbound pulse</text><text x="196" y="154">returning echo</text><text x="500" y="75">Each sample adds another interval of delay.</text><text x="500" y="184">A full sweep combines many such scan lines.</text></g>
+<g font-family="var(--mono)" font-size="17" fill="var(--ink)"><text x="500" y="113">Δt = P × 25 ns</text><text x="500" y="147">r = c × i × Δt / 2</text></g>
+</svg>
+<figcaption>A time-of-flight explanation, not a model of beam width, multipath or the vehicle's movement during a sweep.</figcaption>
+</figure>
+
+Reading the actual detector revealed an important discrepancy: it multiplies by <code>25e-6</code>, while the manufacturer's protocol specifies 25 ns, or <code>25e-9</code> seconds. Those differ by a factor of 1000. The same larger factor appears in the logger's range estimate. I have left the originals untouched rather than silently making the archive look as though it always used the correct unit.
+
+An offline probe of the original <code>ObjectDetector</code> class made the difference explicit. No sonar connection was opened:
+
+| Input | Archived conversion | Protocol-based conversion |
+|---|---|---|
+| Sample index 1; period 80; assumed c = 1500 m/s | 1.5 m | 0.0015 m |
+
+This is a numerical consistency check, not a measurement of a reflector. It explains why range axes and clearance thresholds need verification below the plotting layer. A device can return valid bytes while the application gives those bytes the wrong scale.
+
+## What the detection experiment actually detects
+
+The detector loops over the intensity samples and emits an entry for each value above the configured threshold. It records sample index, converted distance, intensity and a separate “strong” flag for values above 150. Consecutive above-threshold samples are not automatically combined into one physical object.
+
+There is also a <code>sustained_detection</code> method that checks for several consecutive high-intensity samples. But the displayed update path calls <code>detect_objects</code>; the existence of the sustained check does not mean it filters every displayed detection. In an isolated probe, one high sample produced one detection while the sustained check returned false.
+
+That is a useful boundary for the word *object*. An intensity threshold identifies candidate returns. Whether those returns belong to one surface, several surfaces, noise, ringing or a multipath effect requires more reasoning. The nearest sample above threshold is not necessarily the nearest physical obstacle, and increasing a cutoff can remove both noise and weak but meaningful returns.
+
+The per-direction clearance routine scans each stored line for its first above-threshold sample. If none is found, it returns the configured maximum range. An unfilled zero-valued line therefore looks the same to that routine as a measured line with no accepted return. The prototype's “safe directions” label describes an experiment in visualization, not a validated collision-avoidance guarantee.
+
+## Understanding enough to go lower
+
+The intention to develop independent firmware explains why I was modifying the reference helpers rather than only adjusting the plot. A firmware effort needs a deeper account of the device: command semantics, settings, transducer movement, acquisition timing, response framing and failure behavior. The public host protocol is an interface to the existing firmware; reproducing that interface alone does not reproduce the device's internal acquisition and control.
+
+The preserved scripts show host-side acquisition and interpretation. They do not establish access to all internal hardware documentation or demonstrate an independent firmware image. That goal belongs in the story because it explains the investigation, but it should not be turned into a finished capability by a portfolio heading.
+
+What I keep from this period is the direction of the work: move from a picture to inspectable samples, preserve settings alongside the data, trace every physical unit, and distinguish a missing observation from a claim about the world. Those concerns connect directly to the later [camera measurement work](/notes/turning-a-camera-into-a-sensor/) and [Mongla's capability boundaries](/notes/a-capability-is-only-real/).
+
+## Follow the data path
+
+For the wire-level fields, start with [Blue Robotics' Ping360 protocol](https://docs.bluerobotics.com/ping-protocol/pingmessage-ping360/). For the host-library interface, inspect [ping-python](https://github.com/bluerobotics/ping-python). The [upstream data/reference repository](https://github.com/junayed/Sonar-Data-Collection-Analysis-AI-Ping360-Bluerobotics) remains credited as its own work.
+
+The next useful curation of my archive is an offline sample-to-map explainer that keeps recorded inputs, units and observations separate from a live device adapter. It should retain the original experiments and clearly distinguish any later corrections. Publishing a folder of screenshots as “navigation firmware” would lose the interesting part: learning what each number deserved to mean.
+
+<style>{`
+.sonar-capture{border-block:1px solid var(--line-2)}
+.sonar-capture summary{cursor:pointer;color:var(--instrument);padding:.7rem 0;min-height:44px;font:500 var(--t-1)/1.5 var(--sans)}
+.sonar-capture figure{margin:.5rem 0 1rem}
+`}</style>

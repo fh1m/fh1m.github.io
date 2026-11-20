@@ -13,9 +13,9 @@ const beats = [
   "Somewhere in that pixel is Dhaka, and a desk with a cat on it. I'm Fahim. I build machines that have to decide on their own, and this is everything they taught me, laid out as a small system you can fly through.",
 ];
 ---
-<section class="opening" id="opening" aria-label="Opening: Voyager 1's Pale Blue Dot">
+<section class="opening" id="opening" aria-label="Opening: Voyager 1's Pale Blue Dot" hidden>
   <div class="photo-wrap" aria-hidden="true">
-    <img class="photo" src="/world/pbd.webp" srcset="/world/pbd-1200.webp 1200w, /world/pbd.webp 2400w" sizes="100vw" alt="" width="2400" height="2375" fetchpriority="high" />
+    <img class="photo" src="/world/pbd.webp" srcset="/world/pbd-1200.webp 1200w, /world/pbd.webp 2400w" sizes="100vw" alt="" width="2400" height="2375" loading="lazy" />
     <span class="dot-ring"></span>
   </div>
   <div class="text">
@@ -42,10 +42,10 @@ const beats = [
   .beat.first.on { transition: none; }
   .beat.q { font-style: italic; font-size: clamp(1.4rem, 2.6vw, 2.1rem); }
   .beat.me { font-size: clamp(1.1rem, 1.8vw, 1.45rem); }
-  .who { display: block; margin-top: .6rem; font: 400 var(--t-1) var(--sans); font-style: normal; color: #b8bcc4; }
-  .credit { position: absolute; right: 1.2rem; bottom: 1rem; margin: 0; font: 400 var(--t-2) var(--sans); color: rgb(255 255 255 / .45); }
+  .who { display:block; margin-top:.6rem; font:400 var(--t-1)/1.5 var(--sans); font-style:normal; color:var(--dim); }
+  .credit { position:absolute; right:1.2rem; bottom:1rem; margin:0; font:400 var(--t-2)/1.5 var(--sans); color:var(--dim); }
   .controls { position: absolute; left: clamp(1.4rem, 6vw, 5rem); bottom: 1.6rem; display: flex; gap: .5rem; }
-  .controls button { font: 500 var(--t-1) var(--sans); color: #000; background: #ececec; border: 0; border-radius: var(--r-2); padding: .6rem 1rem; cursor: pointer; }
-  .controls .op-skip { background: transparent; color: #e8e8e8; border: 1px solid #555; }
+  .controls button { font:500 var(--t-1) var(--sans); color:var(--black); background:var(--action); border:1px solid var(--action); border-radius:var(--r-2); padding:.6rem 1rem; cursor:pointer; }
+  .controls .op-skip { background:var(--surface); color:var(--ink); border-color:var(--line-2); }
   @media (prefers-reduced-motion: reduce) { .photo-wrap, .beat { transition: none; } }
 </style>

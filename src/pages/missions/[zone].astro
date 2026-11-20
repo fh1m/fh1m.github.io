@@ -55,9 +55,9 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
         <section><h2>The fix</h2><p>{m.fix}</p>{m.numbers && <p class="nums">{m.numbers}</p>}<p class="ev">Evidence: {lesson.refs.map((r, k) => <>{k > 0 && ", "}<a href={r.href} class:list={{ h: r.href.includes("/commit/") }}>{r.label}</a></>)}</p></section>
         <section class="two"><div><h2>Keep doing</h2><p>{lesson.lesson}</p></div><div><h2>Do differently</h2><p>{lesson.recommendation}</p></div></section>
       </article>
-      <aside class="aar-margin">
+      <aside class="aar-margin" aria-label="Context, source images and related work">
         <div class="note bunnu"><p class="who">Bunnu, on what he kept</p><p>{m.bunnu}</p></div>
-        {photo && <figure class="note photo"><img src={photo.src} alt={photo.cap} width={photo.w} height={photo.h} loading="lazy" /><figcaption>{photo.cap}</figcaption></figure>}
+        {photo && <figure class="note photo"><a href={photo.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${photo.cap}`}><img src={photo.src} alt={photo.cap} width={photo.w} height={photo.h} loading="lazy" /></a><figcaption>{photo.cap}<span class="image-hint">Open image to inspect at full size.</span></figcaption></figure>}
         <div class="note"><p class="who">Where this lives</p><p><a href={`/projects/${project.slug}`}>{project.title}</a>. {project.line}</p><p><a href={`/lessons/${lesson.slug}`}>The lesson, in NASA's format</a></p></div>
       </aside>
     </div>
@@ -65,35 +65,38 @@ const i = MISSIONS.indexOf(m), next = MISSIONS[(i + 1) % MISSIONS.length];
   </main>
 </Base>
 <style>
-  :global(body.planet-page) { background: #000; color: #ececec; }
-  .aar { max-width: 76rem; margin: 0 auto; padding: 3rem clamp(1.2rem, 4vw, 3rem) 4rem; font-family: var(--sans); }
-  .nextr { margin: 3rem 0 0; }
+  :global(body.planet-page) { background:var(--page); color:var(--ink); }
+  .aar { max-width:var(--page-width); margin:0 auto; padding:var(--section-gap) var(--gutter) 2rem; font-family:var(--sans); }
+  .nextr { margin:1.5rem 0 0; }
   .kick { margin: 0 0 .5rem; font: 500 var(--t-1) var(--sans); color: var(--c); }
   .bn { font-family: var(--bangla); font-weight: 400; }
-  h1 { font: 600 clamp(1.9rem, 3.6vw, 2.8rem)/1.1 var(--sans); color: #fff; margin: 0 0 .8rem; letter-spacing: -.01em; }
-  .dek { font: 400 var(--t1)/1.5 var(--sans); color: #c8c8c8; max-width: 40ch; margin: 0 0 2.4rem; }
+  h1 { font:600 clamp(1.75rem,2.5vw,2.25rem)/1.18 var(--display); color:var(--ink-hi); margin:0 0 .65rem; letter-spacing:-.01em; }
+  .dek { font:400 1.0625rem/1.55 var(--sans); color:var(--ink); max-width:72ch; margin:0 0 1.25rem; }
   .aar-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem); gap: 2.4rem; align-items: start; }
-  .report section { margin: 0 0 1.8rem; max-width: 62ch; }
+  .aar-grid > * { min-width:0; }
+  .report section { margin:0 0 1.25rem; max-width:85ch; }
   .report section.try { max-width: none; }
   h2 { font: 600 var(--t1) var(--sans); color: var(--c); margin: 0 0 .4rem; }
-  .report p { font: 400 var(--t0)/1.65 var(--sans); color: #e2e2e2; margin: 0 0 .6rem; }
+  .report p { font:400 var(--body-size)/var(--lh) var(--sans); color:var(--ink); margin:0 0 .65rem; }
   .obs { color: #fff !important; font-weight: 700 !important; }
-  .wrong { color: #a3a3a3; text-decoration: line-through; text-decoration-color: #ff6b5b; text-decoration-thickness: 2px; }
+  .wrong { color:var(--dim); text-decoration:line-through; text-decoration-color:var(--failure); text-decoration-thickness:2px; }
   .tried { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .5rem; }
   .tried li { font: 500 var(--t-1)/1.5 var(--sans); }
-  .why { display: block; color: #c8c8c8; }
-  .nums { font: 400 var(--t-1)/1.6 var(--mono) !important; color: #8dff6a !important; }
-  .ev a, .note a { color: #fff; }
+  .why { display:block; color:var(--dim); }
+  .nums { font:400 var(--t-1)/1.6 var(--mono)!important; color:var(--measured)!important; }
+  .ev a, .note a { color:var(--action); }
   .h { font-family: var(--mono); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; max-width: none !important; }
-  .aar-margin { display: grid; gap: 1rem; position: sticky; top: 1.4rem; }
-  .note { margin: 0; padding: .9rem 1rem; border-radius: var(--r-3); background: rgb(255 255 255 / .06); font: 500 var(--t-1)/1.55 var(--sans); color: #e2e2e2; }
+  .aar-margin { display:grid; gap:1rem; position:sticky; top:calc(var(--header-height) + 1rem); max-height:calc(100svh - var(--header-height) - 2rem); overflow:auto; padding:.25rem; }
+  .note { margin:0; padding:.9rem 1rem; border-radius:var(--r-3); background:var(--surface); font:400 var(--t-1)/1.55 var(--sans); color:var(--ink); }
   .note p { margin: 0 0 .4rem; }
-  .note .who { font: 500 var(--t-2) var(--sans); color: #ff9ec2; margin-bottom: .2rem; }
+  .note .who { font:500 var(--t-2) var(--sans); color:var(--action); margin-bottom:.2rem; }
   .bunnu { border-left: 2px solid var(--c); border-radius: 0 var(--r-2) var(--r-2) 0; }
   blockquote.note p { font-style: italic; color: #fff; }
-  blockquote.note footer { font: 500 var(--t-2) var(--sans); color: #8c8c8c; }
+  blockquote.note footer { font:400 var(--t-2)/1.5 var(--sans); color:var(--dim); }
   .photo img { width: 100%; height: auto; border-radius: var(--r-2); display: block; }
-  .photo figcaption { margin-top: .5rem; font: 500 var(--t-2)/1.5 var(--sans); color: #8c8c8c; }
-  @media (max-width: 860px) { .aar-grid { grid-template-columns: 1fr; } .aar-margin { position: static; } .two { grid-template-columns: 1fr; } }
+  .photo figcaption { margin-top:.5rem; font:400 var(--t-2)/1.5 var(--sans); color:var(--dim); }
+  .photo a { display:block; border-radius:var(--r-2); }
+  .image-hint { display:block; color:var(--action); margin-top:.35rem; }
+  @media(max-width:860px) { .aar-grid { grid-template-columns:minmax(0,1fr); } .aar-margin { position:static; max-height:none; overflow:visible; } .two { grid-template-columns:minmax(0,1fr); } }
 </style>
