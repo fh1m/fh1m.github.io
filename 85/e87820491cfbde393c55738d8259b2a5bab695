@@ -1,0 +1,28 @@
+DESIGN.md
+  h_b19ddd3ca98e3d 17
+src/components/game/Panels.astro
+  h_b19ddd3ca98e3d 124,144
+src/data/elements.ts
+  h_b19ddd3ca98e3d 24,27,122,124
+src/pages/about.astro
+  h_b19ddd3ca98e3d 50,56
+src/pages/cv.astro
+  h_b19ddd3ca98e3d 6-7,15-19,23,29,31,33
+src/pages/index.astro
+  h_b19ddd3ca98e3d 35-38,431,434-435,448,450-456,467
+src/pages/notes/index.astro
+  h_b19ddd3ca98e3d 16-22,55-58
+src/pages/projects/[slug].astro
+  h_b19ddd3ca98e3d 36,119-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "85e87820491cfbde393c55738d8259b2a5bab695",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
