@@ -74,6 +74,20 @@ test("object navigation clears narration belonging to the previous world", async
   await expect(page.locator("#guide")).not.toHaveClass(/\bon\b/);
 });
 
+test("the homepage universe fills the viewport in animated and reduced-motion modes", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 960 });
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion });
+    await page.goto("/");
+    const background = page.locator(reducedMotion === "reduce" ? ".poster-img" : "#world");
+    await expect(background).toBeVisible();
+    await expect.poll(async () => {
+      const box = await background.boundingBox();
+      return box ? { left: Math.round(box.x), width: Math.round(box.width) } : null;
+    }).toEqual({ left: 0, width: 1440 });
+  }
+});
+
 test("entering a world frames its project destinations inside the free canvas", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");

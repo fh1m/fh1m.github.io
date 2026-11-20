@@ -16,6 +16,8 @@ Donda/Rubin reduction: one thing at a time, nothing extra.
 
 The entrance is now direct: a human introduction and three choices, with the animated opening opt-in. The selected observatory is a navigational exhibit, not a qualification. Its miniature project models are schematics; actual hardware, CAD and recorded output belong in the project/story pages.
 
+The entrance universe stays edge-to-edge behind the introduction. Keep the canvas and reduced-motion poster at viewport bounds; use a continuous dark scrim for readability, not a translated scene that exposes a flat background strip. Object hover tips remain hidden until entering the observatory.
+
 Oxocarbon Dark is the selected palette: neutral charcoal layers, bright neutral prose, pink primary actions and blue navigation/focus. Domain and data colors come from the same established family, not unrelated background hues. Photographs should be large enough to inspect; diagrams must say whether they are measured, simulated or illustrative. Press is a dated source list, never a wall of endorsement logos.
 
 The shared type roles take the Mongla site's separation of display, prose and data without copying its vehicle-specific palette: Manrope headings, Zed Sans reading and interface text, IBM Plex Mono measurements/code and Tiro Bangla. Professional documents use conventional Plex Sans. Zed Sans must not be replaced by Zed Mono for body text. Important links remain visibly actionable. Wide technical material has labelled, focusable horizontal regions on phones; the document itself must not widen. Gallery images preserve native proportions and open at full resolution.

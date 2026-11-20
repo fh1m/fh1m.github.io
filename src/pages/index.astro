@@ -405,7 +405,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .lbl.station { color:var(--ink); }
   .lbl:hover { color: #fff; text-decoration: underline; }
   .landing .labels, .landing .index, .landing .zones { visibility: hidden; }
-  .landing .guide, .landing #bunnu-story { display:none; }
+  .landing .guide, .landing #bunnu-story, .landing .tip { display:none; }
   .landing .left { top: 50%; bottom: auto; transform: translateY(-50%); left: clamp(1.5rem, 6vw, 7rem); width: min(39rem, 53vw); }
   .landing .intro h1 { font:600 clamp(2rem,3.5vw,3rem)/1.12 var(--display); letter-spacing:-.025em; }
   .landing .intro p { font-size:var(--t0); line-height:1.55; max-width:60ch; }
@@ -419,7 +419,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   #guide-source { display:block; margin-top:.6rem; color:var(--dim); line-height:1.5; }
   .map-note { font:400 .8rem/1.5 var(--sans); color:var(--dim); margin:0 0 .7rem; }
   .snd[aria-pressed="true"] { border-color:var(--instrument); }
-  @media(min-width:901px) { .landing #world, .landing .poster-img { transform:translateX(20vw); } }
+  .landing::after { background:linear-gradient(90deg,rgb(0 0 0 / .65),transparent 70%),radial-gradient(ellipse at center,transparent 55%,rgb(0 0 0 / .55) 100%); }
   .landing .intro p:not(.hello) { color:var(--ink); }
   @media (max-width: 900px) {
     .hud { left:.6rem; right:.6rem; gap:.4rem; justify-content:flex-end; }
