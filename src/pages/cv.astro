@@ -3,7 +3,8 @@ import Base from "../layouts/Base.astro";
 import { person, education, roles, publications, skills, hailoSharing } from "../data/facts";
 const experience = roles.filter((r) => !r.org.startsWith("Mongla"));
 const concise = Astro.props.concise === true;
-const selectedExperience = concise ? experience.filter((r) => ["BRACU Duburi", "Dubotech", "BRACU Mongol-Tori", "Amateur Experimental Rocketry (AERD)"].includes(r.org)) : experience;
+const resumeOrder = ["BRACU Duburi", "Amateur Experimental Rocketry (AERD)", "Dubotech", "BRACU Mongol-Tori"];
+const selectedExperience = concise ? resumeOrder.flatMap(org => experience.filter(r => r.org === org)) : experience;
 const projects = [
   { name: "Mongla", url: "https://github.com/fh1m/mongla_ws", detail: `Developed an independent ROS 2 AUV autonomy stack integrating perception, estimation and mission execution over MAVLink. Bench-tested two ${hailoSharing.requestedDetectorHz} Hz detection networks plus ${hailoSharing.requestedXfeatHz} Hz XFeat on one Hailo-8 (${hailoSharing.durationS} s, repeated-frame input; ${hailoSharing.date}). No water trials. Control board and firmware by Rakibul Islam.` },
   { name: "Camera capture latency", url: "/notes/the-frame-age-problem", detail: "Replaced queued camera consumption with latest-frame capture, reducing kernel-stamped frame age from 396.1 ms to 16.9 ms in a controlled stall benchmark. Evaluated buffering policies against the kernel timestamps rather than using throughput as a proxy for freshness." },
@@ -11,20 +12,25 @@ const projects = [
   { name: "Dristy", url: "https://github.com/fh1m/Dristy", detail: "Built K210 vision firmware and a host API combining neural inference and classical vision. Designed compact serial responses so host software consumes detection results rather than transferring full video frames." },
   { name: "Rupsha", url: "https://github.com/fh1m/rupsha_ws", detail: "Developed a ROS 2 autonomy stack for an Ackermann rover and evaluated behavior in Gazebo. Physical chassis remains in build; simulation results are not represented as field deployment." },
 ];
+const resumeProjects = [
+  { name: "Camera capture latency", url: "/notes/the-frame-age-problem", detail: "Reduced kernel-stamped frame age from 396.1 ms to 16.9 ms in a controlled camera-stall benchmark; compared buffering policies against kernel timestamps, not throughput." },
+  { name: "Visual-navigation investigations: Dhrubotara / Matra / Dhara", url: "/notes/dhrubotara", detail: "Reference matching/homography, depth-scale normalization and capture-time velocity units, evaluated with CPU-controlled experiments and recorded-input replay; not flight validation." },
+];
+const rolePoints = (r: (typeof roles)[number]) => !concise ? r.points : r.org === "BRACU Duburi" ? [r.points[0], "Built the CNN perception stack and dataset pipeline; deployed edge inference and integrated perception into the shared ROS 2 vehicle stack."] : r.points.slice(0, r.org === "Amateur Experimental Rocketry (AERD)" ? 2 : 1);
 ---
 <Base title={concise ? "Résumé" : "Technical CV"} description="Muhammad Fahim Faisal: robotics and autonomy experience, selected engineering projects, education and publications." bodyClass="cv-page">
   <main id="main" class:list={["cv", { concise }]}>
-    <nav class="document-tools no-print" aria-label="Professional documents"><a href="/about">Talk is cheap, so here is work</a><a href="/cv/fahim-faisal-resume.pdf" download>One-page résumé</a><a href="/cv/fahim-faisal-cv.pdf" download>Two-page CV</a></nav>
+    <nav class="document-tools no-print" aria-label="Professional documents"><a href="/about">Contributions &amp; CV</a><a href="/cv/fahim-faisal-resume.pdf" download>One-page résumé</a><a href="/cv/fahim-faisal-cv.pdf" download>Two-page CV</a></nav>
     <header class="cv-head">
       <h1>{person.fullName}</h1>
       <p class="specialism">Robotics and autonomy • Perception, control and embedded systems</p>
       <p class="contact"><span>{person.place}</span><a href={`mailto:${person.email}`}>{person.email}</a><a href={person.github}>github.com/fh1m</a><a href="https://fh1m.github.io">fh1m.github.io</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}</p>
     </header>
-    <p class="summary">Computer science undergraduate with engineering experience across underwater vehicles, rover perception and experimental rocketry. Builds and evaluates perception and control software on resource-constrained hardware; documents measured results and validation limits.</p>
+    <p class="summary">{concise ? "Computer science undergraduate building perception, control and autonomy software across underwater vehicles, rovers and experimental rocketry. Evaluates edge systems with source-linked bench, replay and simulation evidence." : "Computer science undergraduate with engineering experience across underwater vehicles, rover perception and experimental rocketry. Builds and evaluates perception and control software on resource-constrained hardware; documents measured results and validation limits."}</p>
     <section aria-labelledby="experience"><h2 id="experience">Engineering experience</h2>
-      {selectedExperience.map((r) => <article class="entry"><h3>{r.org}</h3><p class="position">{r.title.replaceAll(" · ", "; ")} <span class="dates">({r.dates})</span></p>{r.url && <p class="project-source"><a href={r.url}>{r.url}</a></p>}<ul>{r.points.slice(0, concise ? 1 : undefined).map((p) => <li>{p.replace(" The first code of mine that someone else depended on.", "")}</li>)}</ul></article>)}
+      {selectedExperience.map((r) => <article class="entry"><h3>{r.org}</h3><p class="position">{r.title.replaceAll(" · ", "; ")} <span class="dates">({r.dates})</span></p>{r.url && <p class="project-source"><a href={r.url}>{r.url}</a></p>}<ul>{rolePoints(r).map((p) => <li>{p.replace(" The first code of mine that someone else depended on.", "")}</li>)}</ul></article>)}
     </section>
-    <section aria-labelledby="projects"><h2 id="projects">Selected engineering projects</h2>{projects.slice(0, concise ? 2 : undefined).map((p) => <article class="project"><h3>{p.name} <a class="project-source" href={p.url}>{new URL(p.url, Astro.site).href}</a></h3><p>{p.detail}</p></article>)}</section>
+    <section aria-labelledby="projects"><h2 id="projects">Selected engineering projects</h2>{(concise ? resumeProjects : projects).map((p) => <article class="project"><h3>{p.name} <a class="project-source" href={p.url}>{new URL(p.url, Astro.site).href}</a></h3><p>{p.detail}</p>{concise && p.url === "/notes/dhrubotara" && <p class="project-source">Related investigations: <a href="https://fh1m.github.io/notes/matra/">Matra: depth scale</a> · <a href="https://fh1m.github.io/notes/dhara/">Dhara: capture-time units</a></p>}</article>)}</section>
     <section aria-labelledby="education"><h2 id="education">Education</h2>{education.map((e) => <article class="education"><h3>{e.org}</h3><p>{e.org === "BRAC University" ? "Coursework toward B.Sc. Computer Science; minor studies in Electrical and Electronic Engineering. Degree not completed." : e.org.startsWith("IU ") ? "Coursework toward B.Sc. Autonomous Systems (one semester, on campus) — Bad Honnef, Germany." : e.degree}{e.current && " (in progress)"} <span class="dates">({e.dates})</span></p></article>)}</section>
     <section aria-labelledby="skills"><h2 id="skills">Technical skills</h2><div class="skills">{Object.entries(skills).filter(([k]) => k !== "source").map(([k,v]) => <p><b>{k}:</b> {v}</p>)}</div></section>
     {!concise && <section aria-labelledby="publications"><h2 id="publications">Publications and technical reports</h2><ul>{publications.map((p) => <li><a href={p.url}><b>{p.title}.</b></a> {p.authors}. {p.venue}.</li>)}<li>Co-author, BRACU Duburi Technical Design Reports, RoboSub 2025 and 2026.</li></ul></section>}

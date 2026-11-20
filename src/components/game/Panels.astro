@@ -121,7 +121,7 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
   <button class="close" type="button" aria-label="Close">Close</button>
   <p class="kicker">The office</p>
   <h2 id="obj-cv">{person.fullName}</h2>
-  <p class="pline">Talk is cheap, so here is work: contributions, experiments and the public record. The traditional documents are here too.</p>
+  <p class="pline">The machines, the people, and what I learned building them. Contributions, experiments and the public record, alongside the traditional documents.</p>
   <ul class="results">{results.map((r) => <li><span class="yr">{r.year}</span> <b>{r.event}</b>: {r.result}</li>)}</ul>
   <p class="links"><a href="/about">The work and its sources</a><a href="/cv/fahim-faisal-resume.pdf" download>One-page résumé</a><a href="/cv/fahim-faisal-cv.pdf" download>Two-page CV</a></p>
 </aside>
@@ -141,7 +141,7 @@ const strip = (h: string) => h.replace(/<[^>]+>/g, "");
         <li><b>Look for a new angle.</b> No DVL, so I tested a downward camera: at most 1.09 cm distance-magnitude error in three 30 cm hand slides in air. Not an underwater velocity validation.</li>
       </ul>
       <p class="sum">Where the rules were learned: rockets at AERD, a rover arm at Mongol-Tori, my time as engineering lead at BRACU Duburi before leaving in August 2026, and a stack of my own. The dates are in the CV; the stories are on the planets.</p>
-      <p class="links"><a href="/log">My story</a><a href="/about">Talk is cheap, so here is work</a><a href="/cv/fahim-faisal-cv.pdf" download>Technical CV</a><a href={person.github}>GitHub</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}<a href={`mailto:${person.email}`}>Email</a></p>
+      <p class="links"><a href="/log">My timeline</a><a href="/about">Contributions &amp; CV</a><a href="/cv/fahim-faisal-cv.pdf" download>Technical CV</a><a href={person.github}>GitHub</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}<a href={`mailto:${person.email}`}>Email</a></p>
     </div>
   </div>
 </aside>

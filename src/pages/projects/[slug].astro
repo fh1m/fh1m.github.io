@@ -33,6 +33,7 @@ const context = projectContext[p.slug];
         <h1>{p.title}</h1>
         {p.line && <p class="line">{p.line}</p>}
         <p class="sum">{p.summary}</p>
+        {(p.slug === "mongla" || p.slug === "meghdhut") && <nav class="cover-evidence" aria-label={p.slug === "meghdhut" ? "Related completed public work, not flight validation" : "Completed bench evidence"}>{p.notes.map(n => <a href={n.href}>{n.label} →</a>)}</nav>}
       </div>
       {lead && <figure class="cover-media"><a class="image-view" href={lead.src} target="_blank" rel="noreferrer" aria-label={`Open full-size image: ${lead.alt}`}><img class="cover-img" src={lead.src} alt={lead.alt} width={lead.w} height={lead.h} fetchpriority="high" /></a><figcaption>{lead.alt}<span class="image-hint">Open image to inspect at full size.</span></figcaption></figure>}
     </header>
@@ -115,6 +116,8 @@ const context = projectContext[p.slug];
 </script>
 <style>
   .track-page { position: relative; z-index: 1; font-family: var(--sans); }
+  .cover-evidence { display:grid; gap:.6rem; margin-top:1rem; font-size:.9rem; }
+  .cover-evidence a { color:var(--instrument); }
   .bn { font-family: var(--bangla); color: var(--c); }
   .cover { border: 0; grid-template-columns: minmax(0, 1fr); gap: 4vw; align-items: center; }
   .cover.has-img { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }

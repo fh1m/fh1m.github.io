@@ -47,13 +47,13 @@ const first = new Date(days[0][0]).getDay();
 const cells = days.map(([d, n], i) => ({ d, n, x: Math.floor((i + first) / 7), y: (i + first) % 7 }));
 const langs = (gh.languages as { name: string; color: string; share: number }[]).slice(0, 6);
 ---
-<Base title="Talk is cheap, so here is work" description="Fahim Faisal's engineering work, contributions, experiments, press coverage, achievements, certificates and publications, with sources and validation limits.">
+<Base title="The machines, the people, and what I learned building them" description="Fahim Faisal's engineering work, contributions, experiments, press coverage, achievements, certificates and publications, with sources and validation limits.">
   <main id="main" class="screens work-page">
     <header class="screen work-cover">
       <div class="measure head">
         <figure class="work-portrait"><img src="/media/archive/fahim-at-work.webp" alt="Fahim at the laptop on the right, working with BRACU Duburi teammates in the competition tent" width="1600" height="1066" /><figcaption>A laptop, a team, and a vehicle that needs to work. Photo: BRACU Duburi.</figcaption></figure>
         <div class="work-intro">
-          <h1 class="s-h1">Talk is cheap,<br />so here is work.</h1>
+          <h1 class="s-h1">The machines, the people,<br />and what I learned building them.</h1>
           <p class="s-dek">I'm {person.fullName}. I work on perception, control and embedded systems. Here are the machines, the measurements, and the people I built them with.</p>
           <nav class="document-links" aria-label="Professional documents"><a class="document-link" href="/cv/fahim-faisal-resume.pdf" download>One-page résumé <span>PDF</span></a><a class="document-link" href="/cv/fahim-faisal-cv.pdf" download>Technical CV <span>2 pages, PDF</span></a></nav>
           <nav class="work-links" aria-label="Contact and source code"><a href={person.github}>GitHub</a>{person.linkedin && <a href={person.linkedin}>LinkedIn</a>}<a href={`mailto:${person.email}`}>Email</a></nav>
