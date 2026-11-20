@@ -86,6 +86,17 @@ test("the homepage universe fills the viewport in animated and reduced-motion mo
       return box ? { left: Math.round(box.x), width: Math.round(box.width) } : null;
     }).toEqual({ left: 0, width: 1440 });
   }
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto("/");
+  await page.locator(".rick summary").click();
+  const note = page.locator(".rick-note");
+  await expect(note).toBeVisible();
+  const box = await note.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  await page.locator(".rick summary").click();
+  await expect(note).toBeHidden();
 });
 
 test("entering a world frames its project destinations inside the free canvas", async ({ page }) => {
