@@ -14,7 +14,7 @@ Donda/Rubin reduction: one thing at a time, nothing extra.
 
 ### November 2026 refinement
 
-The entrance is evidence-first: “See engineering work” is the primary action and opens the complete work archive; the observatory is secondary, with direct links to the timeline and one-page résumé. A brief RoboSub/current-autonomy line establishes context. Rick sits clear of the name. The observatory is a navigational exhibit, not a qualification; actual hardware, CAD and recorded output belong in the project/story pages. The Notebook offers a short camera-latency and visual-navigation reading guide before the unchanged long-form archive.
+The entrance is evidence-first: “See engineering work” is the primary action and opens the complete work archive; the observatory is secondary, with direct links to the timeline and one-page résumé. The hero keeps only a two-line engineering statement. Rick's brief, dismissible arrival bubble carries the attributed show quote, competition context and a linked bench result; it closes on observatory entry. Rick sits clear of the name. The observatory is a navigational exhibit, not a qualification; actual hardware, CAD and recorded output belong in the project/story pages. The Notebook offers a short camera-latency and visual-navigation reading guide before the unchanged long-form archive.
 
 The entrance universe stays edge-to-edge behind the introduction. Keep the canvas and reduced-motion poster at viewport bounds; use a continuous dark scrim for readability, not a translated scene that exposes a flat background strip. Object hover tips remain hidden until entering the observatory.
 

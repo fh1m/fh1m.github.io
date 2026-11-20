@@ -88,8 +88,11 @@ test("the homepage universe fills the viewport in animated and reduced-motion mo
   }
   await page.setViewportSize({ width: 320, height: 844 });
   await page.goto("/");
-  await page.locator(".rick summary").click();
   const note = page.locator(".rick-note");
+  await expect(note).toBeVisible();
+  await page.locator(".rick-dismiss").click();
+  await expect(note).toBeHidden();
+  await page.locator(".rick summary").click();
   await expect(note).toBeVisible();
   const box = await note.boundingBox();
   expect(box).not.toBeNull();

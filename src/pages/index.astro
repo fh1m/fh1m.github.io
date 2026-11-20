@@ -27,13 +27,12 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
       <div class="nameplate">
         <h1><button type="button" data-focus="fh1m">Fahim <span class="surname">Faisal</span></button></h1>
         <details class="rick">
-          <summary aria-label="A grumpy Rick has something to say" title="A mildly judgemental guest. Click for his advice."><img src="/media/space/rick-perched.svg" width="110" height="155" alt="" /></summary>
-          <aside class="rick-note"><q>To live is to risk it all.</q><cite>Rick Sanchez · <a href="https://mygeekwisdom.com/2023/11/18/to-live-is-to-risk-it-all-otherwise-youre-just-an-inert-chunk-of-randomly-assembled-molecules-drifting-wherever-the-universe-blows-you/">Rickmancing the Stone, S3 E2</a></cite><p>For me: a web internship in 2021, rockets, underwater robots, a rover arm—and a fresh start at UIU in 2026. Keep the old work. Learn from it. Keep going.</p></aside>
+          <summary aria-controls="rick-welcome" aria-label="A grumpy Rick has something to say" title="A mildly judgemental guest. Click for his advice."><img src="/media/space/rick-perched.svg" width="110" height="155" alt="" /></summary>
+          <aside class="rick-note" id="rick-welcome" hidden><button class="rick-dismiss" type="button" aria-label="Dismiss Rick's welcome">×</button><q>To live is to risk it all.</q><cite>Rick Sanchez · <a href="https://mygeekwisdom.com/2023/11/18/to-live-is-to-risk-it-all-otherwise-youre-just-an-inert-chunk-of-randomly-assembled-molecules-drifting-wherever-the-universe-blows-you/">Rickmancing the Stone, S3 E2</a></cite><p>Fahim's route: rockets → RoboSub &amp; URC → independent autonomy. Measured evidence: <a href="/notes/the-frame-age-problem/">396.1 → 16.9 ms kernel-stamped frame age (bench)</a>.</p></aside>
         </details>
       </div>
       <p class="hello" lang="bn">আসেন, একটু ঘুরে দেখেন।</p>
-      <p>I'm Fahim, from Dhaka. I build perception, control and autonomy software for robots.</p>
-      <p class="credibility">RoboSub &amp; URC engineering · perception, kinematics, ROS 2. Now building independent autonomy.<br /><a href="/notes/the-frame-age-problem/">396.1 → 16.9 ms kernel-stamped frame age (bench).</a></p>
+      <p class="hero-statement">Competition-tested engineering.<br />Evidence-led autonomy.</p>
       <a class="resume-link" href="/cv/fahim-faisal-resume.pdf" download>One-page résumé <span aria-hidden="true">↓ PDF</span></a>
       <nav class="cta" aria-label="Choose a route"><a class="pill engineering-cta" href="/everything/">See engineering work <span aria-hidden="true">↗</span></a><button class="pill ghost" id="explore" type="button">Explore the observatory</button><a class="pill ghost" href="/log/">My timeline</a></nav>
       <a class="opening-link" href="/?intro">A view from Voyager</a>
@@ -104,6 +103,17 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   import "../scripts/live-stats";
   import { startPoster, wantsPoster } from "../game/poster";
   const sfx = createSound(); sfx.scene("space");
+  const guest = document.querySelector<HTMLDetailsElement>(".rick")!;
+  const welcome = document.getElementById("rick-welcome")!;
+  document.getElementById("main")!.append(welcome);
+  const syncWelcome = () => { welcome.hidden = !guest.open; };
+  guest.addEventListener("toggle", syncWelcome);
+  welcome.querySelector("button")!.addEventListener("click", () => { guest.open = false; syncWelcome(); });
+  document.getElementById("explore")!.addEventListener("click", () => { guest.open = false; syncWelcome(); });
+  if (!location.hash && !location.search.includes("intro") && (innerWidth > 900 || innerHeight >= 740)) {
+    guest.open = true; syncWelcome();
+    window.setTimeout(() => { if (!welcome.matches(":hover") && !welcome.contains(document.activeElement)) { guest.open = false; syncWelcome(); } }, 12000);
+  }
   // the 3D planet, or (reduced motion, low-end, no WebGL2, ?poster) a still of it with the same UI on top
   const poster = wantsPoster();
   if (poster) document.getElementById("main")!.classList.add("poster");
@@ -131,6 +141,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     const closeIndex = () => { indexDetails.open = false; };
     const enterObservatory = async () => {
       if (shell.classList.contains("exploring")) return;
+      guest.open = false; syncWelcome();
       explore.disabled = true;
       explore.setAttribute("aria-busy", "true");
       await worldP;
@@ -436,11 +447,13 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .rick summary::-webkit-details-marker { display:none; }
   .rick summary img { display:block; width:100%; height:100%; }
   .rick summary:focus-visible { outline:2px solid var(--instrument); outline-offset:4px; }
-  .rick-note { position:absolute; right:0; top:100%; width:min(20rem,calc(100vw - 5rem)); padding:1rem; background:var(--page); border:1px solid var(--action); border-radius:var(--r-2); box-shadow:0 12px 32px rgb(0 0 0 / .5); }
+  .rick-note { position:fixed; z-index:6; right:1.5rem; bottom:5rem; top:auto; width:min(20rem,calc(100vw - 2rem)); padding:1rem; background:var(--page); border:1px solid var(--action); border-radius:var(--r-2); box-shadow:0 12px 32px rgb(0 0 0 / .5); }
+  .rick-note[hidden] { display:none; }
+  .rick-dismiss { float:right; min-width:44px; min-height:44px; margin:-.5rem -.5rem .25rem .5rem; background:none; border:0; color:var(--ink); cursor:pointer; font-size:1.3rem; }
   .rick-note q { display:block; font:600 1.1rem/1.4 var(--display); color:var(--ink-hi); }
   .rick-note cite { display:block; margin-top:.6rem; font:400 .75rem/1.5 var(--sans); color:var(--ink); }
   .rick-note a { color:var(--instrument); }
-  .landing .intro .rick-note p { font-size:.9rem; line-height:1.5; margin:.8rem 0 0; }
+  .rick-note p { font:400 .9rem/1.5 var(--sans); color:var(--ink); margin:.8rem 0 0; }
   .exploring .rick { display:none; }
   .landing .intro p:not(.hello) { text-shadow:0 1px 8px #000; }
   .landing .cta { align-items:center; gap:.7rem 1.2rem; }
@@ -465,7 +478,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     .zones button { min-width:0; min-height:3.6rem; padding:.45rem .2rem; font-size:.8rem; }
     .rick { position:static; }
     .rick summary { position:static; width:44px; height:62px; }
-    .rick-note { left:0; right:auto; }
+    .rick-note { left:auto; right:1rem; bottom:1rem; }
     .landing .left { top:6rem; bottom:1rem; left:1.4rem; right:1.4rem; width:auto; transform:none; overflow-y:auto; }
     .landing .intro { padding: 1rem; background: rgb(0 0 0 / .65); border-radius: var(--r-3); }
     .landing .intro p:not(.cta) { display: block; overflow: visible; font-size: 1rem; }
