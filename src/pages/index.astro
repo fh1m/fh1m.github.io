@@ -24,11 +24,17 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
 
     <div class="left">
     <header class="intro" id="intro">
-      <h1><button type="button" data-focus="fh1m">Fahim Faisal</button></h1>
+      <div class="nameplate">
+        <h1><button type="button" data-focus="fh1m">Fahim <span class="surname">Faisal</span></button></h1>
+        <details class="rick">
+          <summary aria-label="A grumpy Rick has something to say" title="A mildly judgemental guest. Click for his advice."><img src="/media/space/rick-perched.svg" width="110" height="155" alt="" /></summary>
+          <aside class="rick-note"><q>To live is to risk it all.</q><cite>Rick Sanchez · <a href="https://mygeekwisdom.com/2023/11/18/to-live-is-to-risk-it-all-otherwise-youre-just-an-inert-chunk-of-randomly-assembled-molecules-drifting-wherever-the-universe-blows-you/">Rickmancing the Stone, S3 E2</a></cite><p>For me: a web internship in 2021, rockets, underwater robots, a rover arm—and a fresh start at UIU in 2026. Keep the old work. Learn from it. Keep going.</p></aside>
+        </details>
+      </div>
       <p class="hello" lang="bn">আসেন, একটু ঘুরে দেখেন।</p>
       <p>I'm Fahim, from Dhaka. I write code, build robots, and occasionally discover that the robot understood the code better than I did.</p>
-      <p>Rockets led to underwater vehicles, then rovers and small vision chips. This is a record of the work, the wrong turns, and what I learned along the way.</p>
-      <nav class="cta" aria-label="Choose a route"><a class="pill ghost" href="/log">Read my story</a><button class="pill" id="explore" type="button">Explore the observatory</button><a class="pill ghost" href="/about">See my work</a></nav>
+      <p>It started with a web internship in 2021. Then rockets, underwater vehicles, a rover arm and small vision chips. The work changed; the habit of taking things apart stayed.</p>
+      <nav class="cta" aria-label="Choose a route"><a class="pill ghost" href="/log"><span class="route-number" aria-hidden="true">01 /</span> Read my story</a><button class="pill" id="explore" type="button"><span aria-hidden="true">↗</span> Explore the observatory</button><a class="pill ghost" href="/about"><span class="route-number" aria-hidden="true">02 /</span> See my work</a></nav>
       <a class="opening-link" href="/?intro">A view from Voyager</a>
     </header>
 
@@ -81,9 +87,9 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
 
     <div class="hud">
       <a class="snd" href="/about">Work</a>
-      <button class="snd" id="bunnu-toggle" type="button" aria-pressed="false">Bunnu: off</button>
-      <button id="bunnu-story" class="snd" type="button" hidden>Another story</button>
-      <button class="snd" id="snd" type="button" aria-pressed="true">Sound</button>
+      <button class="snd" id="bunnu-toggle" type="button" aria-pressed="false"><svg class="cat-face" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 10V3l6 4h4l6-4v7c4 11-20 11-16 0Z"/><path d="M8 12h1m6 0h1m-5 3 1 1 1-1M2 14l5 1m10 0 5-1"/></svg><span class="bunnu-label">Bunnu · cat: off</span></button>
+      <button id="bunnu-story" class="snd" type="button" aria-label="Another story from Bunnu" hidden>Story</button>
+      <button class="snd" id="snd" type="button" aria-pressed="true" title="Toggle sound"><span aria-hidden="true" class="sound-symbol">♪</span><span class="sr-only">Sound</span></button>
     </div>
 
     <Opening />
@@ -178,11 +184,11 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     let companionOn = localStorage.getItem("bunnu-enabled") === "1";
     const visited = new Set<string>(JSON.parse(localStorage.getItem("bunnu-visited") || "[]"));
     const storyButton = document.getElementById("bunnu-story") as HTMLButtonElement;
-    const syncCompanion = () => { companion.setAttribute("aria-pressed", String(companionOn)); companion.textContent = `Bunnu: ${companionOn ? "on" : "off"}`; storyButton.hidden = !companionOn; };
+    const syncCompanion = () => { companion.setAttribute("aria-pressed", String(companionOn)); companion.querySelector(".bunnu-label")!.textContent = `Bunnu · cat: ${companionOn ? "on" : "off"}`; storyButton.hidden = !companionOn; };
     syncCompanion();
     companion.addEventListener("click", () => {
       companionOn = !companionOn; localStorage.setItem("bunnu-enabled", companionOn ? "1" : "0"); syncCompanion();
-      if (companionOn) speak(visited.size ? `Welcome back. We've visited ${visited.size} places together. Want another story? Click my ship.` : "I'm Bunnu. He built the robots; I supervised from the desk. Pick a world. I'll keep the notes.");
+      if (companionOn) speak(visited.size ? `Welcome back. We've visited ${visited.size} places together. Want another story? Click my ship.` : "I'm Bunnu, the cat. He built the robots; I supervised from the desk. Pick a world. I'll keep the notes.");
       else clearGuide();
     });
     world.onObject((id) => { clearGuide(); visited.add(id); localStorage.setItem("bunnu-visited", JSON.stringify([...visited])); });
@@ -234,7 +240,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     const toldZone = new Set<string>();
     world.onZone((z) => { clearGuide(); endMission(); if (z) { greeted = true; if (!toldZone.has(z)) { toldZone.add(z); speak(ZLINES[z]); } } });
     let greeted = false;
-    const greet = () => { if (!greeted && companionOn) { greeted = true; speak("I'm Bunnu. Pick a world, or click my ship for a story from the logs. You can switch me off above; no hard feelings. Probably."); } };
+    const greet = () => { if (!greeted && companionOn) { greeted = true; speak("I'm Bunnu, the cat. Pick a world, or click my ship for a story from the logs. You can switch me off above; no hard feelings. Probably."); } };
     if (shell.classList.contains("exploring")) greet();
 
     // labels that sit on the bodies themselves
@@ -421,6 +427,31 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
   .snd[aria-pressed="true"] { border-color:var(--instrument); }
   .landing::after { background:linear-gradient(90deg,rgb(0 0 0 / .65),transparent 70%),radial-gradient(ellipse at center,transparent 55%,rgb(0 0 0 / .55) 100%); }
   .landing .intro p:not(.hello) { color:var(--ink); }
+  .nameplate { position:relative; width:fit-content; padding-top:3.8rem; }
+  .landing .intro h1 { margin:0; font-weight:700; }
+  .surname { color:var(--action); }
+  .rick { position:absolute; right:.15rem; top:-.1rem; z-index:5; }
+  .rick summary { cursor:pointer; list-style:none; width:72px; height:101px; }
+  .rick summary::-webkit-details-marker { display:none; }
+  .rick summary img { display:block; width:100%; height:100%; }
+  .rick summary:focus-visible { outline:2px solid var(--instrument); outline-offset:4px; }
+  .rick-note { position:absolute; right:0; top:100%; width:min(20rem,calc(100vw - 5rem)); padding:1rem; background:var(--page); border:1px solid var(--action); border-radius:var(--r-2); box-shadow:0 12px 32px rgb(0 0 0 / .5); }
+  .rick-note q { display:block; font:600 1.1rem/1.4 var(--display); color:var(--ink-hi); }
+  .rick-note cite { display:block; margin-top:.6rem; font:400 .75rem/1.5 var(--sans); color:var(--ink); }
+  .rick-note a { color:var(--instrument); }
+  .landing .intro .rick-note p { font-size:.9rem; line-height:1.5; margin:.8rem 0 0; }
+  .exploring .rick { display:none; }
+  .exploring .nameplate { padding-top:0; }
+  .landing .intro p:not(.hello) { text-shadow:0 1px 8px #000; }
+  .landing .cta { align-items:center; gap:.7rem 1.2rem; }
+  .landing .cta .ghost { padding:.6rem 0; background:none; border:0; border-bottom:1px solid var(--line-2); border-radius:0; color:var(--ink-hi); }
+  .route-number { color:var(--instrument); font:400 .75rem var(--mono); }
+  .landing #explore { border-radius:2px; border:1px solid var(--action); padding:.8rem 1rem; font-weight:600; box-shadow:3px 3px 0 rgb(238 83 150 / .24); }
+  .landing #explore span { font-size:1.2rem; margin-right:.35rem; }
+  #bunnu-toggle { display:inline-flex; align-items:center; gap:.45rem; }
+  .cat-face { flex:none; color:var(--action); }
+  #snd { display:grid; place-items:center; min-width:44px; min-height:44px; padding:.3rem; background:transparent; border-color:transparent; }
+  .sound-symbol { font:400 1.4rem var(--sans); }
   @media (max-width: 900px) {
     .hud { left:.6rem; right:.6rem; gap:.4rem; justify-content:flex-end; }
     .snd { font-size:.75rem; white-space:nowrap; padding:.45rem .6rem; min-height:2.6rem; }
@@ -428,7 +459,7 @@ const labelIds = [{ id: "fh1m", label: "Fahim Faisal", cls: "star" }, ...PLANETS
     .landing .intro { padding: 1rem; background: rgb(0 0 0 / .65); border-radius: var(--r-3); }
     .landing .intro p:not(.cta) { display: block; overflow: visible; font-size: 1rem; }
     .landing .intro .hello { font-size: .9rem; }
-    .landing .intro h1 { font-size: 2.8rem; }
+    .landing .intro h1 { font-size:clamp(2rem,8.8vw,2.8rem); }
     .exploring .left { top: 4rem; }
   }
   @media (max-width: 900px) {

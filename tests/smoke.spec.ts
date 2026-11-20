@@ -241,11 +241,18 @@ test("professional PDFs preserve page limits, structure and public project links
 });
 
 test("Bunnu stays optional and remembers visited places across reloads", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
   await page.goto("/");
   await page.locator("#explore").click();
   await expect(page.locator("#bunnu-toggle")).toHaveAttribute("aria-pressed", "false");
   await page.locator("#bunnu-toggle").click();
   await expect(page.locator("#guide.on")).toBeVisible();
+  for (const control of await page.locator(".hud > a, .hud > button:visible").all()) {
+    const box = await control.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  }
   await page.locator("#bunnu-story").click();
   await expect(page.locator("#guide-source")).toContainText("preserved pid_v1.py");
   await page.reload();

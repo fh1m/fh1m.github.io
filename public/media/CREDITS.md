@@ -175,3 +175,7 @@ The notebook article, project preview and life chronology use the readable compa
 ## Retired benchmark illustration
 
 On 20 November 2026, `mongla-docs/frame-budget.svg` was removed from the published asset tree and its original bytes preserved in `research/publication-backups/2026-11-20/frame-budget.svg` beside the site checkout. Its “every span measured” photon-to-thrust claim combined incomparable boundaries and included the cautioned B-61 figures. The frame-age article now links the immutable primary ledger and distinguishes kernel-stamp age, inference-call timing and physical end-to-end latency. No active Mongla repository or original supplied asset was modified.
+
+## Perched entrance guest
+
+`space/rick-perched.svg` is an original fan illustration of Rick Sanchez from *Rick and Morty*, drawn for this personal site. The character belongs to its respective rights holders; no affiliation or endorsement is implied. The short quotation “To live is to risk it all.” is attributed to Rick in “Rickmancing the Stone” (season 3, episode 2); the on-site citation links its episode context. The accompanying personal paragraph is Fahim's site copy, not dialogue from the show.
