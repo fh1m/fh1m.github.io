@@ -1,0 +1,16 @@
+src/pages/index.astro
+  h_b19ddd3ca98e3d 458-459
+tests/smoke.spec.ts
+  h_b19ddd3ca98e3d 250
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "e42c245f7f2a230bbc38f94e2c3ca4295ea586a0",
+  "prompts": {},
+  "humans": {
+    "h_b19ddd3ca98e3d": {
+      "author": "Fahim Faisal <fahim.2002.faisal@gmail.com>"
+    }
+  }
+}
